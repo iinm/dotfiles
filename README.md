@@ -1,0 +1,3 @@
+```sh
+fish link.fish
+```
