@@ -1,3 +1,4 @@
 ```sh
-fish install.fish
+make install-config
+make install-essential-tools
 ```
