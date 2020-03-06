@@ -15,6 +15,12 @@ if test -L ~/tools/nodejs
   set -x PATH ~/tools/nodejs/bin $PATH
 end
 
+if test (uname) = 'Linux'
+  alias pbcopy  'xsel -i -p && xsel -o -p | xsel -i -b'
+  alias pbpaste 'xsel -o -b'
+  alias open    'xdg-open'
+end
+
 # --- interactive shell configuration
 if status --is-interactive
   set fish_greeting
@@ -33,12 +39,6 @@ if status --is-interactive
   alias rg   'rg --hidden'
   alias view 'nvim -R'
   alias dco  'docker-compose'
-
-  if test (uname) = 'Linux'
-    alias pbcopy  'xsel -i -p && xsel -o -p | xsel -i -b'
-    alias pbpaste 'xsel -o -b'
-    alias open    'xdg-open'
-  end
 
   if type -q fzf
     set -x FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git --exclude "*~"'
