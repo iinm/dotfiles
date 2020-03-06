@@ -1,0 +1,16 @@
+*~
+*.swp
+.*.un~
+.DS_Store
+
+*.iml
+*.idea
+
+# direnv
+.envrc
+
+# tags
+tags
+GPATH
+GRTAGS
+GTAGS

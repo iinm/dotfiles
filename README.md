@@ -1,3 +1,3 @@
 ```sh
-fish link.fish
+fish install.fish
 ```
