@@ -35,7 +35,7 @@ install-essential-tools: \
 	cp .config/nvim/init.vim ~/.config/nvim/init.vim
 
 ~/.gitconfig-global: .gitconfig-global
-	if ! grep -q 'path = ~/.gitconfig-global' ~/.gitconfig; then echo -e "\n[include]\n\tpath = ~/.gitconfig-global" | tee -a ~/.gitconfig; fi
+	if ! grep -q 'path = ~/.gitconfig-global' ~/.gitconfig; then echo "\n[include]\n\tpath = ~/.gitconfig-global" | tee -a ~/.gitconfig; fi
 	cp .gitconfig-global ~/.gitconfig-global
 
 ~/.gitignore-global: .gitignore-global
@@ -44,6 +44,7 @@ install-essential-tools: \
 ~/tools/bin/fzf:
 	mkdir -p ~/.config/fish/functions
 	wget -O ~/.config/fish/functions/fzf_key_bindings.fish https://raw.githubusercontent.com/junegunn/fzf/0.20.0/shell/key-bindings.fish
+	# TODO: change key bind
 	mkdir -p ~/tools/bin
 	wget -O - https://github.com/junegunn/fzf-bin/releases/download/0.20.0/fzf-0.20.0-linux_amd64.tgz | tar -C ~/tools/bin -xzf -
 	chmod +x ~/tools/bin/fzf
