@@ -108,6 +108,10 @@ let mapleader = ","
 vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>
 nnoremap <C-l> :<C-u>nohlsearch<CR>:<C-u>redraw!<CR>
 
+nnoremap [file] <Nop>
+nmap <Leader>f [file]
+nnoremap [file]e :<C-u>Explore<CR>
+
 nnoremap [jump] <Nop>
 nmap <Leader>j [jump]
 nnoremap [jump]j :<C-u>call GotoJump()<CR>
