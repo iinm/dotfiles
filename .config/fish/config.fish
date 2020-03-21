@@ -3,16 +3,24 @@ set -x EDITOR nvim
 
 set -x PATH ~/tools/bin $PATH
 
+# https://adoptopenjdk.net/releases.html
 if test -L ~/tools/java
   set -x PATH ~/tools/java/bin $PATH
 end
 
+# https://golang.org/dl/
 if test -L ~/tools/golang
   set -x PATH ~/tools/golang/bin $PATH
 end
 
+# https://nodejs.org/ja/download/
 if test -L ~/tools/nodejs
   set -x PATH ~/tools/nodejs/bin $PATH
+end
+
+# https://docs.docker.com/engine/security/rootless/
+if test -S "/run/user/"(id -u)"/docker.sock"
+  set -x DOCKER_HOST "unix:///run/user/"(id -u)"/docker.sock"
 end
 
 if test (uname) = 'Linux'
