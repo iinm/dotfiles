@@ -29,6 +29,11 @@ if test (uname) = 'Linux'
   alias open    'xdg-open'
 end
 
+# Host specific configuration
+if type -q local_config
+  local_config
+end
+
 # --- interactive shell configuration
 if status --is-interactive
   set fish_greeting
