@@ -1,8 +1,4 @@
 ```sh
-if test "$(uname -s)" = "Darwin"; then
-  brew install tmux
-fi
-
-make install-essentials
-make install-config
+pacman -Sy fish bash tmux nvim git tig fzf ripgrep fd
+make install
 ```
