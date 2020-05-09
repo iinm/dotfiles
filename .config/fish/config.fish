@@ -1,6 +1,5 @@
 set -x LANG en_US.UTF-8
 set -x EDITOR nvim
-set -x PATH ~/tools/bin $PATH
 
 if test (uname) = 'Linux'
   alias pbcopy  'xsel -i -p && xsel -o -p | xsel -i -b'
@@ -8,10 +7,19 @@ if test (uname) = 'Linux'
   alias open    'xdg-open'
 end
 
+if type --quiet use_my_tools
+  set -x MY_TOOLS ~/tools
+  use_my_tools
+  set -x PATH (my_tools_default_path) $PATH
+end
+
 # Host specific configuration
 if type --quiet local_config
   local_config
 end
+
+# Removing duplicate PATH entries
+set -x PATH (echo $PATH | tr ' ' '\n' | awk '!a[$0]++')
 
 # --- interactive shell configuration
 if status --is-interactive

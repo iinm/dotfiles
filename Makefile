@@ -4,6 +4,7 @@ all: ;
 install: \
 	~/.config/fish/config.fish \
 	~/.config/fish/fish_variables \
+	~/.config/fish/functions/use_my_tools.fish \
 	~/.config/fish/functions/fzf_key_bindings.fish \
 	~/.tmux.conf \
 	~/.config/nvim/init.vim \
@@ -17,6 +18,10 @@ install: \
 	cp $< $@
 
 ~/.config/fish/fish_variables: .config/fish/fish_variables
+	mkdir --parents $(@D)
+	cp $< $@
+
+~/.config/fish/functions/use_my_tools.fish: .config/fish/functions/use_my_tools.fish
 	mkdir --parents $(@D)
 	cp $< $@
 
