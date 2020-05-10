@@ -140,12 +140,16 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'skywind3000/vim-preview'
   Plug 'godlygeek/tabular'
   Plug 'jiangmiao/auto-pairs'
+  Plug 'tpope/vim-commentary'
   Plug 'SirVer/ultisnips'
   Plug 'honza/vim-snippets'
-  Plug 'tpope/vim-commentary'
-  Plug 'neovim/nvim-lsp'
-  Plug 'fatih/vim-go'
-  Plug 'OmniSharp/omnisharp-vim'
+  Plug 'prabirshrestha/async.vim'
+  Plug 'prabirshrestha/vim-lsp'
+  Plug 'mattn/vim-lsp-settings'
+  Plug 'prabirshrestha/asyncomplete.vim'
+  Plug 'prabirshrestha/asyncomplete-lsp.vim'
+  Plug 'prabirshrestha/asyncomplete-ultisnips.vim'
+  Plug 'mattn/vim-goimports'
   call plug#end()
 
   " --- looks
@@ -162,15 +166,15 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
         \   <bang>0)
 
   " --- lsp
-  "lua require'nvim_lsp'.gopls.setup{}
-  lua require'nvim_lsp'.pyls.setup{}
-  lua require'nvim_lsp'.tsserver.setup{}
+  let g:lsp_virtual_text_enabled = 0
+  let g:lsp_highlight_references_enabled = 1
 
-  " --- vim-go
-  let g:go_fmt_command = "goimports"
-
-  " --- OmniSharp
-  let g:OmniSharp_server_stdio = 1
+  " --- asyncomplete
+  call asyncomplete#register_source(asyncomplete#sources#ultisnips#get_source_options({
+        \ 'name': 'ultisnips',
+        \ 'whitelist': ['*'],
+        \ 'completor': function('asyncomplete#sources#ultisnips#completor'),
+        \ }))
 
   " --- key bind
   nnoremap <Leader><Leader> :<C-u>Commands<CR>
@@ -183,6 +187,11 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   let g:UltiSnipsExpandTrigger = "<c-k>"
   let g:UltiSnipsJumpForwardTrigger = "<c-f>"
   let g:UltiSnipsJumpBackwardTrigger = "<c-b>"
+
+  " asyncomplete
+  inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
+  inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+  inoremap <expr> <cr>    pumvisible() ? "\<C-y>" : "\<cr>"
 
   nnoremap [file] <Nop>
   nmap <Leader>f [file]
@@ -199,21 +208,14 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
 
   nnoremap [code] <Nop>
   nmap <Leader>c [code]
-  nnoremap [code]j <cmd>lua vim.lsp.buf.definition()<CR>
-  nnoremap [code]h <cmd>lua vim.lsp.buf.hover()<CR>
-  nnoremap [code]t <cmd>lua vim.lsp.buf.type_definition()<CR>
-  nnoremap [code]r <cmd>lua vim.lsp.buf.references()<CR>
-  nnoremap [code]n <cmd>lua vim.lsp.buf.rename()<CR>
-  nnoremap [code]s :<C-u>Snippets<CR>
-
-  augroup keymap_go
-    autocmd!
-    autocmd FileType go nnoremap [code]i :<C-u>GoImport 
-    autocmd FileType go nnoremap [code]j :<C-u>GoDef<CR>
-    autocmd FileType go nnoremap [code]d :<C-u>GoDoc<CR>
-    autocmd FileType go nnoremap [code]r :<C-u>GoReferrers<CR>
-    autocmd FileType go nnoremap [code]n :<C-u>GoRename<CR>
-    autocmd FileType go nnoremap [code]t :<C-u>GoTestFunc<CR>
-  augroup END
+  nnoremap [code]a :<C-u>LspCodeAction<CR>
+  nnoremap [code]j :<C-u>LspDefinition<CR>
+  nnoremap [code]h :<C-u>LspHover<CR>
+  nnoremap [code]t :<C-u>LspTypeDefinition<CR>
+  nnoremap [code]r :<C-u>LspReferences<CR>
+  nnoremap [code]i :<C-u>LspImplementation<CR>
+  nnoremap [code]n :<C-u>LspRename<CR>
+  nnoremap [code]d :<C-u>LspDocumentDiagnostics<CR>
+  nnoremap [code]f :<C-u>LspDocumentFormat<CR>
 
 endif
