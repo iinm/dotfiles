@@ -10,6 +10,11 @@
 
 function use_my_tools
 
+  if test -z "$MY_TOOLS"
+    echo 'warning: $MY_TOOLS is not set' >&2
+    return 0
+  end
+
   function my_tools_default_path --description "Show default path"
     echo $MY_TOOLS/bin
     for link in (find $MY_TOOLS -mindepth 1 -maxdepth 1 -type l)

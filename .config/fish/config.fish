@@ -1,27 +1,44 @@
-set -x LANG en_US.UTF-8
-set -x EDITOR nvim
+# Expected directory structure
+#
+# .config/fish/
+#   \__ config.fish
+#   \__ functions/
+#         \__ configure_local.fish (Host specific configuration)
+#               \__ function configure_local_before_default
+#               \__ function configure_local_after_default
+#         \__ use_my_tools.fish
 
+# Host specific configuration
+if type --quiet configure_local
+  configure_local
+end
+
+if type --quiet configure_local_before_default
+  configure_local_before_default
+end
+
+# Environment
+test -n "$LANG";   or set -x LANG en_US.UTF-8
+test -n "$EDITOR"; or set -x EDITOR nvim
+
+# For compatibility
 if test (uname) = 'Linux'
   alias pbcopy  'xsel -i -p && xsel -o -p | xsel -i -b'
   alias pbpaste 'xsel -o -b'
   alias open    'xdg-open'
 end
 
+# Use user installed tools
 if type --quiet use_my_tools
-  set -x MY_TOOLS ~/tools
+  test -n "$MY_TOOLS"; or set -x MY_TOOLS ~/tools
   use_my_tools
-  set -x PATH (my_tools_default_path) $PATH
 end
 
-# Host specific configuration
-if type --quiet local_config
-  local_config
+if type --quiet my_tools_default_path
+  set -gx PATH (my_tools_default_path) $PATH
 end
 
-# Removing duplicate PATH entries
-set -x PATH (echo $PATH | tr ' ' '\n' | awk '!a[$0]++')
-
-# --- interactive shell configuration
+# Interactive shell configuration
 if status --is-interactive
   set fish_greeting
 
@@ -51,3 +68,11 @@ if status --is-interactive
     fzf_key_bindings
   end
 end
+
+# Host specific configuration
+if type --quiet configure_local_after_default
+  configure_local_after_default
+end
+
+# Removing duplicate PATH entries
+set -x PATH (echo $PATH | tr ' ' '\n' | awk '!a[$0]++')
