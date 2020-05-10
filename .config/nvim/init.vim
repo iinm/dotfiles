@@ -35,7 +35,6 @@ augroup END
 
 augroup detect_filetyle
   autocmd!
-  autocmd BufNewFile,BufRead *.fish  setfiletype sh
   autocmd BufNewFile,BufRead *.json5 setfiletype javascript
 augroup END
 
@@ -152,6 +151,7 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'prabirshrestha/asyncomplete-lsp.vim'
   Plug 'prabirshrestha/asyncomplete-ultisnips.vim'
   Plug 'mattn/vim-goimports'
+  Plug 'dag/vim-fish'
   call plug#end()
 
   " --- looks
