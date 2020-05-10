@@ -37,14 +37,10 @@ function use_tools
 
   function use --argument-names name_pattern --description "Set PATH for current shell"
     # $TOOLS/foo-1.0/bin
-    set path (
-      for tool_dir in (find $TOOLS -mindepth 1 -maxdepth 1 -type d)
-        __tools_bin_dir $tool_dir
-      end \
-        | grep "$name_pattern" \
-        | fzf
-    )
-    set -gx PATH "$path" $PATH
+    set version_dir (find $TOOLS -mindepth 1 -maxdepth 1 -type d | grep "$name_pattern" | fzf)
+    set path (__tools_bin_dir $version_dir)
+    set duplicate_prefix (dirname $version_dir)/(basename $version_dir | __tools_trim_version)
+    set -gx PATH "$path" (echo $PATH | tr ' ' '\n' | grep -v "^$duplicate_prefix")
   end
 
   function __tools_bin_dir --argument-names tool_dir --description "Find and show bin directory"
@@ -68,7 +64,7 @@ function use_tools
     echo $tool_dir
   end
 
-  function __tools_trim_version --argument-names name_with_version --description "Trim version string"
+  function __tools_trim_version --description "Trim version string"
     sed -E 's/^([a-zA-Z-]+[a-zA-Z]).*/\1/' \
       | sed -E 's/(.+)-(latest|v)/\1/'
   end
