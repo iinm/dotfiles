@@ -143,6 +143,7 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'SirVer/ultisnips'
   Plug 'honza/vim-snippets'
   Plug 'tpope/vim-commentary'
+  Plug 'neovim/nvim-lsp'
   Plug 'fatih/vim-go'
   Plug 'OmniSharp/omnisharp-vim'
   call plug#end()
@@ -159,6 +160,11 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
         \   <bang>0 ? fzf#vim#with_preview('up:60%')
         \           : fzf#vim#with_preview('right:50%:hidden', '?'),
         \   <bang>0)
+
+  " --- lsp
+  "lua require'nvim_lsp'.gopls.setup{}
+  lua require'nvim_lsp'.pyls.setup{}
+  lua require'nvim_lsp'.tsserver.setup{}
 
   " --- vim-go
   let g:go_fmt_command = "goimports"
@@ -191,11 +197,22 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   nmap <Leader>b [buffer]
   nnoremap [buffer]b :<C-u>Buffers<CR>
 
+  nnoremap [code] <Nop>
+  nmap <Leader>c [code]
+  nnoremap [code]j <cmd>lua vim.lsp.buf.definition()<CR>
+  nnoremap [code]h <cmd>lua vim.lsp.buf.hover()<CR>
+  nnoremap [code]t <cmd>lua vim.lsp.buf.type_definition()<CR>
+  nnoremap [code]r <cmd>lua vim.lsp.buf.references()<CR>
+  nnoremap [code]n <cmd>lua vim.lsp.buf.rename()<CR>
+  nnoremap [code]s :<C-u>Snippets<CR>
+
   augroup keymap_go
     autocmd!
     autocmd FileType go nnoremap [code]i :<C-u>GoImport 
     autocmd FileType go nnoremap [code]j :<C-u>GoDef<CR>
     autocmd FileType go nnoremap [code]d :<C-u>GoDoc<CR>
+    autocmd FileType go nnoremap [code]r :<C-u>GoReferrers<CR>
+    autocmd FileType go nnoremap [code]n :<C-u>GoRename<CR>
     autocmd FileType go nnoremap [code]t :<C-u>GoTestFunc<CR>
   augroup END
 
