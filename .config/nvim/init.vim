@@ -143,7 +143,6 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'SirVer/ultisnips'
   Plug 'honza/vim-snippets'
   Plug 'tpope/vim-commentary'
-  Plug 'vim-scripts/BufOnly.vim'
   Plug 'fatih/vim-go'
   Plug 'OmniSharp/omnisharp-vim'
   call plug#end()
@@ -191,7 +190,6 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   nnoremap [buffer] <Nop>
   nmap <Leader>b [buffer]
   nnoremap [buffer]b :<C-u>Buffers<CR>
-  nnoremap [buffer]o :<C-u>BufOnly<CR>
 
   augroup keymap_go
     autocmd!
