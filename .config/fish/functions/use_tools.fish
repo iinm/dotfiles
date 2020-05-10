@@ -18,7 +18,7 @@ function use_tools
   function tools_default_path --description "Show default path"
     echo $TOOLS/bin
     for link in (find $TOOLS -mindepth 1 -maxdepth 1 -type l)
-      __tools_bin_path $link
+      __tools_bin_dir $link
     end
   end
 
@@ -39,7 +39,7 @@ function use_tools
     # $TOOLS/foo-1.0/bin
     set path (
       for tool_dir in (find $TOOLS -mindepth 1 -maxdepth 1 -type d)
-        __tools_bin_path $tool_dir
+        __tools_bin_dir $tool_dir
       end \
         | grep "$name_pattern" \
         | fzf
@@ -52,11 +52,11 @@ function use_tools
     set -gx PATH "$path" (echo $PATH | tr ' ' '\n' | grep -vE "^$path_pattern")
   end
 
-  function __tools_bin_path --argument-names tool_dir --description "Show path for a tool directory"
-    if test -d $tool_dir/bin
-      echo $tool_dir/bin
-    else if test -d $tool_dir/Contents/Home/bin # JDK
-      echo $tool_dir/Contents/Home/bin
+  function __tools_bin_dir --argument-names tool_dir --description "Show path for a tool directory"
+    set bin_dir \
+      (find $tool_dir/ -type d -name 'bin' | awk '{ print length, $0 }' | sort -n | awk '{ print $2 }' | head -1)
+    if test -n "$bin_dir"
+      echo $bin_dir
     else
       echo $tool_dir
     end
