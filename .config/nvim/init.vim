@@ -141,6 +141,7 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'godlygeek/tabular'
   Plug 'jiangmiao/auto-pairs'
   Plug 'tpope/vim-commentary'
+  Plug 'vim-scripts/BufOnly.vim'
   Plug 'SirVer/ultisnips'
   Plug 'honza/vim-snippets'
   Plug 'prabirshrestha/async.vim'
@@ -205,6 +206,7 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   nnoremap [buffer] <Nop>
   nmap <Leader>b [buffer]
   nnoremap [buffer]b :<C-u>Buffers<CR>
+  nnoremap [buffer]o :<C-u>BufOnly<CR>
 
   nnoremap [code] <Nop>
   nmap <Leader>c [code]
