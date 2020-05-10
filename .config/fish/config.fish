@@ -6,7 +6,7 @@
 #         \__ configure_local.fish (Host specific configuration)
 #               \__ function configure_local_before_default
 #               \__ function configure_local_after_default
-#         \__ use_my_tools.fish
+#         \__ use_tools.fish
 
 # Host specific configuration
 if type --quiet configure_local
@@ -29,13 +29,13 @@ if test (uname) = 'Linux'
 end
 
 # Use user installed tools
-if type --quiet use_my_tools
-  test -n "$MY_TOOLS"; or set -x MY_TOOLS ~/tools
-  use_my_tools
+if type --quiet use_tools
+  test -n "$TOOLS"; or set -x TOOLS ~/tools
+  use_tools
 end
 
-if type --quiet my_tools_default_path
-  set -gx PATH (my_tools_default_path) $PATH
+if type --quiet tools_default_path
+  set -gx PATH (tools_default_path) $PATH
 end
 
 # Interactive shell configuration
