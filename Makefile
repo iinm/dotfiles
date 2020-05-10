@@ -14,27 +14,27 @@ install: \
 	;
 
 ~/.config/fish/config.fish: .config/fish/config.fish
-	mkdir --parents $(@D)
+	mkdir -p $(@D)
 	cp $< $@
 
 ~/.config/fish/fish_variables: .config/fish/fish_variables
-	mkdir --parents $(@D)
+	mkdir -p $(@D)
 	cp $< $@
 
 ~/.config/fish/functions/use_tools.fish: .config/fish/functions/use_tools.fish
-	mkdir --parents $(@D)
+	mkdir -p $(@D)
 	cp $< $@
 
 ~/.config/fish/functions/fzf_key_bindings.fish:
 	curl --fail --create-dirs --output $@ \
 		https://raw.githubusercontent.com/junegunn/fzf/master/shell/key-bindings.fish
-	sed --in-place 's,ct fzf-file-widget,cy fzf-file-widget,g' $@
+	sed -i -E 's,ct fzf-file-widget,cy fzf-file-widget,g' $@
 
 ~/.tmux.conf: .tmux.conf
 	cp $< $@
 
 ~/.config/nvim/init.vim: .config/nvim/init.vim
-	mkdir --parents $(@D)
+	mkdir -p $(@D)
 	cp $< $@
 
 ~/.local/share/nvim/site/autoload/plug.vim:
