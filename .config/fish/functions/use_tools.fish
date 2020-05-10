@@ -54,10 +54,12 @@ function use_tools
 
   function __tools_bin_path --argument-names tool_dir --description "Show path for a tool directory"
     if test -d $tool_dir/bin
-        echo $tool_dir/bin
-      else
-        echo $tool_dir
-      end
+      echo $tool_dir/bin
+    else if test -d $tool_dir/Contents/Home/bin # JDK
+      echo $tool_dir/Contents/Home/bin
+    else
+      echo $tool_dir
+    end
   end
 
   function __tools_trim_version --argument-names name_with_version --description "Trim version e.g. foo-1.0 -> foo"
