@@ -97,7 +97,7 @@ augroup END
 
 
 " --- key bind
-let mapleader = ","
+let mapleader = "\<Space>"
 
 " https://vim.fandom.com/wiki/Search_for_visually_selected_text
 vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>
