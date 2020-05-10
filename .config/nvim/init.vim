@@ -219,5 +219,6 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   nnoremap [code]n :<C-u>LspRename<CR>
   nnoremap [code]d :<C-u>LspDocumentDiagnostics<CR>
   nnoremap [code]f :<C-u>LspDocumentFormat<CR>
+  nnoremap [code]s :<C-u>LspSignatureHelp<CR>
 
 endif
