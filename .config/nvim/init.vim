@@ -9,11 +9,7 @@ set termguicolors
 
 
 " --- looks
-if filereadable(expand('~/.config/nvim/colors/base16-eighties.vim'))
-  colorscheme base16-eighties
-else
-  colorscheme desert
-endif
+colorscheme desert
 let g:netrw_liststyle = 3  " tree style
 let g:markdown_fenced_languages = ['sh']
 
@@ -118,6 +114,7 @@ nnoremap [jump]j :<C-u>call GotoJump()<CR>
 
 nnoremap [grep] <Nop>
 nmap <Leader>g [grep]
+nnoremap [grep]g :<C-u>grep! 
 nnoremap [grep]c :grep! <cword><CR>
 nnoremap [grep]w :grep! '\b<cword>\b'<CR>
 
@@ -131,3 +128,77 @@ nnoremap [grep]w :grep! '\b<cword>\b'<CR>
 " open path            gf (goto file), gx (xdg-open)
 " grep current dir     :grep! hoge -> :cw
 " grep current buffer  :grep! hoge %
+
+
+" --- plugin config
+if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
+
+  call plug#begin(stdpath('data') . '/plugged')
+  Plug 'chriskempson/base16-vim'
+  Plug 'junegunn/fzf'
+  Plug 'junegunn/fzf.vim'
+  Plug 'skywind3000/vim-preview'
+  Plug 'godlygeek/tabular'
+  Plug 'jiangmiao/auto-pairs'
+  Plug 'SirVer/ultisnips'
+  Plug 'honza/vim-snippets'
+  Plug 'tpope/vim-commentary'
+  Plug 'vim-scripts/BufOnly.vim'
+  Plug 'fatih/vim-go'
+  Plug 'OmniSharp/omnisharp-vim'
+  call plug#end()
+
+  " --- looks
+  colorscheme base16-eighties
+
+  " --- fzf
+  let g:fzf_tags_command = 'ctags -R'
+  " preview with '?'
+  command! -bang -nargs=* Rg
+        \ call fzf#vim#grep(
+        \   'rg --column --line-number --no-heading --color=always --smart-case '.shellescape(<q-args>), 1,
+        \   <bang>0 ? fzf#vim#with_preview('up:60%')
+        \           : fzf#vim#with_preview('right:50%:hidden', '?'),
+        \   <bang>0)
+
+  " --- vim-go
+  let g:go_fmt_command = "goimports"
+
+  " --- OmniSharp
+  let g:OmniSharp_server_stdio = 1
+
+  " --- key bind
+  nnoremap <Leader><Leader> :<C-u>Commands<CR>
+
+  " preview quickfix
+  autocmd FileType qf nnoremap <silent><buffer> p :PreviewQuickfix<CR>
+  autocmd FileType qf nnoremap <silent><buffer> P :PreviewClose<CR>
+
+  " snippets
+  let g:UltiSnipsExpandTrigger = "<c-k>"
+  let g:UltiSnipsJumpForwardTrigger = "<c-f>"
+  let g:UltiSnipsJumpBackwardTrigger = "<c-b>"
+
+  nnoremap [file] <Nop>
+  nmap <Leader>f [file]
+  nnoremap [file]e :<C-u>Explore<CR>
+  nnoremap [file]f :<C-u>Files<CR>
+  nnoremap [file]h :<C-u>History<CR>
+  nnoremap [file]g :<C-u>GitFiles<CR>
+
+  nnoremap [grep]r :<C-u>Rg! 
+
+  nnoremap [buffer] <Nop>
+  nmap <Leader>b [buffer]
+  nnoremap [buffer]b :<C-u>Buffers<CR>
+  nnoremap [buffer]o :<C-u>BufOnly<CR>
+
+  augroup keymap_go
+    autocmd!
+    autocmd FileType go nnoremap [code]i :<C-u>GoImport 
+    autocmd FileType go nnoremap [code]j :<C-u>GoDef<CR>
+    autocmd FileType go nnoremap [code]d :<C-u>GoDoc<CR>
+    autocmd FileType go nnoremap [code]t :<C-u>GoTestFunc<CR>
+  augroup END
+
+endif

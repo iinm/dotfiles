@@ -8,7 +8,7 @@ install: \
 	~/.config/fish/functions/fzf_key_bindings.fish \
 	~/.tmux.conf \
 	~/.config/nvim/init.vim \
-	~/.config/nvim/colors/base16-eighties.vim \
+	~/.local/share/nvim/site/autoload/plug.vim \
 	~/.gitconfig-global \
 	~/.gitignore-global \
 	;
@@ -37,9 +37,9 @@ install: \
 	mkdir --parents $(@D)
 	cp $< $@
 
-~/.config/nvim/colors/base16-eighties.vim:
-	curl --fail --create-dirs --output $@ \
-		https://raw.githubusercontent.com/chriskempson/base16-vim/master/colors/base16-eighties.vim
+~/.local/share/nvim/site/autoload/plug.vim:
+	curl --fail --location --create-dirs --output $@ \
+		https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 ~/.gitconfig-global: .gitconfig-global
 	grep --quiet 'path = ~/.gitconfig-global' ~/.gitconfig \
