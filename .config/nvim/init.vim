@@ -168,7 +168,6 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
 
   " --- lsp
   let g:lsp_virtual_text_enabled = 0
-  let g:lsp_highlight_references_enabled = 1
 
   " --- asyncomplete
   call asyncomplete#register_source(asyncomplete#sources#ultisnips#get_source_options({
