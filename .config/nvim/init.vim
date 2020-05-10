@@ -201,24 +201,33 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   nnoremap [file]h :<C-u>History<CR>
   nnoremap [file]g :<C-u>GitFiles<CR>
 
-  nnoremap [grep]r :<C-u>Rg! 
-
   nnoremap [buffer] <Nop>
   nmap <Leader>b [buffer]
   nnoremap [buffer]b :<C-u>Buffers<CR>
   nnoremap [buffer]o :<C-u>BufOnly<CR>
 
+  nnoremap [grep] <Nop>
+  nmap <Leader>g [grep]
+  nnoremap [grep]g :<C-u>grep! 
+  nnoremap [grep]c :grep! <cword><CR>
+  nnoremap [grep]w :grep! '\b<cword>\b'<CR>
+  nnoremap [grep]r :<C-u>Rg! 
+
+  nnoremap [jump] <Nop>
+  nmap <Leader>j [jump]
+  nnoremap [jump]j :<C-u>call GotoJump()<CR>
+
   nnoremap [code] <Nop>
   nmap <Leader>c [code]
-  nnoremap [code]a :<C-u>LspCodeAction<CR>
   nnoremap [code]j :<C-u>LspDefinition<CR>
-  nnoremap [code]h :<C-u>LspHover<CR>
   nnoremap [code]t :<C-u>LspTypeDefinition<CR>
   nnoremap [code]r :<C-u>LspReferences<CR>
   nnoremap [code]i :<C-u>LspImplementation<CR>
+  nnoremap [code]a :<C-u>LspCodeAction<CR>
   nnoremap [code]n :<C-u>LspRename<CR>
+  nnoremap [code]h :<C-u>LspHover<CR>
+  nnoremap [code]s :<C-u>LspSignatureHelp<CR>
   nnoremap [code]d :<C-u>LspDocumentDiagnostics<CR>
   nnoremap [code]f :<C-u>LspDocumentFormat<CR>
-  nnoremap [code]s :<C-u>LspSignatureHelp<CR>
 
 endif
