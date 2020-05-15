@@ -143,6 +143,7 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'tpope/vim-commentary'
   Plug 'vim-scripts/BufOnly.vim'
   Plug 'tpope/vim-sleuth'
+  Plug 'tpope/vim-fugitive'
   Plug 'SirVer/ultisnips'
   Plug 'honza/vim-snippets'
   Plug 'prabirshrestha/async.vim'
