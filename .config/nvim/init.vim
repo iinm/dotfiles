@@ -20,6 +20,7 @@ augroup config_indent
   autocmd Filetype go             setlocal noexpandtab tabstop=4 softtabstop=4 shiftwidth=4
   autocmd Filetype python         setlocal expandtab   tabstop=4 softtabstop=4 shiftwidth=4
   autocmd Filetype java,groovy    setlocal expandtab   tabstop=4 softtabstop=4 shiftwidth=4
+  autocmd Filetype scala          setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
   autocmd Filetype sh,zsh         setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
   autocmd Filetype vim            setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
   autocmd Filetype xml,html,css   setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
