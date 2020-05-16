@@ -154,6 +154,7 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'prabirshrestha/asyncomplete-ultisnips.vim'
   Plug 'mattn/vim-goimports'
   Plug 'dag/vim-fish'
+  Plug 'mattn/emmet-vim'
   call plug#end()
 
   " --- looks
