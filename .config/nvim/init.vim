@@ -144,6 +144,8 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'vim-scripts/BufOnly.vim'
   Plug 'tpope/vim-sleuth'
   Plug 'tpope/vim-fugitive'
+  Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() } }
+  Plug 'mattn/emmet-vim'
   Plug 'SirVer/ultisnips'
   Plug 'honza/vim-snippets'
   Plug 'prabirshrestha/async.vim'
@@ -154,7 +156,6 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'prabirshrestha/asyncomplete-ultisnips.vim'
   Plug 'mattn/vim-goimports'
   Plug 'dag/vim-fish'
-  Plug 'mattn/emmet-vim'
   call plug#end()
 
   " --- looks
