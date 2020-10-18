@@ -3,39 +3,28 @@
 # .config/fish/
 #   \__ config.fish
 #   \__ functions/
-#         \__ configure_local.fish (Host specific configuration)
-#               \__ function configure_local_before_default
-#               \__ function configure_local_after_default
-#         \__ use_tools.fish
+#         \__ config_local.fish (Host specific configuration)
+#               \__ function config_local_first
+#               \__ function config_local_last
 
 # Host specific configuration
-if type --quiet configure_local
-  configure_local
+if type --quiet config_local
+  config_local
 end
 
-if type --quiet configure_local_before_default
-  configure_local_before_default
+if type --quiet config_local_first
+  config_local_first
 end
 
 # Environment
 test -n "$LANG";   or set -x LANG en_US.UTF-8
-test -n "$EDITOR"; or set -x EDITOR nvim
+test -n "$EDITOR"; or type --quiet nvim; and set -x EDITOR nvim
 
 # For compatibility
-if test (uname) = 'Linux'
+if test (uname) = 'Linux'; and type --quiet xsel
   alias pbcopy  'xsel -i -p && xsel -o -p | xsel -i -b'
   alias pbpaste 'xsel -o -b'
   alias open    'xdg-open'
-end
-
-# Use user installed tools
-if type --quiet use_tools
-  test -n "$TOOLS"; or set -x TOOLS ~/tools
-  use_tools
-end
-
-if type --quiet tools_default_path
-  set -gx PATH (tools_default_path) $PATH
 end
 
 # Interactive shell configuration
@@ -53,12 +42,12 @@ if status --is-interactive
   alias gcb 'git rev-parse --abbrev-ref HEAD'
   alias gsm 'git submodule'
 
-  alias rg   'rg --hidden'
-  alias view 'nvim -R'
   alias dco  'docker-compose'
 
   if type --quiet fzf
-    set -x FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git --exclude "*~"'
+    if type --quiet fd
+      set -x FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git --exclude "*~"'
+    end
     set -x FZF_DEFAULT_OPTS    '--reverse'
     set -x FZF_CTRL_T_COMMAND  $FZF_DEFAULT_COMMAND
     set -x FZF_CTRL_T_OPTS     $FZF_DEFAULT_OPTS
@@ -70,8 +59,8 @@ if status --is-interactive
 end
 
 # Host specific configuration
-if type --quiet configure_local_after_default
-  configure_local_after_default
+if type --quiet config_local_last
+  config_local_last
 end
 
 # Removing duplicate PATH entries
