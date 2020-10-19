@@ -43,6 +43,7 @@ if status --is-interactive
   alias gsm 'git submodule'
 
   alias dco  'docker-compose'
+  alias be 'bundle exec'
 
   if type --quiet fzf
     if type --quiet fd
