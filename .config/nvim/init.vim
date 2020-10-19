@@ -37,6 +37,7 @@ augroup END
 augroup detect_filetyle
   autocmd!
   autocmd BufNewFile,BufRead *.json5 setfiletype javascript
+  autocmd BufNewFile,BufRead Fastfile setfiletype ruby
 augroup END
 
 
