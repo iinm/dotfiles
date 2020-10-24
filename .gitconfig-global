@@ -2,6 +2,9 @@
 	trustctime = false
 	excludesfile = ~/.gitignore-global
 
+[pull]
+	ff = only
+
 [credential]
 	helper = cache
 
