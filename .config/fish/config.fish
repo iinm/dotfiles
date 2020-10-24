@@ -65,4 +65,4 @@ if type --quiet config_local_last
 end
 
 # Removing duplicate PATH entries
-set -x PATH (echo $PATH | tr ' ' '\n' | awk '!a[$0]++')
+set -x PATH (echo "$PATH" | tr ':' '\n' | awk '!a[$0]++')
