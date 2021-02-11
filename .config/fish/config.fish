@@ -27,6 +27,11 @@ if test (uname) = 'Linux'; and type --quiet xsel
   alias open    'xdg-open'
 end
 
+# direnv
+if type --quiet direnv
+  direnv hook fish | source
+end
+
 # Interactive shell configuration
 if status --is-interactive
   set fish_greeting
