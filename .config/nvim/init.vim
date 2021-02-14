@@ -146,6 +146,9 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'tpope/vim-sleuth'
   Plug 'tpope/vim-fugitive'
   Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
+  Plug 'aklt/plantuml-syntax'
+  Plug 'tyru/open-browser.vim'
+  Plug 'weirongxu/plantuml-previewer.vim'
   Plug 'mattn/emmet-vim'
   Plug 'SirVer/ultisnips'
   Plug 'honza/vim-snippets'
