@@ -167,13 +167,6 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
 
   " --- fzf
   let g:fzf_tags_command = 'ctags -R'
-  " preview with '?'
-  command! -bang -nargs=* Rg
-        \ call fzf#vim#grep(
-        \   'rg --column --line-number --no-heading --color=always --smart-case '.shellescape(<q-args>), 1,
-        \   <bang>0 ? fzf#vim#with_preview('up:60%')
-        \           : fzf#vim#with_preview('right:50%:hidden', '?'),
-        \   <bang>0)
 
   " --- lsp
   let g:lsp_virtual_text_enabled = 0
