@@ -145,10 +145,10 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'vim-scripts/BufOnly.vim'
   Plug 'tpope/vim-sleuth'
   Plug 'tpope/vim-fugitive'
-  Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
+  Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npm install'  }
   Plug 'aklt/plantuml-syntax'
-  Plug 'tyru/open-browser.vim'
-  Plug 'weirongxu/plantuml-previewer.vim'
+  Plug 'weirongxu/plantuml-previewer.vim' " requires Java, Graphviz
+  Plug 'tyru/open-browser.vim' " required by plantuml-previewer.vim
   Plug 'mattn/emmet-vim'
   Plug 'SirVer/ultisnips'
   Plug 'honza/vim-snippets'
@@ -157,7 +157,6 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'mattn/vim-lsp-settings'
   Plug 'prabirshrestha/asyncomplete.vim'
   Plug 'prabirshrestha/asyncomplete-lsp.vim'
-  Plug 'prabirshrestha/asyncomplete-ultisnips.vim'
   Plug 'mattn/vim-goimports'
   Plug 'dag/vim-fish'
   call plug#end()
@@ -169,14 +168,9 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   let g:fzf_tags_command = 'ctags -R'
 
   " --- lsp
+  " let g:lsp_diagnostics_enabled = 0
   let g:lsp_virtual_text_enabled = 0
-
-  " --- asyncomplete
-  call asyncomplete#register_source(asyncomplete#sources#ultisnips#get_source_options({
-        \ 'name': 'ultisnips',
-        \ 'whitelist': ['*'],
-        \ 'completor': function('asyncomplete#sources#ultisnips#completor'),
-        \ }))
+  let g:lsp_document_highlight_enabled = 0
 
   " --- key bind
   nnoremap <Leader><Leader> :<C-u>Commands<CR>
@@ -212,7 +206,7 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   nnoremap [grep]g :<C-u>grep! 
   nnoremap [grep]c :grep! <cword><CR>
   nnoremap [grep]w :grep! '\b<cword>\b'<CR>
-  nnoremap [grep]r :<C-u>Rg! 
+  nnoremap [grep]r :<C-u>Rg 
 
   nnoremap [jump] <Nop>
   nmap <Leader>j [jump]
