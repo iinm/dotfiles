@@ -48,7 +48,7 @@ install: \
 
 ~/.gitconfig-global: .gitconfig-global
 	grep --quiet 'path = ~/.gitconfig-global' ~/.gitconfig \
-		|| (echo -e "\n[include]\n\tpath = ~/.gitconfig-global" | tee --append ~/.gitconfig)
+		|| bash -c 'echo -e "\n[include]\n\tpath = ~/.gitconfig-global" | tee --append ~/.gitconfig'
 	cp $< $@
 
 ~/.gitignore-global: .gitignore-global
