@@ -18,8 +18,12 @@ a.k.a. dotfiles
 ```sh
 # Create symlink
 bash link.sh
+```
 
-# Configure fish
+## Tips
+
+Configure fish
+```sh
 cat > .config/fish/functions/config_local.fish << 'EOF'
 function config_local --description "Host specific configuration"
   function config_local_first
@@ -30,12 +34,12 @@ function config_local --description "Host specific configuration"
   end
 end
 EOF
-
-# Enable git config
-echo -e "\n[include]\n\tpath = ~/.gitconfig-global" >> ~/.gitconfig
 ```
 
-## Tips
+Enable git config
+```sh
+echo -e "\n[include]\n\tpath = ~/.gitconfig-global" >> ~/.gitconfig
+```
 
 Enable fzf key bindings for fish.
 ```sh
