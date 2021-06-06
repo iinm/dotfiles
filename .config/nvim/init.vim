@@ -27,6 +27,7 @@ augroup config_indent
   autocmd Filetype css            setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
   autocmd Filetype javascript     setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
   autocmd Filetype typescript     setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
+  autocmd Filetype php            setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
   autocmd Filetype json,yaml      setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
   autocmd Filetype sql            setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
   autocmd Filetype markdown       setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
