@@ -39,6 +39,7 @@ augroup detect_filetyle
   autocmd!
   autocmd BufNewFile,BufRead *.json5 setfiletype javascript
   autocmd BufNewFile,BufRead Fastfile setfiletype ruby
+  autocmd BufNewFile,BufRead *.tsx,*.jsx set filetype=typescriptreact
 augroup END
 
 
@@ -160,6 +161,9 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'prabirshrestha/asyncomplete-lsp.vim'
   Plug 'mattn/vim-goimports'
   Plug 'dag/vim-fish'
+  Plug 'peitalin/vim-jsx-typescript'
+  Plug 'leafgarland/typescript-vim'
+  Plug 'jparise/vim-graphql'
   call plug#end()
 
   " --- looks
