@@ -161,7 +161,7 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'prabirshrestha/asyncomplete-lsp.vim'
   Plug 'mattn/vim-goimports'
   Plug 'dag/vim-fish'
-  Plug 'peitalin/vim-jsx-typescript'
+  Plug 'maxmellon/vim-jsx-pretty'
   Plug 'leafgarland/typescript-vim'
   Plug 'jparise/vim-graphql'
   call plug#end()
@@ -171,6 +171,9 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
 
   " --- fzf
   let g:fzf_tags_command = 'ctags -R'
+
+  " --- emmet
+  autocmd FileType html,css,typescriptreact EmmetInstall
 
   " --- lsp
   " let g:lsp_diagnostics_enabled = 0
