@@ -33,6 +33,7 @@ augroup config_indent
   autocmd Filetype markdown       setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
   autocmd Filetype plantuml       setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
   autocmd Filetype tf             setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
+  autocmd Filetype typescriptreact setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
 augroup END
 
 augroup detect_filetyle
@@ -171,6 +172,7 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
 
   " --- fzf
   let g:fzf_tags_command = 'ctags -R'
+  let g:fzf_preview_window = ['right:40%:hidden', 'ctrl-/']
 
   " --- emmet
   autocmd FileType html,css,typescriptreact EmmetInstall
