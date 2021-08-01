@@ -62,11 +62,6 @@ if status --is-interactive
   if type --quiet direnv
     direnv hook fish | source
   end
-
-  # Python venv
-  if type --quiet activate_python_venv
-    activate_python_venv
-  end
 end
 
 # Host specific configuration
