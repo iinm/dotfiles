@@ -1,76 +1,43 @@
-set hidden
-set nobackup
+" --- Cheat Sheet
+" open file            :e **/main.go
+"                      :e %:h/
+" jump                 :jumps -> [N] Ctrl-O (older location) or Ctrl-I (newer location)
+" recent files         :browse oldfiles
+"                      :browse filter /pattern/ oldfiles
+" open path            gf (goto file), gx (xdg-open)
+" grep current dir     :grep! hoge -> :cw
+" grep current buffer  :grep! hoge %
+
 set undofile
 set ignorecase
 set smartcase
-set wildignore=*~,*.swp,.git,*.class,*.o,*.pyc,node_modules
+set wildignore=.git,node_modules
 set clipboard+=unnamedplus
-set termguicolors
-
 
 " --- looks
+if $COLORTERM =~ 'truecolor\|24bit'
+  set termguicolors
+end
 colorscheme desert
-let g:netrw_liststyle = 3  " tree style
-let g:markdown_fenced_languages = ['sh']
-
 
 " --- indent
-augroup config_indent
+set tabstop=8 expandtab shiftwidth=2 softtabstop=2
+
+augroup set_indent
   autocmd!
-  autocmd Filetype go             setlocal noexpandtab tabstop=4 softtabstop=4 shiftwidth=4
-  autocmd Filetype python         setlocal expandtab   tabstop=4 softtabstop=4 shiftwidth=4
-  autocmd Filetype java,groovy    setlocal expandtab   tabstop=4 softtabstop=4 shiftwidth=4
-  autocmd Filetype scala          setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
-  autocmd Filetype sh,zsh         setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
-  autocmd Filetype vim            setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
-  autocmd Filetype xml,html,css   setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
-  autocmd Filetype css            setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
-  autocmd Filetype javascript     setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
-  autocmd Filetype typescript     setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
-  autocmd Filetype php            setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
-  autocmd Filetype json,yaml      setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
-  autocmd Filetype sql            setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
-  autocmd Filetype markdown       setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
-  autocmd Filetype plantuml       setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
-  autocmd Filetype tf             setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
-  autocmd Filetype typescriptreact setlocal expandtab   tabstop=2 softtabstop=2 shiftwidth=2
+  autocmd Filetype go     setlocal tabstop=4 noexpandtab softtabstop=4 shiftwidth=4
+  autocmd Filetype python setlocal tabstop=4 expandtab   softtabstop=4 shiftwidth=4
 augroup END
 
-augroup detect_filetyle
+" --- filetype
+augroup set_filetype
   autocmd!
+  autocmd BufNewFile,BufRead *.tsx,*.jsx set filetype=typescriptreact
   autocmd BufNewFile,BufRead *.json5 setfiletype javascript
   autocmd BufNewFile,BufRead Fastfile setfiletype ruby
-  autocmd BufNewFile,BufRead *.tsx,*.jsx set filetype=typescriptreact
 augroup END
 
-
-" --- highlight keywords
-augroup highlight_todostate
-  autocmd!
-  autocmd WinEnter,BufRead,BufNew,Syntax * :silent! call matchadd('MyTodo', 'TODO:')
-  autocmd WinEnter,BufRead,BufNew,Syntax * :silent! call matchadd('MyWip',  'WIP:')
-  autocmd WinEnter,BufRead,BufNew,Syntax * :silent! call matchadd('MyDone', 'DONE:')
-  autocmd WinEnter,BufRead,BufNew,Syntax * highlight MyTodo guibg=LightRed    guifg=Black
-  autocmd WinEnter,BufRead,BufNew,Syntax * highlight MyWip  guibg=LightYellow guifg=Black
-  autocmd WinEnter,BufRead,BufNew,Syntax * highlight MyDone guibg=LightGreen  guifg=Black
-augroup END
-
-augroup highlight_keywords
-  autocmd!
-  autocmd WinEnter,BufRead,BufNew,Syntax * :silent! call matchadd('MyDue',  'DUE:')
-  autocmd WinEnter,BufRead,BufNew,Syntax * :silent! call matchadd('MyNote', 'NOTE:')
-  autocmd WinEnter,BufRead,BufNew,Syntax * highlight MyDue  guibg=White     guifg=Black
-  autocmd WinEnter,BufRead,BufNew,Syntax * highlight MyNote guibg=LightBlue guifg=Black
-augroup END
-
-
-" --- grep
-if executable('rg')
-  set grepprg=rg\ --vimgrep\ --glob\ '!*~'\ --glob\ '!.git'
-endif
-
-
-" --- jump
+" --- utilities
 " http://vim.wikia.com/wiki/Jumping_to_previously_visited_locations
 function! GotoJump()
   jumps
@@ -86,27 +53,31 @@ function! GotoJump()
   endif
 endfunction
 
-
-" --- quickfix
 " https://vim.fandom.com/wiki/Automatically_fittig_a_quickfix_window_height
 function! AdjustWindowHeight(minheight, maxheight)
   exe max([min([line("$"), a:maxheight]), a:minheight]) . "wincmd _"
 endfunction
 
-augroup config_quickfix
+augroup set_quickfix_window_size
   autocmd!
   autocmd FileType qf call AdjustWindowHeight(3, 15)
   autocmd FileType qf setlocal nowrap
   autocmd QuickFixCmdPost *grep* cwindow
 augroup END
 
+" --- etc.
+let g:netrw_liststyle = 3  " tree style
+let g:markdown_fenced_languages = ['sh']
 
-" --- key bind
-let mapleader = ","
+if executable('rg')
+  set grepprg=rg\ --vimgrep\ --glob\ '!*~'\ --glob\ '!.git'
+endif
+
+" --- key map
+let mapleader = "\<Space>"
 
 " https://vim.fandom.com/wiki/Search_for_visually_selected_text
 vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>
-nnoremap <C-l> :<C-u>nohlsearch<CR>:<C-u>redraw!<CR>
 
 nnoremap [file] <Nop>
 nmap <Leader>f [file]
@@ -122,19 +93,7 @@ nnoremap [grep]g :<C-u>grep!
 nnoremap [grep]c :grep! <cword><CR>
 nnoremap [grep]w :grep! '\b<cword>\b'<CR>
 
-
-" --- Cheat Sheet
-" open file            :e **/main.go
-" open new buffer      :enew -> :r! find . -t f
-" jump                 :jumps -> [N] Ctrl-O (older location) or Ctrl-I (newer location)
-" recent files         :browse oldfiles
-" recent files         :browse filter /pattern/ oldfiles
-" open path            gf (goto file), gx (xdg-open)
-" grep current dir     :grep! hoge -> :cw
-" grep current buffer  :grep! hoge %
-
-
-" --- plugin config
+" --- plugins
 if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
 
   call plug#begin(stdpath('data') . '/plugged')
@@ -182,7 +141,7 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   let g:lsp_diagnostics_virtual_text_enabled = 0
   let g:lsp_document_highlight_enabled = 0
 
-  " --- key bind
+  " --- key map
   nnoremap <Leader><Leader> :<C-u>Commands<CR>
 
   " preview quickfix
@@ -236,4 +195,4 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   nnoremap [code]e :<C-u>LspNextError<CR>
   nnoremap [code]f :<C-u>LspDocumentFormat<CR>
 
-endif
+endif " plugins
