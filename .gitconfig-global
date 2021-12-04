@@ -9,7 +9,7 @@
 	ff = only
 
 [credential]
-	helper = cache
+	helper = store
 
 [merge]
 	tool = vimdiff
