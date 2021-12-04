@@ -97,33 +97,44 @@ nnoremap [grep]w :grep! '\b<cword>\b'<CR>
 if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
 
   call plug#begin(stdpath('data') . '/plugged')
+  " colorscheme
   Plug 'chriskempson/base16-vim'
+
+  " utilities
   Plug 'junegunn/fzf'
   Plug 'junegunn/fzf.vim'
-  Plug 'skywind3000/vim-preview'
-  Plug 'godlygeek/tabular'
-  Plug 'jiangmiao/auto-pairs'
   Plug 'tpope/vim-commentary'
+  Plug 'jiangmiao/auto-pairs'
+  Plug 'godlygeek/tabular'
+  Plug 'mattn/emmet-vim'
+  Plug 'skywind3000/vim-preview'
   Plug 'vim-scripts/BufOnly.vim'
   Plug 'tpope/vim-sleuth'
   Plug 'tpope/vim-fugitive'
   Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npm install'  }
-  Plug 'aklt/plantuml-syntax'
   Plug 'weirongxu/plantuml-previewer.vim' " requires Java, Graphviz
   Plug 'tyru/open-browser.vim' " required by plantuml-previewer.vim
-  Plug 'mattn/emmet-vim'
-  Plug 'SirVer/ultisnips'
-  Plug 'honza/vim-snippets'
+
+  " completion & lsp
   Plug 'prabirshrestha/async.vim'
   Plug 'prabirshrestha/vim-lsp'
   Plug 'mattn/vim-lsp-settings'
   Plug 'prabirshrestha/asyncomplete.vim'
   Plug 'prabirshrestha/asyncomplete-lsp.vim'
-  Plug 'mattn/vim-goimports'
-  Plug 'dag/vim-fish'
-  Plug 'maxmellon/vim-jsx-pretty'
-  Plug 'leafgarland/typescript-vim'
+
+  " snippets
+  if has('python3')
+    Plug 'SirVer/ultisnips'
+    Plug 'honza/vim-snippets'
+    Plug 'prabirshrestha/asyncomplete-ultisnips.vim'
+  endif
+
+  " language
   Plug 'jparise/vim-graphql'
+  Plug 'leafgarland/typescript-vim'
+  Plug 'maxmellon/vim-jsx-pretty'
+  Plug 'aklt/plantuml-syntax'
+  Plug 'dag/vim-fish'
   call plug#end()
 
   " --- looks
@@ -149,14 +160,21 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   autocmd FileType qf nnoremap <silent><buffer> P :PreviewClose<CR>
 
   " snippets
-  let g:UltiSnipsExpandTrigger = "<c-k>"
-  let g:UltiSnipsJumpForwardTrigger = "<c-f>"
-  let g:UltiSnipsJumpBackwardTrigger = "<c-b>"
+  if has('python3')
+    let g:UltiSnipsExpandTrigger = "<c-k>"
+    let g:UltiSnipsJumpForwardTrigger = "<c-f>"
+    let g:UltiSnipsJumpBackwardTrigger = "<c-b>"
+    call asyncomplete#register_source(asyncomplete#sources#ultisnips#get_source_options({
+          \ 'name': 'ultisnips',
+          \ 'allowlist': ['*'],
+          \ 'completor': function('asyncomplete#sources#ultisnips#completor'),
+          \ }))
+  endif
 
   " asyncomplete
   inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
   inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-  inoremap <expr> <cr>    pumvisible() ? "\<C-y>" : "\<cr>"
+  inoremap <expr> <cr>    pumvisible() ? asyncomplete#close_popup() : "\<cr>"
 
   nnoremap [file] <Nop>
   nmap <Leader>f [file]
