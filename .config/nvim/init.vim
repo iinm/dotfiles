@@ -135,6 +135,9 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'maxmellon/vim-jsx-pretty'
   Plug 'aklt/plantuml-syntax'
   Plug 'dag/vim-fish'
+
+  " debugger
+  Plug 'puremourning/vimspector'
   call plug#end()
 
   " --- looks
@@ -219,5 +222,11 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   nnoremap [code]d :<C-u>LspDocumentDiagnostics<CR>
   nnoremap [code]e :<C-u>LspNextError<CR>
   nnoremap [code]f :<C-u>LspDocumentFormat<CR>
+
+  nnoremap [debug] <Nop>
+  nmap <Leader>d [debug]
+  nnoremap [debug]t :<C-u>call vimspector#ToggleBreakpoint()<CR>
+  nnoremap [debug]c :<C-u>call vimspector#Continue()<CR>
+  nnoremap [debug]e :<C-u>VimspectorReset<CR>
 
 endif " plugins
