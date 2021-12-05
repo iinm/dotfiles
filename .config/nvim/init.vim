@@ -101,6 +101,7 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'chriskempson/base16-vim'
 
   " utilities
+  Plug 'easymotion/vim-easymotion'
   Plug 'junegunn/fzf'
   Plug 'junegunn/fzf.vim'
   Plug 'tpope/vim-commentary'
@@ -116,7 +117,6 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'tyru/open-browser.vim' " required by plantuml-previewer.vim
 
   " completion & lsp
-  Plug 'prabirshrestha/async.vim'
   Plug 'prabirshrestha/vim-lsp'
   Plug 'mattn/vim-lsp-settings'
   Plug 'prabirshrestha/asyncomplete.vim'
@@ -140,6 +140,10 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   " --- looks
   colorscheme base16-eighties
 
+  " -- easymotion
+  let g:EasyMotion_do_mapping = 0
+  let g:EasyMotion_smartcase = 1
+
   " --- fzf
   let g:fzf_tags_command = 'ctags -R'
   let g:fzf_preview_window = ['right:40%:hidden', 'ctrl-/']
@@ -154,6 +158,9 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
 
   " --- key map
   nnoremap <Leader><Leader> :<C-u>Commands<CR>
+
+  " easymotion
+  nmap s <Plug>(easymotion-overwin-f2)
 
   " preview quickfix
   autocmd FileType qf nnoremap <silent><buffer> p :PreviewQuickfix<CR>
