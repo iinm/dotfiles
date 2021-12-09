@@ -14,7 +14,7 @@ set smartcase
 set wildignore=.git,node_modules
 set clipboard+=unnamedplus
 
-" --- looks
+" --- appearance
 if $COLORTERM =~ 'truecolor\|24bit'
   set termguicolors
 end
