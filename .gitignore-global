@@ -1,16 +1,9 @@
-*~
-*.swp
-.*.un~
+# macOS
 .DS_Store
 
+# Intellij
 *.iml
 *.idea
 
 # direnv
 .envrc
-
-# tags
-tags
-GPATH
-GRTAGS
-GTAGS
