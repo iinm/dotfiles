@@ -4,14 +4,16 @@ a.k.a. dotfiles
 
 ## Requirements
 
-- fish (Login shell)
+- fish (login shell)
 - bash (for scripting)
 - tmux
 - neovim
+  - vim-plug
 - ripgrep
 - fd
 - fzf
-- xsel (for Linux)
+- direnv
+- xsel (Linux)
 
 ## How to install
 
