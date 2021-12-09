@@ -29,10 +29,10 @@ Configure fish
 cat > .config/fish/functions/config_local.fish << 'EOF'
 function config_local --description "Host specific configuration"
   function config_local_first
+    set -xg PATH ~/tools/bin $PATH
   end
 
   function config_local_last
-    set -xg PATH ~/tools/bin $PATH
   end
 end
 EOF
