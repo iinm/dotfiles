@@ -66,7 +66,13 @@ augroup set_quickfix_window_size
 augroup END
 
 " --- etc.
+let g:netrw_banner = 0
 let g:netrw_liststyle = 3  " tree style
+let g:netrw_browse_split = 4
+let g:netrw_altv = 1
+let g:netrw_alto = 1
+let g:netrw_winsize = 25
+
 let g:markdown_fenced_languages = ['sh']
 
 if executable('rg')
@@ -179,7 +185,7 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
 
   nnoremap [file] <Nop>
   nmap <Leader>f [file]
-  nnoremap [file]e :<C-u>Explore<CR>
+  nnoremap [file]e :<C-u>Vexplore<CR>
   nnoremap [file]f :<C-u>Files<CR>
   nnoremap [file]h :<C-u>History<CR>
   nnoremap [file]g :<C-u>GitFiles<CR>
