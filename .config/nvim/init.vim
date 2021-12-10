@@ -122,6 +122,7 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npm install'  }
   Plug 'weirongxu/plantuml-previewer.vim' " requires Java, Graphviz
   Plug 'tyru/open-browser.vim' " required by plantuml-previewer.vim
+  Plug 'preservim/nerdtree'
 
   " completion & lsp
   Plug 'prabirshrestha/vim-lsp'
@@ -146,7 +147,7 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   " --- looks
   colorscheme base16-eighties
 
-  " -- easymotion
+  " --- easymotion
   let g:EasyMotion_do_mapping = 0
   let g:EasyMotion_smartcase = 1
 
@@ -161,6 +162,9 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   " let g:lsp_diagnostics_enabled = 0
   let g:lsp_diagnostics_virtual_text_enabled = 0
   let g:lsp_document_highlight_enabled = 0
+
+  " --- nerdtree
+  let NERDTreeShowHidden=1
 
   " --- key map
   nnoremap <Leader><Leader> :<C-u>Commands<CR>
@@ -185,7 +189,8 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
 
   nnoremap [file] <Nop>
   nmap <Leader>f [file]
-  nnoremap [file]e :<C-u>Vexplore<CR>
+  nnoremap [file]e :<C-u>NERDTree<CR>
+  nnoremap [file]t :<C-u>NERDTreeFind<CR>
   nnoremap [file]f :<C-u>Files<CR>
   nnoremap [file]h :<C-u>History<CR>
   nnoremap [file]g :<C-u>GitFiles<CR>
