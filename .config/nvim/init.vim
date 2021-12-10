@@ -87,7 +87,7 @@ vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>
 
 nnoremap [file] <Nop>
 nmap <Leader>f [file]
-nnoremap [file]e :<C-u>Explore<CR>
+nnoremap [file]e :<C-u>Vexplore<CR>
 
 nnoremap [jump] <Nop>
 nmap <Leader>j [jump]
