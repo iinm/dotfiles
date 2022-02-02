@@ -2,22 +2,18 @@
 
 a.k.a. dotfiles
 
-## Requirements
+Install requirements.
 
-- zsh
-- tmux
-- neovim
-- ripgrep
-- fd
-- fzf
-- direnv
-- fasd
-- xsel (Linux)
+```
+# Arch Linux
+pacman -Syu zsh tmux neovim git tig ripgrep fd fzf direnv fasd xsel
 
-## How to install
+# Darwin
+brew install tmux neovim tig ripgrep fd fzf direnv fasd
+```
 
+Create symlinks.
 ```sh
-# Create symlink
 zsh link.sh
 ```
 
@@ -30,7 +26,15 @@ echo "source ~/.zshrc.global" > ~/.zshrc.local
 
 Enable fzf key bindings.
 ```sh
+# Darwin
 $(brew --prefix)/opt/fzf/install
+
+# Arch Linux
+cat > ~/.fzf.zsh << EOF
+# https://wiki.archlinux.org/title/fzf#Zsh
+source /usr/share/fzf/key-bindings.zsh
+source /usr/share/fzf/completion.zsh
+EOF
 ```
 
 Enable git config.
