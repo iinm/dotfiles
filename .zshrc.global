@@ -1,0 +1,35 @@
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+alias gco='git checkout'
+alias gst='git status'
+alias gl='git pull'
+alias gcd='cd $(git rev-parse --show-toplevel)'
+alias gcb='git rev-parse --abbrev-ref HEAD'
+alias gsm='git submodule'
+
+if test "$(uname)" = 'Linux'; then
+  alias pbcopy='xsel -i -p && xsel -o -p | xsel -i -b'
+  alias pbpaste='xsel -o -b'
+  alias open='xdg-open'
+fi
+
+if test -r ~/.fzf.zsh; then
+  source ~/.fzf.zsh
+  zle     -N   fzf-file-widget
+  bindkey '^Y' fzf-file-widget
+
+  export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git --exclude "*~"'
+  export FZF_DEFAULT_OPTS='--reverse'
+  export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
+  export FZF_CTRL_T_OPTS=$FZF_DEFAULT_OPTS
+fi
+
+if which direnv &> /dev/null; then
+  eval "$(direnv hook zsh)"
+fi
+
+if which fasd &> /dev/null; then
+  eval "$(fasd --init auto)"
+fi
