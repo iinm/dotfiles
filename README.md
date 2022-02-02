@@ -4,53 +4,45 @@ a.k.a. dotfiles
 
 ## Requirements
 
-- fish (login shell)
-- bash (for scripting)
+- zsh
 - tmux
 - neovim
-  - vim-plug
 - ripgrep
 - fd
 - fzf
 - direnv
+- fasd
 - xsel (Linux)
 
 ## How to install
 
 ```sh
 # Create symlink
-bash link.sh
+zsh link.sh
 ```
 
-## Tips
-
-Configure fish
+Configure zsh.
 ```sh
-cat > .config/fish/functions/config_local.fish << 'EOF'
-function config_local --description "Host specific configuration"
-  function config_local_first
-    set -xg PATH ~/tools/bin $PATH
-  end
-
-  function config_local_last
-  end
-end
-EOF
+# https://grml.org/zsh/
+curl -L -o ~/.zshrc https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc
+echo "source ~/.zshrc.global" > ~/.zshrc.local
 ```
 
-Enable git config
+Enable fzf key bindings.
+```sh
+$(brew --prefix)/opt/fzf/install
+```
+
+Enable git config.
 ```sh
 echo -e "\n[include]\n\tpath = ~/.gitconfig-global" >> ~/.gitconfig
 ```
 
-Enable fzf key bindings for fish.
-```sh
-curl https://raw.githubusercontent.com/junegunn/fzf/master/shell/key-bindings.fish \
-  | sed 's,ct fzf-file-widget,cy fzf-file-widget,g' \
-  > .config/fish/functions/fzf_key_bindings.fish
-```
-
 Install neovim plugins.
 ```sh
-nvim -c 'PlugClean | q | PlugInstall | q | q'
+# https://github.com/junegunn/vim-plug#neovim
+curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site/autoload/plug.vim" --create-dirs \
+  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+nvim -c "PlugClean | q | PlugInstall | q | q"
 ```
