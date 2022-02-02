@@ -10,7 +10,7 @@ list_files() {
   find "$src_root/.config" -mindepth 1 -maxdepth 1 -type d
 }
 
-src_root=$(cd "$(dirname "${(%):-%N}")" && pwd)
+src_root=$(cd "$(dirname "${0}")" && pwd)
 
 for src in $(list_files "$src_root"); do
   dest=$(sed "s,^$src_root,$HOME," <<< "$src")
