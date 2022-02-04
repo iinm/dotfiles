@@ -21,7 +21,20 @@ Configure zsh.
 ```sh
 # https://grml.org/zsh/
 curl -L -o ~/.zshrc https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc
-echo "source ~/.zshrc.global" > ~/.zshrc.local
+echo "source ~/.zshrc.global" >> ~/.zshrc.local
+
+# https://github.com/zsh-users/zsh-completions
+git clone https://github.com/zsh-users/zsh-completions ~/.zsh/zsh-completions
+echo 'fpath=(~/.zsh/zsh-completions/src $fpath)' >> ~/.zshrc.local
+rm -f ~/.zcompdump; compinit
+
+# https://github.com/zsh-users/zsh-autosuggestions/blob/master/INSTALL.md#manual-git-clone
+git clone https://github.com/zsh-users/zsh-autosuggestions ~/.zsh/zsh-autosuggestions
+echo "source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh" >> ~/.zshrc.local
+
+# https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/INSTALL.md
+git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.zsh/zsh-syntax-highlighting
+echo "source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ~/.zshrc.local
 ```
 
 Enable fzf key bindings.
