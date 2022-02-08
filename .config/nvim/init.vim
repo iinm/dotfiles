@@ -86,13 +86,11 @@ let mapleader = "\<Space>"
 " https://vim.fandom.com/wiki/Search_for_visually_selected_text
 vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>
 
+nnoremap <Leader>j :<C-u>call GotoJump()<CR>
+
 nnoremap [file] <Nop>
 nmap <Leader>f [file]
 nnoremap [file]e :<C-u>Vexplore<CR>
-
-nnoremap [jump] <Nop>
-nmap <Leader>j [jump]
-nnoremap [jump]j :<C-u>call GotoJump()<CR>
 
 nnoremap [grep] <Nop>
 nmap <Leader>g [grep]
@@ -188,6 +186,9 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   imap <expr> <C-b> vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<C-b>'
   smap <expr> <C-b> vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<C-b>'
 
+  nnoremap <Leader>b :<C-u>Buffers<CR>
+  nnoremap <Leader>w :<C-u>set wrap!<CR>
+
   nnoremap [file] <Nop>
   nmap <Leader>f [file]
   nnoremap [file]e :<C-u>NERDTree<CR>
@@ -196,21 +197,12 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   nnoremap [file]h :<C-u>History<CR>
   nnoremap [file]g :<C-u>GitFiles<CR>
 
-  nnoremap [buffer] <Nop>
-  nmap <Leader>b [buffer]
-  nnoremap [buffer]b :<C-u>Buffers<CR>
-  nnoremap [buffer]o :<C-u>BufOnly<CR>
-
   nnoremap [grep] <Nop>
   nmap <Leader>g [grep]
   nnoremap [grep]g :<C-u>grep! 
   nnoremap [grep]c :grep! <cword><CR>
   nnoremap [grep]w :grep! '\b<cword>\b'<CR>
   nnoremap [grep]r :<C-u>Rg 
-
-  nnoremap [jump] <Nop>
-  nmap <Leader>j [jump]
-  nnoremap [jump]j :<C-u>call GotoJump()<CR>
 
   nnoremap [code] <Nop>
   nmap <Leader>c [code]
