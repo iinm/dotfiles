@@ -140,6 +140,7 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'maxmellon/vim-jsx-pretty'
   Plug 'aklt/plantuml-syntax'
   Plug 'dag/vim-fish'
+  Plug 'hashivim/vim-terraform'
 
   call plug#end()
 
