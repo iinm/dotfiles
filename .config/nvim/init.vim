@@ -160,9 +160,18 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   autocmd FileType html,css,typescriptreact EmmetInstall
 
   " --- lsp
+  let g:lsp_settings = {
+  \  'efm-langserver': {'disabled': v:false}
+  \}
   " let g:lsp_diagnostics_enabled = 0
   let g:lsp_diagnostics_virtual_text_enabled = 0
   let g:lsp_document_highlight_enabled = 0
+  " format on save
+  augroup format_on_save
+    autocmd!
+    autocmd BufWritePre *.js,*.jsx call execute('LspDocumentFormatSync --server=efm-langserver')
+    autocmd BufWritePre *.ts,*.tsx call execute('LspDocumentFormatSync --server=efm-langserver')
+  augroup END
 
   " --- nerdtree
   let NERDTreeShowHidden=1
@@ -174,8 +183,11 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   nmap s <Plug>(easymotion-overwin-f2)
 
   " preview quickfix
-  autocmd FileType qf nnoremap <silent><buffer> p :PreviewQuickfix<CR>
-  autocmd FileType qf nnoremap <silent><buffer> P :PreviewClose<CR>
+  augroup preview_quickfix
+    autocmd!
+    autocmd FileType qf nnoremap <silent><buffer> p :PreviewQuickfix<CR>
+    autocmd FileType qf nnoremap <silent><buffer> P :PreviewClose<CR>
+  augroup END
 
   " asyncomplete
   inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
