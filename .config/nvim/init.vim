@@ -165,7 +165,9 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   \}
   " let g:lsp_diagnostics_enabled = 0
   let g:lsp_diagnostics_virtual_text_enabled = 0
-  let g:lsp_document_highlight_enabled = 0
+  " let g:lsp_document_highlight_enabled = 0
+  highlight LspErrorHighlight gui=underline
+
   " format on save
   augroup format_on_save
     autocmd!
