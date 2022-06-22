@@ -122,6 +122,7 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   Plug 'weirongxu/plantuml-previewer.vim' " requires Java, Graphviz
   Plug 'tyru/open-browser.vim' " required by plantuml-previewer.vim
   Plug 'preservim/nerdtree'
+  Plug 'kamykn/spelunker.vim'
 
   " completion & lsp
   Plug 'prabirshrestha/vim-lsp'
