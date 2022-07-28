@@ -4,6 +4,7 @@
 [core]
 	trustctime = false
 	excludesfile = ~/.gitignore-global
+	ignorecase = false
 
 [pull]
 	ff = only
