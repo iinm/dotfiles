@@ -5,8 +5,14 @@ a.k.a. dotfiles
 Install requirements.
 
 ```
+# Ubuntu
+sudo apt install zsh tmux git tig ripgrep fd-find fzf direnv fasd xsel curl
+sudo ln -s /usr/bin/fdfind /usr/local/bin/fd
+sudo add-apt-repository ppa:neovim-ppa/stable
+sudo apt install neovim
+
 # Arch Linux
-pacman -Syu zsh tmux neovim git tig ripgrep fd fzf direnv fasd xsel
+sudo pacman -Syu zsh tmux neovim git tig ripgrep fd fzf direnv fasd xsel
 
 # Darwin
 brew install tmux neovim tig ripgrep fd fzf direnv fasd
@@ -39,8 +45,11 @@ echo "source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ~/.z
 
 Enable fzf key bindings.
 ```sh
-# Darwin
-$(brew --prefix)/opt/fzf/install
+# Ubuntu
+cat > ~/.fzf.zsh << EOF
+source /usr/share/doc/fzf/examples/completion.zsh
+source /usr/share/doc/fzf/examples/key-bindings.zsh
+EOF
 
 # Arch Linux
 cat > ~/.fzf.zsh << EOF
@@ -48,6 +57,9 @@ cat > ~/.fzf.zsh << EOF
 source /usr/share/fzf/key-bindings.zsh
 source /usr/share/fzf/completion.zsh
 EOF
+
+# Darwin
+$(brew --prefix)/opt/fzf/install
 ```
 
 Enable git config.
