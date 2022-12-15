@@ -16,6 +16,7 @@ set clipboard+=unnamedplus
 set mouse=a
 
 " --- appearance
+set number
 if $COLORTERM =~ 'truecolor\|24bit'
   set termguicolors
 end
