@@ -104,7 +104,7 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
 
   call plug#begin(stdpath('data') . '/plugged')
   " colorscheme
-  Plug 'chriskempson/base16-vim'
+  Plug 'EdenEast/nightfox.nvim'
 
   " utilities
   Plug 'easymotion/vim-easymotion'
@@ -148,7 +148,7 @@ if filereadable(expand('~/.local/share/nvim/site/autoload/plug.vim'))
   call plug#end()
 
   " --- looks
-  colorscheme base16-eighties
+  colorscheme nordfox
 
   " --- easymotion
   let g:EasyMotion_do_mapping = 0
