@@ -94,9 +94,9 @@ if packer_exists then
 
     -- Languages
     use 'jparise/vim-graphql'
-    use 'leafgarland/typescript-vim'
     use 'maxmellon/vim-jsx-pretty'
     use 'hashivim/vim-terraform'
+    use 'jose-elias-alvarez/typescript.nvim'
   end)
 
   -- Colorscheme
@@ -106,7 +106,7 @@ if packer_exists then
   vim.g.EasyMotion_do_mapping = 0
   vim.g.EasyMotion_smartcase = 1
 
-  -- autopair
+  -- autopairs
   require("nvim-autopairs").setup()
 
   -- Completion
@@ -157,6 +157,11 @@ if packer_exists then
   vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
     vim.lsp.diagnostic.on_publish_diagnostics, { virtual_text = false }
   )
+
+  -- typescript
+  require("typescript").setup({
+    disable_commands = false,
+  })
 
   -- Keymap with Plugins
   vim.keymap.set('n', '<leader><leader>', ':<C-u>Commands<CR>')
