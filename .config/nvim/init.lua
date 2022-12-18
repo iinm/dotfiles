@@ -146,7 +146,7 @@ if packer_exists then
       filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact' },
     }
     vim.cmd [[
-    augroup format_on_save
+    augroup typescript_format_on_save
       autocmd!
       autocmd BufWritePre *.js,*.jsx lua vim.lsp.buf.format()
       autocmd BufWritePre *.ts,*.tsx lua vim.lsp.buf.format()
