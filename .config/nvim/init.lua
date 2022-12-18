@@ -16,16 +16,25 @@ for k, v in pairs({
   vim.opt[k] = v
 end
 
--- netrw
+vim.cmd [[colorscheme desert]]
+
+if vim.fn.executable('rg') then
+  vim.opt.grepprg = 'rg --vimgrep --glob "!*~" --glob "!.git"'
+end
+
+vim.g.markdown_fenced_languages = { 'sh' }
+
+-- File browser
 vim.g.netrw_banner = 0
 vim.g.netrw_liststyle = 3 -- tree view
-vim.g.netrw_winsize = 25
+vim.g.netrw_winsize = 25 -- %
 
--- Keymaps
+-- Keymap
 vim.g.mapleader = ' '
 
 vim.keymap.set('n', '<leader>fe', ':<C-u>Lexplore!<CR>')
 vim.keymap.set('n', '<leader>ft', ':<C-u>Lexplore! %:h<CR><CR>')
+vim.keymap.set('n', '<leader>gg', ':<C-u>grep! ')
 
 -- Indent
 vim.cmd [[
@@ -36,7 +45,7 @@ augroup set_indent
 augroup END
 ]]
 
--- File type
+-- File types
 vim.cmd [[
 augroup set_filetype
   autocmd!
@@ -49,9 +58,7 @@ augroup END
 local packer_local_path = vim.fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
 local packer_exists = pcall(function()
   local file = io.open(packer_local_path, "r")
-  if file ~= nil then
-    io.close(file)
-  end
+  io.close(file)
 end)
 
 if packer_exists then
@@ -72,12 +79,12 @@ if packer_exists then
     use 'tpope/vim-fugitive'
     use 'kamykn/spelunker.vim'
 
-    -- Completion
+    -- Completion, Snippets, LSP
     use 'neovim/nvim-lspconfig'
     use 'hrsh7th/nvim-cmp'
     use 'hrsh7th/cmp-nvim-lsp'
-    use 'hrsh7th/cmp-vsnip'
     use 'hrsh7th/vim-vsnip'
+    use 'hrsh7th/cmp-vsnip'
     use 'rafamadriz/friendly-snippets'
     use 'github/copilot.vim'
 
@@ -85,7 +92,7 @@ if packer_exists then
     use 'williamboman/mason.nvim'
     use 'williamboman/mason-lspconfig.nvim'
 
-    -- Language
+    -- Languages
     use 'jparise/vim-graphql'
     use 'leafgarland/typescript-vim'
     use 'maxmellon/vim-jsx-pretty'
@@ -136,24 +143,22 @@ if packer_exists then
 
   if vim.fn.executable('efm-langserver') == 1 then
     require('lspconfig')['efm'].setup {
-      init_options = { documentFormatting = true },
       filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact' },
     }
+    vim.cmd [[
+    augroup format_on_save
+      autocmd!
+      autocmd BufWritePre *.js,*.jsx lua vim.lsp.buf.format()
+      autocmd BufWritePre *.ts,*.tsx lua vim.lsp.buf.format()
+    augroup END
+    ]]
   end
 
   vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
     vim.lsp.diagnostic.on_publish_diagnostics, { virtual_text = false }
   )
 
-  vim.cmd [[
-  augroup format_on_save
-    autocmd!
-    autocmd BufWritePre *.js,*.jsx lua vim.lsp.buf.format()
-    autocmd BufWritePre *.ts,*.tsx lua vim.lsp.buf.format()
-  augroup END
-  ]]
-
-  -- Keymaps with Plugins
+  -- Keymap with Plugins
   vim.keymap.set('n', '<leader><leader>', ':<C-u>Commands<CR>')
   vim.keymap.set('n', '<leader>b', ':<C-u>Buffers<CR>')
   vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
@@ -175,8 +180,9 @@ if packer_exists then
   vim.keymap.set('n', '<leader>cd', vim.diagnostic.open_float)
   vim.keymap.set('n', '<leader>ce', vim.diagnostic.goto_next)
 
-  -- Spelling
-  -- https://github.com/kamykn/spelunker.vim
-  -- ZL -> Correct all words in buffer
-  -- Zl -> Correct word under cursor
+  -- Spell
+  vim.keymap.set('n', '<leader>sl', '<Plug>(spelunker-correct-from-list)')
+  vim.keymap.set('n', '<leader>sL', '<Plug>(spelunker-correct-all-from-list)')
+  vim.keymap.set('n', '<leader>sf', '<Plug>(spelunker-correct)')
+  vim.keymap.set('n', '<leader>sF', '<Plug>(spelunker-correct-all)')
 end
