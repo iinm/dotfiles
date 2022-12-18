@@ -93,8 +93,9 @@ if packer_exists then
     use 'williamboman/mason-lspconfig.nvim'
 
     -- Languages
-    use 'jparise/vim-graphql'
+    use 'pangloss/vim-javascript'
     use 'maxmellon/vim-jsx-pretty'
+    use 'jparise/vim-graphql'
     use 'hashivim/vim-terraform'
     use 'jose-elias-alvarez/typescript.nvim'
   end)
@@ -146,7 +147,7 @@ if packer_exists then
       filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact' },
     }
     vim.cmd [[
-    augroup typescript_format_on_save
+    augroup format_on_save
       autocmd!
       autocmd BufWritePre *.js,*.jsx lua vim.lsp.buf.format()
       autocmd BufWritePre *.ts,*.tsx lua vim.lsp.buf.format()
@@ -157,6 +158,9 @@ if packer_exists then
   vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
     vim.lsp.diagnostic.on_publish_diagnostics, { virtual_text = false }
   )
+
+  -- javascript
+  vim.g.javascript_plugin_jsdoc = 1
 
   -- typescript
   require("typescript").setup({
