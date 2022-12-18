@@ -11,6 +11,7 @@ alias gsm='git submodule'
 
 if which nvim &> /dev/null; then
   alias vimdiff='nvim -Rd'
+  export EDITOR=nvim
 fi
 
 if test "$(uname)" = 'Linux'; then
