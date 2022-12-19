@@ -120,6 +120,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   call plug#begin()
   " colorscheme
   Plug 'chriskempson/base16-vim'
+  Plug 'joshdick/onedark.vim'
 
   " utilities
   Plug 'easymotion/vim-easymotion'
@@ -158,7 +159,8 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   call plug#end()
 
   " colorscheme
-  colorscheme base16-eighties
+  " colorscheme base16-eighties
+  colorscheme onedark
 
   " easymotion
   let g:EasyMotion_do_mapping = 0
@@ -178,8 +180,8 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   let g:lsp_settings = {
   \  'efm-langserver': {'disabled': v:false}
   \}
-  " let g:lsp_diagnostics_echo_cursor = 1
-  let g:lsp_diagnostics_float_cursor = 1
+  let g:lsp_diagnostics_echo_cursor = 1
+  " let g:lsp_diagnostics_float_cursor = 1
   highlight LspErrorHighlight gui=underline
 
   " format on save
