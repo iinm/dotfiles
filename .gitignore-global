@@ -1,6 +1,10 @@
 # macOS
 .DS_Store
 
+# vim
+*.un~
+*.swp
+
 # Intellij
 *.iml
 *.idea
