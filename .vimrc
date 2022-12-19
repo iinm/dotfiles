@@ -8,8 +8,16 @@
 " grep current dir     :grep! hoge -> :cw
 " grep current buffer  :grep! hoge %
 
+if !isdirectory(expand("~/.vim/undodir"))
+  call mkdir(expand("~/.vim/undodir"), 'p')
+endif
+
 " --- Options
+set encoding=utf-8 
 set hidden
+set nobackup
+set noswapfile
+set undodir=~/.vim/undodir
 set undofile
 set history=10000
 set incsearch
