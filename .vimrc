@@ -22,19 +22,32 @@ set wildignore+=*/.git/*,*/tmp/*,*.swp
 set clipboard=unnamed,unnamedplus,autoselect
 set ttimeoutlen=10
 set backspace=indent,eol,start
+set mouse=a
+if has('mouse_sgr')
+  set ttymouse=sgr
+endif
 
 " --- Appearance
-syntax on
 set number
-if $COLORTERM =~ 'truecolor\|24bit'
+if has('termguicolors')
   set termguicolors
-end
-colorscheme desert
+endif
+if has('syntax') && !exists('g:syntax_on')
+  syntax enable
+endif
 
 " cursor
 let &t_SI = "\<Esc>[6 q"
 let &t_SR = "\<Esc>[4 q"
 let &t_EI = "\<Esc>[2 q"
+
+" italic
+let &t_ZH="\<Esc>[3m"
+let &t_ZR="\<Esc>[23m"
+
+" undercurl
+let &t_Cs = "\e[4:3m"
+let &t_Ce = "\e[4:0m"
 
 " --- Indent
 set tabstop=8 expandtab shiftwidth=2 softtabstop=2
@@ -83,11 +96,8 @@ augroup END
 
 " --- etc.
 let g:netrw_banner = 0
-let g:netrw_liststyle = 3  " tree style
-let g:netrw_browse_split = 4
-let g:netrw_altv = 1
-let g:netrw_alto = 1
-let g:netrw_winsize = 25
+let g:netrw_liststyle = 3 " tree style
+let g:netrw_winsize = 25 " %
 
 let g:markdown_fenced_languages = ['sh']
 
@@ -119,8 +129,7 @@ nnoremap [grep]w :grep! '\b<cword>\b'<CR>
 if filereadable(expand('~/.vim/autoload/plug.vim'))
   call plug#begin()
   " colorscheme
-  Plug 'chriskempson/base16-vim'
-  Plug 'joshdick/onedark.vim'
+  Plug 'sainnhe/everforest'
 
   " utilities
   Plug 'easymotion/vim-easymotion'
@@ -153,14 +162,16 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   " languages
   Plug 'pangloss/vim-javascript'
   Plug 'jparise/vim-graphql'
-  Plug 'leafgarland/typescript-vim'
   Plug 'maxmellon/vim-jsx-pretty'
   Plug 'hashivim/vim-terraform'
+
+  " debugger
+  Plug 'puremourning/vimspector'
   call plug#end()
 
   " colorscheme
-  " colorscheme base16-eighties
-  colorscheme onedark
+  set background=dark
+  colorscheme everforest
 
   " easymotion
   let g:EasyMotion_do_mapping = 0
@@ -180,9 +191,10 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   let g:lsp_settings = {
   \  'efm-langserver': {'disabled': v:false}
   \}
+  let g:lsp_diagnostics_highlights_enabled = 0
   let g:lsp_diagnostics_echo_cursor = 1
   " let g:lsp_diagnostics_float_cursor = 1
-  highlight LspErrorHighlight gui=underline
+  " highlight LspErrorHighlight gui=underline
 
   " format on save
   augroup format_on_save
@@ -190,6 +202,15 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
     autocmd BufWritePre *.js,*.jsx call execute('LspDocumentFormatSync --server=efm-langserver')
     autocmd BufWritePre *.ts,*.tsx call execute('LspDocumentFormatSync --server=efm-langserver')
   augroup END
+
+  " vimspector
+  " https://github.com/puremourning/vimspector#human-mode
+  let g:vimspector_enable_mappings = 'HUMAN'
+  let g:vimspector_bottombar_height = 2
+
+  " spelunker
+  highlight SpelunkerSpellBad cterm=underline
+  highlight SpelunkerComplexOrCompoundWord cterm=underline
 
   " --- Plugin Keymap
   nnoremap <Leader><Leader> :<C-u>Commands<CR>
@@ -229,6 +250,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
 
   nnoremap [spell] <Nop>
   nmap <Leader>s [spell]
+  nnoremap [spell]t <Plug>(spelunker-toggle)
   nnoremap [spell]l <Plug>(spelunker-correct-from-list)
   nnoremap [spell]L <Plug>(spelunker-correct-all-from-list)
   nnoremap [spell]f <Plug>(spelunker-correct)
@@ -247,4 +269,9 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   nnoremap [code]d :<C-u>LspDocumentDiagnostics<CR>
   nnoremap [code]e :<C-u>LspNextError<CR>
   nnoremap [code]f :<C-u>LspDocumentFormat<CR>
+
+  nnoremap [debug] <Nop>
+  nmap <Leader>d [debug]
+  nnoremap [debug]b :<C-u>VimspectorBreakpoints<CR>
+  nnoremap [debug]r :<C-u>VimspectorReset<CR>
 endif " Plugins
