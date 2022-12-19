@@ -11,6 +11,7 @@
 " --- Options
 set hidden
 set undofile
+set history=10000
 set incsearch
 set hlsearch
 set ignorecase
