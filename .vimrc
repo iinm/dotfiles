@@ -23,18 +23,12 @@ set clipboard=unnamed,unnamedplus,autoselect
 set ttimeoutlen=10
 set backspace=indent,eol,start
 set mouse=a
-if has('mouse_sgr')
-  set ttymouse=sgr
-endif
+set ttymouse=sgr
 
 " --- Appearance
 set number
-if has('termguicolors')
-  set termguicolors
-endif
-if has('syntax') && !exists('g:syntax_on')
-  syntax enable
-endif
+set termguicolors
+syntax enable
 
 " cursor
 let &t_SI = "\<Esc>[6 q"
@@ -46,8 +40,8 @@ let &t_ZH="\<Esc>[3m"
 let &t_ZR="\<Esc>[23m"
 
 " undercurl
-let &t_Cs = "\e[4:3m"
-let &t_Ce = "\e[4:0m"
+let &t_Cs = "\<Esc>[4:3m"
+let &t_Ce = "\<Esc>[4:0m"
 
 " --- Indent
 set tabstop=8 expandtab shiftwidth=2 softtabstop=2
