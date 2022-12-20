@@ -19,21 +19,25 @@ tools:
     lint-formats:
       - "%f(%l,%c): %tarning %m"
       - "%f(%l,%c): %rror %m"
-    # format-command: npx --no-install eslint -f json --stdin --fix-dry-run --stdin-filename ${INPUT} | jq -e -r '.[0].output | rtrimstr("\n")'
-    # format-stdin: true
-
-  prettier: &prettier
-    format-command: 'npx --no-install prettier --stdin-filepath ${INPUT}'
+    format-command: npx --no-install eslint -f json --stdin --fix-dry-run --stdin-filename ${INPUT} | jq -e -r '.[0].output | rtrimstr("\n")'
     format-stdin: true
+
+  # prettier: &prettier
+  #   format-command: 'npx --no-install prettier --stdin-filepath ${INPUT}'
+  #   format-stdin: true
 
 languages:
   sh:
     - <<: *shellcheck
 
+  javascript:
+    - <<: *eslint
+
   typescript:
     - <<: *eslint
-    - <<: *prettier
+
+  javascriptreact:
+    - <<: *eslint
 
   typescriptreact:
     - <<: *eslint
-    - <<: *prettier
