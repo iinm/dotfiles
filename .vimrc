@@ -180,6 +180,11 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   let g:EasyMotion_do_mapping = 0
   let g:EasyMotion_smartcase = 1
 
+  " auto-pairs
+  " https://github.com/jiangmiao/auto-pairs/issues/104
+  let g:AutoPairsMultilineClose = 0
+  let g:AutoPairsFlyMode = 0
+
   " fzf
   let g:fzf_tags_command = 'ctags -R'
   let g:fzf_preview_window = ['right:40%:hidden', 'ctrl-/']
