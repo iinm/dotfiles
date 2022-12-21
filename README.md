@@ -2,25 +2,27 @@
 
 a.k.a. dotfiles
 
-Install utilities.
+## Install Basic Utilities
 
 ```sh
 # Ubuntu
-sudo apt install zsh tmux git tig ripgrep fd-find fzf direnv zoxide jq curl xsel
+sudo apt install zsh tmux git tig ripgrep fd-find fzf direnv zoxide curl xsel jq shellcheck
 sudo ln -s /usr/bin/fdfind /usr/local/bin/fd
 ```
 
 ```sh
 # Darwin
-brew install tmux tig ripgrep fd fzf direnv zoxide jq
+brew install tmux tig ripgrep fd fzf direnv zoxide jq shellcheck
 ```
 
-Create symlinks.
+## Create Symlinks
+
 ```sh
 zsh link.sh
 ```
 
-Configure zsh.
+## Configure zsh
+
 ```sh
 # https://grml.org/zsh/
 curl -L -o ~/.zshrc https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc
@@ -39,7 +41,8 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.zsh/zsh-syntax
 echo "source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ~/.zshrc.local
 ```
 
-Enable fzf key bindings.
+## Enable fzf Key Bindings
+
 ```sh
 # Ubuntu
 cat > ~/.fzf.zsh << EOF
@@ -53,12 +56,14 @@ EOF
 $(brew --prefix)/opt/fzf/install
 ```
 
-Enable git config.
+## Enable Git Config
+
 ```sh
 echo -e "\n[include]\n\tpath = ~/.gitconfig-global" >> ~/.gitconfig
 ```
 
-Install Python for Vim
+## Install Python (for Vim)
+
 ```sh
 # Ubuntu
 sudo apt install libpython3-dev
@@ -67,21 +72,27 @@ sudo apt install libpython3-dev
 ```sh
 # Darwin
 brew install openssl
+```
 
-mkdir -p $HOME/tools/sources
+```sh
 python_version=3.11.1
+mkdir -p ~/tools/sources
 curl https://www.python.org/ftp/python/${python_version}/Python-${python_version}.tar.xz \
-  | tar -C $HOME/tools/sources -xJf -
-cd $HOME/tools/sources/python-${python_version}
+  | tar -C ~/tools/sources -xJf -
+
+cd ~/tools/sources/python-${python_version}
 ./configure --prefix=$HOME/tools/python-${python_version} --with-openssl=/opt/homebrew/opt/openssl@3
 make
 make install
+
+echo "export PATH=\$HOME/tools/python-${python_version}/bin:\$PATH" >> ~/.zshrc.local
 ```
 
-Install Vim & Plugin Manager
+## Install Vim & Plugin Manager
+
 ```sh
 # Ubuntu
-sudo apt install libxt-dev
+sudo apt install libxt-dev # to enable clipboard
 ```
 
 ```sh
@@ -93,6 +104,34 @@ make distclean
 make
 make install
 
+echo "export PATH=\$HOME/tools/vim/bin:\$PATH" >> ~/.zshrc.local
+
 curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
   https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+```
+
+## Install Golang
+
+Required to install efm-langserver.
+
+```sh
+go_version=1.19.4
+# Linux
+go_bin_url=https://go.dev/dl/go1.19.4.linux-amd64.tar.gz
+# Darwin
+go_bin_url=https://go.dev/dl/go1.19.4.darwin-arm64.tar.gz
+
+curl -L $go_bin_url | tar -C ~/tools -xzf -
+mv ~/tools/go ~/tools/go-$go_version
+echo "export PATH=\$HOME/tools/go-${go_version}/bin:\$PATH" >> ~/.zshrc.local
+```
+
+## Install Node Version Manager
+
+```sh
+git clone https://github.com/nvm-sh/nvm.git ~/tools/nvm
+cat >> ~/.zshrc.local << 'EOF'
+export NVM_DIR=$HOME/tools/nvm
+source $NVM_DIR/nvm.sh
+EOF
 ```
