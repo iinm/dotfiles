@@ -116,22 +116,21 @@ Required to install efm-langserver.
 
 ```sh
 go_version=1.19.4
-# Linux
-go_bin_url=https://go.dev/dl/go1.19.4.linux-amd64.tar.gz
-# Darwin
-go_bin_url=https://go.dev/dl/go1.19.4.darwin-arm64.tar.gz
+platform=$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)
+go_bin_url=https://go.dev/dl/go${go_version}.${platform}.tar.gz
 
 curl -L $go_bin_url | tar -C ~/tools -xzf -
 mv ~/tools/go ~/tools/go-$go_version
 echo "export PATH=\$HOME/tools/go-${go_version}/bin:\$PATH" >> ~/.zshrc.local
 ```
 
-## Install Node Version Manager
+## Install Node.js
 
 ```sh
-git clone https://github.com/nvm-sh/nvm.git ~/tools/nvm
-cat >> ~/.zshrc.local << 'EOF'
-export NVM_DIR=$HOME/tools/nvm
-source $NVM_DIR/nvm.sh
-EOF
+nodejs_version=18.12.1
+platform=$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)
+nodejs_bin_url=https://nodejs.org/dist/v${nodejs_version}/node-v${nodejs_version}-${platform}.tar.xz
+
+curl -L $nodejs_bin_url | tar -C ~/tools -xJf -
+echo "export PATH=\$HOME/tools/node-v${nodejs_version}-${platform}/bin:\$PATH" >> ~/.zshrc.local
 ```
