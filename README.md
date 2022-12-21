@@ -2,17 +2,17 @@
 
 a.k.a. dotfiles
 
-Install requirements.
+Install utilities.
 
 ```sh
 # Ubuntu
-sudo apt install zsh tmux git tig ripgrep fd-find fzf direnv zoxide xsel curl
+sudo apt install zsh tmux git tig ripgrep fd-find fzf direnv zoxide jq curl xsel
 sudo ln -s /usr/bin/fdfind /usr/local/bin/fd
 ```
 
 ```sh
 # Darwin
-brew install tmux tig ripgrep fd fzf direnv zoxide
+brew install tmux tig ripgrep fd fzf direnv zoxide jq
 ```
 
 Create symlinks.
