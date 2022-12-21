@@ -6,13 +6,13 @@ Install requirements.
 
 ```sh
 # Ubuntu
-sudo apt install zsh tmux git tig ripgrep fd-find fzf direnv xsel curl
+sudo apt install zsh tmux git tig ripgrep fd-find fzf direnv zoxide xsel curl
 sudo ln -s /usr/bin/fdfind /usr/local/bin/fd
 ```
 
 ```sh
 # Darwin
-brew install tmux tig ripgrep fd fzf direnv
+brew install tmux tig ripgrep fd fzf direnv zoxide
 ```
 
 Create symlinks.
