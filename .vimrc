@@ -149,6 +149,8 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   Plug 'tpope/vim-surround'
   Plug 'kamykn/spelunker.vim'
   Plug 'markonm/traces.vim'
+  Plug 'tyru/open-browser.vim'
+  Plug 'weirongxu/plantuml-previewer.vim'
 
   " completion, lsp
   Plug 'prabirshrestha/vim-lsp'
@@ -167,6 +169,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   Plug 'jparise/vim-graphql'
   Plug 'maxmellon/vim-jsx-pretty'
   Plug 'hashivim/vim-terraform'
+  Plug 'aklt/plantuml-syntax'
 
   " debugger
   Plug 'puremourning/vimspector'
