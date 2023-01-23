@@ -35,7 +35,6 @@ set mouse=a
 set ttymouse=sgr
 
 " --- Appearance
-set number
 set termguicolors
 syntax enable
 
