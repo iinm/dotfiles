@@ -150,6 +150,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   Plug 'markonm/traces.vim'
   Plug 'tyru/open-browser.vim'
   Plug 'weirongxu/plantuml-previewer.vim'
+  Plug 'lilydjwg/colorizer'
 
   " completion, lsp
   Plug 'prabirshrestha/vim-lsp'
