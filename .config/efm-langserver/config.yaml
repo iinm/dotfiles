@@ -1,4 +1,6 @@
 version: 2
+# log-file: /tmp/efm-langserver.log 
+# log-level: 1
 root-markers:
   - .git/
 lint-debounce: 1s
@@ -19,7 +21,7 @@ tools:
     lint-formats:
       - "%f(%l,%c): %tarning %m"
       - "%f(%l,%c): %rror %m"
-    format-command: npx --no-install eslint -f json --stdin --fix-dry-run --stdin-filename ${INPUT} | jq -e -r '.[0].output | rtrimstr("\n")'
+    format-command: bash $HOME/.config/efm-langserver/eslint-format-stdin.bash ${INPUT}
     format-stdin: true
 
   # prettier: &prettier
