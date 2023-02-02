@@ -5,7 +5,6 @@ for k, v in pairs({
   smartcase = true,
   wildignore = '.git,node_modules',
   clipboard = "unnamedplus",
-  number = true,
 
   -- Default indent
   tabstop = 8,
@@ -66,7 +65,7 @@ if packer_exists then
     use 'wbthomason/packer.nvim'
 
     -- Colorscheme
-    use 'EdenEast/nightfox.nvim'
+    use 'sainnhe/everforest'
 
     -- Utilities
     use 'easymotion/vim-easymotion'
@@ -78,6 +77,7 @@ if packer_exists then
     use 'tpope/vim-sleuth'
     use 'tpope/vim-fugitive'
     use 'kamykn/spelunker.vim'
+    use 'lilydjwg/colorizer'
 
     -- Completion, Snippets, LSP
     use 'neovim/nvim-lspconfig'
@@ -101,7 +101,11 @@ if packer_exists then
   end)
 
   -- Colorscheme
-  vim.cmd [[colorscheme nordfox]]
+  vim.opt.background = 'dark'
+  vim.cmd [[colorscheme everforest]]
+
+  -- fzf
+  vim.g.fzf_preview_window = {'right:40%:hidden', 'ctrl-/'}
 
   -- easymotion
   vim.g.EasyMotion_do_mapping = 0
