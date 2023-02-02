@@ -176,6 +176,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   call plug#end()
 
   " colorscheme
+  let g:everforest_background = 'soft'
   set background=dark
   colorscheme everforest
 
