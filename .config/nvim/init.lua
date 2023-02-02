@@ -5,6 +5,7 @@ for k, v in pairs({
   smartcase = true,
   wildignore = '.git,node_modules',
   clipboard = "unnamedplus",
+  termguicolors = true,
 
   -- Default indent
   tabstop = 8,
@@ -15,7 +16,7 @@ for k, v in pairs({
   vim.opt[k] = v
 end
 
-vim.cmd [[colorscheme desert]]
+-- vim.cmd [[colorscheme desert]]
 
 if vim.fn.executable('rg') then
   vim.opt.grepprg = 'rg --vimgrep --glob "!*~" --glob "!.git"'
@@ -65,6 +66,7 @@ if packer_exists then
     use 'wbthomason/packer.nvim'
 
     -- Colorscheme
+    use 'EdenEast/nightfox.nvim'
     use 'sainnhe/everforest'
 
     -- Utilities
@@ -101,8 +103,8 @@ if packer_exists then
   end)
 
   -- Colorscheme
-  vim.opt.background = 'dark'
-  vim.cmd [[colorscheme everforest]]
+  -- vim.cmd [[colorscheme everforest]]
+  vim.cmd [[colorscheme nordfox]]
 
   -- fzf
   vim.g.fzf_preview_window = {'right:40%:hidden', 'ctrl-/'}
@@ -170,6 +172,12 @@ if packer_exists then
   require("typescript").setup({
     disable_commands = false,
   })
+
+  -- Spell
+  vim.cmd [[
+  highlight SpelunkerSpellBad cterm=underline
+  highlight SpelunkerComplexOrCompoundWord cterm=underline
+  ]]
 
   -- Keymap with Plugins
   vim.keymap.set('n', '<leader><leader>', ':<C-u>Commands<CR>')
