@@ -72,6 +72,7 @@ if packer_exists then
     use 'tpope/vim-sleuth'
     use 'vim-scripts/BufOnly.vim'
     use 'windwp/nvim-autopairs'
+    use 'folke/trouble.nvim'
 
     -- Snippets
     use 'hrsh7th/vim-vsnip'
@@ -81,6 +82,8 @@ if packer_exists then
     use 'neovim/nvim-lspconfig'
     use 'williamboman/mason.nvim'
     use 'williamboman/mason-lspconfig.nvim'
+    use 'onsails/lspkind.nvim'
+    use 'ray-x/lsp_signature.nvim'
 
     -- Completion
     use 'hrsh7th/cmp-buffer'
@@ -145,6 +148,8 @@ if packer_exists then
 
   -- Completion
   local cmp = require('cmp')
+  local lspkind = require('lspkind')
+
   cmp.setup({
     snippet = {
       expand = function(args)
@@ -161,8 +166,27 @@ if packer_exists then
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },
       { name = 'vsnip' },
+      { name = 'path' },
     }, {
       { name = 'buffer' },
+    }),
+    formatting = {
+      format = lspkind.cmp_format({
+        mode = 'symbol',
+        -- https://github.com/microsoft/vscode-codicons/blob/main/dist/codicon.ttf
+        preset = 'codicons',
+        maxwidth = 50,
+        ellipsis_char = '...',
+      })
+    },
+  })
+
+  cmp.setup.cmdline(':', {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = cmp.config.sources({
+      { name = 'path' }
+    }, {
+      { name = 'cmdline' }
     })
   })
 
@@ -197,6 +221,22 @@ if packer_exists then
   vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
     vim.lsp.diagnostic.on_publish_diagnostics, { virtual_text = false }
   )
+
+  require('trouble').setup({
+    icons = false,
+    fold_open = "v",
+    fold_closed = ">",
+    indent_lines = false,
+    signs = {
+      error = "error",
+      warning = "warn",
+      hint = "hint",
+      information = "info"
+    },
+    use_diagnostic_signs = false
+  })
+
+  require('lsp_signature').setup()
 
   -- javascript
   vim.g.javascript_plugin_jsdoc = 1
