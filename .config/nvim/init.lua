@@ -157,6 +157,20 @@ if packer_exists then
       end,
     },
     mapping = cmp.mapping.preset.insert({
+      ["<Tab>"] = cmp.mapping(function(fallback)
+        if cmp.visible() then
+          cmp.select_next_item()
+        else
+          fallback()
+        end
+      end, { "i", "s" }),
+      ["<S-Tab>"] = cmp.mapping(function(fallback)
+        if cmp.visible() then
+          cmp.select_prev_item()
+        else
+          fallback()
+        end
+      end, { "i", "s" }),
       ['<C-b>'] = cmp.mapping.scroll_docs(-4),
       ['<C-f>'] = cmp.mapping.scroll_docs(4),
       ['<C-Space>'] = cmp.mapping.complete(),
@@ -290,4 +304,12 @@ if packer_exists then
   vim.keymap.set('n', '<leader>sL', '<Plug>(spelunker-correct-all-from-list)')
   -- vim.keymap.set('n', '<leader>sf', '<Plug>(spelunker-correct)')
   -- vim.keymap.set('n', '<leader>sF', '<Plug>(spelunker-correct-all)')
+
+  -- vsnip
+  vim.cmd [[
+  imap <expr> <Tab>   vsnip#jumpable(1)   ? '<Plug>(vsnip-jump-next)'      : '<Tab>'
+  smap <expr> <Tab>   vsnip#jumpable(1)   ? '<Plug>(vsnip-jump-next)'      : '<Tab>'
+  imap <expr> <S-Tab> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
+  smap <expr> <S-Tab> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
+  ]]
 end
