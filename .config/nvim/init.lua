@@ -99,6 +99,7 @@ if packer_exists then
     use 'jose-elias-alvarez/typescript.nvim'
     use 'jparise/vim-graphql'
     use 'hashivim/vim-terraform'
+    use 'dag/vim-fish'
   end)
 
   -- Colorscheme

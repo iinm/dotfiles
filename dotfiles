@@ -2,18 +2,77 @@
 
 source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-zsh_rc_dir=~/.zsh/rc.d
-zsh_plugin_dir=~/.zsh/plugins
+help() {
+  cat << 'HELP'
+Usage: dotfiles COMMAND
 
-setup() {
-  link
-  setup_zsh
+  setup                           Run all following commands
+  install_requirements_on_ubuntu  Install essential utilities on Ubuntu
+  install_requirements_on_darwin  Install essential utilities on Darwin
+  link                            Create symlink to dotfiles
+  setup_fish                      Configure fish shell
+  setup_git                       Configure git
+HELP
 }
 
-# TODO
-# sudo apt install zsh tmux git tig ripgrep fd-find fzf direnv zoxide curl xsel jq
-# sudo ln -s /usr/bin/fdfind /usr/local/bin/fd
-# brew install tmux tig ripgrep fd fzf direnv zoxide jq
+setup() {
+  if test "$(lsb_release -is)" = "Ubuntu"; then
+    install_requirements_on_ubuntu
+  fi
+
+  if test "$(uname)" = "Darwin"; then
+    install_requirements_on_darwin
+  fi
+
+  link
+  setup_fish
+  setup_git
+}
+
+install_requirements_on_ubuntu() {
+  local missing_packages=()
+  which fish || missing_packages+=(fish)
+  which tmux || missing_packages+=(tmux)
+  which git || missing_packages+=(git)
+  which rg || missing_packages+=(ripgrep)
+  which fzf || missing_packages+=(fzf)
+  which direnv || missing_packages+=(direnv)
+  which zoxide || missing_packages+=(zoxide)
+  which curl || missing_packages+=(curl)
+  which jq || missing_packages+=(jq)
+  which xsel || missing_packages+=(xsel)
+  which efm-langserver || missing_packages+=(efm-langserver)
+  which shellcheck || missing_packages+=(shellcheck)
+
+  if test "${#missing_packages[@]}" -eq 0; then
+    echo "info: all required packages are installed. skip." >&2
+  else
+    echo "info: install ${missing_packages[*]}" >&2
+    sudo apt install "${missing_packages[@]}"
+  fi
+}
+
+install_requirements_on_darwin() {
+  local missing_packages=()
+  which fish || missing_packages+=(fish)
+  which tmux || missing_packages+=(tmux)
+  which git || missing_packages+=(git)
+  which rg || missing_packages+=(ripgrep)
+  which fzf || missing_packages+=(fzf)
+  which direnv || missing_packages+=(direnv)
+  which zoxide || missing_packages+=(zoxide)
+  which curl || missing_packages+=(curl)
+  which jq || missing_packages+=(jq)
+  which efm-langserver || missing_packages+=(efm-langserver)
+  which shellcheck || missing_packages+=(shellcheck)
+
+  if test "${#missing_packages[@]}" -eq 0; then
+    echo "info: all required packages are installed. skip." >&2
+  else
+    echo "info: install ${missing_packages[*]}" >&2
+    brew install "${missing_packages[@]}"
+  fi
+}
 
 link() {
   for src in $(
@@ -24,93 +83,60 @@ link() {
   ); do
     dest=$(sed "s,^$source_dir,$HOME," <<< "$src")
     if file -E "$dest" > /dev/null; then
-      echo "warn: $dest is already exist. skip." >&2
+      echo "info: $dest is already exist. skip." >&2
       continue
     fi
     ln -vs "$src" "$dest"
   done
 }
 
-setup_zsh() {
-  install_zsh_grml
-  install_zsh_plugins
-}
-
-install_zsh_grml() {
-  # https://grml.org/zsh/
-  if grep 'grml.org' ~/.zshrc &> /dev/null; then
-    echo "info: zsh grml config is installed. skip." >&2
+setup_fish() {
+  local fish_local_config=~/.config/fish/functions/config_local.fish
+  if test -e "$fish_local_config"; then
+    echo "info: $fish_local_config exists. skip." >&2
   else
-    curl -L -o ~/.zshrc https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc
+    echo "info: create $fish_local_config" >&2
+    cat > "$fish_local_config" << 'EOF'
+function config_local --description "Host specific configuration"
+  function config_local_first
+    set -xg PATH \
+      ~/.local/bin \
+      $PATH
+  end
+
+  function config_local_last
+  end
+end
+EOF
+  fi
+
+  local fish_fzf_keybindings=~/.config/fish/functions/fzf_key_bindings.fish
+  if test -e "$fish_fzf_keybindings"; then
+    echo "info: $fish_fzf_keybindings exists. skip." >&2
+  else
+    echo "info: donwload fish fzf key-bindings." >&2
+    curl https://raw.githubusercontent.com/junegunn/fzf/master/shell/key-bindings.fish \
+      | sed 's,ct fzf-file-widget,cy fzf-file-widget,g' \
+      > "$fish_fzf_keybindings" 
   fi
 }
 
-install_zsh_plugins() {
-  mkdir -pv "$zsh_rc_dir"
-  zsh_completions_dir="$zsh_plugin_dir/zsh-completions"
-  if test -e "$zsh_completions_dir"; then
-    echo "info: zsh-completions is installed. skip." >&2
+setup_git() {
+  if grep -q "gitconfig-global" ~/.gitconfig; then
+    echo "info: git config enabled. skip." >&2
   else
-    git clone --depth 1 https://github.com/zsh-users/zsh-completions "$zsh_completions_dir"
-    echo "fpath=($zsh_completions_dir/src \$fpath)" > "$zsh_rc_dir/00-zsh-completions.zsh"
+    echo "info: enable git config." >&2
+    echo -e "\n[include]\n\tpath = ~/.gitconfig-global" >> ~/.gitconfig
   fi
-
-  zsh_autosuggestions_dir="$zsh_plugin_dir/zsh-autosuggestions"
-  if test -e "$zsh_autosuggestions_dir"; then
-    echo "info: zsh-autosuggestions is installed. skip." >&2
-  else
-    git clone --depth 1 https://github.com/zsh-users/zsh-autosuggestions "$zsh_autosuggestions_dir"
-    echo "source $zsh_autosuggestions_dir/zsh-autosuggestions.zsh" > "$zsh_rc_dir/00-zsh-autosuggestions.zsh"
-  fi
-
-  zsh_syntax_highlighting_dir="$zsh_plugin_dir/zsh-syntax-highlighting"
-  if test -e "$zsh_syntax_highlighting_dir"; then
-    echo "info: zsh-syntax-highlighting is installed. skip." >&2
-  else
-    git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting "$zsh_syntax_highlighting_dir"
-    echo "source $zsh_syntax_highlighting_dir/zsh-syntax-highlighting.zsh" > "$zsh_rc_dir/00-zsh-syntax-highlighting"
-  fi
-}
-
-setup_fzf() {
-  echo "TODO" 
-  # # Ubuntu
-  # cat > ~/.fzf.zsh << EOF
-  # source /usr/share/doc/fzf/examples/completion.zsh
-  # source /usr/share/doc/fzf/examples/key-bindings.zsh
-  # EOF
-  # 
-  # # Darwin
-  # $(brew --prefix)/opt/fzf/install
-}
-
-configure_git() {
-  echo "TODO"
-  # echo -e "\n[include]\n\tpath = ~/.gitconfig-global" >> ~/.gitconfig
-}
-
-install_golang() {
-  echo "TODO"
-  # go_version=1.19.4
-  # platform=$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/amd64/')
-  # go_bin_url=https://go.dev/dl/go${go_version}.${platform}.tar.gz
-
-  # curl -L $go_bin_url | tar -C ~/tools -xzf -
-  # mv ~/tools/go ~/tools/go-$go_version
-  # echo "export PATH=\$HOME/tools/go-${go_version}/bin:\$PATH" >> ~/.zshrc.local
-}
-
-install_nodejs() {
-  echo "TODO"
-  # nodejs_version=18.12.1
-  # platform=$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/x64/')
-  # nodejs_bin_url=https://nodejs.org/dist/v${nodejs_version}/node-v${nodejs_version}-${platform}.tar.xz
-
-  # curl -L $nodejs_bin_url | tar -C ~/tools -xJf -
-  # echo "export PATH=\$HOME/tools/node-v${nodejs_version}-${platform}/bin:\$PATH" >> ~/.zshrc.local
 }
 
 if test "${BASH_SOURCE[0]}" = "$0"; then
   set -eu -o pipefail
+
+  if test "$#" -eq 0; then
+    help
+    exit 1
+  fi
+
   "$@"
 fi
