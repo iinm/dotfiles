@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+
+source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+zsh_rc_dir=~/.zsh/rc.d
+zsh_plugin_dir=~/.zsh/plugins
+
+setup() {
+  link
+  setup_zsh
+}
+
+# TODO
+# sudo apt install zsh tmux git tig ripgrep fd-find fzf direnv zoxide curl xsel jq
+# sudo ln -s /usr/bin/fdfind /usr/local/bin/fd
+# brew install tmux tig ripgrep fd fzf direnv zoxide jq
+
+link() {
+  for src in $(
+    # ~/.*
+    find "$source_dir" -maxdepth 1 -type f -name '.*';
+    # ~/.config/*
+    find "$source_dir/.config" -mindepth 1 -maxdepth 1 -type d;
+  ); do
+    dest=$(sed "s,^$source_dir,$HOME," <<< "$src")
+    if file -E "$dest" > /dev/null; then
+      echo "warn: $dest is already exist. skip." >&2
+      continue
+    fi
+    ln -vs "$src" "$dest"
+  done
+}
+
+setup_zsh() {
+  install_zsh_grml
+  install_zsh_plugins
+}
+
+install_zsh_grml() {
+  # https://grml.org/zsh/
+  if grep 'grml.org' ~/.zshrc &> /dev/null; then
+    echo "info: zsh grml config is installed. skip." >&2
+  else
+    curl -L -o ~/.zshrc https://git.grml.org/f/grml-etc-core/etc/zsh/zshrc
+  fi
+}
+
+install_zsh_plugins() {
+  mkdir -pv "$zsh_rc_dir"
+  zsh_completions_dir="$zsh_plugin_dir/zsh-completions"
+  if test -e "$zsh_completions_dir"; then
+    echo "info: zsh-completions is installed. skip." >&2
+  else
+    git clone --depth 1 https://github.com/zsh-users/zsh-completions "$zsh_completions_dir"
+    echo "fpath=($zsh_completions_dir/src \$fpath)" > "$zsh_rc_dir/00-zsh-completions.zsh"
+  fi
+
+  zsh_autosuggestions_dir="$zsh_plugin_dir/zsh-autosuggestions"
+  if test -e "$zsh_autosuggestions_dir"; then
+    echo "info: zsh-autosuggestions is installed. skip." >&2
+  else
+    git clone --depth 1 https://github.com/zsh-users/zsh-autosuggestions "$zsh_autosuggestions_dir"
+    echo "source $zsh_autosuggestions_dir/zsh-autosuggestions.zsh" > "$zsh_rc_dir/00-zsh-autosuggestions.zsh"
+  fi
+
+  zsh_syntax_highlighting_dir="$zsh_plugin_dir/zsh-syntax-highlighting"
+  if test -e "$zsh_syntax_highlighting_dir"; then
+    echo "info: zsh-syntax-highlighting is installed. skip." >&2
+  else
+    git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting "$zsh_syntax_highlighting_dir"
+    echo "source $zsh_syntax_highlighting_dir/zsh-syntax-highlighting.zsh" > "$zsh_rc_dir/00-zsh-syntax-highlighting"
+  fi
+}
+
+setup_fzf() {
+  echo "TODO" 
+  # # Ubuntu
+  # cat > ~/.fzf.zsh << EOF
+  # source /usr/share/doc/fzf/examples/completion.zsh
+  # source /usr/share/doc/fzf/examples/key-bindings.zsh
+  # EOF
+  # 
+  # # Darwin
+  # $(brew --prefix)/opt/fzf/install
+}
+
+configure_git() {
+  echo "TODO"
+  # echo -e "\n[include]\n\tpath = ~/.gitconfig-global" >> ~/.gitconfig
+}
+
+install_golang() {
+  echo "TODO"
+  # go_version=1.19.4
+  # platform=$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/amd64/')
+  # go_bin_url=https://go.dev/dl/go${go_version}.${platform}.tar.gz
+
+  # curl -L $go_bin_url | tar -C ~/tools -xzf -
+  # mv ~/tools/go ~/tools/go-$go_version
+  # echo "export PATH=\$HOME/tools/go-${go_version}/bin:\$PATH" >> ~/.zshrc.local
+}
+
+install_nodejs() {
+  echo "TODO"
+  # nodejs_version=18.12.1
+  # platform=$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/x64/')
+  # nodejs_bin_url=https://nodejs.org/dist/v${nodejs_version}/node-v${nodejs_version}-${platform}.tar.xz
+
+  # curl -L $nodejs_bin_url | tar -C ~/tools -xJf -
+  # echo "export PATH=\$HOME/tools/node-v${nodejs_version}-${platform}/bin:\$PATH" >> ~/.zshrc.local
+}
+
+if test "${BASH_SOURCE[0]}" = "$0"; then
+  set -eu -o pipefail
+  "$@"
+fi

@@ -38,3 +38,7 @@ if which zoxide &> /dev/null; then
   eval "$(zoxide init zsh)"
   alias cd='z'
 fi
+
+if ls ~/.zsh/rc.d/*.zsh &> /dev/null; then
+  source ~/.zsh/rc.d/*.zsh
+fi
