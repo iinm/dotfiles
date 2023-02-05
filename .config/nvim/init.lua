@@ -32,28 +32,19 @@ vim.g.mapleader = ' '
 
 vim.keymap.set('n', '<leader>fe', ':<C-u>Lexplore!<CR>')
 vim.keymap.set('n', '<leader>ft', ':<C-u>Lexplore! %:h<CR><CR>')
-vim.keymap.set('n', '<leader>gg', ':<C-u>grep! ')
+vim.keymap.set('n', '<leader>fs', ':<C-u>grep! ')
 vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
 
 -- Indent
-vim.cmd [[
-augroup set_indent
-  autocmd!
-  autocmd Filetype go     setlocal tabstop=4 noexpandtab softtabstop=4 shiftwidth=4
-  autocmd Filetype python setlocal tabstop=4 expandtab   softtabstop=4 shiftwidth=4
-augroup END
-]]
-
--- File types
-vim.cmd [[
-augroup set_filetype
-  autocmd!
-  autocmd BufNewFile,BufRead *.tsx,*.jsx set filetype=typescriptreact
-augroup END
-]]
+local indent_group = vim.api.nvim_create_augroup('vimrc', { clear = true })
+vim.api.nvim_create_autocmd({ 'FileType' }, {
+  pattern = 'go',
+  group = indent_group,
+  command = 'setlocal tabstop=4 noexpandtab softtabstop=4 shiftwidth=4'
+})
 
 -- Plugins
--- https://github.com/wbthomason/packer.nvim
+-- git clone --depth 1 https://github.com/wbthomason/packer.nvim ~/.local/share/nvim/site/pack/packer/start/packer.nvim
 local packer_local_path = vim.fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
 local packer_exists = pcall(function()
   local file = io.open(packer_local_path, "r")
@@ -108,7 +99,7 @@ if packer_exists then
   end)
 
   -- Colorscheme
-  vim.cmd [[colorscheme nordfox]]
+  vim.cmd.colorscheme('nordfox')
 
   -- easymotion
   vim.g.EasyMotion_do_mapping = 0
@@ -134,12 +125,21 @@ if packer_exists then
       find_files = {
         theme = 'dropdown'
       },
+      git_files = {
+        theme = 'dropdown'
+      },
       buffers = {
         theme = 'dropdown'
       },
       oldfiles = {
         theme = 'dropdown'
-      }
+      },
+      live_grep = {
+        theme = 'dropdown'
+      },
+      grep_string = {
+        theme = 'dropdown'
+      },
     }
   }
 
@@ -181,16 +181,17 @@ if packer_exists then
         'javascript',
         'javascriptreact',
         'typescript',
-        'typescriptreact'
+        'typescriptreact',
+        'sh',
       },
     }
-    vim.cmd [[
-    augroup format_on_save
-      autocmd!
-      autocmd BufWritePre *.js,*.jsx lua vim.lsp.buf.format()
-      autocmd BufWritePre *.ts,*.tsx lua vim.lsp.buf.format()
-    augroup END
-    ]]
+
+    local format_on_save_group = vim.api.nvim_create_augroup('vimrc', { clear = true })
+    vim.api.nvim_create_autocmd({ 'BufWritePre' }, {
+      pattern = '*.js,*.jsx,*.ts,*.tsx',
+      group = format_on_save_group,
+      command = 'lua vim.lsp.buf.format()'
+    })
   end
 
   vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
@@ -205,21 +206,31 @@ if packer_exists then
     disable_commands = false,
   })
 
+  -- File types
+  local file_type_group = vim.api.nvim_create_augroup('vimrc', { clear = true })
+  vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
+    pattern = '*.tsx,*.jsx',
+    group = file_type_group,
+    command = 'set filetype=typescriptreact'
+  })
+
   -- Spell
-  vim.cmd [[
-  highlight SpelunkerSpellBad cterm=underline
-  highlight SpelunkerComplexOrCompoundWord cterm=underline
-  ]]
+  vim.cmd.highlight({ 'SpelunkerSpellBad', 'cterm=underline' })
+  vim.cmd.highlight({ 'SpelunkerComplexOrCompoundWord', 'cterm=underline' })
 
   -- Keymap with Plugins
   local telescope_builtin = require('telescope.builtin')
   vim.keymap.set('n', '<leader><leader>', telescope_builtin.commands, {})
   vim.keymap.set('n', '<leader>b', telescope_builtin.buffers, {})
+  vim.keymap.set('n', '<leader>r', telescope_builtin.resume, {})
   vim.keymap.set('n', 's', '<Plug>(easymotion-overwin-f2)')
 
   -- File
   vim.keymap.set('n', '<leader>ff', telescope_builtin.find_files, {})
   vim.keymap.set('n', '<leader>fh', telescope_builtin.oldfiles, {})
+  vim.keymap.set('n', '<leader>fg', telescope_builtin.git_files, {})
+  vim.keymap.set('n', '<leader>fs', telescope_builtin.live_grep, {})
+  vim.keymap.set('n', '<leader>fc', telescope_builtin.grep_string, {})
 
   -- LSP
   vim.keymap.set('n', '<leader>ch', vim.lsp.buf.hover)
@@ -234,8 +245,9 @@ if packer_exists then
   vim.keymap.set('n', '<leader>ce', vim.diagnostic.goto_next)
 
   -- Spell
+  vim.keymap.set('n', '<leader>st', '<Plug>(spelunker-toggle)')
   vim.keymap.set('n', '<leader>sl', '<Plug>(spelunker-correct-from-list)')
   vim.keymap.set('n', '<leader>sL', '<Plug>(spelunker-correct-all-from-list)')
-  vim.keymap.set('n', '<leader>sf', '<Plug>(spelunker-correct)')
-  vim.keymap.set('n', '<leader>sF', '<Plug>(spelunker-correct-all)')
+  -- vim.keymap.set('n', '<leader>sf', '<Plug>(spelunker-correct)')
+  -- vim.keymap.set('n', '<leader>sF', '<Plug>(spelunker-correct-all)')
 end

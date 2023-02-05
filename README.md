@@ -2,17 +2,17 @@
 
 a.k.a. dotfiles
 
-## Install Basic Utilities
+## Install Utilities
 
 ```sh
 # Ubuntu
-sudo apt install zsh tmux git tig ripgrep fd-find fzf direnv zoxide curl xsel jq shellcheck
+sudo apt install zsh tmux git tig ripgrep fd-find fzf direnv zoxide curl xsel jq
 sudo ln -s /usr/bin/fdfind /usr/local/bin/fd
 ```
 
 ```sh
 # Darwin
-brew install tmux tig ripgrep fd fzf direnv zoxide jq shellcheck
+brew install tmux tig ripgrep fd fzf direnv zoxide jq
 ```
 
 ## Create Symlinks
@@ -62,61 +62,11 @@ $(brew --prefix)/opt/fzf/install
 echo -e "\n[include]\n\tpath = ~/.gitconfig-global" >> ~/.gitconfig
 ```
 
-## Install Python (for Vim)
-
-```sh
-# Ubuntu
-sudo apt install libpython3-dev
-```
-
-```sh
-# Darwin
-brew install openssl
-```
-
-```sh
-python_version=3.11.1
-mkdir -p ~/tools/sources
-curl https://www.python.org/ftp/python/${python_version}/Python-${python_version}.tar.xz \
-  | tar -C ~/tools/sources -xJf -
-
-cd ~/tools/sources/python-${python_version}
-./configure --prefix=$HOME/tools/python-${python_version} --with-openssl=/opt/homebrew/opt/openssl@3
-make
-make install
-
-echo "export PATH=\$HOME/tools/python-${python_version}/bin:\$PATH" >> ~/.zshrc.local
-```
-
-## Install Vim & Plugin Manager
-
-```sh
-# Ubuntu
-sudo apt install libxt-dev # to enable clipboard
-```
-
-```sh
-git clone https://github.com/vim/vim.git ~/tools/sources/vim
-cd ~/tools/sources/vim/src
-
-make distclean
-./configure --prefix=$HOME/tools/vim --enable-python3interp
-make
-make install
-
-echo "export PATH=\$HOME/tools/vim/bin:\$PATH" >> ~/.zshrc.local
-
-curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
-  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-```
-
 ## Install Golang
-
-Required to install efm-langserver.
 
 ```sh
 go_version=1.19.4
-platform=$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)
+platform=$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/amd64/')
 go_bin_url=https://go.dev/dl/go${go_version}.${platform}.tar.gz
 
 curl -L $go_bin_url | tar -C ~/tools -xzf -
@@ -128,7 +78,7 @@ echo "export PATH=\$HOME/tools/go-${go_version}/bin:\$PATH" >> ~/.zshrc.local
 
 ```sh
 nodejs_version=18.12.1
-platform=$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)
+platform=$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/x64/')
 nodejs_bin_url=https://nodejs.org/dist/v${nodejs_version}/node-v${nodejs_version}-${platform}.tar.xz
 
 curl -L $nodejs_bin_url | tar -C ~/tools -xJf -
