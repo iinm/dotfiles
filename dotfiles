@@ -115,7 +115,10 @@ EOF
     echo "info: $fish_fzf_keybindings exists. skip." >&2
   else
     echo "info: donwload fish fzf key-bindings." >&2
-    curl https://raw.githubusercontent.com/junegunn/fzf/master/shell/key-bindings.fish \
+    local fzf_verion
+    fzf_verion="$(fzf --version | sed -E 's,^([0-9]+\.[0-9]+)\.?([0-9]+)?.*$,\1.\2,' | sed -E 's,^.+\.$,\00,')"
+    curl --show-error --fail \
+      "https://raw.githubusercontent.com/junegunn/fzf/$fzf_verion/shell/key-bindings.fish" \
       | sed 's,ct fzf-file-widget,cy fzf-file-widget,g' \
       > "$fish_fzf_keybindings" 
   fi
