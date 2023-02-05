@@ -16,13 +16,11 @@ for k, v in pairs({
   vim.opt[k] = v
 end
 
--- vim.cmd [[colorscheme desert]]
+vim.g.markdown_fenced_languages = { 'sh' }
 
 if vim.fn.executable('rg') then
   vim.opt.grepprg = 'rg --vimgrep --glob "!*~" --glob "!.git"'
 end
-
-vim.g.markdown_fenced_languages = { 'sh' }
 
 -- File browser
 vim.g.netrw_banner = 0
@@ -35,6 +33,7 @@ vim.g.mapleader = ' '
 vim.keymap.set('n', '<leader>fe', ':<C-u>Lexplore!<CR>')
 vim.keymap.set('n', '<leader>ft', ':<C-u>Lexplore! %:h<CR><CR>')
 vim.keymap.set('n', '<leader>gg', ':<C-u>grep! ')
+vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
 
 -- Indent
 vim.cmd [[
@@ -67,47 +66,49 @@ if packer_exists then
 
     -- Colorscheme
     use 'EdenEast/nightfox.nvim'
-    use 'sainnhe/everforest'
 
     -- Utilities
+    use {
+      'nvim-telescope/telescope.nvim', tag = '0.1.1',
+      requires = { { 'nvim-lua/plenary.nvim' } }
+    }
     use 'easymotion/vim-easymotion'
-    use 'junegunn/fzf'
-    use 'junegunn/fzf.vim'
-    use 'tpope/vim-commentary'
-    use 'windwp/nvim-autopairs'
-    use 'vim-scripts/BufOnly.vim'
-    use 'tpope/vim-sleuth'
-    use 'tpope/vim-fugitive'
+    use 'github/copilot.vim'
     use 'kamykn/spelunker.vim'
     use 'lilydjwg/colorizer'
+    use 'tpope/vim-commentary'
+    use 'tpope/vim-fugitive'
+    use 'tpope/vim-sleuth'
+    use 'vim-scripts/BufOnly.vim'
+    use 'windwp/nvim-autopairs'
 
-    -- Completion, Snippets, LSP
-    use 'neovim/nvim-lspconfig'
-    use 'hrsh7th/nvim-cmp'
-    use 'hrsh7th/cmp-nvim-lsp'
+    -- Snippets
     use 'hrsh7th/vim-vsnip'
-    use 'hrsh7th/cmp-vsnip'
     use 'rafamadriz/friendly-snippets'
-    use 'github/copilot.vim'
 
-    -- Package manager
+    -- LSP, and Package manager
+    use 'neovim/nvim-lspconfig'
     use 'williamboman/mason.nvim'
     use 'williamboman/mason-lspconfig.nvim'
+
+    -- Completion
+    use 'hrsh7th/cmp-buffer'
+    use 'hrsh7th/cmp-path'
+    use 'hrsh7th/cmp-cmdline'
+    use 'hrsh7th/cmp-vsnip'
+    use 'hrsh7th/cmp-nvim-lsp'
+    use 'hrsh7th/nvim-cmp'
 
     -- Languages
     use 'pangloss/vim-javascript'
     use 'maxmellon/vim-jsx-pretty'
+    use 'jose-elias-alvarez/typescript.nvim'
     use 'jparise/vim-graphql'
     use 'hashivim/vim-terraform'
-    use 'jose-elias-alvarez/typescript.nvim'
   end)
 
   -- Colorscheme
-  -- vim.cmd [[colorscheme everforest]]
   vim.cmd [[colorscheme nordfox]]
-
-  -- fzf
-  vim.g.fzf_preview_window = {'right:40%:hidden', 'ctrl-/'}
 
   -- easymotion
   vim.g.EasyMotion_do_mapping = 0
@@ -115,6 +116,32 @@ if packer_exists then
 
   -- autopairs
   require("nvim-autopairs").setup()
+
+  -- Telescope
+  local telescope_actions = require('telescope.actions')
+  require('telescope').setup {
+    defaults = {
+      mappings = {
+        i = {
+          ['<esc>'] = telescope_actions.close
+        }
+      }
+    },
+    pickers = {
+      commands = {
+        theme = 'dropdown'
+      },
+      find_files = {
+        theme = 'dropdown'
+      },
+      buffers = {
+        theme = 'dropdown'
+      },
+      oldfiles = {
+        theme = 'dropdown'
+      }
+    }
+  }
 
   -- Completion
   local cmp = require('cmp')
@@ -150,7 +177,12 @@ if packer_exists then
 
   if vim.fn.executable('efm-langserver') == 1 then
     require('lspconfig')['efm'].setup {
-      filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact' },
+      filetypes = {
+        'javascript',
+        'javascriptreact',
+        'typescript',
+        'typescriptreact'
+      },
     }
     vim.cmd [[
     augroup format_on_save
@@ -180,14 +212,14 @@ if packer_exists then
   ]]
 
   -- Keymap with Plugins
-  vim.keymap.set('n', '<leader><leader>', ':<C-u>Commands<CR>')
-  vim.keymap.set('n', '<leader>b', ':<C-u>Buffers<CR>')
-  vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
+  local telescope_builtin = require('telescope.builtin')
+  vim.keymap.set('n', '<leader><leader>', telescope_builtin.commands, {})
+  vim.keymap.set('n', '<leader>b', telescope_builtin.buffers, {})
   vim.keymap.set('n', 's', '<Plug>(easymotion-overwin-f2)')
 
   -- File
-  vim.keymap.set('n', '<leader>ff', ':<C-u>Files<CR>')
-  vim.keymap.set('n', '<leader>fh', ':<C-u>History<CR>')
+  vim.keymap.set('n', '<leader>ff', telescope_builtin.find_files, {})
+  vim.keymap.set('n', '<leader>fh', telescope_builtin.oldfiles, {})
 
   -- LSP
   vim.keymap.set('n', '<leader>ch', vim.lsp.buf.hover)
