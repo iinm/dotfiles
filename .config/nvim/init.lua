@@ -72,7 +72,6 @@ if packer_exists then
     use 'tpope/vim-sleuth'
     use 'vim-scripts/BufOnly.vim'
     use 'windwp/nvim-autopairs'
-    use 'folke/trouble.nvim'
 
     -- Snippets
     use 'hrsh7th/vim-vsnip'
@@ -82,8 +81,9 @@ if packer_exists then
     use 'neovim/nvim-lspconfig'
     use 'williamboman/mason.nvim'
     use 'williamboman/mason-lspconfig.nvim'
-    use 'onsails/lspkind.nvim'
     use 'ray-x/lsp_signature.nvim'
+    use 'folke/trouble.nvim'
+    use 'onsails/lspkind.nvim'
 
     -- Completion
     use 'hrsh7th/cmp-buffer'
