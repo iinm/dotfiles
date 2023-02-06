@@ -258,7 +258,8 @@ if packer_exists then
     use_diagnostic_signs = false
   })
 
-  require('lsp_signature').setup()
+  -- TODO: fix conflict with copilot
+  -- require('lsp_signature').setup()
 
   -- javascript
   vim.g.javascript_plugin_jsdoc = 1
@@ -271,7 +272,7 @@ if packer_exists then
   -- File types
   local file_type_group = vim.api.nvim_create_augroup('vimrc', { clear = true })
   vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
-    pattern = '*.tsx,*.jsx',
+    pattern = {'*.tsx', '*.jsx'},
     group = file_type_group,
     command = 'set filetype=typescriptreact'
   })
