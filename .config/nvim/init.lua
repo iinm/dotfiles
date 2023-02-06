@@ -158,7 +158,7 @@ if packer_exists then
       end,
     },
     mapping = cmp.mapping.preset.insert({
-      -- Note: conflict with copilot
+      -- Note: it conflicts with copilot
       -- ["<Tab>"] = cmp.mapping(function(fallback)
       --   if cmp.visible() then
       --     cmp.select_next_item()
@@ -226,19 +226,26 @@ if packer_exists then
       },
     }
 
-    -- TODO: fix
-    local format_on_save_group = vim.api.nvim_create_augroup('vimrc', { clear = true })
-    vim.api.nvim_create_autocmd({ 'BufWritePre' }, {
-      pattern = {'*.js', '*.jsx', '*.ts', '*.tsx'},
-      group = format_on_save_group,
-      callback = vim.lsp.buf.format,
-      -- callback = function(bufnr)
-      --   vim.lsp.buf.format({
-      --     filter = function(client) return client.name ~= "efm" end,
-      --     bufnr = bufnr
-      --   })
-      -- end,
-    })
+    -- Note: this is not working
+    -- local format_on_save_group = vim.api.nvim_create_augroup('vimrc', { clear = true })
+    -- vim.api.nvim_create_autocmd({ 'BufWritePre' }, {
+    --   group = format_on_save_group,
+    --   pattern = {'*.js', '*.jsx', '*.ts', '*.tsx'},
+    --   callback = function(bufnr)
+    --     vim.lsp.buf.format({
+    --       filter = function(client)
+    --         return client.name == 'efm'
+    --       end,
+    --       bufnr = bufnr,
+    --     })
+    --   end,
+    -- })
+    vim.cmd [[
+    augroup format_on_save
+    autocmd!
+      autocmd BufWritePre *.js,*.jsx,*.ts,*.tsx lua vim.lsp.buf.format()
+    augroup END
+    ]]
   end
 
   vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
