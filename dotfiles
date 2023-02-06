@@ -67,7 +67,8 @@ bootstrap() {
     fi
 
   else
-    echo "error: Unsupported platform"
+    echo "error: Unsupported platform" >&2
+    exit 1
   fi
 }
 
