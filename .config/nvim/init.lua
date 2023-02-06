@@ -158,20 +158,21 @@ if packer_exists then
       end,
     },
     mapping = cmp.mapping.preset.insert({
-      ["<Tab>"] = cmp.mapping(function(fallback)
-        if cmp.visible() then
-          cmp.select_next_item()
-        else
-          fallback()
-        end
-      end, { "i", "s" }),
-      ["<S-Tab>"] = cmp.mapping(function(fallback)
-        if cmp.visible() then
-          cmp.select_prev_item()
-        else
-          fallback()
-        end
-      end, { "i", "s" }),
+      -- Note: conflict with copilot
+      -- ["<Tab>"] = cmp.mapping(function(fallback)
+      --   if cmp.visible() then
+      --     cmp.select_next_item()
+      --   else
+      --     fallback()
+      --   end
+      -- end, { "i", "s" }),
+      -- ["<S-Tab>"] = cmp.mapping(function(fallback)
+      --   if cmp.visible() then
+      --     cmp.select_prev_item()
+      --   else
+      --     fallback()
+      --   end
+      -- end, { "i", "s" }),
       ['<C-b>'] = cmp.mapping.scroll_docs(-4),
       ['<C-f>'] = cmp.mapping.scroll_docs(4),
       ['<C-Space>'] = cmp.mapping.complete(),
@@ -258,8 +259,7 @@ if packer_exists then
     use_diagnostic_signs = false
   })
 
-  -- TODO: fix conflict with copilot
-  -- require('lsp_signature').setup()
+  require('lsp_signature').setup()
 
   -- javascript
   vim.g.javascript_plugin_jsdoc = 1
