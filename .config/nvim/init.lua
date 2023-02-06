@@ -225,11 +225,18 @@ if packer_exists then
       },
     }
 
+    -- TODO: fix
     local format_on_save_group = vim.api.nvim_create_augroup('vimrc', { clear = true })
     vim.api.nvim_create_autocmd({ 'BufWritePre' }, {
-      pattern = '*.js,*.jsx,*.ts,*.tsx',
+      pattern = {'*.js', '*.jsx', '*.ts', '*.tsx'},
       group = format_on_save_group,
-      command = 'lua vim.lsp.buf.format()'
+      callback = vim.lsp.buf.format,
+      -- callback = function(bufnr)
+      --   vim.lsp.buf.format({
+      --     filter = function(client) return client.name ~= "efm" end,
+      --     bufnr = bufnr
+      --   })
+      -- end,
     })
   end
 
