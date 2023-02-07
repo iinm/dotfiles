@@ -24,18 +24,16 @@ setup() {
 bootstrap() {
   if test "$(lsb_release -is 2> /dev/null)" = "Ubuntu"; then
     local missing_packages=()
-    which fish || missing_packages+=(fish)
-    which tmux || missing_packages+=(tmux)
-    which git || missing_packages+=(git)
-    which rg || missing_packages+=(ripgrep)
-    which fzf || missing_packages+=(fzf)
-    which direnv || missing_packages+=(direnv)
-    which zoxide || missing_packages+=(zoxide)
-    which curl || missing_packages+=(curl)
-    which jq || missing_packages+=(jq)
-    which xsel || missing_packages+=(xsel)
-    which efm-langserver || missing_packages+=(efm-langserver)
-    which shellcheck || missing_packages+=(shellcheck)
+    which fish &> /dev/null || missing_packages+=(fish)
+    which tmux &> /dev/null || missing_packages+=(tmux)
+    which git &> /dev/null || missing_packages+=(git)
+    which rg &> /dev/null || missing_packages+=(ripgrep)
+    which fzf &> /dev/null || missing_packages+=(fzf)
+    which direnv &> /dev/null || missing_packages+=(direnv)
+    which curl &> /dev/null || missing_packages+=(curl)
+    which jq &> /dev/null || missing_packages+=(jq)
+    which xsel &> /dev/null || missing_packages+=(xsel)
+    which shellcheck &> /dev/null || missing_packages+=(shellcheck)
 
     if test "${#missing_packages[@]}" -eq 0; then
       echo "info: all required packages are installed. skip." >&2
@@ -46,18 +44,16 @@ bootstrap() {
 
   elif test "$(uname)" = "Darwin"; then
     local missing_packages=()
-    which fish || missing_packages+=(fish)
-    which tmux || missing_packages+=(tmux)
-    which git || missing_packages+=(git)
-    which rg || missing_packages+=(ripgrep)
-    which fzf || missing_packages+=(fzf)
-    which direnv || missing_packages+=(direnv)
-    which zoxide || missing_packages+=(zoxide)
-    which curl || missing_packages+=(curl)
-    which jq || missing_packages+=(jq)
-    which nvim || missing_packages+=(neovim)
-    which efm-langserver || missing_packages+=(efm-langserver)
-    which shellcheck || missing_packages+=(shellcheck)
+    which fish &> /dev/null || missing_packages+=(fish)
+    which tmux &> /dev/null || missing_packages+=(tmux)
+    which git &> /dev/null || missing_packages+=(git)
+    which rg &> /dev/null || missing_packages+=(ripgrep)
+    which fzf &> /dev/null || missing_packages+=(fzf)
+    which direnv &> /dev/null || missing_packages+=(direnv)
+    which curl &> /dev/null || missing_packages+=(curl)
+    which jq &> /dev/null || missing_packages+=(jq)
+    which nvim &> /dev/null || missing_packages+=(neovim)
+    which shellcheck &> /dev/null || missing_packages+=(shellcheck)
 
     if test "${#missing_packages[@]}" -eq 0; then
       echo "info: all required packages are installed. skip." >&2
