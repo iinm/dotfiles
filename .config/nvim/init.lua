@@ -36,10 +36,10 @@ vim.keymap.set('n', '<leader>fs', ':<C-u>grep! ')
 vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
 
 -- Indent
-local indent_group = vim.api.nvim_create_augroup('vimrc', { clear = true })
+local indent_augroup = vim.api.nvim_create_augroup('vimrc', { clear = true })
 vim.api.nvim_create_autocmd({ 'FileType' }, {
   pattern = 'go',
-  group = indent_group,
+  group = indent_augroup,
   command = 'setlocal tabstop=4 noexpandtab softtabstop=4 shiftwidth=4'
 })
 
@@ -81,6 +81,7 @@ if packer_exists then
     use 'neovim/nvim-lspconfig'
     use 'williamboman/mason.nvim'
     use 'williamboman/mason-lspconfig.nvim'
+    use 'jose-elias-alvarez/null-ls.nvim'
     use 'ray-x/lsp_signature.nvim'
     use 'folke/trouble.nvim'
     use 'onsails/lspkind.nvim'
@@ -215,42 +216,41 @@ if packer_exists then
   end
   })
 
-  if vim.fn.executable('efm-langserver') == 1 then
-    require('lspconfig')['efm'].setup {
-      filetypes = {
-        'javascript',
-        'javascriptreact',
-        'typescript',
-        'typescriptreact',
-        'sh',
-      },
-    }
-
-    -- Note: this is not working
-    -- local format_on_save_group = vim.api.nvim_create_augroup('vimrc', { clear = true })
-    -- vim.api.nvim_create_autocmd({ 'BufWritePre' }, {
-    --   group = format_on_save_group,
-    --   pattern = {'*.js', '*.jsx', '*.ts', '*.tsx'},
-    --   callback = function(bufnr)
-    --     vim.lsp.buf.format({
-    --       filter = function(client)
-    --         return client.name == 'efm'
-    --       end,
-    --       bufnr = bufnr,
-    --     })
-    --   end,
-    -- })
-    vim.cmd [[
-    augroup format_on_save
-    autocmd!
-      autocmd BufWritePre *.js,*.jsx,*.ts,*.tsx lua vim.lsp.buf.format()
-    augroup END
-    ]]
-  end
-
   vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
     vim.lsp.diagnostic.on_publish_diagnostics, { virtual_text = false }
   )
+
+  local null_ls = require('null-ls')
+  local lsp_formatting_augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+  null_ls.setup({
+    sources = {
+      null_ls.builtins.formatting.eslint,
+      null_ls.builtins.diagnostics.shellcheck.with({
+        diagnostic_config = {
+          virtual_text = false,
+          severity_sort = true,
+        },
+      }),
+      null_ls.builtins.code_actions.shellcheck,
+    },
+    on_attach = function(client, bufnr)
+      if client.supports_method("textDocument/formatting") then
+        vim.api.nvim_clear_autocmds({ group = lsp_formatting_augroup, buffer = bufnr })
+        vim.api.nvim_create_autocmd("BufWritePre", {
+          group = lsp_formatting_augroup,
+          buffer = bufnr,
+          callback = function()
+            vim.lsp.buf.format({
+              filter = function(client)
+                return client.name == "null-ls"
+              end,
+              bufnr = bufnr
+            })
+          end,
+        })
+      end
+    end,
+  })
 
   require('trouble').setup({
     icons = false,
@@ -277,10 +277,10 @@ if packer_exists then
   })
 
   -- File types
-  local file_type_group = vim.api.nvim_create_augroup('vimrc', { clear = true })
+  local file_type_augroup = vim.api.nvim_create_augroup('vimrc', { clear = true })
   vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
     pattern = {'*.tsx', '*.jsx'},
-    group = file_type_group,
+    group = file_type_augroup,
     command = 'set filetype=typescriptreact'
   })
 
