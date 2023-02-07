@@ -17,7 +17,10 @@ if test (uname) = 'Linux'; and type --quiet xsel
 end
 
 if status is-interactive
-  set fish_greeting
+  set -U fish_greeting
+
+  fish_config theme choose 'Base16 Eighties'
+  fish_config prompt choose arrow
 
   alias rm 'rm -i'
   alias cp 'cp -i'
