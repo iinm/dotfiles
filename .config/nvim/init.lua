@@ -30,8 +30,9 @@ vim.g.netrw_winsize = 25 -- %
 -- Keymap
 vim.g.mapleader = ' '
 
-vim.keymap.set('n', '<leader>fe', ':<C-u>Lexplore!<CR>')
-vim.keymap.set('n', '<leader>ft', ':<C-u>Lexplore! %:h<CR><CR>')
+vim.keymap.set('n', '<leader>fe', ':<C-u>Explore .<CR>')
+-- vim.keymap.set('n', '<leader>ft', ':<C-u>Explore %:h<CR><CR>')
+vim.keymap.set('n', '<leader>ft', ':<C-u>Explore <bar> :sil! /<C-R>=expand("%:t")<CR><CR>')
 vim.keymap.set('n', '<leader>fs', ':<C-u>grep! ')
 vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
 
