@@ -37,7 +37,7 @@ vim.keymap.set('n', '<leader>fs', ':<C-u>grep! ')
 vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
 
 -- Indent
-local indent_augroup = vim.api.nvim_create_augroup('vimrc', { clear = true })
+local indent_augroup = vim.api.nvim_create_augroup('MyIndent', { clear = true })
 vim.api.nvim_create_autocmd({ 'FileType' }, {
   pattern = 'go',
   group = indent_augroup,
@@ -64,7 +64,10 @@ if packer_exists then
       'nvim-telescope/telescope.nvim', tag = '0.1.1',
       requires = { { 'nvim-lua/plenary.nvim' } }
     }
-    use 'easymotion/vim-easymotion'
+    use {
+      'phaazon/hop.nvim',
+      branch = 'v2',
+    }
     use 'github/copilot.vim'
     use 'kamykn/spelunker.vim'
     use 'lilydjwg/colorizer'
@@ -107,9 +110,8 @@ if packer_exists then
   -- Colorscheme
   vim.cmd.colorscheme('nordfox')
 
-  -- easymotion
-  vim.g.EasyMotion_do_mapping = 0
-  vim.g.EasyMotion_smartcase = 1
+  -- hop
+  require('hop').setup()
 
   -- autopairs
   require("nvim-autopairs").setup()
@@ -135,7 +137,9 @@ if packer_exists then
         theme = 'dropdown'
       },
       buffers = {
-        theme = 'dropdown'
+        theme = 'dropdown',
+        ignore_current_buffer = true,
+        sort_lastused = true,
       },
       oldfiles = {
         theme = 'dropdown'
@@ -222,7 +226,20 @@ if packer_exists then
   )
 
   local null_ls = require('null-ls')
-  local lsp_formatting_augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+
+  -- https://github.com/jose-elias-alvarez/null-ls.nvim/wiki/Avoiding-LSP-formatting-conflicts
+  local lsp_formatting = function(bufnr)
+    vim.lsp.buf.format({
+      filter = function(client)
+        -- apply whatever logic you want (in this example, we'll only use null-ls)
+        return client.name == "null-ls"
+      end,
+      bufnr = bufnr,
+    })
+  end
+
+  local lsp_formatting_augroup = vim.api.nvim_create_augroup("LspFormatting", { clear = true })
+
   null_ls.setup({
     sources = {
       null_ls.builtins.formatting.eslint,
@@ -241,12 +258,7 @@ if packer_exists then
           group = lsp_formatting_augroup,
           buffer = bufnr,
           callback = function()
-            vim.lsp.buf.format({
-              filter = function(client)
-                return client.name == "null-ls"
-              end,
-              bufnr = bufnr
-            })
+            lsp_formatting(bufnr)
           end,
         })
       end
@@ -278,7 +290,7 @@ if packer_exists then
   })
 
   -- File types
-  local file_type_augroup = vim.api.nvim_create_augroup('vimrc', { clear = true })
+  local file_type_augroup = vim.api.nvim_create_augroup('MyFileType', { clear = true })
   vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
     pattern = {'*.tsx', '*.jsx'},
     group = file_type_augroup,
@@ -294,7 +306,7 @@ if packer_exists then
   vim.keymap.set('n', '<leader><leader>', telescope_builtin.commands, {})
   vim.keymap.set('n', '<leader>b', telescope_builtin.buffers, {})
   vim.keymap.set('n', '<leader>r', telescope_builtin.resume, {})
-  vim.keymap.set('n', 's', '<Plug>(easymotion-overwin-f2)')
+  vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
 
   -- File
   vim.keymap.set('n', '<leader>ff', telescope_builtin.find_files, {})

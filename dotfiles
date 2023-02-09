@@ -6,11 +6,12 @@ help() {
   cat << 'HELP'
 Usage: dotfiles COMMAND
 
-  setup         Run all following commands
-  bootstrap     Install essential utilities
-  link          Create symlink to dotfiles
-  setup_fish    Configure fish shell
-  setup_git     Configure git
+  setup           Run all following commands
+  bootstrap       Install essential utilities
+  link            Create symlink to dotfiles
+  setup_fish      Configure fish shell
+  setup_git       Configure git
+  setup_neovim    Configure neovim
 HELP
 }
 
@@ -19,6 +20,7 @@ setup() {
   link
   setup_fish
   setup_git
+  setup_neovim
 }
 
 bootstrap() {
@@ -131,6 +133,16 @@ setup_git() {
   else
     echo "info: enable git config." >&2
     echo -e "\n[include]\n\tpath = ~/.gitconfig-global" >> ~/.gitconfig
+  fi
+}
+
+setup_neovim() {
+  local nvim_packer_dir=~/.local/share/nvim/site/pack/packer/start/packer.nvim
+  if test -e "$nvim_packer_dir"; then
+    echo "info: $nvim_packer_dir exists. skip." >&2
+  else
+    echo "info: install packer.nvim" >&2
+    git clone --depth 1 https://github.com/wbthomason/packer.nvim "$nvim_packer_dir"
   fi
 }
 
