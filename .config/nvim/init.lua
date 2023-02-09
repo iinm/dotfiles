@@ -113,7 +113,7 @@ if packer_exists then
   -- autopairs
   require("nvim-autopairs").setup()
 
-  -- Telescope
+  -- telescope
   local telescope_actions = require('telescope.actions')
   require('telescope').setup {
     defaults = {
@@ -167,7 +167,7 @@ if packer_exists then
     }
   })
 
-  -- Completion
+  -- cmp
   local cmp = require('cmp')
   local lspkind = require('lspkind')
 
@@ -235,17 +235,29 @@ if packer_exists then
   end
   })
 
-  vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
-    vim.lsp.diagnostic.on_publish_diagnostics, { virtual_text = false }
-  )
+  -- https://github.com/neovim/nvim-lspconfig/wiki/UI-Customization
+  vim.diagnostic.config({
+    virtual_text = false,
+    signs = true,
+    underline = true,
+    update_in_insert = false,
+    severity_sort = true,
+  })
 
+  local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
+  for type, icon in pairs(signs) do
+    local hl = "DiagnosticSign" .. type
+    vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+  end
+
+
+  -- null-ls
   local null_ls = require('null-ls')
 
   -- https://github.com/jose-elias-alvarez/null-ls.nvim/wiki/Avoiding-LSP-formatting-conflicts
   local lsp_formatting = function(bufnr)
     vim.lsp.buf.format({
       filter = function(client)
-        -- apply whatever logic you want (in this example, we'll only use null-ls)
         return client.name == "null-ls"
       end,
       bufnr = bufnr,
