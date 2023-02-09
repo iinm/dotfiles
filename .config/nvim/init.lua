@@ -29,10 +29,6 @@ vim.g.netrw_winsize = 25 -- %
 
 -- Keymap
 vim.g.mapleader = ' '
-
-vim.keymap.set('n', '<leader>fe', ':<C-u>Explore .<CR>')
--- vim.keymap.set('n', '<leader>ft', ':<C-u>Explore %:h<CR><CR>')
-vim.keymap.set('n', '<leader>ft', ':<C-u>Explore <bar> :sil! /<C-R>=expand("%:t")<CR><CR>')
 vim.keymap.set('n', '<leader>fs', ':<C-u>grep! ')
 vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
 
@@ -68,6 +64,7 @@ if packer_exists then
       'phaazon/hop.nvim',
       branch = 'v2',
     }
+    use 'nvim-tree/nvim-tree.lua'
     use 'github/copilot.vim'
     use 'kamykn/spelunker.vim'
     use 'lilydjwg/colorizer'
@@ -152,6 +149,23 @@ if packer_exists then
       },
     }
   }
+
+  -- nvim-tree
+  vim.g.loaded_netrw = 1
+  vim.g.loaded_netrwPlugin = 1
+  require("nvim-tree").setup({
+    renderer = {
+      icons = {
+        show = {
+          file = false,
+          folder = false,
+          folder_arrow = true,
+          git = true,
+          modified = true,
+        }
+      }
+    }
+  })
 
   -- Completion
   local cmp = require('cmp')
@@ -314,6 +328,9 @@ if packer_exists then
   vim.keymap.set('n', '<leader>fg', telescope_builtin.git_files, {})
   vim.keymap.set('n', '<leader>fs', telescope_builtin.live_grep, {})
   vim.keymap.set('n', '<leader>fc', telescope_builtin.grep_string, {})
+  vim.keymap.set('n', '<leader>fe', ':<C-u>NvimTreeToggle<CR>')
+  vim.keymap.set('n', '<leader>ft', ':<C-u>NvimTreeFindFile<CR>')
+
 
   -- LSP
   vim.keymap.set('n', '<leader>ch', vim.lsp.buf.hover)
