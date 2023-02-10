@@ -258,12 +258,12 @@ if packer_exists then
     vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
   end
 
-  local show_diagnostics_augroup = vim.api.nvim_create_augroup('UserShowDiagnostics', { clear = true })
-  vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
-    group = show_diagnostics_augroup,
-    pattern = '*',
-    callback = function() vim.diagnostic.open_float(nil, { focus = false }) end,
-  })
+  -- local show_diagnostics_augroup = vim.api.nvim_create_augroup('UserShowDiagnostics', { clear = true })
+  -- vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+  --   group = show_diagnostics_augroup,
+  --   pattern = '*',
+  --   callback = function() vim.diagnostic.open_float(nil, { focus = false }) end,
+  -- })
 
   -- https://github.com/jose-elias-alvarez/null-ls.nvim/wiki/Avoiding-LSP-formatting-conflicts
   local null_ls = require('null-ls')
@@ -371,8 +371,9 @@ if packer_exists then
   vim.keymap.set('n', '<leader>ct', vim.lsp.buf.type_definition)
   vim.keymap.set('n', '<leader>cn', vim.lsp.buf.rename)
   vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action)
-  vim.keymap.set('n', '<leader>cd', ':<C-u>Trouble<CR>')
+  vim.keymap.set('n', '<leader>cd', vim.diagnostic.open_float)
   vim.keymap.set('n', '<leader>ce', vim.diagnostic.goto_next)
+  vim.keymap.set('n', '<leader>cp', ':<C-u>Trouble<CR>')
 
   -- spell
   vim.keymap.set('n', '<leader>st', '<Plug>(spelunker-toggle)')
