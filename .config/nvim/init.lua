@@ -125,6 +125,10 @@ if packer_exists then
   local telescope_actions = require('telescope.actions')
   require('telescope').setup {
     defaults = {
+      file_ignore_patterns = {
+        'node_modules',
+        '.git',
+      },
       mappings = {
         i = {
           ['<esc>'] = telescope_actions.close
@@ -134,7 +138,10 @@ if packer_exists then
     pickers = {
       commands = { theme = 'dropdown' },
       command_history = { theme = 'dropdown' },
-      find_files = { theme = 'dropdown' },
+      find_files = {
+        theme = 'dropdown',
+        hidden = true,
+      },
       git_files = { theme = 'dropdown' },
       buffers = {
         theme = 'dropdown',
@@ -143,7 +150,10 @@ if packer_exists then
       },
       oldfiles = { theme = 'dropdown'
       },
-      live_grep = { theme = 'dropdown' },
+      live_grep = {
+        theme = 'dropdown',
+        hidden = true
+      },
       grep_string = { theme = 'dropdown' },
     }
   }
