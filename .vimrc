@@ -191,10 +191,10 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   let g:lsp_diagnostics_virtual_text_enabled = 0
   let g:lsp_diagnostics_echo_cursor = 1
   let g:lsp_diagnostics_signs_delay = 200
-  let g:lsp_diagnostics_signs_error = {'text': ''}
-  let g:lsp_diagnostics_signs_warning = {'text': ''}
-  let g:lsp_diagnostics_signs_information = {'text': ''}
-  let g:lsp_diagnostics_signs_hint = {'text': ''}
+  " let g:lsp_diagnostics_signs_error = {'text': '❌'}
+  " let g:lsp_diagnostics_signs_warning = {'text': '⚠️'}
+  " let g:lsp_diagnostics_signs_information = {'text': 'ℹ️'}
+  " let g:lsp_diagnostics_signs_hint = {'text': '💡'}
 
   augroup vimrc_format_on_save
     autocmd!

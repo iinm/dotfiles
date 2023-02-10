@@ -2,6 +2,8 @@
 
 source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+ZCAT="$(which gzcat || which zcat)"
+
 help() {
   cat << 'HELP'
 Usage: dotfiles COMMAND
@@ -38,6 +40,7 @@ bootstrap() {
     which finger &> /dev/null || missing_packages+=(finger)
     which shellcheck &> /dev/null || missing_packages+=(shellcheck)
     which efm-langserver &> /dev/null || missing_packages+=(efm-langserver)
+    # Vim clipboard support
     dpkg --status libxt-dev &> /dev/null || missing_packages+=(libxt-dev)
 
     if test "${#missing_packages[@]}" -eq 0; then
@@ -99,7 +102,6 @@ setup_fish() {
 function config_local --description "Host specific configuration"
   function config_local_first
     set -xg PATH \
-      ~/.local/bin \
       $PATH
   end
 
@@ -164,20 +166,20 @@ setup_vim() {
     )
   fi
 
-  if grep -q "Feb 03, 2023" "$vim_dir/share/vim/vim90/syntax/sh.vim"; then
-    echo "info: sh.vim is already patched. skip." >&2
-  else
-    echo "info: patch sh.vim." >&2
-    curl --show-error --fail http://www.drchip.org/astronaut/vim/syntax/sh.vim.gz \
-      | gzcat > "$vim_dir/share/vim/vim90/syntax/sh.vim"
-  fi
-
   if test -e ~/.vim/autoload/plug.vim; then
     echo "info: vim-plug exists. skip." >&2
   else
     echo "info: install vim-plug." >&2
     curl --show-error --fail -o ~/.vim/autoload/plug.vim --create-dirs \
       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  fi
+
+  if grep -q "Feb 03, 2023" "$vim_dir/share/vim/vim90/syntax/sh.vim"; then
+    echo "info: sh.vim is already patched. skip." >&2
+  else
+    echo "info: patch sh.vim." >&2
+    curl --show-error --fail http://www.drchip.org/astronaut/vim/syntax/sh.vim.gz \
+      | "$ZCAT" > "$vim_dir/share/vim/vim90/syntax/sh.vim"
   fi
 }
 
