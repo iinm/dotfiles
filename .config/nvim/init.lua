@@ -39,8 +39,11 @@ vim.g.markdown_fenced_languages = { 'sh' }
 
 -- keymap
 vim.g.mapleader = ' '
-vim.keymap.set('n', '<leader>gg', ':<C-u>grep! ')
 vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
+vim.keymap.set('n', '<leader>gg', ':<C-u>grep! ')
+vim.keymap.set('n', '<leader>gc', ':<C-u>grep! <cword><CR>')
+vim.keymap.set('n', '<leader>gw', ":<C-u>grep! '\\b<cword>\\b'<CR>")
+
 -- https://vim.fandom.com/wiki/Search_for_visually_selected_text
 vim.cmd [[vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>]]
 
@@ -353,13 +356,11 @@ if packer_exists then
   vim.keymap.set('n', '<leader>ff', telescope_builtin.find_files, {})
   vim.keymap.set('n', '<leader>fh', telescope_builtin.oldfiles, {})
   vim.keymap.set('n', '<leader>fg', telescope_builtin.git_files, {})
-  vim.keymap.set('n', '<leader>fs', telescope_builtin.live_grep, {})
   vim.keymap.set('n', '<leader>fc', telescope_builtin.grep_string, {})
   vim.keymap.set('n', '<leader>ft', ':<C-u>NvimTreeFindFile<CR>')
 
   -- grep
-  vim.keymap.set('n', '<leader>gc', ':<C-u>grep! <cword><CR>')
-  vim.keymap.set('n', '<leader>gw', ":<C-u>grep! '\\b<cword>\\b'<CR>")
+  vim.keymap.set('n', '<leader>gl', telescope_builtin.live_grep, {})
 
   -- lsp
   vim.keymap.set('n', '<leader>ch', vim.lsp.buf.hover)

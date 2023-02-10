@@ -8,7 +8,19 @@ if type --quiet config_local_first
 end
 
 test -n "$LANG";   or set -x LANG en_US.UTF-8
-test -n "$EDITOR"; or type --quiet nvim; and set -x EDITOR nvim
+test -n "$EDITOR"; or type --quiet vim; and set -x EDITOR vim
+
+if test -e /opt/homebrew
+  set -xg PATH /opt/homebrew/sbin /opt/homebrew/bin $PATH
+end
+
+if test -e $HOME/.local/bin
+  set -xg PATH $HOME/.local/bin $PATH
+end
+
+if test -e $HOME/tools/vim
+  set -xg PATH $HOME/tools/vim/bin $PATH
+end
 
 if test (uname) = 'Linux'; and type --quiet xsel
   alias pbcopy  'xsel -i -p && xsel -o -p | xsel -i -b'
@@ -48,10 +60,6 @@ if status is-interactive
 
   if type --quiet direnv
     direnv hook fish | source
-  end
-
-  if type --quiet zoxide
-    zoxide init fish | source
   end
  end
 

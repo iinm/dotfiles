@@ -9,9 +9,9 @@ Usage: dotfiles COMMAND
   setup           Run all following commands
   bootstrap       Install essential utilities
   link            Create symlink to dotfiles
-  setup_fish      Configure fish shell
-  setup_git       Configure git
-  setup_neovim    Configure neovim
+  setup_fish      Setup fish shell
+  setup_git       Setup git
+  setup_vim       Setup vim
 HELP
 }
 
@@ -20,7 +20,7 @@ setup() {
   link
   setup_fish
   setup_git
-  setup_neovim
+  setup_vim
 }
 
 bootstrap() {
@@ -36,6 +36,8 @@ bootstrap() {
     which jq &> /dev/null || missing_packages+=(jq)
     which xsel &> /dev/null || missing_packages+=(xsel)
     which shellcheck &> /dev/null || missing_packages+=(shellcheck)
+    which efm-langserver &> /dev/null || missing_packages+=(efm-langserver)
+    dpkg -i libxt-dev &> /dev/null || missing_packages+=(libxt-dev)
 
     if test "${#missing_packages[@]}" -eq 0; then
       echo "info: all required packages are installed. skip." >&2
@@ -54,8 +56,8 @@ bootstrap() {
     which direnv &> /dev/null || missing_packages+=(direnv)
     which curl &> /dev/null || missing_packages+=(curl)
     which jq &> /dev/null || missing_packages+=(jq)
-    which nvim &> /dev/null || missing_packages+=(neovim)
     which shellcheck &> /dev/null || missing_packages+=(shellcheck)
+    which efm-langserver &> /dev/null || missing_packages+=(efm-langserver)
 
     if test "${#missing_packages[@]}" -eq 0; then
       echo "info: all required packages are installed. skip." >&2
@@ -136,13 +138,45 @@ setup_git() {
   fi
 }
 
-setup_neovim() {
-  local nvim_packer_dir=~/.local/share/nvim/site/pack/packer/start/packer.nvim
-  if test -e "$nvim_packer_dir"; then
-    echo "info: $nvim_packer_dir exists. skip." >&2
+setup_vim() {
+  local vim_source_dir=~/tools/sources/vim
+  local vim_dir=~/tools/vim
+
+  if test -e "$vim_source_dir"; then
+    echo "info: $vim_source_dir exists. skip." >&2
   else
-    echo "info: install packer.nvim" >&2
-    git clone --depth 1 https://github.com/wbthomason/packer.nvim "$nvim_packer_dir"
+    echo "info: clone vim source." >&2
+    git clone --depth 1 https://github.com/vim/vim "$vim_source_dir"
+  fi
+
+  if test -e "$vim_dir"; then
+    echo "info: $vim_dir exists. skip." >&2
+  else
+    echo "info: build vim." >&2;
+    (
+      set -eu;
+      cd "$vim_source_dir";
+      make distclean;
+      ./configure --prefix="$vim_dir";
+      make;
+      make install;
+    )
+  fi
+
+  if grep -q "Feb 03, 2023" "$vim_dir/share/vim/vim90/syntax/sh.vim"; then
+    echo "info: sh.vim is already patched. skip." >&2
+  else
+    echo "info: patch sh.vim." >&2
+    curl --show-error --fail http://www.drchip.org/astronaut/vim/syntax/sh.vim.gz \
+      | gzcat > "$vim_dir/share/vim/vim90/syntax/sh.vim"
+  fi
+
+  if test -e ~/.vim/autoload/plug.vim; then
+    echo "info: vim-plug exists. skip." >&2
+  else
+    echo "info: install vim-plug." >&2
+    curl --show-error --fail -o ~/.vim/autoload/plug.vim --create-dirs \
+      https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
   fi
 }
 
