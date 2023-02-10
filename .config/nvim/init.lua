@@ -17,7 +17,6 @@ for k, v in pairs({
   wildignore = '.git,node_modules',
   clipboard = 'unnamedplus',
   termguicolors = true,
-  updatetime = 250,
 
   -- default indent
   tabstop = 8,
@@ -97,7 +96,7 @@ if packer_exists then
     use 'williamboman/mason.nvim'
     use 'williamboman/mason-lspconfig.nvim'
     use 'jose-elias-alvarez/null-ls.nvim'
-    use 'ray-x/lsp_signature.nvim'
+    -- use 'ray-x/lsp_signature.nvim'
     use 'folke/trouble.nvim'
     use 'onsails/lspkind.nvim'
 
@@ -318,7 +317,7 @@ if packer_exists then
     use_diagnostic_signs = true
   })
 
-  require('lsp_signature').setup()
+  -- require('lsp_signature').setup()
 
   -- file types
   local file_type_augroup = vim.api.nvim_create_augroup('UserFileType', { clear = true })
