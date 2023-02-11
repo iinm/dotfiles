@@ -61,13 +61,10 @@ augroup vimrc_indent
 augroup END
 
 " --- etc.
-let g:netrw_banner = 0
-let g:netrw_liststyle = 3 " tree style
-
 let g:markdown_fenced_languages = ['sh', 'plantuml']
 
 if executable('rg')
-  set grepprg=rg\ --vimgrep\ --glob\ '!*~'\ --glob\ '!.git'\ --glob\ '!node_modules'
+  set grepprg=rg\ --vimgrep\ --hidden\ --glob\ '!*~'\ --glob\ '!.git'\ --glob\ '!node_modules'
 endif
 
 augroup vimrc_quickfix
@@ -84,6 +81,12 @@ nnoremap <Leader>w :<C-u>set wrap!<CR>
 " https://vim.fandom.com/wiki/Search_for_visually_selected_text
 vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>
 
+nnoremap [file] <Nop>
+nmap <Leader>f [file]
+nnoremap [file]e :<C-u>Explore .<CR>
+" https://vi.stackexchange.com/questions/20307/find-and-highlight-current-file-in-netrw
+nnoremap [file]t :<C-u>Explore <bar> :sil! /<C-R>=expand("%:t")<CR><CR> <bar> :nohlsearch<CR>
+ 
 nnoremap [grep] <Nop>
 nmap <Leader>g [grep]
 nnoremap [grep]g :<C-u>grep! 
@@ -97,7 +100,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   Plug 'sainnhe/everforest'
 
   " utilities
-  Plug 'preservim/nerdtree'
   Plug 'junegunn/fzf'
   Plug 'junegunn/fzf.vim'
   Plug 'easymotion/vim-easymotion'
@@ -223,7 +225,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   nnoremap [file]f :<C-u>Files<CR>
   nnoremap [file]h :<C-u>History<CR>
   nnoremap [file]g :<C-u>GitFiles<CR>
-  nnoremap [file]t :<C-u>NERDTreeFind<CR>
 
   nnoremap [spell] <Nop>
   nmap <Leader>s [spell]
