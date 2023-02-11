@@ -95,9 +95,9 @@ vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>
 
 nnoremap [file] <Nop>
 nmap <Leader>f [file]
-nnoremap [file]e :<C-u>Explore .<CR>
+" nnoremap [file]f :<C-u>terminal find . -name
 " https://vi.stackexchange.com/questions/20307/find-and-highlight-current-file-in-netrw
-nnoremap [file]t :<C-u>Explore <bar> :sil! /<C-R>=expand("%:t")<CR><CR> <bar> :nohlsearch<CR>
+nnoremap [file]e :<C-u>Explore <bar> :sil! /<C-R>=expand("%:t")<CR><CR> <bar> :nohlsearch<CR>
 nnoremap [file]h :<C-u>browse oldfiles<CR>
  
 nnoremap [grep] <Nop>
@@ -113,8 +113,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   Plug 'sainnhe/everforest'
 
   " utilities
-  Plug 'junegunn/fzf'
-  Plug 'junegunn/fzf.vim'
+  Plug 'ctrlpvim/ctrlp.vim'
   Plug 'easymotion/vim-easymotion'
   Plug 'tpope/vim-commentary'
   Plug 'tpope/vim-sleuth'
@@ -158,6 +157,10 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   set background=dark
   colorscheme everforest
 
+  " ctrlp
+  let g:ctrlp_show_hidden = 1
+  let g:ctrlp_custom_ignore = 'node_modules\|DS_Store\|git'
+
   " easymotion
   let g:EasyMotion_do_mapping = 0
   let g:EasyMotion_smartcase = 1
@@ -166,9 +169,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   " https://github.com/jiangmiao/auto-pairs/issues/104
   let g:AutoPairsMultilineClose = 0
   let g:AutoPairsFlyMode = 0
-
-  " fzf
-  let g:fzf_preview_window = ['right:40%:hidden', 'ctrl-/']
 
   " emmet
   augroup vimrc_emmet
@@ -207,10 +207,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   let g:lsp_diagnostics_virtual_text_enabled = 0
   let g:lsp_diagnostics_echo_cursor = 1
   let g:lsp_diagnostics_signs_delay = 200
-  " let g:lsp_diagnostics_signs_error = {'text': '❌'}
-  " let g:lsp_diagnostics_signs_warning = {'text': '⚠️'}
-  " let g:lsp_diagnostics_signs_information = {'text': 'ℹ️'}
-  " let g:lsp_diagnostics_signs_hint = {'text': '💡'}
 
   " https://github.com/mattn/vim-lsp-settings
   let g:lsp_settings = {
@@ -234,16 +230,13 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   augroup END
 
   " --- Plugin Keymap
-  nnoremap <Leader><Leader> :<C-u>Commands<CR>
-  nnoremap <Leader>b :<C-u>Buffers<CR>
-  nnoremap <Leader>r :<C-u>History:<CR>
+  nnoremap <Leader>b :<C-u>CtrlPBuffer<CR>
   nnoremap s <Plug>(easymotion-overwin-f2)
 
   nnoremap [file] <Nop>
   nmap <Leader>f [file]
-  nnoremap [file]f :<C-u>Files<CR>
-  nnoremap [file]h :<C-u>History<CR>
-  nnoremap [file]g :<C-u>GitFiles<CR>
+  nnoremap [file]f :<C-u>CtrlP<CR>
+  nnoremap [file]h :<C-u>CtrlPMRU<CR>
 
   nnoremap [spell] <Nop>
   nmap <Leader>s [spell]
