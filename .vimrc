@@ -166,30 +166,31 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   " javascript
   let g:javascript_plugin_jsdoc = 1
 
-  " asynccomplete
-  call asyncomplete#register_source(asyncomplete#sources#buffer#get_source_options({
-      \ 'name': 'buffer',
-      \ 'allowlist': ['*'],
-      \ 'completor': function('asyncomplete#sources#buffer#completor'),
-      \ 'config': {
-      \    'max_buffer_size': 5000000,
-      \  },
-      \ }))
-  au User asyncomplete_setup call asyncomplete#register_source(asyncomplete#sources#emmet#get_source_options({
-      \ 'name': 'emmet',
-      \ 'whitelist': ['html'],
-      \ 'completor': function('asyncomplete#sources#emmet#completor'),
-      \ }))
-  au User asyncomplete_setup call asyncomplete#register_source(asyncomplete#sources#emmet#get_source_options({
-      \ 'name': 'emmet',
-      \ 'whitelist': ['html'],
-      \ 'completor': function('asyncomplete#sources#emmet#completor'),
-      \ }))
+  " asyncomplete
+  augroup vimrc_asyncomplete
+    autocmd!
+    autocmd User asyncomplete_setup call asyncomplete#register_source(asyncomplete#sources#buffer#get_source_options({
+        \ 'name': 'buffer',
+        \ 'allowlist': ['*'],
+        \ 'completor': function('asyncomplete#sources#buffer#completor'),
+        \ 'config': {
+        \    'max_buffer_size': 5000000,
+        \  },
+    \ }))
+    autocmd User asyncomplete_setup call asyncomplete#register_source(asyncomplete#sources#file#get_source_options({
+        \ 'name': 'file',
+        \ 'allowlist': ['*'],
+        \ 'priority': 10,
+        \ 'completor': function('asyncomplete#sources#file#completor')
+    \ }))
+    autocmd User asyncomplete_setup call asyncomplete#register_source(asyncomplete#sources#emmet#get_source_options({
+        \ 'name': 'emmet',
+        \ 'whitelist': ['html', 'css', 'typescriptreact'],
+        \ 'completor': function('asyncomplete#sources#emmet#completor'),
+    \ }))
+  augroup END
 
   " lsp
-  let g:lsp_settings = {
-  \  'efm-langserver': {'disabled': v:false}
-  \}
   let g:lsp_diagnostics_virtual_text_enabled = 0
   let g:lsp_diagnostics_echo_cursor = 1
   let g:lsp_diagnostics_signs_delay = 200
@@ -197,6 +198,11 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   " let g:lsp_diagnostics_signs_warning = {'text': '⚠️'}
   " let g:lsp_diagnostics_signs_information = {'text': 'ℹ️'}
   " let g:lsp_diagnostics_signs_hint = {'text': '💡'}
+
+  " https://github.com/mattn/vim-lsp-settings
+  let g:lsp_settings = {
+      \ 'efm-langserver': {'disabled': v:false}
+  \ }
 
   augroup vimrc_format_on_save
     autocmd!
