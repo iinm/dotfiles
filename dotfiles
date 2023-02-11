@@ -62,11 +62,9 @@ bootstrap() {
     local packages=(
       fish
       tmux
-      git
       ripgrep
       fzf
       direnv
-      curl
       jq
       shellcheck
       efm-langserver
