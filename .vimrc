@@ -5,8 +5,9 @@
 " recent files         :browse oldfiles
 "                      :browse filter /pattern/ oldfiles
 " open path            gf (goto file), gx (xdg-open)
-" grep current dir     :grep! hoge -> :cw
-" grep current buffer  :grep! hoge %
+" grep current dir     :grep! foo -> :cw
+" grep current buffer  :grep! foo %
+" close buffers        :bd foo* -> Ctrl-a
 
 if !isdirectory(expand("~/.vim/undodir"))
   call mkdir(expand("~/.vim/undodir"), 'p')
@@ -57,7 +58,7 @@ set tabstop=8 expandtab shiftwidth=2 softtabstop=2
 augroup vimrc_indent
   autocmd!
   autocmd Filetype go     setlocal tabstop=4 noexpandtab softtabstop=4 shiftwidth=4
-  autocmd Filetype python setlocal tabstop=4 expandtab   softtabstop=4 shiftwidth=4
+  " autocmd Filetype python setlocal tabstop=4 expandtab   softtabstop=4 shiftwidth=4
 augroup END
 
 " --- etc.
@@ -86,6 +87,7 @@ nmap <Leader>f [file]
 nnoremap [file]e :<C-u>Explore .<CR>
 " https://vi.stackexchange.com/questions/20307/find-and-highlight-current-file-in-netrw
 nnoremap [file]t :<C-u>Explore <bar> :sil! /<C-R>=expand("%:t")<CR><CR> <bar> :nohlsearch<CR>
+nnoremap [file]h :<C-u>browse oldfiles<CR>
  
 nnoremap [grep] <Nop>
 nmap <Leader>g [grep]
