@@ -10,9 +10,11 @@
 " close other window   Ctrl-w -> o
 " browse file          :e .
 "                      :e . -> i -> i -> i (tree view)
+"                      :e . -> p (preview)
 "                      :e . -> d (make directory)
 "                      :e . -> % (new file)
-"                      :e . -> D (delete directory)
+"                      :e . -> D (delete)
+"                      :e . -> R (rename)
 "                      :e . -> mt (mark target) -> mf (markfile) -> mm (move)
 "                      :e . -> mt (mark target) -> mf (markfile) -> mc (copy)
 "                      :e . -> mu (unmark all)
