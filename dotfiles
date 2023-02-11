@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 ZCAT="$(which gzcat || which zcat)"
 
@@ -31,6 +31,7 @@ bootstrap() {
     which fish &> /dev/null || missing_packages+=(fish)
     which tmux &> /dev/null || missing_packages+=(tmux)
     which git &> /dev/null || missing_packages+=(git)
+    which make &> /dev/null || missing_packages+=(make)
     which rg &> /dev/null || missing_packages+=(ripgrep)
     which fzf &> /dev/null || missing_packages+=(fzf)
     which direnv &> /dev/null || missing_packages+=(direnv)
@@ -40,13 +41,15 @@ bootstrap() {
     which finger &> /dev/null || missing_packages+=(finger)
     which shellcheck &> /dev/null || missing_packages+=(shellcheck)
     which efm-langserver &> /dev/null || missing_packages+=(efm-langserver)
-    # Vim clipboard support
+    # https://github.com/vim/vim/blob/master/src/INSTALL
+    dpkg --status clang &> /dev/null || missing_packages+=(clang)
+    dpkg --status libtool-bin &> /dev/null || missing_packages+=(libtool-bin)
     dpkg --status libxt-dev &> /dev/null || missing_packages+=(libxt-dev)
 
     if test "${#missing_packages[@]}" -eq 0; then
-      echo "info: all required packages are installed. skip." >&2
+      echo "info: all required packages are installed. skip."
     else
-      echo "info: install ${missing_packages[*]}" >&2
+      echo "info: install ${missing_packages[*]}"
       sudo apt install "${missing_packages[@]}"
     fi
 
@@ -64,14 +67,14 @@ bootstrap() {
     which efm-langserver &> /dev/null || missing_packages+=(efm-langserver)
 
     if test "${#missing_packages[@]}" -eq 0; then
-      echo "info: all required packages are installed. skip." >&2
+      echo "info: all required packages are installed. skip."
     else
-      echo "info: install ${missing_packages[*]}" >&2
+      echo "info: install ${missing_packages[*]}"
       brew install "${missing_packages[@]}"
     fi
 
   else
-    echo "error: Unsupported platform" >&2
+    echo "error: Unsupported platform"
     exit 1
   fi
 }
@@ -79,13 +82,13 @@ bootstrap() {
 link() {
   for src in $(
     # ~/.*
-    find "$source_dir" -maxdepth 1 -type f -name '.*';
+    find "$SOURCE_DIR" -maxdepth 1 -type f -name '.*';
     # ~/.config/*
-    find "$source_dir/.config" -mindepth 1 -maxdepth 1 -type d;
+    find "$SOURCE_DIR/.config" -mindepth 1 -maxdepth 1 -type d;
   ); do
-    dest=$(sed "s,^$source_dir,$HOME," <<< "$src")
+    dest=$(sed "s,^$SOURCE_DIR,$HOME," <<< "$src")
     if file -E "$dest" > /dev/null; then
-      echo "info: $dest is already exist. skip." >&2
+      echo "info: $dest is already exist. skip."
       continue
     fi
     ln -vs "$src" "$dest"
@@ -95,9 +98,9 @@ link() {
 setup_fish() {
   local fish_local_config=~/.config/fish/functions/config_local.fish
   if test -e "$fish_local_config"; then
-    echo "info: $fish_local_config exists. skip." >&2
+    echo "info: $fish_local_config exists. skip."
   else
-    echo "info: create $fish_local_config" >&2
+    echo "info: create $fish_local_config"
     cat > "$fish_local_config" << 'EOF'
 function config_local --description "Host specific configuration"
   function config_local_first
@@ -113,9 +116,9 @@ EOF
 
   local fish_fzf_keybindings=~/.config/fish/functions/fzf_key_bindings.fish
   if test -e "$fish_fzf_keybindings"; then
-    echo "info: $fish_fzf_keybindings exists. skip." >&2
+    echo "info: $fish_fzf_keybindings exists. skip."
   else
-    echo "info: donwload fish fzf key-bindings." >&2
+    echo "info: donwload fish fzf key-bindings."
     local fzf_verion
     fzf_verion="$(fzf --version | sed -E 's,^([0-9]+\.[0-9]+)\.?([0-9]+)?.*$,\1.\2,' | sed -E 's,^.+\.$,\00,')"
     curl --show-error --fail \
@@ -125,18 +128,18 @@ EOF
   fi
 
   if finger "$USER" | grep -q "$(which fish)"; then
-    echo "info: fish is default shell. skip." >&2
+    echo "info: fish is default shell. skip."
   else
-    echo "info: set fish as default shell." >&2
+    echo "info: set fish as default shell."
     chsh -s "$(which fish)"
   fi
 }
 
 setup_git() {
   if grep -q "gitconfig-global" ~/.gitconfig; then
-    echo "info: git config enabled. skip." >&2
+    echo "info: git config enabled. skip."
   else
-    echo "info: enable git config." >&2
+    echo "info: enable git config."
     echo -e "\n[include]\n\tpath = ~/.gitconfig-global" >> ~/.gitconfig
   fi
 }
@@ -146,19 +149,19 @@ setup_vim() {
   local vim_dir=~/tools/vim
 
   if test -e "$vim_source_dir"; then
-    echo "info: $vim_source_dir exists. skip." >&2
+    echo "info: $vim_source_dir exists. skip."
   else
-    echo "info: clone vim source." >&2
+    echo "info: clone vim source."
     git clone --depth 1 https://github.com/vim/vim "$vim_source_dir"
   fi
 
   if test -e "$vim_dir"; then
-    echo "info: $vim_dir exists. skip." >&2
+    echo "info: $vim_dir exists. skip."
   else
-    echo "info: build vim." >&2;
+    echo "info: build vim.";
     (
       set -eu;
-      cd "$vim_source_dir";
+      cd "$vim_source_dir/src";
       make distclean;
       ./configure --prefix="$vim_dir";
       make;
@@ -167,17 +170,17 @@ setup_vim() {
   fi
 
   if test -e ~/.vim/autoload/plug.vim; then
-    echo "info: vim-plug exists. skip." >&2
+    echo "info: vim-plug exists. skip."
   else
-    echo "info: install vim-plug." >&2
+    echo "info: install vim-plug."
     curl --show-error --fail -o ~/.vim/autoload/plug.vim --create-dirs \
       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
   fi
 
   if grep -q "Feb 03, 2023" "$vim_dir/share/vim/vim90/syntax/sh.vim"; then
-    echo "info: sh.vim is already patched. skip." >&2
+    echo "info: sh.vim is already patched. skip."
   else
-    echo "info: patch sh.vim." >&2
+    echo "info: patch sh.vim."
     curl --show-error --fail http://www.drchip.org/astronaut/vim/syntax/sh.vim.gz \
       | "$ZCAT" > "$vim_dir/share/vim/vim90/syntax/sh.vim"
   fi
