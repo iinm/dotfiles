@@ -1,13 +1,22 @@
 " --- Cheat Sheet
 " open file            :e **/main.go
 "                      :e %:h/
-" jump                 :jumps -> [N] Ctrl-O (older location) or Ctrl-I (newer location)
 " recent files         :browse oldfiles
 "                      :browse filter /pattern/ oldfiles
-" open path            gf (goto file), gx (xdg-open)
+" jump                 :jumps -> [N] Ctrl-o (older location) or Ctrl-i (newer location)
 " grep current dir     :grep! foo -> :cw
 " grep current buffer  :grep! foo %
 " close buffers        :bd foo* -> Ctrl-a
+" close other window   Ctrl-w -> o
+" browse file          :e .
+"                      :e . -> i -> i -> i (tree view)
+"                      :e . -> d (make directory)
+"                      :e . -> % (new file)
+"                      :e . -> D (delete directory)
+"                      :e . -> mt (mark target) -> mf (markfile) -> mm (move)
+"                      :e . -> mt (mark target) -> mf (markfile) -> mc (copy)
+"                      :e . -> mu (unmark all)
+" open path            gf (goto file), gx (xdg-open)
 
 if !isdirectory(expand("~/.vim/undodir"))
   call mkdir(expand("~/.vim/undodir"), 'p')
@@ -62,8 +71,6 @@ augroup vimrc_indent
 augroup END
 
 " --- etc.
-let g:markdown_fenced_languages = ['sh', 'plantuml']
-
 if executable('rg')
   set grepprg=rg\ --vimgrep\ --hidden\ --glob\ '!*~'\ --glob\ '!.git'\ --glob\ '!node_modules'
 endif
@@ -73,6 +80,8 @@ augroup vimrc_quickfix
   autocmd FileType qf setlocal nowrap
   autocmd QuickFixCmdPost *grep* cwindow
 augroup END
+
+let g:markdown_fenced_languages = ['sh', 'plantuml']
 
 " --- Keymap
 let mapleader = "\<Space>"
