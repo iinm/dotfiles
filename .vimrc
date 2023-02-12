@@ -6,7 +6,7 @@
 " jump                 :jumps -> [N] Ctrl-o (older location) or Ctrl-i (newer location)
 " grep current dir     :grep! foo -> :cw
 " grep current buffer  :grep! foo %
-" grep current word    :grep! <cword>
+" grep cursor word     :grep! <cword>
 "                      :grep! \b<cword>\b
 " close buffers        :bd foo* -> Ctrl-a
 " close other window   Ctrl-w -> o
@@ -94,7 +94,6 @@ vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>
 
 let mapleader = "\<Space>"
 
-nnoremap <Leader>b :<C-u>ls<CR>:b<Space>
 nnoremap <Leader>w :<C-u>set wrap!<CR>
 
 nnoremap [file] <Nop>
@@ -105,6 +104,12 @@ nnoremap [file]H :<C-u>browse filter /<C-R>=substitute(getcwd(), '^.*/', '', '')
 nnoremap [file]s :<C-u>grep!<Space>
 " https://vi.stackexchange.com/questions/20307/find-and-highlight-current-file-in-netrw
 nnoremap [file]e :<C-u>Explore <bar> :sil! /<C-R>=expand("%:t")<CR><CR> <bar> :nohlsearch<CR>
+
+nnoremap [buffer] <Nop>
+nmap <Leader>b [buffer]
+nnoremap [buffer]b :<C-u>ls<CR>:b<Space>
+nnoremap [buffer]l :<C-u>b #<CR>
+nnoremap [buffer]dt :<C-u>bd !*<C-a><CR>
 
 " --- Plugins
 if filereadable(expand('~/.vim/autoload/plug.vim'))
