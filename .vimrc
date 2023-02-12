@@ -21,6 +21,8 @@
 "                      :e . -> mt (mark target) -> mf (markfile) -> mc (copy)
 "                      :e . -> mu (unmark all)
 " open path            gf (goto file), gx (xdg-open)
+" next occurrence of cursor word      *
+" previous occurrence of cursor word  %
 
 if !isdirectory(expand("~/.vim/undodir"))
   call mkdir(expand("~/.vim/undodir"), 'p')
@@ -232,7 +234,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   " --- Plugin Keymap
   nnoremap s <Plug>(easymotion-overwin-f2)
 
- nnoremap [code] <Nop>
+  nnoremap [code] <Nop>
   nmap <Leader>c [code]
   nnoremap [code]j :<C-u>LspDefinition<CR>
   nnoremap [code]t :<C-u>LspTypeDefinition<CR>
