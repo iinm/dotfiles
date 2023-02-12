@@ -78,7 +78,7 @@ augroup vimrc_indent
 augroup END
 
 " --- etc.
-set grepprg=grep\ -nH\ -R\ --exclude-dir\ '.git'\ $*\ .
+set grepprg=grep\ -n\ -H\ -R\ --exclude-dir\ '.git'\ $*\ .
 if executable('rg')
   set grepprg=rg\ --vimgrep\ --hidden\ --glob\ '!.git'
 endif
@@ -100,9 +100,9 @@ nnoremap <Leader>w :<C-u>set wrap!<CR>
 
 nnoremap [file] <Nop>
 nmap <Leader>f [file]
-nnoremap [file]f :<C-u>terminal find . -iname<Space>
+nnoremap [file]f :<C-u>terminal ++curwin find . -iname *
 if executable('fd')
-  nnoremap [file]f :<C-u>terminal fd -H -i<Space>
+  nnoremap [file]f :<C-u>terminal ++curwin fd --hidden --ignore-case<Space>
 endif
 nnoremap [file]h :<C-u>browse oldfiles<CR>
 nnoremap [file]H :<C-u>browse filter /<C-r>=substitute(getcwd(), '^.*/', '', '')<CR>\/.*/ oldfiles<CR>
@@ -111,7 +111,7 @@ nnoremap [file]e :<C-u>Explore <bar> /<C-r>=expand("%:t")<CR><CR> <bar> :nohlsea
 
 nnoremap [buffer] <Nop>
 nmap <Leader>b [buffer]
-nnoremap [buffer]l :<C-u>b #<CR>
+nnoremap [buffer]b :<C-u>b #<CR>
 " close all buffers except current buffer (close all -> back to last position -> close empty)
 nnoremap [buffer]o :<C-u>%bd<CR><C-o>:bd #<CR>
 " close all terminal buffers
