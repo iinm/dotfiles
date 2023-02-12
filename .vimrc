@@ -114,8 +114,11 @@ nmap <Leader>b [buffer]
 nnoremap [buffer]b :<C-u>b #<CR>
 " close all buffers except current buffer (close all -> back to last position -> close empty)
 nnoremap [buffer]o :<C-u>%bd<CR><C-o>:bd #<CR>
-" close all terminal buffers
-nnoremap [buffer]c :<C-u>bd !*<C-a><CR>
+" close all find-file buffers
+nnoremap [buffer]c :<C-u>bd !find*<C-a><CR>
+if executable('fd')
+  nnoremap [buffer]c :<C-u>bd !fd*<C-a><CR>
+endif
 
 " --- Plugins
 if filereadable(expand('~/.vim/autoload/plug.vim'))
