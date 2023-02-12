@@ -112,7 +112,9 @@ nnoremap [file]e :<C-u>Explore <bar> /<C-r>=expand("%:t")<CR><CR> <bar> :nohlsea
 nnoremap [buffer] <Nop>
 nmap <Leader>b [buffer]
 nnoremap [buffer]l :<C-u>b #<CR>
-nnoremap [buffer]o :<C-u>%bd <bar> e # <bar> bd #<CR>
+" close all buffers except current buffer; close all -> open last -> close empty -> back to last position
+nnoremap [buffer]o :<C-u>%bd <bar> e # <bar> bd #<CR> 2<C-o>
+" close all terminal buffers
 nnoremap [buffer]c :<C-u>bd !*<C-a><CR>
 
 " --- Plugins
