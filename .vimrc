@@ -43,12 +43,14 @@ set smartcase
 set wildmenu
 set wildmode=longest,full
 set wildoptions=pum
-set wildignore+=*/.git/*,*/tmp/*,*.swp
+set wildignore+=.git/,node_modules/
 set clipboard=unnamed,unnamedplus,autoselect
+set timeoutlen=500
 set ttimeoutlen=10
 set backspace=indent,eol,start
 set mouse=a
 set ttymouse=sgr
+set showcmd
 
 " --- Appearance
 set termguicolors
@@ -72,10 +74,11 @@ set tabstop=8 expandtab shiftwidth=2 softtabstop=2
 
 augroup vimrc_indent
   autocmd!
-  autocmd Filetype go     setlocal tabstop=4 noexpandtab softtabstop=4 shiftwidth=4
+  autocmd Filetype go setlocal tabstop=4 noexpandtab softtabstop=4 shiftwidth=4
 augroup END
 
 " --- etc.
+set grepprg=grep\ -nH\ -R\ --exclude-dir\ '.git'\ $*\ .
 if executable('rg')
   set grepprg=rg\ --vimgrep\ --hidden\ --glob\ '!.git'
 endif
@@ -86,31 +89,31 @@ augroup vimrc_quickfix
   autocmd QuickFixCmdPost *grep* cwindow
 augroup END
 
-let g:markdown_fenced_languages = ['sh', 'plantuml']
+let g:markdown_fenced_languages = ['sh']
 
 " --- Keymap
-nnoremap <C-l> :nohlsearch<CR>
-" https://vim.fandom.com/wiki/Search_for_visually_selected_text
-vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>
-
 let mapleader = "\<Space>"
 
+nnoremap <C-l> :nohlsearch<CR>
+nnoremap <leader><leader> :<C-u>buffers<CR>:b<Space>
 nnoremap <Leader>w :<C-u>set wrap!<CR>
 
 nnoremap [file] <Nop>
 nmap <Leader>f [file]
-nnoremap [file]f :<C-u>terminal fd --hidden --ignore-case<Space>
+nnoremap [file]f :<C-u>terminal find . -iname<Space>)
+if executable('fd')
+  nnoremap [file]f :<C-u>terminal fd -H -i<Space>
+endif
 nnoremap [file]h :<C-u>browse oldfiles<CR>
-nnoremap [file]H :<C-u>browse filter /<C-R>=substitute(getcwd(), '^.*/', '', '')<CR>.*/ oldfiles<CR>
-nnoremap [file]s :<C-u>grep!<Space>
-" https://vi.stackexchange.com/questions/20307/find-and-highlight-current-file-in-netrw
-nnoremap [file]e :<C-u>Explore <bar> :sil! /<C-R>=expand("%:t")<CR><CR> <bar> :nohlsearch<CR>
+nnoremap [file]H :<C-u>browse filter /<C-r>=substitute(getcwd(), '^.*/', '', '')<CR>\/.*/ oldfiles<CR>
+nnoremap [file]s :<C-u>grep! -i<Space>
+nnoremap [file]e :<C-u>Explore <bar> /<C-r>=expand("%:t")<CR><CR> <bar> :nohlsearch<CR>
 
 nnoremap [buffer] <Nop>
 nmap <Leader>b [buffer]
-nnoremap [buffer]b :<C-u>ls<CR>:b<Space>
 nnoremap [buffer]l :<C-u>b #<CR>
-nnoremap [buffer]dt :<C-u>bd !*<C-a><CR>
+nnoremap [buffer]o :<C-u>%bd <bar> e # <bar> bd #<CR>
+nnoremap [buffer]c :<C-u>bd !*<C-a><CR>
 
 " --- Plugins
 if filereadable(expand('~/.vim/autoload/plug.vim'))
@@ -121,26 +124,18 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   " utilities
   Plug 'easymotion/vim-easymotion'
   Plug 'tpope/vim-commentary'
-  Plug 'tpope/vim-sleuth'
   Plug 'tpope/vim-fugitive'
-  Plug 'tpope/vim-surround'
-  Plug 'jiangmiao/auto-pairs'
-  Plug 'mattn/emmet-vim'
+  Plug 'tpope/vim-sleuth'
   Plug 'kamykn/spelunker.vim'
-  Plug 'markonm/traces.vim'
-  Plug 'vim-scripts/BufOnly.vim'
-  Plug 'lilydjwg/colorizer'
-  Plug 'godlygeek/tabular'
-  Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+  Plug 'github/copilot.vim'
 
-  " completion, lsp
+  " lsp
   Plug 'prabirshrestha/vim-lsp'
   Plug 'mattn/vim-lsp-settings'
+
+  " completion
   Plug 'prabirshrestha/asyncomplete.vim'
   Plug 'prabirshrestha/asyncomplete-lsp.vim'
-  Plug 'prabirshrestha/asyncomplete-buffer.vim'
-  Plug 'prabirshrestha/asyncomplete-file.vim'
-  Plug 'github/copilot.vim'
 
   " snippets
   Plug 'hrsh7th/vim-vsnip'
@@ -149,11 +144,10 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
 
   " languages
   Plug 'pangloss/vim-javascript'
-  Plug 'jparise/vim-graphql'
   Plug 'maxmellon/vim-jsx-pretty'
+  Plug 'jparise/vim-graphql'
   Plug 'hashivim/vim-terraform'
   Plug 'dag/vim-fish'
-  Plug 'aklt/plantuml-syntax'
   call plug#end()
 
   " colorscheme
@@ -165,53 +159,19 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   let g:EasyMotion_do_mapping = 0
   let g:EasyMotion_smartcase = 1
 
-  " auto-pairs
-  " https://github.com/jiangmiao/auto-pairs/issues/104
-  let g:AutoPairsMultilineClose = 0
-  let g:AutoPairsFlyMode = 0
-
-  " emmet
-  augroup vimrc_emmet
-    autocmd!
-    autocmd FileType html,css,typescriptreact EmmetInstall
-  augroup END
-
   " javascript
   let g:javascript_plugin_jsdoc = 1
-
-  " asyncomplete
-  augroup vimrc_asyncomplete
-    autocmd!
-    autocmd User asyncomplete_setup call asyncomplete#register_source(asyncomplete#sources#buffer#get_source_options({
-        \ 'name': 'buffer',
-        \ 'allowlist': ['*'],
-        \ 'completor': function('asyncomplete#sources#buffer#completor'),
-        \ 'config': {
-        \    'max_buffer_size': 5000000,
-        \  },
-    \ }))
-    autocmd User asyncomplete_setup call asyncomplete#register_source(asyncomplete#sources#file#get_source_options({
-        \ 'name': 'file',
-        \ 'allowlist': ['*'],
-        \ 'priority': 10,
-        \ 'completor': function('asyncomplete#sources#file#completor')
-    \ }))
-  augroup END
 
   " lsp
   let g:lsp_diagnostics_virtual_text_enabled = 0
   let g:lsp_diagnostics_echo_cursor = 1
-  let g:lsp_diagnostics_signs_delay = 200
-
-  " https://github.com/mattn/vim-lsp-settings
   let g:lsp_settings = {
       \ 'efm-langserver': {'disabled': v:false}
   \ }
 
   augroup vimrc_format_on_save
     autocmd!
-    autocmd BufWritePre *.js,*.jsx call execute('LspDocumentFormatSync --server=efm-langserver')
-    autocmd BufWritePre *.ts,*.tsx call execute('LspDocumentFormatSync --server=efm-langserver')
+    autocmd BufWritePre *.js,*.jsx,*.ts,*.tsx call execute('LspDocumentFormatSync --server=efm-langserver')
   augroup END
 
   " spelunker
@@ -226,8 +186,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
 
   " --- Plugin Keymap
   nnoremap s <Plug>(easymotion-overwin-f2)
-
-  nnoremap [buffer]o :<C-u>BufOnly<CR>
 
   nnoremap [code] <Nop>
   nmap <Leader>c [code]
@@ -244,9 +202,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   nnoremap [code]f :<C-u>LspDocumentFormat<CR>
 
   " asyncomplete
-  inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
-  inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-  inoremap <expr> <cr>    pumvisible() ? asyncomplete#close_popup() : "\<cr>"
+  inoremap <expr> <cr> pumvisible() ? asyncomplete#close_popup() : "\<cr>"
 
   " vsnip
   inoremap <expr> <C-f> vsnip#jumpable(1)  ? '<Plug>(vsnip-jump-next)' : '<C-f>'

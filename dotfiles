@@ -59,6 +59,14 @@ bootstrap() {
       sudo apt install "${missing_packages[@]}"
     fi
 
+    if test -e ~/.local/bin/fd; then
+      echo "info: fd is already linked. skip."
+    else
+      echo "info: link fd to ~/.local/bin/fd"
+      mkdir -p ~/.local/bin
+      ln -s "$(which fdfind)" ~/.local/bin/fd
+    fi
+
   elif test "$(uname)" = "Darwin"; then
     local packages=(
       fish
