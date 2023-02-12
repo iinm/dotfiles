@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+: "${VIM_VERSION:="v9.0.1274"}"
 
-ZCAT="$(which gzcat || which zcat)"
+SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 help() {
   cat << 'HELP'
@@ -170,7 +170,7 @@ setup_vim() {
     echo "info: $vim_source_dir exists. skip."
   else
     echo "info: clone vim source."
-    git clone --depth 1 https://github.com/vim/vim "$vim_source_dir"
+    git clone --depth 1 --branch "$VIM_VERSION" https://github.com/vim/vim "$vim_source_dir"
   fi
 
   if test -e "$vim_dir"; then
@@ -180,7 +180,7 @@ setup_vim() {
     (
       set -eu;
       cd "$vim_source_dir/src";
-      make distclean;
+      make distclean || true;
       ./configure --prefix="$vim_dir";
       make;
       make install;
@@ -193,14 +193,6 @@ setup_vim() {
     echo "info: install vim-plug."
     curl --show-error --fail -o ~/.vim/autoload/plug.vim --create-dirs \
       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  fi
-
-  if grep -q "Feb 03, 2023" "$vim_dir/share/vim/vim90/syntax/sh.vim"; then
-    echo "info: sh.vim is already patched. skip."
-  else
-    echo "info: patch sh.vim."
-    curl --show-error --fail http://www.drchip.org/astronaut/vim/syntax/sh.vim.gz \
-      | "$ZCAT" > "$vim_dir/share/vim/vim90/syntax/sh.vim"
   fi
 }
 
