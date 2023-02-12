@@ -122,8 +122,7 @@ setup_fish() {
     cat > "$fish_local_config" << 'EOF'
 function config_local --description "Host specific configuration"
   function config_local_first
-    set -xg PATH \
-      $PATH
+    # fish_add_path
   end
 
   function config_local_last

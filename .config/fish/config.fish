@@ -11,15 +11,16 @@ test -n "$LANG";   or set -x LANG en_US.UTF-8
 test -n "$EDITOR"; or type --quiet vim; and set -x EDITOR vim
 
 if test -e /opt/homebrew
-  set -xg PATH /opt/homebrew/sbin /opt/homebrew/bin $PATH
+  fish_add_path /opt/homebrew/sbin
+  fish_add_path /opt/homebrew/bin
 end
 
 if test -e $HOME/.local/bin
-  set -xg PATH $HOME/.local/bin $PATH
+  fish_add_path $HOME/.local/bin
 end
 
 if test -e $HOME/tools/vim
-  set -xg PATH $HOME/tools/vim/bin $PATH
+  fish_add_path $HOME/tools/vim/bin
 end
 
 if test (uname) = 'Linux'; and type --quiet xsel
@@ -60,6 +61,10 @@ if status is-interactive
 
   if type --quiet direnv
     direnv hook fish | source
+  end
+ 
+  if type --quiet cd_hooks
+    cd_hooks
   end
  end
 
