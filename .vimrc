@@ -4,9 +4,9 @@
 " recent files         :browse oldfiles
 "                      :browse filter /hoge.*/ oldfiles
 " jump                 :jumps -> [N] Ctrl-o (older location) or Ctrl-i (newer location)
-" grep current dir     :grep! foo -> :cw
-" grep current buffer  :grep! foo %
-" grep cursor word     :grep! <cword>
+" grep                 :grep! foo -> :cw
+"                      :grep! foo % (current buffer)
+"                      :grep! <cword> (cursor word)
 "                      :grep! \b<cword>\b
 " close buffers        :bd foo* -> Ctrl-a
 " close other window   Ctrl-w -> o
@@ -21,8 +21,8 @@
 "                      :e . -> mt (mark target) -> mf (markfile) -> mc (copy)
 "                      :e . -> mu (unmark all)
 " open path            gf (goto file), gx (xdg-open)
-" next occurrence of cursor word      *
-" previous occurrence of cursor word  %
+" next <cword>         *
+" previous <cword>     %
 
 if !isdirectory(expand("~/.vim/undodir"))
   call mkdir(expand("~/.vim/undodir"), 'p')
@@ -73,7 +73,6 @@ set tabstop=8 expandtab shiftwidth=2 softtabstop=2
 augroup vimrc_indent
   autocmd!
   autocmd Filetype go     setlocal tabstop=4 noexpandtab softtabstop=4 shiftwidth=4
-  " autocmd Filetype python setlocal tabstop=4 expandtab   softtabstop=4 shiftwidth=4
 augroup END
 
 " --- etc.
@@ -141,7 +140,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   Plug 'prabirshrestha/asyncomplete-lsp.vim'
   Plug 'prabirshrestha/asyncomplete-buffer.vim'
   Plug 'prabirshrestha/asyncomplete-file.vim'
-  Plug 'prabirshrestha/asyncomplete-emmet.vim'
   Plug 'github/copilot.vim'
 
   " snippets
@@ -198,11 +196,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
         \ 'priority': 10,
         \ 'completor': function('asyncomplete#sources#file#completor')
     \ }))
-    autocmd User asyncomplete_setup call asyncomplete#register_source(asyncomplete#sources#emmet#get_source_options({
-        \ 'name': 'emmet',
-        \ 'whitelist': ['html', 'css', 'typescriptreact'],
-        \ 'completor': function('asyncomplete#sources#emmet#completor'),
-    \ }))
   augroup END
 
   " lsp
@@ -233,6 +226,8 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
 
   " --- Plugin Keymap
   nnoremap s <Plug>(easymotion-overwin-f2)
+
+  nnoremap [buffer]o :<C-u>BufOnly<CR>
 
   nnoremap [code] <Nop>
   nmap <Leader>c [code]
