@@ -2,10 +2,12 @@
 " open file            :e **/main.go
 "                      :e %:h/
 " recent files         :browse oldfiles
-"                      :browse filter /pattern/ oldfiles
+"                      :browse filter /hoge.*/ oldfiles
 " jump                 :jumps -> [N] Ctrl-o (older location) or Ctrl-i (newer location)
 " grep current dir     :grep! foo -> :cw
 " grep current buffer  :grep! foo %
+" grep current word    :grep! <cword>
+"                      :grep! \b<cword>\b
 " close buffers        :bd foo* -> Ctrl-a
 " close other window   Ctrl-w -> o
 " browse file          :e .
@@ -74,7 +76,7 @@ augroup END
 
 " --- etc.
 if executable('rg')
-  set grepprg=rg\ --vimgrep\ --hidden\ --glob\ '!*~'\ --glob\ '!.git'\ --glob\ '!node_modules'
+  set grepprg=rg\ --vimgrep\ --hidden\ --glob\ '!.git'
 endif
 
 augroup vimrc_quickfix
@@ -86,25 +88,23 @@ augroup END
 let g:markdown_fenced_languages = ['sh', 'plantuml']
 
 " --- Keymap
-let mapleader = "\<Space>"
-
 nnoremap <C-l> :nohlsearch<CR>
-nnoremap <Leader>w :<C-u>set wrap!<CR>
 " https://vim.fandom.com/wiki/Search_for_visually_selected_text
 vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>
 
+let mapleader = "\<Space>"
+
+nnoremap <Leader>b :<C-u>ls<CR>:b<Space>
+nnoremap <Leader>w :<C-u>set wrap!<CR>
+
 nnoremap [file] <Nop>
 nmap <Leader>f [file]
-" nnoremap [file]f :<C-u>terminal find . -name
+nnoremap [file]f :<C-u>terminal fd --hidden --ignore-case<Space>
+nnoremap [file]h :<C-u>browse oldfiles<CR>
+nnoremap [file]H :<C-u>browse filter /<C-R>=substitute(getcwd(), '^.*/', '', '')<CR>.*/ oldfiles<CR>
+nnoremap [file]s :<C-u>grep!<Space>
 " https://vi.stackexchange.com/questions/20307/find-and-highlight-current-file-in-netrw
 nnoremap [file]e :<C-u>Explore <bar> :sil! /<C-R>=expand("%:t")<CR><CR> <bar> :nohlsearch<CR>
-nnoremap [file]h :<C-u>browse oldfiles<CR>
- 
-nnoremap [grep] <Nop>
-nmap <Leader>g [grep]
-nnoremap [grep]g :<C-u>grep! 
-nnoremap [grep]c :grep! <cword><CR>
-nnoremap [grep]w :grep! '\b<cword>\b'<CR>
 
 " --- Plugins
 if filereadable(expand('~/.vim/autoload/plug.vim'))
@@ -113,7 +113,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   Plug 'sainnhe/everforest'
 
   " utilities
-  Plug 'ctrlpvim/ctrlp.vim'
   Plug 'easymotion/vim-easymotion'
   Plug 'tpope/vim-commentary'
   Plug 'tpope/vim-sleuth'
@@ -156,10 +155,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   let g:everforest_background = 'soft'
   set background=dark
   colorscheme everforest
-
-  " ctrlp
-  let g:ctrlp_show_hidden = 1
-  let g:ctrlp_custom_ignore = 'node_modules\|DS_Store\|git'
 
   " easymotion
   let g:EasyMotion_do_mapping = 0
@@ -230,25 +225,9 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   augroup END
 
   " --- Plugin Keymap
-  nnoremap <Leader>b :<C-u>CtrlPBuffer<CR>
   nnoremap s <Plug>(easymotion-overwin-f2)
 
-  nnoremap [file] <Nop>
-  nmap <Leader>f [file]
-  nnoremap [file]f :<C-u>CtrlP<CR>
-  nnoremap [file]h :<C-u>CtrlPMRU<CR>
-
-  nnoremap [spell] <Nop>
-  nmap <Leader>s [spell]
-  nnoremap [spell]t <Plug>(spelunker-toggle)
-  nnoremap [spell]e <Plug>(spelunker-jump-next)
-  nnoremap [spell]l <Plug>(spelunker-correct-from-list)
-  nnoremap [spell]L <Plug>(spelunker-correct-all-from-list)
-  nnoremap [spell]f <Plug>(spelunker-correct)
-  nnoremap [spell]g <Plug>(add-spelunker-good)
-  nnoremap [spell]u <Plug>(undo-spelunker-good)
-
-  nnoremap [code] <Nop>
+ nnoremap [code] <Nop>
   nmap <Leader>c [code]
   nnoremap [code]j :<C-u>LspDefinition<CR>
   nnoremap [code]t :<C-u>LspTypeDefinition<CR>
