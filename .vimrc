@@ -100,7 +100,7 @@ nnoremap <Leader>w :<C-u>set wrap!<CR>
 
 nnoremap [file] <Nop>
 nmap <Leader>f [file]
-nnoremap [file]f :<C-u>terminal find . -iname<Space>)
+nnoremap [file]f :<C-u>terminal find . -iname<Space>
 if executable('fd')
   nnoremap [file]f :<C-u>terminal fd -H -i<Space>
 endif
