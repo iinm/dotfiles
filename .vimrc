@@ -1,14 +1,31 @@
 " --- Cheat Sheet
 " open file            :e **/main.go
 "                      :e %:h/
+" motions              } (next paragraph)
+"                      { (previous paragraph)
+"                      C-f (next page)
+"                      C-b (previous page)
+" scroll               zz (center)
+"                      zt (top)
+"                      zb (bottom)
+" search               /foo -> n (next) -> N (previous)
+"                      * (next <cword>)
+"                      % (previous <cword>)
+" marks                :marks
+"                      ma (set mark a)
+"                      `a (jump to mark a)
+"                      `` (jump to previous mark)
+"                      :delmarks a (delete mark a)
+"                      :delmarks! a (delete all marks)
+" jumps                :jumps -> [N] Ctrl-o (older location) or Ctrl-i (newer location)
 " recent files         :browse oldfiles
-"                      :browse filter /hoge.*/ oldfiles
-" jump                 :jumps -> [N] Ctrl-o (older location) or Ctrl-i (newer location)
+"                      :browse filter /foo.*/ oldfiles
 " grep                 :grep! foo -> :cw
 "                      :grep! foo % (current buffer)
 "                      :grep! <cword> (cursor word)
 "                      :grep! \b<cword>\b
-" close buffers        :bd foo* -> Ctrl-a
+" close buffers        :bd foo* -> Ctrl-a (close all matched)
+"                      :%bd (close all) -> C-o (back to previous buffer)
 " close other window   Ctrl-w -> o
 " browse file          :e .
 "                      :e . -> i -> i -> i (tree view)
@@ -20,13 +37,11 @@
 "                      :e . -> mt (mark target) -> mf (markfile) -> mm (move)
 "                      :e . -> mt (mark target) -> mf (markfile) -> mc (copy)
 "                      :e . -> mu (unmark all)
-" open path            gf (goto file), gx (xdg-open)
-" next <cword>         *
-" previous <cword>     %
 " terminal             :terminal ls
 "                      :terminal -> Ctrl-w -> N  (normal mode)
 "                      :terminal -> Ctrl-w -> :  (command mode)
 "                      :terminal -> Ctrl-w -> "" (paste)
+" open path            gf (goto file), gx (xdg-open)
 
 if !isdirectory(expand("~/.vim/undodir"))
   call mkdir(expand("~/.vim/undodir"), 'p')
@@ -99,24 +114,24 @@ let g:markdown_fenced_languages = ['sh']
 let mapleader = "\<Space>"
 
 nnoremap <C-l> :nohlsearch<CR>
-nnoremap <leader><leader> :<C-u>buffers<CR>:b<Space>
 nnoremap <Leader>w :<C-u>set wrap!<CR>
 nnoremap <Leader>n :<C-u>set number!<CR>
 
-nnoremap [file] <Nop>
-nmap <Leader>f [file]
-nnoremap [file]f :<C-u>terminal ++curwin find . -iname **<Left>
+nnoremap <leader>f :<C-u>terminal ++curwin find . -iname **<Left>
 if executable('fd')
-  nnoremap [file]f :<C-u>terminal ++curwin fd -H -i<Space>
+  nnoremap <leader>f :<C-u>terminal ++curwin fd -H -i<Space>
 endif
-nnoremap [file]h :<C-u>enew <bar> 0put =v:oldfiles <bar> goto 1 <bar> doautocmd User UserMRUEnter<CR>
-nnoremap [file]H :<C-u>enew <bar> 0put =v:oldfiles<CR>:v/<C-r>=substitute(getcwd(), '^.*/', '', '')<CR>/d <bar> nohlsearch <bar> doautocmd User UserMRUEnter<CR>
-nnoremap [file]s :<C-u>grep! -i<Space>
-nnoremap [file]e :<C-u>Explore <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>
+nnoremap <leader>r :<C-u>enew <bar> 0put =v:oldfiles<CR>:v/<C-r>=substitute(getcwd(), '^.*/', '', '')<CR>/d <bar> nohlsearch <bar> doautocmd User UserMRUEnter<CR>
+nnoremap <leader>R :<C-u>enew <bar> 0put =v:oldfiles <bar> goto 1 <bar> doautocmd User UserMRUEnter<CR>
+nnoremap <leader>s :<C-u>grep! -i<Space>
+nnoremap <leader>e :<C-u>Explore <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>
+nnoremap <leader>b :<C-u>buffers<CR>:b<Space>
+nnoremap <leader>m :<C-u>marks<CR>
 
 augroup vimrc_file_finder
   autocmd!
   autocmd TerminalWinOpen !find*,!fd* setlocal nobuflisted
+  autocmd TerminalWinOpen !find*,!fd* goto 1
   autocmd TerminalWinOpen !find*,!fd* nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR>
 augroup END
 
@@ -129,12 +144,6 @@ augroup vimrc_mru
   autocmd User UserMRUEnter syntax match UserMRUDirectory /^[^:]\+\//
   autocmd User UserMRUEnter highlight UserMRUDirectory ctermfg=gray
 augroup END
-
-nnoremap [buffer] <Nop>
-nmap <Leader>b [buffer]
-nnoremap [buffer]b :<C-u>b #<CR>
-" close all buffers except current buffer (close all -> back to last position -> close empty)
-nnoremap [buffer]o :<C-u>%bd<CR><C-o>:bd #<CR>
 
 " --- Plugins
 if filereadable(expand('~/.vim/autoload/plug.vim'))
