@@ -19,6 +19,9 @@ function cd_hooks
     cat "$DIRECTORY_HISTORY_FILE" | $TAC | awk '!a[$0]++' | $TAC > "$tmpfile"
     mv -f "$tmpfile" "$DIRECTORY_HISTORY_FILE"
     rm -f "$tmpfile"
-    cd (cat "$DIRECTORY_HISTORY_FILE" | fzf --tac)
+    set -l dest (cat "$DIRECTORY_HISTORY_FILE" | fzf --tac)
+    if test -n "$dest"
+      cd "$dest"
+    end
   end
 end
