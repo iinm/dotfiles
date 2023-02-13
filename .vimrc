@@ -97,6 +97,7 @@ let mapleader = "\<Space>"
 nnoremap <C-l> :nohlsearch<CR>
 nnoremap <leader><leader> :<C-u>buffers<CR>:b<Space>
 nnoremap <Leader>w :<C-u>set wrap!<CR>
+nnoremap <Leader>n :<C-u>set number!<CR>
 
 nnoremap [file] <Nop>
 nmap <Leader>f [file]
