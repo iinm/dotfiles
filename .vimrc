@@ -1,6 +1,8 @@
 " --- Cheat Sheet
-" open file            :e **/main.go
+" open file            :e **/foo.sh
 "                      :e %:h/
+"                      :sp foo.sh (split)
+"                      :vsp foo.sh (vsplit)
 " motions              } (next paragraph)
 "                      { (previous paragraph)
 "                      C-f (next page)
@@ -26,7 +28,8 @@
 "                      :grep! \b<cword>\b
 " close buffers        :bd foo* -> Ctrl-a (close all matched)
 "                      :%bd (close all) -> C-o (back to previous buffer)
-" close other window   Ctrl-w -> o
+" window               C-w C-w (next window)
+"                      C-w -> o (close other windows)
 " browse file          :e .
 "                      :e . -> i -> i -> i (tree view)
 "                      :e . -> p (preview)
@@ -125,8 +128,7 @@ nnoremap <leader>r :<C-u>enew <bar> 0put =v:oldfiles<CR>:v/<C-r>=substitute(getc
 nnoremap <leader>R :<C-u>enew <bar> 0put =v:oldfiles <bar> goto 1 <bar> doautocmd User UserMRUEnter<CR>
 nnoremap <leader>s :<C-u>grep! -i<Space>
 nnoremap <leader>e :<C-u>Explore <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>
-nnoremap <leader>b :<C-u>buffers<CR>:b<Space>
-nnoremap <leader>m :<C-u>marks<CR>
+nnoremap <leader><leader> :<C-u>buffers<CR>:b<Space>
 
 augroup vimrc_file_finder
   autocmd!
