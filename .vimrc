@@ -110,16 +110,18 @@ nnoremap [file]H :<C-u>browse filter /<C-r>=substitute(getcwd(), '^.*/', '', '')
 nnoremap [file]s :<C-u>grep! -i<Space>
 nnoremap [file]e :<C-u>Explore <bar> /<C-r>=expand("%:t")<CR><CR> <bar> :nohlsearch<CR>
 
+augroup vimrc_file_finder
+  autocmd!
+  " open file with enter key
+  autocmd TerminalWinOpen !find*,!fd* nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR>
+  autocmd TerminalWinOpen !find*,!fd* set nobuflisted
+augroup END
+
 nnoremap [buffer] <Nop>
 nmap <Leader>b [buffer]
 nnoremap [buffer]b :<C-u>b #<CR>
 " close all buffers except current buffer (close all -> back to last position -> close empty)
 nnoremap [buffer]o :<C-u>%bd<CR><C-o>:bd #<CR>
-" close all find-file buffers
-nnoremap [buffer]c :<C-u>bd !find*<C-a><CR>
-if executable('fd')
-  nnoremap [buffer]c :<C-u>bd !fd*<C-a><CR>
-endif
 
 " --- Plugins
 if filereadable(expand('~/.vim/autoload/plug.vim'))
@@ -175,7 +177,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
       \ 'efm-langserver': {'disabled': v:false}
   \ }
 
-  augroup vimrc_format_on_save
+  augroup vimrc_plugin_format_on_save
     autocmd!
     autocmd BufWritePre *.js,*.jsx,*.ts,*.tsx call execute('LspDocumentFormatSync --server=efm-langserver')
   augroup END
@@ -185,7 +187,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   highlight SpelunkerComplexOrCompoundWord cterm=underline
 
   " --- File types
-  augroup vimrc_filetypes
+  augroup vimrc_plugin_filetypes
     autocmd!
     autocmd BufNewFile,BufRead *.tsx,*.jsx set filetype=typescriptreact
   augroup END
