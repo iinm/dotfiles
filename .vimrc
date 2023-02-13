@@ -23,6 +23,10 @@
 " open path            gf (goto file), gx (xdg-open)
 " next <cword>         *
 " previous <cword>     %
+" terminal             :terminal ls
+"                      :terminal -> Ctrl-w -> N  (normal mode)
+"                      :terminal -> Ctrl-w -> :  (command mode)
+"                      :terminal -> Ctrl-w -> "" (paste)
 
 if !isdirectory(expand("~/.vim/undodir"))
   call mkdir(expand("~/.vim/undodir"), 'p')
