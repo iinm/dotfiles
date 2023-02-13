@@ -101,20 +101,20 @@ nnoremap <Leader>n :<C-u>set number!<CR>
 
 nnoremap [file] <Nop>
 nmap <Leader>f [file]
-nnoremap [file]f :<C-u>terminal ++curwin find . -iname *
+nnoremap [file]f :<C-u>terminal ++curwin find . -iname **<Left>
 if executable('fd')
   nnoremap [file]f :<C-u>terminal ++curwin fd -H -i<Space>
 endif
 nnoremap [file]h :<C-u>browse oldfiles<CR>
 nnoremap [file]H :<C-u>browse filter /<C-r>=substitute(getcwd(), '^.*/', '', '')<CR>\/.*/ oldfiles<CR>
 nnoremap [file]s :<C-u>grep! -i<Space>
-nnoremap [file]e :<C-u>Explore <bar> /<C-r>=expand("%:t")<CR><CR> <bar> :nohlsearch<CR>
+nnoremap [file]e :<C-u>Explore <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>
 
 augroup vimrc_file_finder
   autocmd!
   " open file with enter key
   autocmd TerminalWinOpen !find*,!fd* nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR>
-  autocmd TerminalWinOpen !find*,!fd* set nobuflisted
+  autocmd TerminalWinOpen !find*,!fd* setl nobuflisted
 augroup END
 
 nnoremap [buffer] <Nop>
