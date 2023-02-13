@@ -105,16 +105,25 @@ nnoremap [file]f :<C-u>terminal ++curwin find . -iname **<Left>
 if executable('fd')
   nnoremap [file]f :<C-u>terminal ++curwin fd -H -i<Space>
 endif
-nnoremap [file]h :<C-u>browse oldfiles<CR>
-nnoremap [file]H :<C-u>browse filter /<C-r>=substitute(getcwd(), '^.*/', '', '')<CR>\/.*/ oldfiles<CR>
+nnoremap [file]h :<C-u>enew <bar> 0put =v:oldfiles <bar> goto 1 <bar> doautocmd User UserMRUEnter<CR>
+nnoremap [file]H :<C-u>enew <bar> 0put =v:oldfiles<CR>:v/<C-r>=substitute(getcwd(), '^.*/', '', '')<CR>/d <bar> nohlsearch <bar> doautocmd User UserMRUEnter<CR>
 nnoremap [file]s :<C-u>grep! -i<Space>
 nnoremap [file]e :<C-u>Explore <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>
 
 augroup vimrc_file_finder
   autocmd!
-  " open file with enter key
+  autocmd TerminalWinOpen !find*,!fd* setlocal nobuflisted
   autocmd TerminalWinOpen !find*,!fd* nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR>
-  autocmd TerminalWinOpen !find*,!fd* setl nobuflisted
+augroup END
+
+augroup vimrc_mru
+  autocmd!
+  autocmd User UserMRUEnter setlocal buftype=nofile
+  autocmd User UserMRUEnter setlocal nobuflisted
+  autocmd User UserMRUEnter goto 1
+  autocmd User UserMRUEnter nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR>
+  autocmd User UserMRUEnter syntax match UserMRUDirectory /^[^:]\+\//
+  autocmd User UserMRUEnter highlight UserMRUDirectory ctermfg=gray
 augroup END
 
 nnoremap [buffer] <Nop>
