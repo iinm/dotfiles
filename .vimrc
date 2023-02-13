@@ -102,7 +102,7 @@ nnoremap [file] <Nop>
 nmap <Leader>f [file]
 nnoremap [file]f :<C-u>terminal ++curwin find . -iname *
 if executable('fd')
-  nnoremap [file]f :<C-u>terminal ++curwin fd --hidden --ignore-case<Space>
+  nnoremap [file]f :<C-u>terminal ++curwin fd -H -i<Space>
 endif
 nnoremap [file]h :<C-u>browse oldfiles<CR>
 nnoremap [file]H :<C-u>browse filter /<C-r>=substitute(getcwd(), '^.*/', '', '')<CR>\/.*/ oldfiles<CR>
