@@ -110,6 +110,7 @@ vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>
 nnoremap [file] <Nop>
 nmap <Leader>f [file]
 nnoremap [file]h :<C-u>enew <bar> 0put =v:oldfiles<CR>:v/<C-r>=substitute(getcwd(), '^.*/', '', '')<CR>/d <bar> nohlsearch <bar> doautocmd User UserMRUEnter<CR>
+nnoremap [file]H :<C-u>enew <bar> 0put =v:oldfiles <bar> doautocmd User UserMRUEnter<CR>
 nnoremap [file]f :<C-u>terminal ++curwin find . -iname **<Left>
 nnoremap [file]s :<C-u>grep! -i<Space>
 nnoremap [file]e :<C-u>Explore <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>
