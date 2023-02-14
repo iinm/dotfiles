@@ -109,7 +109,8 @@ link() {
       echo "info: $dest is already exist. skip."
       continue
     fi
-    ln -vs "$src" "$dest"
+    echo "info: create symlink: $dest -> $src"
+    ln -s "$src" "$dest"
   done
 }
 

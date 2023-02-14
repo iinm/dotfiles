@@ -30,6 +30,7 @@
 "                      :%bd (close all) -> C-o (back to previous buffer)
 " window               C-w C-w (next window)
 "                      C-w -> o (close other windows)
+"                      C-w -> = (equalize window size)
 " browse file          :e .
 "                      :e . -> i -> i -> i (tree view)
 "                      :e . -> p (preview)
