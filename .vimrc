@@ -67,7 +67,6 @@ set wildmode=longest,full
 set wildoptions=pum
 set wildignore+=.git/,node_modules/
 set clipboard=unnamed,unnamedplus,autoselect
-set timeoutlen=500
 set ttimeoutlen=10
 set backspace=indent,eol,start
 set mouse=a
@@ -120,15 +119,14 @@ nnoremap <C-l> :nohlsearch<CR>
 nnoremap <Leader>w :<C-u>set wrap!<CR>
 nnoremap <Leader>n :<C-u>set number!<CR>
 
+nnoremap <leader><leader> :<C-u>buffers<CR>:b<Space>
+nnoremap <leader>r :<C-u>enew <bar> 0put =v:oldfiles<CR>:v/<C-r>=substitute(getcwd(), '^.*/', '', '')<CR>/d <bar> nohlsearch <bar> doautocmd User UserMRUEnter<CR>
 nnoremap <leader>f :<C-u>terminal ++curwin find . -iname **<Left>
 if executable('fd')
   nnoremap <leader>f :<C-u>terminal ++curwin fd -H -i<Space>
 endif
-nnoremap <leader>r :<C-u>enew <bar> 0put =v:oldfiles<CR>:v/<C-r>=substitute(getcwd(), '^.*/', '', '')<CR>/d <bar> nohlsearch <bar> doautocmd User UserMRUEnter<CR>
-nnoremap <leader>R :<C-u>enew <bar> 0put =v:oldfiles <bar> goto 1 <bar> doautocmd User UserMRUEnter<CR>
 nnoremap <leader>s :<C-u>grep! -i<Space>
 nnoremap <leader>e :<C-u>Explore <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>
-nnoremap <leader><leader> :<C-u>buffers<CR>:b<Space>
 
 augroup vimrc_file_finder
   autocmd!
@@ -226,7 +224,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   nnoremap [code]r :<C-u>LspReferences<CR>
   nnoremap [code]i :<C-u>LspImplementation<CR>
   nnoremap [code]a :<C-u>LspCodeAction<CR>
-  nnoremap [code]n :<C-u>LspRename<CR>
+  nnoremap [code]c :<C-u>LspRename<CR>
   nnoremap [code]h :<C-u>LspHover<CR>
   nnoremap [code]s :<C-u>LspSignatureHelp<CR>
   nnoremap [code]d :<C-u>LspDocumentDiagnostics<CR>
