@@ -127,7 +127,7 @@ nnoremap [buffer]d :<C-u>b #<CR>:bd #<CR>
 nnoremap [buffer]o :<C-u>%bd<CR><C-o>:bd #<CR>
 
 function! MRU(pattern='') abort
-  let files = filter(
+  let l:files = filter(
   \  deepcopy(v:oldfiles),
   \  {idx, path -> a:pattern == '' || path =~ '\v' . a:pattern}
   \ )
