@@ -1,0 +1,4 @@
+[[language]]
+name = "typescript"
+formatter = { command = "eslint-format-stdin.sh" , args = ["stdin.ts"] }
+auto-format = true

@@ -1,0 +1,14 @@
+theme = "everforest_dark"
+
+[editor]
+# gutters = ["diagnostics", "spacer", "line-numbers", "spacer", "diff"]
+gutters = ["diagnostics", "spacer", "diff"]
+
+[editor.cursor-shape]
+insert = "bar"
+
+[editor.file-picker]
+hidden = false
+
+[editor.lsp]
+# auto-signature-help = false
