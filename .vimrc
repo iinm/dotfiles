@@ -126,7 +126,6 @@ nnoremap [buffer]o :<C-u>%bd<CR><C-o>:bd #<CR>
 augroup vimrc_file_finder
   autocmd!
   autocmd TerminalWinOpen !find*,!fd* setlocal nobuflisted
-  autocmd TerminalWinOpen !find*,!fd* goto 1
   autocmd TerminalWinOpen !find*,!fd* nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR>
 augroup END
 
