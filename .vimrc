@@ -104,7 +104,7 @@ let mapleader = "\<Space>"
 nnoremap / /\v
 vnoremap / /\v
 nnoremap <C-l> :nohlsearch<CR>
-nnoremap <leader><leader> :<C-u>ls<CR>:b<Space>
+nnoremap <leader><leader> :<C-u>call Buffers()<CR>
 nnoremap <Leader>w :<C-u>set wrap!<CR>
 nnoremap <Leader>n :<C-u>set number!<CR>
 vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>
@@ -126,25 +126,40 @@ nnoremap [buffer]b :<C-u>b #<CR>
 nnoremap [buffer]d :<C-u>b #<CR>:bd #<CR>
 nnoremap [buffer]o :<C-u>%bd<CR><C-o>:bd #<CR>
 
+nnoremap [vim] <Nop>
+nmap <Leader>v [vim]
+nnoremap [vim]r :<C-u>source $MYVIMRC<CR>
+
+function! Buffers() abort
+  let l:buffers = execute('ls')
+  enew
+  setlocal buftype=nofile
+  setlocal nobuflisted
+  0put =l:buffers
+  goto 2
+  syntax match Grey /\v[^"]+\//
+  syntax match Aqua /\v\s.?a\s/
+  nnoremap <buffer> <CR> :<C-u>b <C-r>=matchstr(getline('.'), '\v^\s+\d+')<CR><CR>:sil bw #<CR>
+endfunction
+
 function! MRU(pattern='') abort
   let l:files = filter(
   \  deepcopy(v:oldfiles),
   \  {idx, path -> a:pattern == '' || path =~ '\v' . a:pattern}
   \ )
   enew
-  0put =files
-  goto 1
   setlocal buftype=nofile
   setlocal nobuflisted
-  nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR>
-  syntax match UserMRUDirectory /\v^.+\//
-  highlight UserMRUDirectory ctermfg=gray
+  0put =files
+  goto 1
+  nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR><CR>:sil bw #<CR>
+  syntax match Grey /\v^.+\//
 endfunction
 
 augroup vimrc_file_finder
   autocmd!
   autocmd TerminalWinOpen !find*,!fd* setlocal nobuflisted
-  autocmd TerminalWinOpen !find*,!fd* nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR>
+  autocmd TerminalWinOpen !find*,!fd* nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR><CR>:sil bw #<CR>
 augroup END
 
 " --- etc.
