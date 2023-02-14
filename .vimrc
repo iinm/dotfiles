@@ -73,6 +73,11 @@ set backspace=indent,eol,start
 set mouse=a
 set ttymouse=sgr
 set showcmd
+set tabstop=8 expandtab shiftwidth=2 softtabstop=2
+set grepprg=grep\ -n\ -H\ -R\ --exclude-dir\ '.git'\ $*\ .
+if executable('rg')
+  set grepprg=rg\ --vimgrep\ --hidden\ --glob\ '!.git'
+endif
 
 " --- Appearance
 set termguicolors
@@ -91,43 +96,29 @@ let &t_ZR="\<Esc>[23m"
 let &t_Cs = "\<Esc>[4:3m"
 let &t_Ce = "\<Esc>[4:0m"
 
-" --- Indent
-set tabstop=8 expandtab shiftwidth=2 softtabstop=2
-
-augroup vimrc_indent
-  autocmd!
-  autocmd Filetype go setlocal tabstop=4 noexpandtab softtabstop=4 shiftwidth=4
-augroup END
-
-" --- etc.
-set grepprg=grep\ -n\ -H\ -R\ --exclude-dir\ '.git'\ $*\ .
-if executable('rg')
-  set grepprg=rg\ --vimgrep\ --hidden\ --glob\ '!.git'
-endif
-
-augroup vimrc_quickfix
-  autocmd!
-  autocmd FileType qf setlocal nowrap
-  autocmd QuickFixCmdPost *grep* cwindow
-augroup END
-
-let g:markdown_fenced_languages = ['sh']
-
 " --- Keymap
 let mapleader = "\<Space>"
 
 nnoremap <C-l> :nohlsearch<CR>
+nnoremap <leader><leader> :<C-u>ls<CR>:b<Space>
 nnoremap <Leader>w :<C-u>set wrap!<CR>
 nnoremap <Leader>n :<C-u>set number!<CR>
+vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>
 
-nnoremap <leader><leader> :<C-u>buffers<CR>:b<Space>
-nnoremap <leader>r :<C-u>enew <bar> 0put =v:oldfiles<CR>:v/<C-r>=substitute(getcwd(), '^.*/', '', '')<CR>/d <bar> nohlsearch <bar> doautocmd User UserMRUEnter<CR>
-nnoremap <leader>f :<C-u>terminal ++curwin find . -iname **<Left>
+nnoremap [file] <Nop>
+nmap <Leader>f [file]
+nnoremap [file]h :<C-u>enew <bar> 0put =v:oldfiles<CR>:v/<C-r>=substitute(getcwd(), '^.*/', '', '')<CR>/d <bar> nohlsearch <bar> doautocmd User UserMRUEnter<CR>
+nnoremap [file]f :<C-u>terminal ++curwin find . -iname **<Left>
+nnoremap [file]s :<C-u>grep! -i<Space>
+nnoremap [file]e :<C-u>Explore <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>
 if executable('fd')
-  nnoremap <leader>f :<C-u>terminal ++curwin fd -H -i<Space>
+  nnoremap [file]f :<C-u>terminal ++curwin fd -H -i<Space>
 endif
-nnoremap <leader>s :<C-u>grep! -i<Space>
-nnoremap <leader>e :<C-u>Explore <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>
+
+nnoremap [buffer] <Nop>
+nmap <Leader>b [buffer]
+nnoremap [buffer]b :<C-u>b #<CR>
+nnoremap [buffer]o :<C-u>%bd<CR><C-o>:bd #<CR>
 
 augroup vimrc_file_finder
   autocmd!
@@ -138,13 +129,31 @@ augroup END
 
 augroup vimrc_mru
   autocmd!
-  autocmd User UserMRUEnter setlocal buftype=nofile
-  autocmd User UserMRUEnter setlocal nobuflisted
-  autocmd User UserMRUEnter goto 1
-  autocmd User UserMRUEnter nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR>
-  autocmd User UserMRUEnter syntax match UserMRUDirectory /^[^:]\+\//
-  autocmd User UserMRUEnter highlight UserMRUDirectory ctermfg=gray
+  autocmd User UserMRUEnter call s:on_user_mru_enter()
 augroup END
+
+function! s:on_user_mru_enter() abort
+  setlocal buftype=nofile
+  setlocal nobuflisted
+  goto 1
+  nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR>
+  syntax match UserMRUDirectory /^[^:]\+\//
+  highlight UserMRUDirectory ctermfg=gray
+endfunction
+
+" --- etc.
+augroup vimrc_quickfix
+  autocmd!
+  autocmd FileType qf setlocal nowrap
+  autocmd QuickFixCmdPost *grep* cwindow
+augroup END
+
+augroup vimrc_indent
+  autocmd!
+  autocmd Filetype go setlocal tabstop=4 noexpandtab softtabstop=4 shiftwidth=4
+augroup END
+
+let g:markdown_fenced_languages = ['sh']
 
 " --- Plugins
 if filereadable(expand('~/.vim/autoload/plug.vim'))
@@ -200,9 +209,15 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
       \ 'efm-langserver': {'disabled': v:false}
   \ }
 
-  augroup vimrc_plugin_format_on_save
+  function! s:on_lsp_buffer_enabled() abort
+    if exists('+tagfunc') | setlocal tagfunc=lsp#tagfunc | endif
+    autocmd! BufWritePre *.js,*.jsx,*.ts,*.tsx call execute('LspDocumentFormatSync --server=efm-langserver')
+    call s:enable_lsp_keymap()
+  endfunction
+
+  augroup vimrc_lsp
     autocmd!
-    autocmd BufWritePre *.js,*.jsx,*.ts,*.tsx call execute('LspDocumentFormatSync --server=efm-langserver')
+    autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
   augroup END
 
   " spelunker
@@ -210,27 +225,13 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   highlight SpelunkerComplexOrCompoundWord cterm=underline
 
   " --- File types
-  augroup vimrc_plugin_filetypes
+  augroup vimrc_filetypes_with_plugin
     autocmd!
     autocmd BufNewFile,BufRead *.tsx,*.jsx set filetype=typescriptreact
   augroup END
 
   " --- Plugin Keymap
   nnoremap s <Plug>(easymotion-overwin-f2)
-
-  nnoremap [code] <Nop>
-  nmap <Leader>c [code]
-  nnoremap [code]j :<C-u>LspDefinition<CR>
-  nnoremap [code]t :<C-u>LspTypeDefinition<CR>
-  nnoremap [code]r :<C-u>LspReferences<CR>
-  nnoremap [code]i :<C-u>LspImplementation<CR>
-  nnoremap [code]a :<C-u>LspCodeAction<CR>
-  nnoremap [code]c :<C-u>LspRename<CR>
-  nnoremap [code]h :<C-u>LspHover<CR>
-  nnoremap [code]s :<C-u>LspSignatureHelp<CR>
-  nnoremap [code]d :<C-u>LspDocumentDiagnostics<CR>
-  nnoremap [code]e :<C-u>LspNextError<CR>
-  nnoremap [code]f :<C-u>LspDocumentFormat<CR>
 
   " asyncomplete
   inoremap <expr> <cr> pumvisible() ? asyncomplete#close_popup() : "\<cr>"
@@ -240,4 +241,18 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   snoremap <expr> <C-f> vsnip#jumpable(1)  ? '<Plug>(vsnip-jump-next)' : '<C-f>'
   inoremap <expr> <C-b> vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<C-b>'
   snoremap <expr> <C-b> vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<C-b>'
+
+  function! s:enable_lsp_keymap() abort
+    nnoremap [code] <Nop>
+    nmap <Leader>c [code]
+    nnoremap <buffer> [code]t <plug>(lsp-type-definition)
+    nnoremap <buffer> [code]r <plug>(lsp-references)
+    nnoremap <buffer> [code]i <plug>(lsp-implementation)
+    nnoremap <buffer> [code]a <plug>(lsp-code-action)
+    nnoremap <buffer> [code]c <plug>(lsp-rename)
+    nnoremap <buffer> [code]h <plug>(lsp-hover)
+    nnoremap <buffer> [code]d <plug>(lsp-document-diagnostic)
+    nnoremap <buffer> [code]e <plug>(lsp-next-error)
+    nnoremap <buffer> [code]f <plug>(lsp-format)
+  endfunction
 endif " Plugins
