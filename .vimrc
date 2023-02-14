@@ -31,6 +31,8 @@
 " window               C-w C-w (next window)
 "                      C-w -> o (close other windows)
 "                      C-w -> = (equalize window size)
+"                      C-w -> _
+"                      C-w -> | (maximize)
 " browse file          :e .
 "                      :e . -> i -> i -> i (tree view)
 "                      :e . -> p (preview)
@@ -118,6 +120,7 @@ endif
 nnoremap [buffer] <Nop>
 nmap <Leader>b [buffer]
 nnoremap [buffer]b :<C-u>b #<CR>
+nnoremap [buffer]d :<C-u>b #<CR>:bd #<CR>
 nnoremap [buffer]o :<C-u>%bd<CR><C-o>:bd #<CR>
 
 augroup vimrc_file_finder
