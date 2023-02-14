@@ -101,6 +101,8 @@ let &t_Ce = "\<Esc>[4:0m"
 " --- Keymap
 let mapleader = "\<Space>"
 
+nnoremap / /\v
+vnoremap / /\v
 nnoremap <C-l> :nohlsearch<CR>
 nnoremap <leader><leader> :<C-u>ls<CR>:b<Space>
 nnoremap <Leader>w :<C-u>set wrap!<CR>
@@ -109,8 +111,8 @@ vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>
 
 nnoremap [file] <Nop>
 nmap <Leader>f [file]
-nnoremap [file]h :<C-u>enew <bar> 0put =v:oldfiles<CR>:v/<C-r>=substitute(getcwd(), '^.*/', '', '')<CR>/d <bar> nohlsearch <bar> doautocmd User UserMRUEnter<CR>
-nnoremap [file]H :<C-u>enew <bar> 0put =v:oldfiles <bar> doautocmd User UserMRUEnter<CR>
+nnoremap [file]h :<C-u>call MRU('<C-r>=substitute(getcwd(), '^.*/', '', '')<CR>')<CR>
+nnoremap [file]H :<C-u>call MRU()<CR>
 nnoremap [file]f :<C-u>terminal ++curwin find . -iname **<Left>
 nnoremap [file]s :<C-u>grep! -i<Space>
 nnoremap [file]e :<C-u>Explore <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>
@@ -124,25 +126,26 @@ nnoremap [buffer]b :<C-u>b #<CR>
 nnoremap [buffer]d :<C-u>b #<CR>:bd #<CR>
 nnoremap [buffer]o :<C-u>%bd<CR><C-o>:bd #<CR>
 
+function! MRU(pattern='') abort
+  let files = filter(
+  \  deepcopy(v:oldfiles),
+  \  {idx, path -> a:pattern == '' || path =~ '\v' . a:pattern}
+  \ )
+  enew
+  0put =files
+  goto 1
+  setlocal buftype=nofile
+  setlocal nobuflisted
+  nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR>
+  syntax match UserMRUDirectory /\v^.+\//
+  highlight UserMRUDirectory ctermfg=gray
+endfunction
+
 augroup vimrc_file_finder
   autocmd!
   autocmd TerminalWinOpen !find*,!fd* setlocal nobuflisted
   autocmd TerminalWinOpen !find*,!fd* nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR>
 augroup END
-
-augroup vimrc_mru
-  autocmd!
-  autocmd User UserMRUEnter call s:on_user_mru_enter()
-augroup END
-
-function! s:on_user_mru_enter() abort
-  setlocal buftype=nofile
-  setlocal nobuflisted
-  goto 1
-  nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR>
-  syntax match UserMRUDirectory /^[^:]\+\//
-  highlight UserMRUDirectory ctermfg=gray
-endfunction
 
 " --- etc.
 augroup vimrc_quickfix
@@ -209,7 +212,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   let g:lsp_diagnostics_virtual_text_enabled = 0
   let g:lsp_diagnostics_echo_cursor = 1
   let g:lsp_settings = {
-      \ 'efm-langserver': {'disabled': v:false}
+  \  'efm-langserver': {'disabled': v:false}
   \ }
 
   function! s:on_lsp_buffer_enabled() abort
