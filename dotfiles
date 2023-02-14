@@ -31,7 +31,6 @@ bootstrap() {
       fish
       tmux
       git
-      tig
       make
       ripgrep
       fd-find
@@ -72,7 +71,6 @@ bootstrap() {
     local packages=(
       fish
       tmux
-      tig
       ripgrep
       fd
       fzf
