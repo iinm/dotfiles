@@ -236,6 +236,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   " lsp
   let g:lsp_diagnostics_virtual_text_enabled = 0
   let g:lsp_diagnostics_echo_cursor = 1
+  let g:lsp_document_code_action_signs_enabled = 0
   let g:lsp_settings = {
   \  'efm-langserver': {'disabled': v:false}
   \ }
