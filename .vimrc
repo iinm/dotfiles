@@ -289,6 +289,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   function! s:enable_lsp_keymap() abort
     nnoremap [code] <Nop>
     nmap <Leader>c [code]
+    nnoremap <buffer> [code]j <plug>(lsp-definition)
     nnoremap <buffer> [code]t <plug>(lsp-type-definition)
     nnoremap <buffer> [code]r <plug>(lsp-references)
     nnoremap <buffer> [code]i <plug>(lsp-implementation)
