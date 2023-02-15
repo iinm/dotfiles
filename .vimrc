@@ -75,6 +75,7 @@ set backspace=indent,eol,start
 set mouse=a
 set ttymouse=sgr
 set showcmd
+set laststatus=2
 set tabstop=8 expandtab shiftwidth=2 softtabstop=2
 set grepprg=grep\ -n\ -H\ -R\ --exclude-dir\ '.git'\ $*\ .
 if executable('rg')
@@ -282,7 +283,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   nnoremap [git]g :<C-u>Git<CR>
   nnoremap [git]f :<C-u>Git fetch --prune<CR>
   nnoremap [git]c :<C-u>Git checkout<Space>
-  nnoremap [git]p :<C-u>Git push<Space>
+  nnoremap [git]p :<C-u>terminal git push origin <C-r>=FugitiveHead()<CR><Space>
 
   function! s:enable_lsp_keymap() abort
     nnoremap [code] <Nop>
