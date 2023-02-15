@@ -148,8 +148,8 @@ function! Buffers() abort
   syntax match Red /\v\+\s/ " modified
   nnoremap <buffer> <CR> :<C-u>b <C-r>=matchstr(getline('.'), '\v^\s+\d+')<CR><CR>:bw #<CR>
   nnoremap <buffer> dd :<C-u>bd <C-r>=matchstr(getline('.'), '\v^\s+\d+')<CR><CR>dd
-  nnoremap <buffer> <Esc> :<C-u>bw<CR>
-  nnoremap <buffer> <C-o> :<C-u>bw<CR>
+  nnoremap <buffer> <Esc> :<C-u>b #<CR>:bw #<CR>
+  nnoremap <buffer> <C-o> :<C-u>b #<CR>:bw #<CR>
 endfunction
 
 function! MRU(pattern='') abort
@@ -170,16 +170,16 @@ function! MRU(pattern='') abort
   setlocal readonly
   syntax match Grey /\v^.+\// " directory
   nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR><CR>:bw #<CR>
-  nnoremap <buffer> <Esc> :<C-u>bw<CR>
-  nnoremap <buffer> <C-o> :<C-u>bw<CR>
+  nnoremap <buffer> <Esc> :<C-u>b #<CR>:bw #<CR>
+  nnoremap <buffer> <C-o> :<C-u>b #<CR>:bw #<CR>
 endfunction
 
 augroup vimrc_file_finder
   autocmd!
   autocmd TerminalWinOpen !find*,!fd* setlocal nobuflisted
   autocmd TerminalWinOpen !find*,!fd* nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR><CR>:bw #<CR>
-  autocmd TerminalWinOpen !find*,!fd* nnoremap <buffer> <Esc> :<C-u>bw<CR>
-  autocmd TerminalWinOpen !find*,!fd* nnoremap <buffer> <C-o> :<C-u>bw<CR>
+  autocmd TerminalWinOpen !find*,!fd* nnoremap <buffer> <Esc> :<C-u>b #<CR>:bw<CR>
+  autocmd TerminalWinOpen !find*,!fd* nnoremap <buffer> <C-o> :<C-u>b #<CR>:bw<CR>
 augroup END
 
 " --- etc.
@@ -203,7 +203,9 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   Plug 'sainnhe/everforest'
 
   " utilities
+  Plug 'ctrlpvim/ctrlp.vim'
   Plug 'easymotion/vim-easymotion'
+  Plug 'jiangmiao/auto-pairs'
   Plug 'tpope/vim-commentary'
   Plug 'tpope/vim-fugitive'
   Plug 'tpope/vim-sleuth'
@@ -236,9 +238,18 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   set background=dark
   colorscheme everforest
 
+  " ctrlp
+  let g:ctrlp_user_command = 'fd --type f --color=never "" %s'
+  let g:ctrlp_use_caching = 0
+
   " easymotion
   let g:EasyMotion_do_mapping = 0
   let g:EasyMotion_smartcase = 1
+
+  " auto-pairs
+  " https://github.com/jiangmiao/auto-pairs/issues/104
+  let g:AutoPairsMultilineClose = 0
+  let g:AutoPairsFlyMode = 0
 
   " javascript
   let g:javascript_plugin_jsdoc = 1
@@ -277,6 +288,11 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
 
   " --- Plugin Keymap
   nnoremap s <Plug>(easymotion-overwin-f2)
+  nnoremap <leader><leader> :<C-u>CtrlPBuffer<CR>
+
+  nnoremap [file]f :<C-u>CtrlP<CR>
+  nnoremap [file]h :<C-u>let g:ctrlp_mruf_relative = 1 <bar> CtrlPMRU<CR>
+  nnoremap [file]H :<C-u>let g:ctrlp_mruf_relative = 0 <bar> CtrlPMRU<CR>
 
   nnoremap [git] <Nop>
   nmap <Leader>g [git]
