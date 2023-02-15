@@ -145,7 +145,7 @@ function! Buffers() abort
   syntax match Grey /\vline\s+\d+/ " line number
   syntax match Aqua /\v\s.?a\s/ " active
   syntax match Red /\v\+\s/ " modified
-  nnoremap <buffer> <CR> :<C-u>b <C-r>=matchstr(getline('.'), '\v^\s+\d+')<CR><CR>:sil bw #<CR>
+  nnoremap <buffer> <CR> :<C-u>b <C-r>=matchstr(getline('.'), '\v^\s+\d+')<CR><CR>:bw #<CR>
   nnoremap <buffer> <Esc> :<C-u>bw<CR>
 endfunction
 
@@ -161,14 +161,14 @@ function! MRU(pattern='') abort
   goto 1
   setlocal readonly
   syntax match Grey /\v^.+\// " directory
-  nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR><CR>:sil bw #<CR>
+  nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR><CR>:bw #<CR>
   nnoremap <buffer> <Esc> :<C-u>bw<CR>
 endfunction
 
 augroup vimrc_file_finder
   autocmd!
   autocmd TerminalWinOpen !find*,!fd* setlocal nobuflisted
-  autocmd TerminalWinOpen !find*,!fd* nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR><CR>:sil bw #<CR>
+  autocmd TerminalWinOpen !find*,!fd* nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR><CR>:bw #<CR>
   autocmd TerminalWinOpen !find*,!fd* nnoremap <Esc> :<C-u>bw<CR>
 augroup END
 
