@@ -134,7 +134,7 @@ function! Buffers() abort
   let l:cwd_name = substitute(getcwd(), '^.*/', '', '')
   let l:buffers = execute('ls')
   let l:buffers = substitute(l:buffers, '^\n', '', '')
-  let l:buffers = substitute(l:buffers, '\v[^"]{-}' . l:cwd_name . '/', '', 'g')
+  let l:buffers = substitute(l:buffers, '\v[^"]{-}/' . l:cwd_name . '/', '', 'g')
   enew
   setlocal buftype=nofile
   setlocal nobuflisted
@@ -154,7 +154,12 @@ endfunction
 function! MRU(pattern='') abort
   let l:files = filter(
   \  deepcopy(v:oldfiles),
-  \  {idx, path -> a:pattern == '' || path =~ '\v' . a:pattern}
+  \  {_, path -> a:pattern == '' || path =~ '\v' . a:pattern}
+  \ )
+  " omit current directory
+  let l:files = map(
+  \  l:files,
+  \  {_, path -> substitute(expand(path), getcwd() . '/', '', '')}
   \ )
   enew
   setlocal buftype=nofile
