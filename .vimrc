@@ -283,7 +283,8 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   nnoremap [git]g :<C-u>Git<CR>
   nnoremap [git]f :<C-u>Git fetch --prune<CR>
   nnoremap [git]c :<C-u>Git checkout<Space>
-  nnoremap [git]p :<C-u>terminal git push origin <C-r>=FugitiveHead()<CR><Space>
+  nnoremap [git]p :<C-u>Git pull origin <C-r>=FugitiveHead()<CR><CR>
+  nnoremap [git]P :<C-u>terminal git push origin <C-r>=FugitiveHead()<CR><Space>
 
   function! s:enable_lsp_keymap() abort
     nnoremap [code] <Nop>
