@@ -105,7 +105,7 @@ let mapleader = "\<Space>"
 nnoremap / /\v
 vnoremap / /\v
 nnoremap <C-l> :nohlsearch<CR>
-nnoremap <leader><leader> :<C-u>call Buffers()<CR>
+nnoremap <leader><leader> :<C-u>Buffers<CR>
 nnoremap <Leader>w :<C-u>set wrap!<CR>
 nnoremap <Leader>n :<C-u>set number!<CR>
 vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>
@@ -131,6 +131,8 @@ nnoremap [vim] <Nop>
 nmap <Leader>v [vim]
 nnoremap [vim]r :<C-u>source $MYVIMRC<CR>
 
+command -nargs=0 Buffers call Buffers()
+
 function! Buffers() abort
   let l:cwd_name = substitute(getcwd(), '^.*/', '', '')
   let l:buffers = execute('ls')
@@ -141,12 +143,11 @@ function! Buffers() abort
   setlocal nobuflisted
   0put =l:buffers
   goto 1
-  setlocal readonly
   syntax match Grey /\v[^"]+\// " directory
   syntax match Grey /\vline\s+\d+/ " line number
   syntax match Aqua /\v\s.?a\s/ " active
   syntax match Red /\v\+\s/ " modified
-  nnoremap <buffer> <CR> :<C-u>b <C-r>=matchstr(getline('.'), '\v^\s+\d+')<CR><CR>:bw #<CR>
+  nnoremap <buffer> <CR> :<C-u>b <C-r>=matchstr(getline('.'), '\v^\s+\d+')<CR><CR>:bw #<CR>:nohlsearch<CR>
   nnoremap <buffer> dd :<C-u>bd <C-r>=matchstr(getline('.'), '\v^\s+\d+')<CR><CR>dd
   nnoremap <buffer> <Esc> :<C-u>b #<CR>:bw #<CR>
   nnoremap <buffer> <C-o> :<C-u>b #<CR>:bw #<CR>
@@ -169,18 +170,22 @@ function! MRU(pattern='') abort
   goto 1
   setlocal readonly
   syntax match Grey /\v^.+\// " directory
-  nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR><CR>:bw #<CR>
+  nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR><CR>:bw #<CR>:nohlsearch<CR>
   nnoremap <buffer> <Esc> :<C-u>b #<CR>:bw #<CR>
   nnoremap <buffer> <C-o> :<C-u>b #<CR>:bw #<CR>
 endfunction
 
 augroup vimrc_file_finder
   autocmd!
-  autocmd TerminalWinOpen !find*,!fd* setlocal nobuflisted
-  autocmd TerminalWinOpen !find*,!fd* nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR><CR>:bw #<CR>
-  autocmd TerminalWinOpen !find*,!fd* nnoremap <buffer> <Esc> :<C-u>b #<CR>:bw<CR>
-  autocmd TerminalWinOpen !find*,!fd* nnoremap <buffer> <C-o> :<C-u>b #<CR>:bw<CR>
+  autocmd TerminalWinOpen !find*,!fd* call s:on_file_finder_open()
 augroup END
+
+function! s:on_file_finder_open() abort
+  setlocal nobuflisted
+  nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR><CR>:bw #<CR>:nohlsearch<CR>
+  nnoremap <buffer> <Esc> :<C-u>b #<CR>:bw<CR>
+  nnoremap <buffer> <C-o> :<C-u>b #<CR>:bw<CR>
+endfunction
 
 " --- etc.
 augroup vimrc_quickfix
@@ -194,6 +199,12 @@ augroup vimrc_indent
   autocmd Filetype go setlocal tabstop=4 noexpandtab softtabstop=4 shiftwidth=4
 augroup END
 
+" https://vim.fandom.com/wiki/Fix_syntax_highlighting
+augroup vimrc_fix_syntax_highlighting
+  autocmd!
+  autocmd BufEnter,InsertLeave * :syntax sync fromstart
+augroup END
+
 let g:markdown_fenced_languages = ['sh']
 
 " --- Plugins
@@ -205,7 +216,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   " utilities
   Plug 'ctrlpvim/ctrlp.vim'
   Plug 'easymotion/vim-easymotion'
-  Plug 'jiangmiao/auto-pairs'
   Plug 'tpope/vim-commentary'
   Plug 'tpope/vim-fugitive'
   Plug 'tpope/vim-sleuth'
@@ -239,17 +249,13 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   colorscheme everforest
 
   " ctrlp
-  let g:ctrlp_user_command = 'fd --type f --color=never "" %s'
+  let g:ctrlp_user_command = 'fd --hidden --type f --color=never "" %s'
   let g:ctrlp_use_caching = 0
+  let g:ctrlp_by_filename = 1
 
   " easymotion
   let g:EasyMotion_do_mapping = 0
   let g:EasyMotion_smartcase = 1
-
-  " auto-pairs
-  " https://github.com/jiangmiao/auto-pairs/issues/104
-  let g:AutoPairsMultilineClose = 0
-  let g:AutoPairsFlyMode = 0
 
   " javascript
   let g:javascript_plugin_jsdoc = 1
@@ -288,11 +294,8 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
 
   " --- Plugin Keymap
   nnoremap s <Plug>(easymotion-overwin-f2)
-  nnoremap <leader><leader> :<C-u>CtrlPBuffer<CR>
 
   nnoremap [file]f :<C-u>CtrlP<CR>
-  nnoremap [file]h :<C-u>let g:ctrlp_mruf_relative = 1 <bar> CtrlPMRU<CR>
-  nnoremap [file]H :<C-u>let g:ctrlp_mruf_relative = 0 <bar> CtrlPMRU<CR>
 
   nnoremap [git] <Nop>
   nmap <Leader>g [git]
