@@ -131,14 +131,19 @@ nmap <Leader>v [vim]
 nnoremap [vim]r :<C-u>source $MYVIMRC<CR>
 
 function! Buffers() abort
+  let l:cwd_name = substitute(getcwd(), '^.*/', '', '')
   let l:buffers = execute('ls')
+  let l:buffers = substitute(l:buffers, '^\n', '', '')
+  let l:buffers = substitute(l:buffers, '\v[^"]{-}' . l:cwd_name . '/', '', 'g')
   enew
   setlocal buftype=nofile
   setlocal nobuflisted
   0put =l:buffers
-  goto 2
+  goto 1
+  setlocal readonly
   syntax match Grey /\v[^"]+\//
   syntax match Aqua /\v\s.?a\s/
+  syntax match Red /\v\+\s/
   nnoremap <buffer> <CR> :<C-u>b <C-r>=matchstr(getline('.'), '\v^\s+\d+')<CR><CR>:sil bw #<CR>
 endfunction
 
@@ -152,6 +157,7 @@ function! MRU(pattern='') abort
   setlocal nobuflisted
   0put =files
   goto 1
+  setlocal readonly
   nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR><CR>:sil bw #<CR>
   syntax match Grey /\v^.+\//
 endfunction
