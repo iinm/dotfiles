@@ -265,6 +265,9 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   highlight SpelunkerSpellBad cterm=underline
   highlight SpelunkerComplexOrCompoundWord cterm=underline
 
+  " fugitive
+  set statusline=%<%f\ %h%m%r%{FugitiveStatusline()}%=%-14.(%l,%c%V%)\ %P
+
   " --- File types
   augroup vimrc_filetypes_with_plugin
     autocmd!
@@ -274,14 +277,12 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   " --- Plugin Keymap
   nnoremap s <Plug>(easymotion-overwin-f2)
 
-  " asyncomplete
-  inoremap <expr> <cr> pumvisible() ? asyncomplete#close_popup() : "\<cr>"
-
-  " vsnip
-  inoremap <expr> <C-f> vsnip#jumpable(1)  ? '<Plug>(vsnip-jump-next)' : '<C-f>'
-  snoremap <expr> <C-f> vsnip#jumpable(1)  ? '<Plug>(vsnip-jump-next)' : '<C-f>'
-  inoremap <expr> <C-b> vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<C-b>'
-  snoremap <expr> <C-b> vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<C-b>'
+  nnoremap [git] <Nop>
+  nmap <Leader>g [git]
+  nnoremap [git]g :<C-u>Git<CR>
+  nnoremap [git]f :<C-u>Git fetch --prune<CR>
+  nnoremap [git]c :<C-u>Git checkout<Space>
+  nnoremap [git]p :<C-u>Git push<Space>
 
   function! s:enable_lsp_keymap() abort
     nnoremap [code] <Nop>
@@ -296,4 +297,13 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
     nnoremap <buffer> [code]e <plug>(lsp-next-error)
     nnoremap <buffer> [code]f <plug>(lsp-format)
   endfunction
+
+  " asyncomplete
+  inoremap <expr> <cr> pumvisible() ? asyncomplete#close_popup() : "\<cr>"
+
+  " vsnip
+  inoremap <expr> <C-f> vsnip#jumpable(1)  ? '<Plug>(vsnip-jump-next)' : '<C-f>'
+  snoremap <expr> <C-f> vsnip#jumpable(1)  ? '<Plug>(vsnip-jump-next)' : '<C-f>'
+  inoremap <expr> <C-b> vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<C-b>'
+  snoremap <expr> <C-b> vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<C-b>'
 endif " Plugins
