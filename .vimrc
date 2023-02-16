@@ -67,8 +67,8 @@ set ignorecase
 set smartcase
 set wildmenu
 set wildmode=longest,full
-set wildoptions=pum
-set wildignore+=.git/,node_modules/
+set wildoptions=fuzzy,pum
+set wildignore=.git/,node_modules/
 set clipboard=unnamed,unnamedplus,autoselect
 set ttimeoutlen=10
 set backspace=indent,eol,start
@@ -105,33 +105,26 @@ let mapleader = "\<Space>"
 nnoremap / /\v
 vnoremap / /\v
 nnoremap <C-l> :nohlsearch<CR>
-nnoremap <leader><leader> :<C-u>Buffers<CR>
 nnoremap <Leader>w :<C-u>set wrap!<CR>
 nnoremap <Leader>n :<C-u>set number!<CR>
 vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>
-
-nnoremap [file] <Nop>
-nmap <Leader>f [file]
-nnoremap [file]h :<C-u>call MRU('<C-r>=substitute(getcwd(), '^.*/', '', '')<CR>')<CR>
-nnoremap [file]H :<C-u>call MRU()<CR>
-nnoremap [file]f :<C-u>terminal ++curwin find . -iname **<Left>
-nnoremap [file]s :<C-u>grep! -i<Space>
-nnoremap [file]e :<C-u>Explore <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>
+nnoremap <leader>f :<C-u>terminal ++curwin find . -iname **<Left>
 if executable('fd')
-  nnoremap [file]f :<C-u>terminal ++curwin fd -H -i<Space>
+  nnoremap <leader>f :<C-u>terminal ++curwin fd -H -i<Space>
 endif
-
-nnoremap [buffer] <Nop>
-nmap <Leader>b [buffer]
-nnoremap [buffer]b :<C-u>b #<CR>
-nnoremap [buffer]d :<C-u>b #<CR>:bd #<CR>
-nnoremap [buffer]o :<C-u>%bd<CR><C-o>:bd #<CR>
+nnoremap <leader>b :<C-u>Buffers<CR>
 
 nnoremap [vim] <Nop>
 nmap <Leader>v [vim]
 nnoremap [vim]r :<C-u>source $MYVIMRC<CR>
 
 command -nargs=0 Buffers call Buffers()
+command -nargs=0 BD call BufferDelete()
+command -nargs=0 Oldfiles call Oldfiles()
+
+function! BufferDelete() abort
+  execute('b # | bd #')
+endfunction
 
 function! Buffers() abort
   let l:cwd_name = substitute(getcwd(), '^.*/', '', '')
@@ -153,7 +146,7 @@ function! Buffers() abort
   nnoremap <buffer> <C-o> :<C-u>b #<CR>:bw #<CR>
 endfunction
 
-function! MRU(pattern='') abort
+function! Oldfiles(pattern='') abort
   let l:files = filter(
   \  deepcopy(v:oldfiles),
   \  {_, path -> a:pattern == '' || path =~ '\v' . a:pattern}
@@ -216,6 +209,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   " utilities
   Plug 'ctrlpvim/ctrlp.vim'
   Plug 'easymotion/vim-easymotion'
+  Plug 'jiangmiao/auto-pairs'
   Plug 'tpope/vim-commentary'
   Plug 'tpope/vim-fugitive'
   Plug 'tpope/vim-sleuth'
@@ -248,14 +242,21 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   set background=dark
   colorscheme everforest
 
+
   " ctrlp
-  let g:ctrlp_user_command = 'fd --hidden --type f --color=never "" %s'
+  let g:ctrlp_user_command = 'fd --hidden --exclude .git --type f --color=never "" %s'
   let g:ctrlp_use_caching = 0
   let g:ctrlp_by_filename = 1
+  let g:ctrlp_mruf_relative = 1
 
   " easymotion
   let g:EasyMotion_do_mapping = 0
   let g:EasyMotion_smartcase = 1
+
+  " auto-pairs
+  " https://github.com/jiangmiao/auto-pairs/issues/104
+  let g:AutoPairsMultilineClose = 0
+  let g:AutoPairsFlyMode = 0
 
   " javascript
   let g:javascript_plugin_jsdoc = 1
@@ -295,29 +296,24 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   " --- Plugin Keymap
   nnoremap s <Plug>(easymotion-overwin-f2)
 
-  nnoremap [file]f :<C-u>CtrlP<CR>
+  nnoremap <leader>f :<C-u>CtrlPMixed<CR>
 
   nnoremap [git] <Nop>
   nmap <Leader>g [git]
-  nnoremap [git]g :<C-u>Git<CR>
   nnoremap [git]f :<C-u>Git fetch --prune<CR>
   nnoremap [git]c :<C-u>Git checkout<Space>
   nnoremap [git]p :<C-u>Git pull origin <C-r>=FugitiveHead()<CR><CR>
   nnoremap [git]P :<C-u>terminal git push origin <C-r>=FugitiveHead()<CR><Space>
 
   function! s:enable_lsp_keymap() abort
-    nnoremap [code] <Nop>
-    nmap <Leader>c [code]
-    nnoremap <buffer> [code]j <plug>(lsp-definition)
-    nnoremap <buffer> [code]t <plug>(lsp-type-definition)
-    nnoremap <buffer> [code]r <plug>(lsp-references)
-    nnoremap <buffer> [code]i <plug>(lsp-implementation)
-    nnoremap <buffer> [code]a <plug>(lsp-code-action)
-    nnoremap <buffer> [code]c <plug>(lsp-rename)
-    nnoremap <buffer> [code]h <plug>(lsp-hover)
-    nnoremap <buffer> [code]d <plug>(lsp-document-diagnostic)
-    nnoremap <buffer> [code]e <plug>(lsp-next-error)
-    nnoremap <buffer> [code]f <plug>(lsp-format)
+    nnoremap <buffer> <leader>a <plug>(lsp-code-action)
+    nnoremap <buffer> gd <plug>(lsp-definition)
+    nnoremap <buffer> gt <plug>(lsp-type-definition)
+    nnoremap <buffer> gr <plug>(lsp-references)
+    nnoremap <buffer> gi <plug>(lsp-implementation)
+    nnoremap <buffer> [g <plug>(lsp-previous-diagnostic)
+    nnoremap <buffer> ]g <plug>(lsp-next-diagnostic)
+    nnoremap <buffer> K <plug>(lsp-hover)
   endfunction
 
   " asyncomplete
