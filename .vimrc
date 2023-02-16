@@ -13,6 +13,8 @@
 " search               /foo -> n (next) -> N (previous)
 "                      * (next <cword>)
 "                      % (previous <cword>)
+" command              :foo
+"                      :foo <C-r>" (paste from register)
 " replace              :%s/foo/bar/g
 "                      :%s/<C-r>/bar/g (replace last search)
 " marks                :marks
@@ -138,7 +140,6 @@ function! Buffers() abort
   setlocal buftype=nofile
   setlocal nobuflisted
   0put =l:buffers
-  goto 1
   syntax match Grey /\v[^"]+\// " directory
   syntax match Grey /\vline\s+\d+/ " line number
   syntax match Aqua /\v\s.?a\s/ " active
@@ -310,6 +311,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   nnoremap [git]c :<C-u>Git checkout<Space>
   nnoremap [git]p :<C-u>Git pull origin <C-r>=FugitiveHead()<CR><CR>
   nnoremap [git]P :<C-u>terminal git push origin <C-r>=FugitiveHead()<CR><Space>
+  nnoremap [git]b :<C-u>Git blame<CR>
 
   function! s:enable_lsp_keymap() abort
     nnoremap <buffer> <leader>a <plug>(lsp-code-action)
