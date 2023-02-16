@@ -13,6 +13,8 @@
 " search               /foo -> n (next) -> N (previous)
 "                      * (next <cword>)
 "                      % (previous <cword>)
+" replace              :%s/foo/bar/g
+"                      :%s/<C-r>/bar/g (replace last search)
 " marks                :marks
 "                      ma (set mark a)
 "                      `a (jump to mark a)
@@ -121,6 +123,7 @@ nnoremap [vim]r :<C-u>source $MYVIMRC<CR>
 command -nargs=0 Buffers call Buffers()
 command -nargs=0 BD call BufferDelete()
 command -nargs=0 Oldfiles call Oldfiles()
+command -nargs=0 OldfilesLocal call Oldfiles(substitute(getcwd(), '^.*/', '', ''))
 
 function! BufferDelete() abort
   execute('b # | bd #')
@@ -209,10 +212,13 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   " utilities
   Plug 'ctrlpvim/ctrlp.vim'
   Plug 'easymotion/vim-easymotion'
-  Plug 'jiangmiao/auto-pairs'
   Plug 'tpope/vim-commentary'
   Plug 'tpope/vim-fugitive'
   Plug 'tpope/vim-sleuth'
+  Plug 'mattn/vim-maketable'
+  Plug 'mattn/emmet-vim'
+  Plug 'jiangmiao/auto-pairs'
+  Plug 'markonm/traces.vim'
   Plug 'kamykn/spelunker.vim'
   Plug 'github/copilot.vim'
 
