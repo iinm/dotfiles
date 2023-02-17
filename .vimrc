@@ -120,8 +120,6 @@ if executable('fd')
   nnoremap <leader>f :<C-u>terminal ++curwin fd -H -i<Space>
 endif
 nnoremap <leader>b :<C-u>Buffers<CR>
-nnoremap c[ :<C-u>colder<CR>
-nnoremap c] :<C-u>cnewer<CR>
 nnoremap gO :<C-u>Outline<CR>
 
 nnoremap [vim] <Nop>
