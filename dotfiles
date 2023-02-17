@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
+: "${LUA_VERSION:="5.4.4"}"
 : "${VIM_VERSION:="v9.0.1274"}"
 
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+LUA_DIR=~/tools/lua-$LUA_VERSION
 
 help() {
   cat << 'HELP'
@@ -13,6 +16,7 @@ Usage: dotfiles COMMAND
   link            Create symlink to dotfiles
   setup_fish      Setup fish shell
   setup_git       Setup git
+  setup_lua       Setup lua
   setup_vim       Setup vim
 HELP
 }
@@ -22,6 +26,7 @@ setup() {
   link
   setup_fish
   setup_git
+  setup_lua
   setup_vim
 }
 
@@ -163,6 +168,32 @@ setup_git() {
   fi
 }
 
+setup_lua() {
+  local lua_source_dir=~/tools/sources/lua-$LUA_VERSION
+
+  if test -e "$lua_source_dir"; then
+    echo "info: $lua_source_dir exists. skip."
+  else
+    echo "info: download lua source."
+    curl --show-error --fail -o - \
+      "https://www.lua.org/ftp/lua-$LUA_VERSION.tar.gz" \
+      | tar xz -C ~/tools/sources
+  fi
+
+  if test -e "$LUA_DIR"; then
+    echo "info: $LUA_DIR exists. skip."
+  else
+    echo "info: build lua.";
+    (
+      set -eu;
+      cd "$lua_source_dir";
+      make clean
+      make all test
+      make INSTALL_TOP="$LUA_DIR" install;
+    )
+  fi
+}
+
 setup_vim() {
   local vim_source_dir=~/tools/sources/vim
   local vim_dir=~/tools/vim
@@ -182,7 +213,7 @@ setup_vim() {
       set -eu;
       cd "$vim_source_dir/src";
       make distclean || true;
-      ./configure --prefix="$vim_dir";
+      ./configure --prefix="$vim_dir" --enable-luainterp=yes --with-lua-prefix="$LUA_DIR";
       make;
       make install;
     )
