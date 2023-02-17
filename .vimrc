@@ -51,6 +51,9 @@
 "                      :terminal -> Ctrl-w -> N  (normal mode)
 "                      :terminal -> Ctrl-w -> :  (command mode)
 "                      :terminal -> Ctrl-w -> "" (paste)
+" quickfix             :cw(indow) (open quickfix window)
+"                      :colder (older quickfix list)
+"                      :cnewer (newer quickfix list)
 " open path            gf (goto file), gx (xdg-open)
 
 if !isdirectory(expand("~/.vim/undodir"))
@@ -117,6 +120,9 @@ if executable('fd')
   nnoremap <leader>f :<C-u>terminal ++curwin fd -H -i<Space>
 endif
 nnoremap <leader>b :<C-u>Buffers<CR>
+nnoremap c[ :<C-u>colder<CR>
+nnoremap c] :<C-u>cnewer<CR>
+nnoremap gO :<C-u>Outline<CR>
 
 nnoremap [vim] <Nop>
 nmap <Leader>v [vim]
@@ -126,6 +132,7 @@ command -nargs=0 Buffers call Buffers()
 command -nargs=0 BD call BufferDelete()
 command -nargs=0 Oldfiles call Oldfiles()
 command -nargs=0 OldfilesLocal call Oldfiles(substitute(getcwd(), '^.*/', '', ''))
+command -nargs=0 Outline call Outline()
 
 function! BufferDelete() abort
   execute('b # | bd #')
@@ -170,6 +177,26 @@ function! Oldfiles(pattern='') abort
   nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR><CR>:bw #<CR>:nohlsearch<CR>
   nnoremap <buffer> <Esc> :<C-u>b #<CR>:bw #<CR>
   nnoremap <buffer> <C-o> :<C-u>b #<CR>:bw #<CR>
+endfunction
+
+function! Outline() abort
+  let l:filetype = &filetype
+
+  if l:filetype == 'typescript'
+    if expand('%') =~ '\.test\.ts$'
+      vimgrep /\v^\s*(describe|beforeAll|afterAll|beforeEach|afterEach|it[^\w]|")/j %
+    else
+      vimgrep /\v^(export\s+)?(function|interface|type|enum|const)/j %
+    endif
+  else
+    echom 'Not supported for ' . l:filetype
+    return
+  endif
+
+  call setqflist([], 'r', {'title': 'Outline'})
+  syntax match ConcealedDetails /\v^[^|]*\|[^|]*\| / conceal
+  setlocal conceallevel=2
+  setlocal concealcursor=nvic
 endfunction
 
 augroup vimrc_file_finder
