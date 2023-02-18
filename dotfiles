@@ -137,20 +137,6 @@ end
 EOF
   fi
 
-  local fish_fzf_keybindings=~/.config/fish/functions/fzf_key_bindings.fish
-  if test -e "$fish_fzf_keybindings"; then
-    echo "info: $fish_fzf_keybindings exists. skip."
-  else
-    echo "info: donwload fish fzf key-bindings."
-    local fzf_verion
-    # e.g., 0.29 -> 0.29. -> 0.29.0
-    fzf_verion="$(fzf --version | sed -E 's,^([0-9]+\.[0-9]+)\.?([0-9]+)?.*$,\1.\2,' | sed -E 's,^.+\.$,\00,')"
-    curl --show-error --fail \
-      "https://raw.githubusercontent.com/junegunn/fzf/$fzf_verion/shell/key-bindings.fish" \
-      | sed 's,ct fzf-file-widget,cy fzf-file-widget,g' \
-      > "$fish_fzf_keybindings" 
-  fi
-
   if finger "$USER" | grep -q "$(which fish)"; then
     echo "info: fish is default shell. skip."
   else

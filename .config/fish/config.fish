@@ -47,16 +47,7 @@ if status is-interactive
   alias gsm 'git submodule'
   alias gi  'vim -c Git'
 
-  if type --quiet fzf
-    if type --quiet fd
-      set -x FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git --exclude "*~"'
-    end
-    set -x FZF_DEFAULT_OPTS   '--reverse'
-    set -x FZF_CTRL_T_COMMAND $FZF_DEFAULT_COMMAND
-    set -x FZF_CTRL_T_OPTS    $FZF_DEFAULT_OPTS
-  end
-
-  if type --quiet fzf_key_bindings
+  if type --quiet fzf; and type --quiet fzf_key_bindings
     fzf_key_bindings
   end
 
