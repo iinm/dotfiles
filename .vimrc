@@ -126,12 +126,14 @@ nnoremap [vim] <Nop>
 nmap <Leader>v [vim]
 nnoremap [vim]r :<C-u>source $MYVIMRC<CR>
 
+" --- Command
 command -nargs=0 Buffers call Buffers()
 command -nargs=0 BD call BufferDelete()
 command -nargs=0 Oldfiles call Oldfiles()
-command -nargs=0 OldfilesLocal call Oldfiles(substitute(getcwd(), '^.*/', '', ''))
+command -nargs=0 OldfilesLocal call Oldfiles('\v^' .. getcwd())
 command -nargs=0 Outline call Outline()
 
+" --- Function
 function! BufferDelete() abort
   execute('b # | bd #')
 endfunction
@@ -140,7 +142,7 @@ function! Buffers() abort
   let l:cwd_name = substitute(getcwd(), '^.*/', '', '')
   let l:buffers = execute('ls')
   let l:buffers = substitute(l:buffers, '^\n', '', '')
-  let l:buffers = substitute(l:buffers, '\v[^"]{-}/' . l:cwd_name . '/', '', 'g')
+  let l:buffers = substitute(l:buffers, '\v[^"]{-}/' .. l:cwd_name .. '/', '', 'g')
   enew
   setlocal buftype=nofile
   setlocal nobuflisted
@@ -158,12 +160,12 @@ endfunction
 function! Oldfiles(pattern='') abort
   let l:files = filter(
   \  deepcopy(v:oldfiles),
-  \  {_, path -> a:pattern == '' || path =~ '\v' . a:pattern}
+  \  {_, path -> a:pattern == '' || expand(path) =~ a:pattern}
   \ )
   " omit current directory
   let l:files = map(
   \  l:files,
-  \  {_, path -> substitute(expand(path), getcwd() . '/', '', '')}
+  \  {_, path -> substitute(expand(path), getcwd() .. '/', '', '')}
   \ )
   enew
   setlocal buftype=nofile
@@ -187,7 +189,7 @@ function! Outline() abort
       vimgrep /\v^(export\s+)?(function|interface|type|enum|const)/j %
     endif
   else
-    echom 'Not supported for ' . l:filetype
+    echom 'Not supported for ' .. l:filetype
     return
   endif
 
@@ -195,18 +197,6 @@ function! Outline() abort
   syntax match ConcealedDetails /\v^[^|]*\|[^|]*\| / conceal
   setlocal conceallevel=2
   setlocal concealcursor=nvic
-endfunction
-
-augroup vimrc_file_finder
-  autocmd!
-  autocmd TerminalWinOpen !find*,!fd* call s:on_file_finder_open()
-augroup END
-
-function! s:on_file_finder_open() abort
-  setlocal nobuflisted
-  nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR><CR>:bw #<CR>:nohlsearch<CR>
-  nnoremap <buffer> <Esc> :<C-u>b #<CR>:bw<CR>
-  nnoremap <buffer> <C-o> :<C-u>b #<CR>:bw<CR>
 endfunction
 
 " --- etc.
@@ -226,6 +216,18 @@ augroup vimrc_fix_syntax_highlighting
   autocmd!
   autocmd BufEnter,InsertLeave * :syntax sync fromstart
 augroup END
+
+augroup vimrc_file_finder
+  autocmd!
+  autocmd TerminalWinOpen !find*,!fd* call s:on_file_finder_open()
+augroup END
+
+function! s:on_file_finder_open() abort
+  setlocal nobuflisted
+  nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR><CR>:bw #<CR>:nohlsearch<CR>
+  nnoremap <buffer> <Esc> :<C-u>b #<CR>:bw<CR>
+  nnoremap <buffer> <C-o> :<C-u>b #<CR>:bw<CR>
+endfunction
 
 let g:markdown_fenced_languages = ['sh']
 
