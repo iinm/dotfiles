@@ -243,8 +243,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   Plug 'tpope/vim-sleuth'
   Plug 'mattn/vim-maketable'
   Plug 'mattn/emmet-vim'
-  Plug 'jiangmiao/auto-pairs'
-  Plug 'markonm/traces.vim'
   Plug 'kamykn/spelunker.vim'
   Plug 'github/copilot.vim'
 
@@ -283,11 +281,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   " easymotion
   let g:EasyMotion_do_mapping = 0
   let g:EasyMotion_smartcase = 1
-
-  " auto-pairs
-  " https://github.com/jiangmiao/auto-pairs/issues/104
-  let g:AutoPairsMultilineClose = 0
-  let g:AutoPairsFlyMode = 0
 
   " javascript
   let g:javascript_plugin_jsdoc = 1
