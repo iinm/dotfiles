@@ -274,7 +274,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   set background=dark
   colorscheme everforest
 
-
   " ctrlp
   let g:ctrlp_user_command = 'fd --hidden --exclude .git --type f --color=never "" %s'
   let g:ctrlp_use_caching = 0
