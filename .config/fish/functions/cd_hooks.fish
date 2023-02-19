@@ -1,6 +1,5 @@
 function cd_hooks
   set -g DIRECTORY_HISTORY_FILE ~/.directory_history
-  set -g TAC (which tac || echo 'tail -r')
 
   function cd
     builtin cd $argv
@@ -14,9 +13,9 @@ function cd_hooks
   end
 
   function cdi
-    # complaction
+    # compaction
     set -l tmpfile (mktemp)
-    cat "$DIRECTORY_HISTORY_FILE" | $TAC | awk '!a[$0]++' | $TAC > "$tmpfile"
+    cat "$DIRECTORY_HISTORY_FILE" | tac | awk '!a[$0]++' | tac > "$tmpfile"
     mv -f "$tmpfile" "$DIRECTORY_HISTORY_FILE"
     rm -f "$tmpfile"
     set -l dest (cat "$DIRECTORY_HISTORY_FILE" | fzf --reverse --tac)

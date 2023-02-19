@@ -29,6 +29,10 @@ if test (uname) = 'Linux'; and type --quiet xsel
   alias open    'xdg-open'
 end
 
+if test (uname) = 'Darwin'; and not type --quiet tac
+  alias tac 'tail -r'
+end
+
 if status is-interactive
   set -U fish_greeting
 
