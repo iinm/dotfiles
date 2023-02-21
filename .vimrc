@@ -129,6 +129,7 @@ nnoremap [vim]r :<C-u>source $MYVIMRC<CR>
 " --- Command
 command -nargs=0 Buffers call Buffers()
 command -nargs=0 BD call BufferDelete()
+command -nargs=0 BOnly call BufferOnly()
 command -nargs=0 Oldfiles call Oldfiles()
 command -nargs=0 OldfilesLocal call Oldfiles('\v^' .. getcwd())
 command -nargs=0 Outline call Outline()
@@ -136,6 +137,10 @@ command -nargs=0 Outline call Outline()
 " --- Function
 function! BufferDelete() abort
   execute('b # | bd #')
+endfunction
+
+function! BufferOnly() abort
+  execute('%bd | e # | bd #')
 endfunction
 
 function! Buffers() abort
