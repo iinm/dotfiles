@@ -357,3 +357,8 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   inoremap <expr> <C-b> vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<C-b>'
   snoremap <expr> <C-b> vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<C-b>'
 endif " Plugins
+
+" --- Local configuration
+if filereadable(expand('~/.local.vimrc'))
+  source ~/.local.vimrc
+endif
