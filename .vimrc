@@ -121,6 +121,7 @@ if executable('fd')
 endif
 nnoremap <leader>b :<C-u>Buffers<CR>
 nnoremap gO :<C-u>Outline<CR>
+nnoremap <C-w>m <C-w>_<C-w><bar>
 
 nnoremap [vim] <Nop>
 nmap <Leader>v [vim]
