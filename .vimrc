@@ -37,6 +37,7 @@
 "                      C-w -> = (equalize window size)
 "                      C-w -> _
 "                      C-w -> | (maximize)
+"                      C-w -> c (close)
 " browse file          :e .
 "                      :e . -> i -> i -> i (tree view)
 "                      :e . -> p (preview)
