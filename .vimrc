@@ -91,6 +91,7 @@ endif
 
 " --- Appearance
 set termguicolors
+set cursorline
 syntax enable
 
 " cursor
