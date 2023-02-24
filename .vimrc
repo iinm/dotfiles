@@ -255,6 +255,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   Plug 'mattn/emmet-vim'
   Plug 'mattn/vim-molder'
   Plug 'kamykn/spelunker.vim'
+  Plug 'previm/previm'
   Plug 'github/copilot.vim'
 
   " lsp
@@ -320,6 +321,9 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
 
   " fugitive
   set statusline=%<%f\ %h%m%r%{FugitiveStatusline()}%=%-14.(%l,%c%V%)\ %P
+
+  " previm
+  let g:previm_open_cmd = 'open -a "Google Chrome"'
 
   " --- File types
   augroup vimrc_filetypes_with_plugin
