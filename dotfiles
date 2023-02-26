@@ -83,6 +83,9 @@ bootstrap() {
       jq
       shellcheck
       efm-langserver
+      colima
+      docker
+      docker-compose
     )
     local missing_packages=()
     for package in "${packages[@]}"; do
