@@ -1,4 +1,5 @@
 " --- Cheat Sheet
+" start                vim -u NONE (no plugins)
 " open file            :e **/foo.sh
 "                      :e %:h/
 "                      :sp foo.sh (split)
