@@ -155,15 +155,16 @@ function! Buffers() abort
   enew
   setlocal buftype=nofile
   setlocal nobuflisted
+  setlocal bufhidden=wipe
   0put =l:buffers
   syntax match Grey /\v[^"]+\// " directory
   syntax match Grey /\vline\s+\d+/ " line number
   syntax match Aqua /\v\s.?a\s/ " active
   syntax match Red /\v\+\s/ " modified
-  nnoremap <buffer> <CR> :<C-u>b <C-r>=matchstr(getline('.'), '\v^\s+\d+')<CR><CR>:bw #<CR>:nohlsearch<CR>
+  nnoremap <buffer> <CR> :<C-u>b <C-r>=matchstr(getline('.'), '\v^\s+\d+')<CR><CR>
   nnoremap <buffer> dd :<C-u>bd <C-r>=matchstr(getline('.'), '\v^\s+\d+')<CR><CR>dd
-  nnoremap <buffer> <Esc> :<C-u>b #<CR>:bw #<CR>
-  nnoremap <buffer> <C-o> :<C-u>b #<CR>:bw #<CR>
+  nnoremap <buffer> <Esc> :<C-u>b #<CR>
+  nnoremap <buffer> <C-o> :<C-u>b #<CR>
 endfunction
 
 function! Oldfiles(pattern='') abort
@@ -179,13 +180,14 @@ function! Oldfiles(pattern='') abort
   enew
   setlocal buftype=nofile
   setlocal nobuflisted
-  0put =files
+  setlocal bufhidden=wipe
+  0put =l:files
   goto 1
   setlocal readonly
   syntax match Grey /\v^.+\// " directory
-  nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR><CR>:bw #<CR>:nohlsearch<CR>
-  nnoremap <buffer> <Esc> :<C-u>b #<CR>:bw #<CR>
-  nnoremap <buffer> <C-o> :<C-u>b #<CR>:bw #<CR>
+  nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR>
+  nnoremap <buffer> <Esc> :<C-u>b #<CR>
+  nnoremap <buffer> <C-o> :<C-u>b #<CR>
 endfunction
 
 function! Outline() abort
