@@ -282,10 +282,16 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   Plug 'dag/vim-fish'
   call plug#end()
 
-  " colorscheme
+  " appearance
   let g:everforest_background = 'soft'
   set background=dark
   colorscheme everforest
+
+  set statusline=%<%f\ %h%m%r%{FugitiveStatusline()}%=%-14.(%l,%c%V%)\ %P
+
+  " spelunker
+  highlight SpelunkerSpellBad cterm=underline
+  highlight SpelunkerComplexOrCompoundWord cterm=underline
 
   " ctrlp
   let g:ctrlp_user_command = 'fd --hidden --exclude .git --type f --color=never "" %s'
@@ -317,13 +323,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
     autocmd!
     autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
   augroup END
-
-  " spelunker
-  highlight SpelunkerSpellBad cterm=underline
-  highlight SpelunkerComplexOrCompoundWord cterm=underline
-
-  " fugitive
-  set statusline=%<%f\ %h%m%r%{FugitiveStatusline()}%=%-14.(%l,%c%V%)\ %P
 
   " previm
   let g:previm_open_cmd = 'open -a "Google Chrome"'
