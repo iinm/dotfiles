@@ -256,7 +256,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   Plug 'tpope/vim-sleuth'
   Plug 'mattn/vim-maketable'
   Plug 'mattn/emmet-vim'
-  Plug 'mattn/vim-molder'
   Plug 'kamykn/spelunker.vim'
   Plug 'previm/previm'
   Plug 'github/copilot.vim'
