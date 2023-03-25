@@ -296,6 +296,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   let g:ctrlp_user_command = 'fd --hidden --exclude .git --type f --color=never "" %s'
   let g:ctrlp_use_caching = 0
   let g:ctrlp_mruf_relative = 1
+  let g:ctrlp_regexp = 1
 
   " easymotion
   let g:EasyMotion_do_mapping = 0
