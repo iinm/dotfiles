@@ -164,6 +164,7 @@ setup_lua() {
     echo "info: $lua_source_dir exists. skip."
   else
     echo "info: download lua source."
+    mkdir -p ~/tools/sources
     curl --show-error --fail -o - \
       "https://www.lua.org/ftp/lua-$LUA_VERSION.tar.gz" \
       | tar xz -C ~/tools/sources
@@ -191,6 +192,7 @@ setup_vim() {
     echo "info: $vim_source_dir exists. skip."
   else
     echo "info: clone vim source."
+    mkdir -p ~/tools/sources
     git clone --depth 1 --branch "$VIM_VERSION" https://github.com/vim/vim "$vim_source_dir"
   fi
 
