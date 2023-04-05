@@ -118,7 +118,7 @@ nnoremap <C-l> :nohlsearch<CR>
 nnoremap <Leader>w :<C-u>set wrap!<CR>
 nnoremap <Leader>n :<C-u>set number!<CR>
 nnoremap <Leader>s :<C-u>gr!<space>
-nnoremap <Leader>e :<C-u>Ex<CR>
+nnoremap <Leader>e :<C-u>Ex <bar> /<C-r>=expand('%:t')<CR><CR>
 vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>
 nnoremap <leader>f :<C-u>terminal ++curwin find . -iname **<Left>
 if executable('fd')
