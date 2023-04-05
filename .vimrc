@@ -242,6 +242,7 @@ function! s:on_file_finder_open() abort
   nnoremap <buffer> <C-o> :<C-u>b #<CR>:bw<CR>
 endfunction
 
+let g:netrw_banner = 0
 let g:markdown_fenced_languages = ['sh']
 
 " --- Plugins
