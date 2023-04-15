@@ -15,7 +15,7 @@ tools:
       - '%f:%l:%c: %tote: %m'
 
   eslint: &eslint
-    lint-command: "npx --no-install eslint -f visualstudio --stdin --stdin-filename ${INPUT} | sed -E 's/warning|error/info/'"
+    lint-command: bash $HOME/.config/efm-langserver/eslint-stdin.sh ${INPUT}
     lint-ignore-exit-code: true
     lint-stdin: true
     lint-formats:
@@ -24,6 +24,8 @@ tools:
       - "%f(%l,%c): %tnfo %m"
     format-command: bash $HOME/.config/efm-langserver/eslint-format-stdin.sh ${INPUT}
     format-stdin: true
+    root-markers:
+      - .eslintrc.cjs
 
   # prettier: &prettier
   #   format-command: 'npx --no-install prettier --stdin-filepath ${INPUT}'
