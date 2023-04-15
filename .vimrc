@@ -300,6 +300,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   let g:ctrlp_use_caching = 0
   let g:ctrlp_mruf_relative = 1
   let g:ctrlp_regexp = 1
+  let g:ctrlp_root_markers = ['package.json', '.git']
 
   " easymotion
   let g:EasyMotion_do_mapping = 0
