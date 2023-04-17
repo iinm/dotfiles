@@ -19,6 +19,10 @@ if test -e $HOME/.local/bin
   fish_add_path $HOME/.local/bin
 end
 
+if test -e $HOME/tools/bin
+  fish_add_path $HOME/tools/bin
+end
+
 if test -e $HOME/tools/vim
   fish_add_path $HOME/tools/vim/bin
 end
