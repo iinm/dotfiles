@@ -7,16 +7,9 @@ if type --quiet config_local_first
   config_local_first
 end
 
-test -n "$LANG";   or set -x LANG en_US.UTF-8
-test -n "$EDITOR"; or type --quiet vim; and set -x EDITOR vim
-
 if test -e /opt/homebrew
   fish_add_path /opt/homebrew/sbin
   fish_add_path /opt/homebrew/bin
-end
-
-if test -e $HOME/.local/bin
-  fish_add_path $HOME/.local/bin
 end
 
 if test -e $HOME/tools/bin
@@ -26,6 +19,9 @@ end
 if test -e $HOME/tools/vim
   fish_add_path $HOME/tools/vim/bin
 end
+
+test -n "$LANG";   or set -x LANG en_US.UTF-8
+test -n "$EDITOR"; or type --quiet vim; and set -x EDITOR vim
 
 if test (uname) = 'Linux'; and type --quiet xsel
   alias pbcopy  'xsel -i -p && xsel -o -p | xsel -i -b'
