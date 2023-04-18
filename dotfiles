@@ -18,6 +18,7 @@ Usage: dotfiles COMMAND
   setup_git       Setup git
   setup_lua       Setup lua
   setup_vim       Setup vim
+  setup_pyenv     Setup pyenv
 HELP
 }
 
@@ -28,6 +29,7 @@ setup() {
   setup_git
   setup_lua
   setup_vim
+  setup_pyenv
 }
 
 bootstrap() {
@@ -226,6 +228,16 @@ setup_vim() {
 " if getcwd() == expand('~/projects/foo')
 " endif
 EOF
+  fi
+}
+
+setup_pyenv() {
+  local pyenv_dir=~/tools/pyenv
+  if test -e "$pyenv_dir"; then
+    echo "info: $pyenv_dir exists. skip."
+  else
+    echo "info: clone pyenv."
+    git clone https://github.com/pyenv/pyenv.git "$pyenv_dir"
   fi
 }
 
