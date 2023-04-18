@@ -27,14 +27,6 @@ if test -e $HOME/tools/vim
   fish_add_path $HOME/tools/vim/bin
 end
 
-if test -e $HOME/tools/pyenv
-  set -x PYENV_ROOT $HOME/tools/pyenv
-  fish_add_path $PYENV_ROOT/bin
-  function use_pyenv
-    pyenv init - | source
-  end
-end
-
 if test (uname) = 'Linux'; and type --quiet xsel
   alias pbcopy  'xsel -i -p && xsel -o -p | xsel -i -b'
   alias pbpaste 'xsel -o -b'
