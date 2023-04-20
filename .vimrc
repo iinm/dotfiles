@@ -329,7 +329,13 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   augroup END
 
   " previm
-  let g:previm_open_cmd = 'open -a "Google Chrome"'
+  if has('unix')
+    if system('uname') =~? 'Darwin'
+      let g:previm_open_cmd = 'open -a "Google Chrome"'
+    else
+      let g:previm_open_cmd = 'google-chrome'
+    endif
+  endif
 
   " --- File types
   augroup vimrc_filetypes_with_plugin
