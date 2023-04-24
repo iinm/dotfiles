@@ -252,6 +252,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   Plug 'sainnhe/everforest'
 
   " utilities
+  Plug 'christoomey/vim-tmux-navigator'
   Plug 'ctrlpvim/ctrlp.vim'
   Plug 'easymotion/vim-easymotion'
   Plug 'tpope/vim-commentary'
