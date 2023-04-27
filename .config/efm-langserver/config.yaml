@@ -26,10 +26,16 @@ tools:
     format-stdin: true
     root-markers:
       - .eslintrc.cjs
+      - .eslintrc.js
+      - .eslintrc.json
 
   # prettier: &prettier
   #   format-command: 'npx --no-install prettier --stdin-filepath ${INPUT}'
   #   format-stdin: true
+
+  terraform: &terraform
+    format-command: terraform fmt -
+    format-stdin: true
 
 languages:
   sh:
@@ -46,3 +52,6 @@ languages:
 
   typescriptreact:
     - <<: *eslint
+
+  terraform:
+    - <<: *terraform
