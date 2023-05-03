@@ -112,8 +112,8 @@ let &t_Ce = "\<Esc>[4:0m"
 " --- Keymap
 let mapleader = "\<Space>"
 
-nnoremap / /\v
-vnoremap / /\v
+" nnoremap / /\v
+" vnoremap / /\v
 nnoremap <C-l> :nohlsearch<CR>
 nnoremap <Leader>w :<C-u>set wrap!<CR>
 nnoremap <Leader>n :<C-u>set number!<CR>
@@ -252,7 +252,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   Plug 'sainnhe/everforest'
 
   " utilities
-  Plug 'christoomey/vim-tmux-navigator'
   Plug 'ctrlpvim/ctrlp.vim'
   Plug 'easymotion/vim-easymotion'
   Plug 'tpope/vim-commentary'
