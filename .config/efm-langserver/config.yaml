@@ -22,16 +22,18 @@ tools:
       - "%f(%l,%c): %tarning %m"
       - "%f(%l,%c): %trror %m"
       - "%f(%l,%c): %tnfo %m"
-    format-command: bash $HOME/.config/efm-langserver/eslint-format-stdin.sh ${INPUT}
-    format-stdin: true
+    # format-command: bash $HOME/.config/efm-langserver/eslint-format-stdin.sh ${INPUT}
+    # format-stdin: true
     root-markers:
       - .eslintrc.cjs
       - .eslintrc.js
       - .eslintrc.json
 
-  # prettier: &prettier
-  #   format-command: 'npx --no-install prettier --stdin-filepath ${INPUT}'
-  #   format-stdin: true
+  prettier: &prettier
+    format-command: 'npx --no-install prettier --stdin-filepath ${INPUT}'
+    format-stdin: true
+    root-markers:
+      - .prettierrc.json
 
   terraform: &terraform
     format-command: terraform fmt -
@@ -42,15 +44,18 @@ languages:
     - <<: *shellcheck
 
   javascript:
+    - <<: *prettier
     - <<: *eslint
 
   typescript:
     - <<: *eslint
 
   javascriptreact:
+    - <<: *prettier
     - <<: *eslint
 
   typescriptreact:
+    - <<: *prettier
     - <<: *eslint
 
   terraform:
