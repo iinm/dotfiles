@@ -118,6 +118,7 @@ link() {
     # ~/.config/*
     find "$SOURCE_DIR/.config" -mindepth 1 -maxdepth 1 -type d;
   ); do
+    # shellcheck disable=SC2001
     dest=$(sed "s,^$SOURCE_DIR,$HOME," <<< "$src")
     if file -E "$dest" > /dev/null; then
       echo "info: $dest is already exist. skip."
