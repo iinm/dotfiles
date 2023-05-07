@@ -43,7 +43,7 @@ if status is-interactive
   set -U fish_greeting
 
   fish_config theme choose 'Base16 Eighties'
-  fish_config prompt choose default
+  fish_config prompt choose astronaut
 
   alias rm 'rm -i'
   alias cp 'cp -i'
