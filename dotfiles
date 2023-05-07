@@ -32,7 +32,7 @@ setup() {
 
 bootstrap() {
   if test "$(lsb_release -is 2> /dev/null)" = "Ubuntu"; then
-    if test -e /etc/apt/sources.list.d/fish-shell-ubuntu-release-3-jammy.list; then
+    if test -e /etc/apt/sources.list.d/fish-shell-ubuntu-release-3-*.list; then
       echo "info: fish PPA is already enabled. skip."
     else
       echo "info: enable fish PPA."
