@@ -5,6 +5,4 @@
 
 set -eu -o pipefail
 
-git clone https://github.com/iinm/dotfiles ~/dotfiles
-cd ~/dotfiles
 ./dotfiles setup
