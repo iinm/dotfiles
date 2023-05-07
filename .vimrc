@@ -81,8 +81,8 @@ set wildignore=.git/,node_modules/
 set clipboard=unnamed,unnamedplus,autoselect
 set ttimeoutlen=10
 set backspace=indent,eol,start
-set mouse=a
-set ttymouse=sgr
+" set mouse=a
+" set ttymouse=sgr
 set showcmd
 set laststatus=2
 set tabstop=8 expandtab shiftwidth=2 softtabstop=2
