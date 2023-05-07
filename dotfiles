@@ -32,6 +32,13 @@ setup() {
 
 bootstrap() {
   if test "$(lsb_release -is 2> /dev/null)" = "Ubuntu"; then
+    if test -e /etc/apt/sources.list.d/fish-shell-ubuntu-release-3-jammy.list; then
+      echo "info: fish PPA is already enabled. skip."
+    else
+      echo "info: enable fish PPA."
+      sudo apt-add-repository ppa:fish-shell/release-3 -y
+    fi
+
     local packages=(
       fish
       tmux
@@ -61,7 +68,7 @@ bootstrap() {
     else
       echo "info: install ${missing_packages[*]}"
       sudo apt update
-      sudo apt install "${missing_packages[@]}"
+      sudo apt install -y "${missing_packages[@]}"
     fi
 
     if test -e ~/tools/bin/fd; then
