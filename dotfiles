@@ -151,7 +151,7 @@ EOF
     echo "info: fish is default shell. skip."
   else
     echo "info: set fish as default shell."
-    chsh -s "$(which fish)"
+    sudo chsh "$(id -un)" -s "$(which fish)"
   fi
 }
 
