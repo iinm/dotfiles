@@ -32,7 +32,7 @@ if test (uname) = 'Linux'; and type --quiet xsel
     alias pbcopy 'cat > ~/.clipboard'
     alias pbpaste 'cat ~/.clipboard'
   end
-  alias open    'xdg-open'
+  alias open 'xdg-open'
 end
 
 if test (uname) = 'Darwin'; and not type --quiet tac
@@ -43,7 +43,7 @@ if status is-interactive
   set -U fish_greeting
 
   fish_config theme choose 'Base16 Eighties'
-  fish_config prompt choose arrow
+  fish_config prompt choose default
 
   alias rm 'rm -i'
   alias cp 'cp -i'
