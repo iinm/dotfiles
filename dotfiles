@@ -46,7 +46,6 @@ bootstrap() {
       xsel
       finger
       shellcheck
-      efm-langserver
       # https://github.com/vim/vim/blob/master/src/INSTALL
       clang
       libtool-bin
@@ -61,15 +60,16 @@ bootstrap() {
       echo "info: all required packages are installed. skip."
     else
       echo "info: install ${missing_packages[*]}"
+      sudo apt update
       sudo apt install "${missing_packages[@]}"
     fi
 
-    if test -e ~/.local/bin/fd; then
+    if test -e ~/tools/bin/fd; then
       echo "info: fd is already linked. skip."
     else
-      echo "info: link fd to ~/.local/bin/fd"
-      mkdir -p ~/.local/bin
-      ln -s "$(which fdfind)" ~/.local/bin/fd
+      echo "info: link fd to ~/tools/bin/fd"
+      mkdir -p ~/tools/bin
+      ln -s "$(which fdfind)" ~/tools/bin/fd
     fi
 
   elif test "$(uname)" = "Darwin"; then
@@ -82,7 +82,6 @@ bootstrap() {
       direnv
       jq
       shellcheck
-      efm-langserver
       colima
       docker
       docker-compose
@@ -226,6 +225,28 @@ setup_vim() {
 " if getcwd() == expand('~/projects/foo')
 " endif
 EOF
+  fi
+
+  local efm_langserver_version=0.0.44
+  if test -e ~/tools/bin/efm-langserver; then
+    echo "info: efm-langserver exists. skip."
+  else
+    echo "info: install efm-langserver."
+    mkdir -p ~/tools/bin
+    rm -rf /tmp/efm-langserver_v*
+    if test "$(uname)" = "Linux"; then
+      curl -L --show-error --fail \
+        "https://github.com/mattn/efm-langserver/releases/download/v${efm_langserver_version}/efm-langserver_v${efm_langserver_version}_linux_amd64.tar.gz" \
+        | tar -zxf - -C /tmp
+      mv /tmp/efm-langserver_v${efm_langserver_version}_linux_amd64/efm-langserver ~/tools/bin
+    fi
+    if test "$(uname)" = "Darwin"; then
+      curl -L --show-error --fail \
+        -o /tmp/efm-langserver_v${efm_langserver_version}.zip \
+        "https://github.com/mattn/efm-langserver/releases/download/v${efm_langserver_version}/efm-langserver_v${efm_langserver_version}_darwin_arm64.zip"
+      unzip /tmp/efm-langserver_v${efm_langserver_version}.zip -d /tmp
+      mv /tmp/efm-langserver_v${efm_langserver_version}_darwin_arm64/efm-langserver ~/tools/bin
+    fi
   fi
 }
 
