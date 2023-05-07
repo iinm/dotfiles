@@ -37,6 +37,7 @@ bootstrap() {
     else
       echo "info: enable fish PPA."
       sudo apt-add-repository ppa:fish-shell/release-3 -y
+      sudo apt purge -y fish || true
     fi
 
     local packages=(
@@ -242,16 +243,17 @@ EOF
     echo "info: install efm-langserver."
     mkdir -p ~/tools/bin
     rm -rf /tmp/efm-langserver_v*
+    local base_url="https://github.com/mattn/efm-langserver/releases/download"
     if test "$(uname)" = "Linux"; then
       curl -L --show-error --fail \
-        "https://github.com/mattn/efm-langserver/releases/download/v${efm_langserver_version}/efm-langserver_v${efm_langserver_version}_linux_amd64.tar.gz" \
+        "${base_url}/v${efm_langserver_version}/efm-langserver_v${efm_langserver_version}_linux_amd64.tar.gz" \
         | tar -zxf - -C /tmp
       mv /tmp/efm-langserver_v${efm_langserver_version}_linux_amd64/efm-langserver ~/tools/bin
     fi
     if test "$(uname)" = "Darwin"; then
       curl -L --show-error --fail \
         -o /tmp/efm-langserver_v${efm_langserver_version}.zip \
-        "https://github.com/mattn/efm-langserver/releases/download/v${efm_langserver_version}/efm-langserver_v${efm_langserver_version}_darwin_arm64.zip"
+        "${base_url}/v${efm_langserver_version}/efm-langserver_v${efm_langserver_version}_darwin_arm64.zip"
       unzip /tmp/efm-langserver_v${efm_langserver_version}.zip -d /tmp
       mv /tmp/efm-langserver_v${efm_langserver_version}_darwin_arm64/efm-langserver ~/tools/bin
     fi
