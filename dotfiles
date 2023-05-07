@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 
-: "${LUA_VERSION:="5.4.4"}"
-: "${VIM_VERSION:="v9.0.1426"}"
-
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-LUA_DIR=~/tools/lua-$LUA_VERSION
 
 help() {
   cat << 'HELP'
@@ -16,7 +11,6 @@ Usage: dotfiles COMMAND
   link            Create symlink to dotfiles
   setup_fish      Setup fish shell
   setup_git       Setup git
-  setup_lua       Setup lua
   setup_vim       Setup vim
 HELP
 }
@@ -26,7 +20,6 @@ setup() {
   link
   setup_fish
   setup_git
-  setup_lua
   setup_vim
 }
 
@@ -40,8 +33,17 @@ bootstrap() {
       sudo apt purge -y fish || true
     fi
 
+    if test -e /etc/apt/sources.list.d/jonathonf-ubuntu-vim-*.list; then
+      echo "info: vim PPA is already enabled. skip."
+    else
+      echo "info: enable vim PPA."
+      sudo apt-add-repository ppa:jonathonf/vim -y
+      sudo apt purge -y vim || true
+    fi
+
     local packages=(
       fish
+      vim-gtk
       tmux
       git
       make
@@ -83,6 +85,7 @@ bootstrap() {
   elif test "$(uname)" = "Darwin"; then
     local packages=(
       fish
+      vim
       tmux
       ripgrep
       fd
@@ -165,59 +168,7 @@ setup_git() {
   fi
 }
 
-setup_lua() {
-  local lua_source_dir=~/tools/sources/lua-$LUA_VERSION
-
-  if test -e "$lua_source_dir"; then
-    echo "info: $lua_source_dir exists. skip."
-  else
-    echo "info: download lua source."
-    mkdir -p ~/tools/sources
-    curl --show-error --fail -o - \
-      "https://www.lua.org/ftp/lua-$LUA_VERSION.tar.gz" \
-      | tar xz -C ~/tools/sources
-  fi
-
-  if test -e "$LUA_DIR"; then
-    echo "info: $LUA_DIR exists. skip."
-  else
-    echo "info: build lua.";
-    (
-      set -eu;
-      cd "$lua_source_dir";
-      make clean
-      make all test
-      make INSTALL_TOP="$LUA_DIR" install;
-    )
-  fi
-}
-
 setup_vim() {
-  local vim_source_dir=~/tools/sources/vim
-  local vim_dir=~/tools/vim
-
-  if test -e "$vim_source_dir"; then
-    echo "info: $vim_source_dir exists. skip."
-  else
-    echo "info: clone vim source."
-    mkdir -p ~/tools/sources
-    git clone --depth 1 --branch "$VIM_VERSION" https://github.com/vim/vim "$vim_source_dir"
-  fi
-
-  if test -e "$vim_dir"; then
-    echo "info: $vim_dir exists. skip."
-  else
-    echo "info: build vim.";
-    (
-      set -eu;
-      cd "$vim_source_dir/src";
-      make distclean || true;
-      ./configure --prefix="$vim_dir" --enable-luainterp=yes --with-lua-prefix="$LUA_DIR";
-      make;
-      make install;
-    )
-  fi
-
   if test -e ~/.vim/autoload/plug.vim; then
     echo "info: vim-plug exists. skip."
   else
