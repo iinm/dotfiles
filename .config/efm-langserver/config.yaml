@@ -48,6 +48,7 @@ languages:
     - <<: *eslint
 
   typescript:
+    - <<: *prettier
     - <<: *eslint
 
   javascriptreact:
