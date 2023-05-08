@@ -20,7 +20,7 @@ set -x SHELL (which fish)
 test -n "$LANG";   or set -x LANG en_US.UTF-8
 test -n "$EDITOR"; or type --quiet vim; and set -x EDITOR vim
 
-if test (uname) = 'Linux'; and type --quiet xsel
+if test (uname) = 'Linux'
   if xsel &> /dev/null
     alias pbcopy  'xsel -i -p && xsel -o -p | xsel -i -b'
     alias pbpaste 'xsel -o -b'
