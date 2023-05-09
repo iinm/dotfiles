@@ -7,6 +7,10 @@ if type --quiet config_local_first
   config_local_first
 end
 
+set -x SHELL (which fish)
+test -n "$LANG";   or set -x LANG en_US.UTF-8
+test -n "$EDITOR"; or type --quiet vim; and set -x EDITOR vim
+
 if test -e /opt/homebrew
   fish_add_path /opt/homebrew/sbin
   fish_add_path /opt/homebrew/bin
@@ -16,10 +20,6 @@ if test -e $HOME/tools/bin
   fish_add_path $HOME/tools/bin
 end
 
-set -x SHELL (which fish)
-test -n "$LANG";   or set -x LANG en_US.UTF-8
-test -n "$EDITOR"; or type --quiet vim; and set -x EDITOR vim
-
 if test (uname) = 'Linux'
   if xsel &> /dev/null
     alias pbcopy  'xsel -i -p && xsel -o -p | xsel -i -b'
@@ -27,7 +27,7 @@ if test (uname) = 'Linux'
   else
     function pbcopy
       read input
-      # OSC 52
+      # OSC52
       printf "\e]52;c;%s\a" (echo -n "$input" | openssl base64 -A)
     end
   end
@@ -36,6 +36,17 @@ end
 
 if test (uname) = 'Darwin'; and not type --quiet tac
   alias tac 'tail -r'
+end
+
+if type --quiet colima
+  test -n "$COLIMA_START_OPTIONS"; or set -x COLIMA_START_OPTIONS '--cpu 2 --memory 4 --disk 30'
+  alias colima-start "colima start $COLIMA_START_OPTIONS"
+end
+
+if test -e $HOME/tools/anaconda3
+  function use_anaconda
+    eval "$($HOME/tools/anaconda3/bin/conda shell.fish hook)"
+  end
 end
 
 if status is-interactive
@@ -67,7 +78,7 @@ if status is-interactive
   if type --quiet cd_hooks
     cd_hooks
   end
- end
+end
 
 # Host specific configuration
 if type --quiet config_local_last
