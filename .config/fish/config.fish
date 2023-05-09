@@ -25,8 +25,11 @@ if test (uname) = 'Linux'
     alias pbcopy  'xsel -i -p && xsel -o -p | xsel -i -b'
     alias pbpaste 'xsel -o -b'
   else
-    alias pbcopy 'cat > ~/.clipboard'
-    alias pbpaste 'cat ~/.clipboard'
+    function pbcopy
+      read input
+      # OSC 52
+      printf "\e]52;c;%s\a" (echo -n "$input" | openssl base64 -A)
+    end
   end
   alias open 'xdg-open'
 end

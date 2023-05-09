@@ -260,6 +260,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   Plug 'mattn/vim-maketable'
   Plug 'mattn/emmet-vim'
   Plug 'kamykn/spelunker.vim'
+  Plug 'ojroques/vim-oscyank', {'branch': 'main'}
   Plug 'previm/previm'
   Plug 'github/copilot.vim'
 
@@ -337,6 +338,15 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
       let g:previm_open_cmd = 'google-chrome'
     endif
   endif
+
+  " oscyank
+  augroup vimrc_oscyank
+    autocmd!
+    autocmd TextYankPost *
+          \ if v:event.operator is 'y' && v:event.regname is '+' |
+          \ execute 'OSCYankRegister +' |
+          \ endif
+  augroup END
 
   " --- File types
   augroup vimrc_filetypes_with_plugin
