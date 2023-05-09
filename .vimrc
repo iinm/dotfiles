@@ -242,6 +242,31 @@ function! s:on_file_finder_open() abort
   nnoremap <buffer> <C-o> :<C-u>b #<CR>:bw<CR>
 endfunction
 
+" https://www.sobyte.net/post/2022-01/vim-copy-over-ssh/
+function! s:copy_to_clipboard()
+  let l:content = join(v:event.regcontents, "\n")
+  let l:encoded = system('base64', l:content)
+  let l:sequence = "\e]52;c;" . trim(l:encoded) . "\x07"
+  call s:raw_echo(l:sequence)
+endfunction
+
+function! s:raw_echo(str)
+  if filewritable('/dev/fd/2')
+    call writefile([a:str], '/dev/fd/2', 'b')
+  else
+    exec("silent! !echo " . shellescape(a:str))
+    redraw!
+  endif
+endfunction
+
+augroup vimrc_clipboard
+  autocmd!
+  autocmd TextYankPost *
+        \ if v:event.operator is 'y' |
+        \   call s:copy_to_clipboard() |
+        \ endif
+augroup END
+
 let g:netrw_banner = 0
 let g:markdown_fenced_languages = ['sh']
 
@@ -260,7 +285,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   Plug 'mattn/vim-maketable'
   Plug 'mattn/emmet-vim'
   Plug 'kamykn/spelunker.vim'
-  Plug 'ojroques/vim-oscyank', {'branch': 'main'}
   Plug 'previm/previm'
   Plug 'github/copilot.vim'
 
@@ -338,15 +362,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
       let g:previm_open_cmd = 'google-chrome'
     endif
   endif
-
-  " oscyank
-  augroup vimrc_oscyank
-    autocmd!
-    autocmd TextYankPost *
-          \ if v:event.operator is 'y' && v:event.regname is '+' |
-          \ execute 'OSCYankRegister +' |
-          \ endif
-  augroup END
 
   " --- File types
   augroup vimrc_filetypes_with_plugin
