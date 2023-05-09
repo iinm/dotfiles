@@ -248,6 +248,9 @@ function! s:copy_to_clipboard()
   let l:encoded = system('base64', l:content)
   let l:sequence = "\e]52;c;" . trim(l:encoded) . "\x07"
   call s:raw_echo(l:sequence)
+  if !empty($CLIPBOARD_FILE)
+    call writefile(v:event.regcontents, expand($CLIPBOARD_FILE), 'b')
+  end
 endfunction
 
 function! s:raw_echo(str)
@@ -266,6 +269,11 @@ augroup vimrc_clipboard
         \   call s:copy_to_clipboard() |
         \ endif
 augroup END
+
+" if !empty($CLIPBOARD_FILE)
+"   nnoremap p :<C-u>let @*=join(readfile(expand($CLIPBOARD_FILE), 'b'), "\n")<CR>p
+"   nnoremap P :<C-u>let @*=join(readfile(expand($CLIPBOARD_FILE), 'b'), "\n")<CR>P
+" end
 
 let g:netrw_banner = 0
 let g:markdown_fenced_languages = ['sh']
