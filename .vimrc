@@ -199,7 +199,7 @@ function! Outline() abort
     if expand('%') =~ '\.test\.ts$'
       vimgrep /\v^\s*(describe|beforeAll|afterAll|beforeEach|afterEach|it[^\w]|")/j %
     else
-      vimgrep /\v^(export\s+)?(function|interface|type|enum|const)/j %
+      vimgrep /\v^(export\s+)?(function|interface|type|enum|const|class)/j %
     endif
   else
     echom 'Not supported for ' .. l:filetype
