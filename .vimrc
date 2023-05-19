@@ -244,10 +244,10 @@ endfunction
 
 " https://www.sobyte.net/post/2022-01/vim-copy-over-ssh/
 function! s:copy_to_clipboard()
-  let l:content = join(v:event.regcontents, "\n")
-  let l:encoded = system('base64', l:content)
-  let l:sequence = "\e]52;c;" . trim(l:encoded) . "\x07"
-  call s:raw_echo(l:sequence)
+  " let l:content = join(v:event.regcontents, "\n")
+  " let l:encoded = system('base64', l:content)
+  " let l:sequence = "\e]52;c;" . trim(l:encoded) . "\x07"
+  " call s:raw_echo(l:sequence)
   if !empty($CLIPBOARD_FILE)
     call writefile(v:event.regcontents, expand($CLIPBOARD_FILE), 'b')
   end
