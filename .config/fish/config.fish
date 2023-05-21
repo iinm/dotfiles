@@ -21,7 +21,8 @@ if test -e $HOME/tools/bin
 end
 
 if test (uname) = 'Linux'
-  if xsel &> /dev/null
+  alias open 'xdg-open'
+  if xsel -o &> /dev/null
     alias pbcopy  'xsel -i -p && xsel -o -p | xsel -i -b'
     alias pbpaste 'xsel -o -b'
   else
@@ -34,7 +35,6 @@ if test (uname) = 'Linux'
     end
     alias pbpaste "cat $CLIPBOARD_FILE"
   end
-  alias open 'xdg-open'
 end
 
 if test (uname) = 'Darwin'; and not type --quiet tac
