@@ -39,6 +39,10 @@ tools:
     format-command: terraform fmt -
     format-stdin: true
 
+  goimports: &goimports
+    format-command: goimports
+    format-stdin: true
+
 languages:
   sh:
     - <<: *shellcheck
@@ -61,3 +65,6 @@ languages:
 
   terraform:
     - <<: *terraform
+
+  go:
+    - <<: *goimports

@@ -354,6 +354,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
     if exists('+tagfunc') | setlocal tagfunc=lsp#tagfunc | endif
     autocmd! BufWritePre *.js,*.jsx,*.ts,*.tsx call execute('LspDocumentFormatSync --server=efm-langserver')
     autocmd! BufWritePre *.tf call execute('LspDocumentFormatSync --server=efm-langserver')
+    autocmd! BufWritePre *.go call execute('LspDocumentFormatSync --server=efm-langserver')
     call s:enable_lsp_keymap()
   endfunction
 
