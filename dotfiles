@@ -85,6 +85,7 @@ bootstrap() {
       fish
       vim
       tmux
+      tig
       ripgrep
       fd
       fzf
