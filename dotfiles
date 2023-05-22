@@ -48,6 +48,7 @@ bootstrap() {
       vim-gtk
       tmux
       git
+      tig
       make
       ripgrep
       fd-find
