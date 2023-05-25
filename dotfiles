@@ -27,89 +27,96 @@ setup() {
 
 bootstrap() {
   if test "$(lsb_release -is 2> /dev/null)" = "Ubuntu"; then
-    if test -e /etc/apt/sources.list.d/fish-shell-ubuntu-release-3-*.list; then
-      echo "info: fish PPA is already enabled. skip."
-    else
-      echo "info: enable fish PPA."
-      sudo apt-add-repository ppa:fish-shell/release-3 -y
-      sudo apt purge -y fish || true
-    fi
-
-    if test -e /etc/apt/sources.list.d/jonathonf-ubuntu-vim-*.list; then
-      echo "info: vim PPA is already enabled. skip."
-    else
-      echo "info: enable vim PPA."
-      sudo apt-add-repository ppa:jonathonf/vim -y
-      sudo apt purge -y vim || true
-    fi
-
-    local packages=(
-      fish
-      vim-gtk
-      tmux
-      git
-      make
-      ripgrep
-      fd-find
-      fzf
-      direnv
-      curl
-      jq
-      xsel
-      finger
-      shellcheck
-    )
-    local missing_packages=()
-    for package in "${packages[@]}"; do
-      dpkg --status "$package" &> /dev/null || missing_packages+=("$package")
-    done
-
-    if test "${#missing_packages[@]}" -eq 0; then
-      echo "info: all required packages are installed. skip."
-    else
-      echo "info: install ${missing_packages[*]}"
-      sudo apt update
-      sudo apt install -y "${missing_packages[@]}"
-    fi
-
-    if test -e ~/tools/bin/fd; then
-      echo "info: fd is already linked. skip."
-    else
-      echo "info: link fd to ~/tools/bin/fd"
-      mkdir -p ~/tools/bin
-      ln -s "$(which fdfind)" ~/tools/bin/fd
-    fi
-
+    bootstrap_ubuntu
   elif test "$(uname)" = "Darwin"; then
-    local packages=(
-      fish
-      vim
-      tmux
-      ripgrep
-      fd
-      fzf
-      direnv
-      jq
-      shellcheck
-      colima
-      docker
-      docker-compose
-    )
-    local missing_packages=()
-    for package in "${packages[@]}"; do
-      brew list "$package" &> /dev/null || missing_packages+=("$package")
-    done
-
-    if test "${#missing_packages[@]}" -eq 0; then
-      echo "info: all required packages are installed. skip."
-    else
-      echo "info: install ${missing_packages[*]}"
-      brew install "${missing_packages[@]}"
-    fi
-
+    bootstrap_darwin
   else
     echo "error: Unsupported platform"
     exit 1
+  fi
+}
+
+bootstrap_ubuntu() {
+  if test -e /etc/apt/sources.list.d/fish-shell-ubuntu-release-3-*.list; then
+    echo "skip: fish PPA is already enabled."
+  else
+    echo "run: enable fish PPA."
+    sudo apt-add-repository ppa:fish-shell/release-3 -y
+    sudo apt purge -y fish || true
+  fi
+
+  if test -e /etc/apt/sources.list.d/jonathonf-ubuntu-vim-*.list; then
+    echo "skip: vim PPA is already enabled."
+  else
+    echo "run: enable vim PPA."
+    sudo apt-add-repository ppa:jonathonf/vim -y
+    sudo apt purge -y vim || true
+  fi
+
+  local packages=(
+    fish
+    vim-gtk
+    tmux
+    git
+    make
+    ripgrep
+    fd-find
+    fzf
+    direnv
+    curl
+    jq
+    xsel
+    finger
+    shellcheck
+  )
+  local missing_packages=()
+  for package in "${packages[@]}"; do
+    dpkg --status "$package" &> /dev/null || missing_packages+=("$package")
+  done
+
+  if test "${#missing_packages[@]}" -eq 0; then
+    echo "skip: all required packages are installed."
+  else
+    echo "run: install ${missing_packages[*]}"
+    sudo apt update
+    sudo apt install -y "${missing_packages[@]}"
+  fi
+
+  local fd_path=$HOME/tools/bin/fd
+  if test -e "$fd_path"; then
+    echo "skip: fd is already linked."
+  else
+    echo "run: link fd to $fd_path"
+    mkdir -p ~/tools/bin
+    ln -s "$(which fdfind)" "$fd_path"
+  fi
+}
+
+bootstrap_darwin() {
+ local packages=(
+    fish
+    vim
+    tmux
+    ripgrep
+    fd
+    fzf
+    direnv
+    jq
+    shellcheck
+    colima
+    docker
+    docker-compose
+  )
+  local missing_packages=()
+  for package in "${packages[@]}"; do
+    brew list "$package" &> /dev/null || missing_packages+=("$package")
+  done
+
+  if test "${#missing_packages[@]}" -eq 0; then
+    echo "skip: all required packages are installed."
+  else
+    echo "run: install ${missing_packages[*]}"
+    brew install "${missing_packages[@]}"
   fi
 }
 
@@ -123,10 +130,10 @@ link() {
     # shellcheck disable=SC2001
     dest=$(sed "s,^$SOURCE_DIR,$HOME," <<< "$src")
     if file -E "$dest" > /dev/null; then
-      echo "info: $dest is already exist. skip."
+      echo "skip: $dest is already exist."
       continue
     fi
-    echo "info: create symlink: $dest -> $src"
+    echo "run: create symlink: $dest -> $src"
     ln -s "$src" "$dest"
   done
 }
@@ -134,9 +141,9 @@ link() {
 setup_fish() {
   local fish_local_config=~/.config/fish/functions/config_local.fish
   if test -e "$fish_local_config"; then
-    echo "info: $fish_local_config exists. skip."
+    echo "skip: $fish_local_config exists."
   else
-    echo "info: create $fish_local_config"
+    echo "run: create $fish_local_config"
     cat > "$fish_local_config" << 'EOF'
 function config_local --description "Host specific configuration"
   function config_local_first
@@ -150,37 +157,38 @@ EOF
   fi
 
   if finger "$USER" | grep -q "$(which fish)"; then
-    echo "info: fish is default shell. skip."
+    echo "skip: fish is default shell."
   else
-    echo "info: set fish as default shell."
+    echo "run: set fish as default shell."
     sudo chsh "$(id -un)" -s "$(which fish)"
   fi
 }
 
 setup_git() {
   if grep -q "gitconfig-global" ~/.gitconfig; then
-    echo "info: git config enabled. skip."
+    echo "skip: git config enabled."
   else
-    echo "info: enable git config."
+    echo "run: enable git config."
     echo -e "\n[include]\n\tpath = ~/.gitconfig-global" >> ~/.gitconfig
   fi
 }
 
 setup_vim() {
   if test -e ~/.vim/autoload/plug.vim; then
-    echo "info: vim-plug exists. skip."
+    echo "skip: vim-plug exists."
   else
-    echo "info: install vim-plug."
+    echo "run: install vim-plug."
     curl --show-error --fail -o ~/.vim/autoload/plug.vim --create-dirs \
       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     vim -u NONE -c 'silent! source ~/.vimrc' -c 'PlugInstall' -c 'qa!'
   fi
 
-  if test -e ~/.local.vim; then
-    echo "info: ~/.local.vim exists. skip."
+  local vim_local_config=$HOME/.local.vim
+  if test -e "$vim_local_config"; then
+    echo "skip: $vim_local_config exists."
   else
-    echo "info: create ~/.local.vim"
-    cat > ~/.local.vim << 'EOF'
+    echo "run: create $vim_local_config"
+    cat > "$vim_local_config" << 'EOF'
 " if getcwd() == expand('~/projects/foo')
 " endif
 EOF
@@ -188,9 +196,9 @@ EOF
 
   local efm_langserver_version=0.0.44
   if test -e ~/tools/bin/efm-langserver; then
-    echo "info: efm-langserver exists. skip."
+    echo "skip: efm-langserver exists."
   else
-    echo "info: install efm-langserver."
+    echo "run: install efm-langserver."
     mkdir -p ~/tools/bin
     rm -rf /tmp/efm-langserver_v*
     local base_url="https://github.com/mattn/efm-langserver/releases/download"
@@ -213,9 +221,9 @@ EOF
 setup_wezterm() {
   local local_config=~/.config/wezterm/local_config.lua
   if test -e "$local_config"; then
-    echo "info: $local_config exists. skip."
+    echo "skip: $local_config exists."
   else
-    echo "info: create $local_config"
+    echo "run: create $local_config"
     cat > "$local_config" << 'EOF'
 local module = {}
 
