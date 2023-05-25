@@ -242,8 +242,9 @@ function! s:on_file_finder_open() abort
   nnoremap <buffer> <C-o> :<C-u>b #<CR>:bw<CR>
 endfunction
 
-" https://www.sobyte.net/post/2022-01/vim-copy-over-ssh/
 function! s:copy_to_clipboard()
+  " echomsg v:event
+  " https://www.sobyte.net/post/2022-01/vim-copy-over-ssh/
   " let l:content = join(v:event.regcontents, "\n")
   " let l:encoded = system('base64', l:content)
   " let l:sequence = "\e]52;c;" . trim(l:encoded) . "\x07"
@@ -270,9 +271,10 @@ augroup vimrc_clipboard
         \ endif
 augroup END
 
+" Note: register type should be set
 " if !empty($CLIPBOARD_FILE)
-"   nnoremap p :<C-u>let @*=join(readfile(expand($CLIPBOARD_FILE), 'b'), "\n")<CR>p
-"   nnoremap P :<C-u>let @*=join(readfile(expand($CLIPBOARD_FILE), 'b'), "\n")<CR>P
+"   nnoremap p :<C-u>call setreg('+', join(readfile(expand($CLIPBOARD_FILE), 'b'), "\n"))<CR>p
+"   nnoremap P :<C-u>call setreg('+', join(readfile(expand($CLIPBOARD_FILE), 'b'), "\n"))<CR>P
 " end
 
 let g:netrw_banner = 0
