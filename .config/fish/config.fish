@@ -41,17 +41,6 @@ if test (uname) = 'Darwin'; and not type --quiet tac
   alias tac 'tail -r'
 end
 
-if type --quiet colima
-  test -n "$COLIMA_START_OPTIONS"; or set -x COLIMA_START_OPTIONS '--cpu 2 --memory 4 --disk 30'
-  alias colima-start "colima start $COLIMA_START_OPTIONS"
-end
-
-if test -e $HOME/tools/anaconda3
-  function use_anaconda
-    eval "$($HOME/tools/anaconda3/bin/conda shell.fish hook)"
-  end
-end
-
 if status is-interactive
   set -U fish_greeting
 
@@ -62,13 +51,13 @@ if status is-interactive
   alias cp 'cp -i'
   alias mv 'mv -i'
 
+  alias g   'vim -c Git'
   alias gco 'git checkout'
   alias gst 'git status'
   alias gl  'git pull'
   alias gcd 'cd (git rev-parse --show-toplevel)'
   alias gcb 'git rev-parse --abbrev-ref HEAD'
   alias gsm 'git submodule'
-  alias gi  'vim -c Git'
 
   if type --quiet fzf; and type --quiet fzf_key_bindings
     fzf_key_bindings
@@ -80,6 +69,18 @@ if status is-interactive
  
   if type --quiet cd_hooks
     cd_hooks
+  end
+
+  if type --quiet colima
+    test -n "$COLIMA_START_OPTIONS"; \
+      or set -x COLIMA_START_OPTIONS '--cpu 2 --memory 4 --disk 30'
+    alias colima-start "colima start $COLIMA_START_OPTIONS"
+  end
+
+  if test -e $HOME/tools/anaconda3
+    function use_anaconda
+      eval "$($HOME/tools/anaconda3/bin/conda shell.fish hook)"
+    end
   end
 end
 

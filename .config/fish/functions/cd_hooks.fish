@@ -7,7 +7,7 @@ function cd_hooks
     end
   end
 
-  function cdi
+  function d
     # compaction
     set -l tmpfile (mktemp)
     cat "$DIRECTORY_HISTORY_FILE" | tac | awk '!a[$0]++' | tac > "$tmpfile"
