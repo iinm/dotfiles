@@ -118,7 +118,7 @@ nnoremap <C-l> :nohlsearch<CR>
 nnoremap <Leader>w :<C-u>set wrap!<CR>
 nnoremap <Leader>n :<C-u>set number!<CR>
 nnoremap <Leader>s :<C-u>gr!<space>
-nnoremap <Leader>e :<C-u>Ex <bar> /<C-r>=expand('%:t')<CR><CR>
+nnoremap <Leader>e :<C-u>e %:h <bar> /<C-r>=expand('%:t')<CR><CR>
 vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>
 nnoremap <leader>f :<C-u>terminal ++curwin find . -iname **<Left>
 if executable('fd')
@@ -292,6 +292,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   Plug 'tpope/vim-commentary'
   Plug 'tpope/vim-fugitive'
   Plug 'tpope/vim-sleuth'
+  Plug 'mattn/vim-molder'
   Plug 'mattn/vim-maketable'
   Plug 'mattn/emmet-vim'
   Plug 'kamykn/spelunker.vim'
@@ -325,6 +326,9 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   colorscheme everforest
 
   set statusline=%<%f\ %h%m%r%{FugitiveStatusline()}%=%-14.(%l,%c%V%)\ %P
+
+  " file explorer
+  let g:molder_show_hidden = 1
 
   " spelunker
   highlight SpelunkerSpellBad cterm=underline
