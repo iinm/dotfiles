@@ -394,7 +394,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   nnoremap [git]f :<C-u>Git fetch --prune<CR>
   nnoremap [git]c :<C-u>Git checkout<Space>
   nnoremap [git]p :<C-u>Git pull origin <C-r>=FugitiveHead()<CR><CR>
-  nnoremap [git]P :<C-u>terminal git push origin <C-r>=FugitiveHead()<CR><Space>
+  nnoremap [git]P :<C-u>terminal ++hidden fish -c "with_notify git push origin <C-r>=FugitiveHead()<CR>"<Space>
   nnoremap [git]b :<C-u>Git blame<CR>
 
   function! s:enable_lsp_keymap() abort
