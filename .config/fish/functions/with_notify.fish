@@ -4,9 +4,9 @@ function with_notify
   set -l cmd_status $status
 
   if test $cmd_status -eq 0
-    notify -t "Success 😁" -c "$cmd"
+    notify -t "Success 🎉" -c "$cmd"
   else
-    notify -t "failed 🤔" -c "$cmd"
+    notify -t "Failed 🚨" -c "$cmd"
   end
 
   return $cmd_status
