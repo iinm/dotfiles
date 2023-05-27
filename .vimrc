@@ -336,10 +336,12 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
 
   " ctrlp
   let g:ctrlp_user_command = 'fd --hidden --exclude .git --type f --color=never "" %s'
+  let g:ctrlp_root_markers = ['package.json', '.git']
+  let g:ctrlp_match_window = 'bottom,order:btt,min:1,max:15,results:15'
+  let g:ctrlp_by_filename = 1
+  " let g:ctrlp_regexp = 1
   let g:ctrlp_use_caching = 0
   let g:ctrlp_mruf_relative = 1
-  let g:ctrlp_regexp = 1
-  let g:ctrlp_root_markers = ['package.json', '.git']
 
   " easymotion
   let g:EasyMotion_do_mapping = 0
