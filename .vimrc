@@ -297,6 +297,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
   Plug 'mattn/emmet-vim'
   Plug 'kamykn/spelunker.vim'
   Plug 'previm/previm'
+  Plug 'jiangmiao/auto-pairs'
   Plug 'github/copilot.vim'
 
   " lsp
@@ -329,6 +330,11 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
 
   " file explorer
   let g:molder_show_hidden = 1
+
+  " auto-pairs
+  " https://github.com/jiangmiao/auto-pairs/issues/104
+  let g:AutoPairsMultilineClose = 0
+  let g:AutoPairsFlyMode = 0
 
   " spelunker
   highlight SpelunkerSpellBad cterm=underline
