@@ -3,7 +3,7 @@ function notify
   # echo $_flag_title $_flag_content
   if test -n "$TMUX"
     # tmux display-message -d 3000 "$_flag_title: $_flag_content"
-    tmux display-popup -x R -y S -h 4 -w '40%' echo -n -e "$_flag_title\n$_flag_content"
+    tmux display-popup -x R -y S -h 4 -w '40%' printf "%s\n%s" "$_flag_title" "$_flag_content"
   else if type --quiet osascript
     # darwin
     set -l escaped_title (printf '%s' $_flag_title | sed -e 's,",\\\\",g')
