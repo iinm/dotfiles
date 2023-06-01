@@ -57,6 +57,7 @@
 "                      :colder (older quickfix list)
 "                      :cnewer (newer quickfix list)
 " open path            gf (goto file), gx (xdg-open)
+" folding              zc (close), zo (open)
 
 if !isdirectory(expand("~/.vim/undodir"))
   call mkdir(expand("~/.vim/undodir"), 'p')
@@ -92,6 +93,8 @@ if executable('rg')
 endif
 set splitbelow
 set splitright
+set foldmethod=indent
+set foldlevel=99
 
 " --- Appearance
 set termguicolors
