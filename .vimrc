@@ -371,7 +371,9 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
 
   function! s:on_lsp_buffer_enabled() abort
     if exists('+tagfunc') | setlocal tagfunc=lsp#tagfunc | endif
-    autocmd! BufWritePre *.js,*.jsx,*.ts,*.tsx call execute('LspDocumentFormatSync --server=efm-langserver')
+    autocmd! BufWritePre *.js,*.jsx,*.ts,*.tsx
+          \ call execute('LspCodeActionSync source.organizeImports') |
+          \ call execute('LspDocumentFormatSync --server=efm-langserver')
     autocmd! BufWritePre *.tf call execute('LspDocumentFormatSync --server=efm-langserver')
     autocmd! BufWritePre *.go call execute('LspDocumentFormatSync --server=efm-langserver')
     call s:enable_lsp_keymap()
