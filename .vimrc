@@ -90,6 +90,8 @@ set grepprg=grep\ -n\ -H\ -R\ --exclude-dir\ '.git'\ $*\ .
 if executable('rg')
   set grepprg=rg\ --vimgrep\ --hidden\ --glob\ '!.git'
 endif
+set splitbelow
+set splitright
 
 " --- Appearance
 set termguicolors
