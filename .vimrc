@@ -95,6 +95,7 @@ set splitbelow
 set splitright
 set foldmethod=indent
 set foldlevel=99
+set maxmempattern=5000
 
 " --- Appearance
 set termguicolors
