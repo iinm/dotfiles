@@ -197,7 +197,7 @@ function! Outline() abort
 
   if l:filetype == 'typescript'
     if expand('%') =~ '\.test\.ts$'
-      vimgrep /\v^\s*(describe|beforeAll|afterAll|beforeEach|afterEach|it[^\w]|")/j %
+      vimgrep /\v^\s*(describe|beforeAll|afterAll|beforeEach|afterEach|it[^\w]|\]\)\()/j %
     else
       vimgrep /\v^(export\s+)?(function|interface|type|enum|const|class)/j %
     endif
