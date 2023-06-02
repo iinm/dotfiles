@@ -1,59 +1,62 @@
 -- Options
 vim.opt.undofile = true
-vim.opt.clipboard = "unnamedplus"
-vim.opt.wildignore = { '.git', 'node_modules' }
-vim.opt.ignorecase = true
 vim.opt.smartcase = true
+vim.opt.wildignore = { '.git', 'node_modules' }
 vim.opt.wildmode = { 'longest', 'full' }
 vim.opt.wildoptions = { 'fuzzy', 'pum', 'tagfile' }
+vim.opt.clipboard = "unnamedplus"
 vim.opt.termguicolors = true
 vim.opt.cursorline = true
 vim.opt.foldmethod = 'indent'
 vim.opt.foldlevel = 99
 vim.opt.splitbelow = true
 vim.opt.splitright = true
--- default indent
 vim.opt.tabstop = 8
 vim.opt.expandtab = true
 vim.opt.shiftwidth = 2
 vim.opt.softtabstop = 2
-
 vim.opt.grepprg = 'grep -n -H -R --exclude-dir ".git" $* .'
 if vim.fn.executable('rg') then
   vim.opt.grepprg = 'rg --vimgrep --hidden --glob "!.git" --glob "!node_modules"'
 end
 
--- Key map
+vim.g.markdown_fenced_languages = { 'sh' }
+
+-- Utilities
+vim.cmd('source ' .. vim.fn.stdpath('config') .. '/outline.vim')
+vim.cmd('source ' .. vim.fn.stdpath('config') .. '/buffers.vim')
+
+-- Key maps
 vim.g.mapleader = ' '
+vim.keymap.set('n', '<leader>vr', ':<C-u>source $MYVIMRC<CR>')
+vim.keymap.set('n', '<C-w>m', '<C-w>_<C-w><bar>')
+vim.keymap.set('n', '<leader>b', ':<C-u>call Buffers()<CR>')
 vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
 vim.keymap.set('n', '<leader>n', ':<C-u>set number!<CR>')
 vim.keymap.set('n', '<leader>s', ':<C-u>gr!<Space>')
 vim.keymap.set('n', '<leader>e', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>')
 vim.keymap.set('n', '<leader>t', ':<C-u>split | terminal<Space>')
-
 -- https://vim.fandom.com/wiki/Search_for_visually_selected_text
 vim.cmd [[vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>]]
 
 -- Commands
 vim.api.nvim_create_user_command('Outline', 'call Outline()', {})
+vim.api.nvim_create_user_command('BDelete', 'b # | bd #', {})
+vim.api.nvim_create_user_command('BOnly', '%bd | e # | bd #', {})
 
--- Autocmd
+-- etc.
 vim.api.nvim_create_autocmd({ 'QuickFixCmdPost' }, {
   group = vim.api.nvim_create_augroup('UserOpenQuickfixWindow', {}),
   pattern = '*grep*',
   command = 'cwindow'
 })
 
--- Indent
-local indent_augroup = vim.api.nvim_create_augroup('UserIndent', { clear = true })
+local indent_augroup = vim.api.nvim_create_augroup('UserIndentConfig', { clear = true })
 vim.api.nvim_create_autocmd({ 'FileType' }, {
   pattern = 'go',
   group = indent_augroup,
   command = 'setlocal tabstop=4 noexpandtab softtabstop=4 shiftwidth=4'
 })
-
--- Functions
-vim.cmd('source ' .. vim.fn.stdpath('config') .. '/outline.vim')
 
 -- Plugins
 -- https://github.com/wbthomason/packer.nvim#bootstrapping
@@ -72,32 +75,26 @@ local packer_bootstrap = ensure_packer()
 
 require('packer').startup(function(use)
   use 'wbthomason/packer.nvim'
+  use "nvim-lua/plenary.nvim"
 
   -- ui
-  use 'EdenEast/nightfox.nvim'
+  use 'sainnhe/everforest'
 
-  -- utils
-  use {
-    'nvim-telescope/telescope.nvim', tag = '0.1.1',
-    requires = { {'nvim-lua/plenary.nvim'} }
-  }
+  -- utilities
+  use 'ctrlpvim/ctrlp.vim'
   use 'mattn/vim-molder'
-  use 'tpope/vim-commentary'
   use 'tpope/vim-sleuth'
+  use 'tpope/vim-commentary'
   use 'tpope/vim-fugitive'
   use 'windwp/nvim-autopairs'
   use 'kamykn/spelunker.vim'
   use { 'phaazon/hop.nvim', branch = 'v2' }
-  use 'kazhala/close-buffers.nvim'
-  use 'github/copilot.vim'
 
   -- lsp
   use 'neovim/nvim-lspconfig'
   use "williamboman/mason.nvim"
   use 'williamboman/mason-lspconfig.nvim'
   use 'jose-elias-alvarez/null-ls.nvim'
-  use 'folke/trouble.nvim'
-  use 'onsails/lspkind.nvim'
 
   -- snippets
   use 'hrsh7th/vim-vsnip'
@@ -105,13 +102,12 @@ require('packer').startup(function(use)
 
   -- completion
   use 'hrsh7th/cmp-buffer'
-  use 'hrsh7th/cmp-path'
-  use 'hrsh7th/cmp-cmdline'
   use 'hrsh7th/cmp-vsnip'
   use 'hrsh7th/cmp-nvim-lsp'
   use 'hrsh7th/nvim-cmp'
+  use 'github/copilot.vim'
 
-  -- languages
+  -- lanugages
   use 'pangloss/vim-javascript'
   use 'maxmellon/vim-jsx-pretty'
   use 'jose-elias-alvarez/typescript.nvim'
@@ -123,70 +119,23 @@ require('packer').startup(function(use)
     require('packer').sync()
   end
 
-  -- telescope
-  local telescope = require('telescope')
-  local telescope_actions = require('telescope.actions')
-  telescope.setup({
-    defaults = {
-      path_display = {"smart"},
-      file_ignore_patterns = { 'node_modules', '.git' },
-      mappings = {
-        i = {
-          ['<esc>'] = telescope_actions.close,
-        }
-      }
-    },
-    pickers = {
-      find_files = {
-        hidden = true,
-      },
-      buffers = {
-        ignore_current_buffer = true,
-        sort_lastused = true,
-      },
-      oldfiles = {
-        only_cwd = true,
-      },
-    }
-  })
+  -- ctrlp
+  vim.g.ctrlp_user_command = 'fd --hidden --exclude .git --type f --color=never "" %s'
+  vim.g.ctrlp_root_markers = { '.git', 'package.json' }
+  vim.g.ctrlp_match_window = 'bottom,order:btt,min:1,max:15,results:15'
+  vim.g.ctrlp_by_filename = 1
+  vim.g.ctrlp_use_caching = 0
+  vim.g.ctrlp_mruf_relative = 1
 
   -- lsp
   require('mason').setup()
+  -- https://github.com/williamboman/mason-lspconfig.nvim
   require('mason-lspconfig').setup_handlers({
     function(server)
       require('lspconfig')[server].setup {
         capabilities = require('cmp_nvim_lsp').default_capabilities(),
       }
     end
-  })
-
-  -- https://github.com/neovim/nvim-lspconfig/wiki/UI-Customization
-  vim.diagnostic.config({
-    virtual_text = false,
-    signs = true,
-    underline = false,
-    update_in_insert = false,
-    severity_sort = true,
-  })
-
-  local signs = { Error = ' ', Warn = ' ', Hint = ' ', Info = ' ' }
-  for type, icon in pairs(signs) do
-    local hl = 'DiagnosticSign' .. type
-    vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-  end
-
-  require('trouble').setup({
-    icons = false,
-    fold_open = 'v',
-    fold_closed = '>',
-    indent_lines = false,
-    signs = {
-      error = 'error',
-      warning = 'warn',
-      hint = 'hint',
-      information = 'info'
-    },
-    use_diagnostic_signs = true
   })
 
   -- null-ls
@@ -229,10 +178,24 @@ require('packer').startup(function(use)
     end,
   })
 
+  -- https://github.com/neovim/nvim-lspconfig/wiki/UI-Customization
+  vim.diagnostic.config({
+    virtual_text = false,
+    signs = true,
+    underline = false,
+    update_in_insert = false,
+    severity_sort = true,
+  })
+
+  local signs = { Error = ' ', Warn = ' ', Hint = ' ', Info = ' ' }
+  for type, icon in pairs(signs) do
+    local hl = 'DiagnosticSign' .. type
+    vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+  end
+
   -- cmp
   -- https://github.com/hrsh7th/nvim-cmp
   local cmp = require('cmp')
-  local lspkind = require('lspkind')
   cmp.setup({
     snippet = {
       expand = function(args)
@@ -252,26 +215,9 @@ require('packer').startup(function(use)
     }, {
       { name = 'buffer' },
     }),
-    formatting = {
-      format = lspkind.cmp_format({
-        mode = 'symbol',
-        -- https://github.com/microsoft/vscode-codicons/blob/main/dist/codicon.ttf
-        preset = 'codicons',
-        maxwidth = 50,
-        ellipsis_char = '...',
-      })
-    },
   })
-  -- cmp.setup.cmdline(':', {
-  --   mapping = cmp.mapping.preset.cmdline(),
-  --   sources = cmp.config.sources({
-  --     { name = 'path' }
-  --   }, {
-  --     { name = 'cmdline' }
-  --   })
-  -- })
 
-  -- file types
+  -- File types
   local file_type_augroup = vim.api.nvim_create_augroup('UserFileType', {})
   vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
     pattern = { '*.tsx', '*.jsx' },
@@ -280,14 +226,17 @@ require('packer').startup(function(use)
   })
 
   -- etc.
-  vim.cmd [[colorscheme nordfox]]
+  vim.cmd [[
+  let g:everforest_background = 'soft'
+  set background=dark
+  colorscheme everforest
+  ]]
   vim.cmd [[
   set statusline=%<%f\ %h%m%r%{FugitiveStatusline()}%=%-14.(%l,%c%V%)\ %P
   ]]
 
   require('nvim-autopairs').setup()
   require('hop').setup()
-  require('close_buffers').setup()
   require('typescript').setup({})
 
   vim.g.javascript_plugin_jsdoc = 1
@@ -298,19 +247,15 @@ require('packer').startup(function(use)
   highlight SpelunkerComplexOrCompoundWord gui=underline
   ]])
 
-  -- Key map
-  local telescope_builtin = require('telescope.builtin')
-  vim.keymap.set('n', '<leader>f', telescope_builtin.find_files, {})
-  vim.keymap.set('n', '<leader>b', telescope_builtin.buffers, {})
-  vim.keymap.set('n', '<leader>r', telescope_builtin.command_history, {})
+  -- Keymaps
+  vim.keymap.set('n', '<leader>f', ':<C-u>CtrlPMixed<CR>', {})
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
 
   vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float)
+  vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
   vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
   vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
-  vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
 
-  -- lsp
   -- https://github.com/neovim/nvim-lspconfig
   vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('UserLspConfig', {}),
@@ -333,23 +278,18 @@ require('packer').startup(function(use)
     end,
   })
 
-  -- git
   vim.keymap.set('n', '<leader>gf', ':<C-u>Git fetch --prune<CR>')
   vim.keymap.set('n', '<leader>gc', ':<C-u>Git checkout<Space>')
   vim.keymap.set('n', '<leader>gp', ':<C-u>Git pull origin <C-r>=FugitiveHead()<CR><CR>')
   vim.keymap.set('n', '<leader>gP', ':<C-u>split | terminal fish -c "with_notify git push origin <C-r>=FugitiveHead()<CR>"<Space>')
   vim.keymap.set('n', '<leader>gb', ':<C-u>Git blame<CR>')
 
-  -- vsnip
+  -- https://github.com/hrsh7th/vim-vsnip
   vim.cmd [[
   inoremap <expr> <C-f> vsnip#jumpable(1)  ? '<Plug>(vsnip-jump-next)' : '<C-f>'
   snoremap <expr> <C-f> vsnip#jumpable(1)  ? '<Plug>(vsnip-jump-next)' : '<C-f>'
   inoremap <expr> <C-b> vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<C-b>'
   snoremap <expr> <C-b> vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<C-b>'
   ]]
-
-  -- Commands
-  vim.api.nvim_create_user_command('BD', 'BDelete this', {})
-  vim.api.nvim_create_user_command('BOnly', 'BDelete other', {})
 
 end)
