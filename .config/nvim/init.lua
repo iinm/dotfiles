@@ -151,6 +151,14 @@ require('packer').startup(function(use)
     })
   end
 
+  local before_formatting = function(bufnr)
+    local filetype = vim.api.nvim_buf_get_option(bufnr, 'filetype')
+    if filetype == 'typescript' then
+      local ts = require("typescript").actions
+      ts.removeUnused({ sync = true })
+    end
+  end
+
   local lsp_formatting_augroup = vim.api.nvim_create_augroup('LspFormatting', {})
 
   null_ls.setup({
@@ -171,6 +179,7 @@ require('packer').startup(function(use)
           group = lsp_formatting_augroup,
           buffer = bufnr,
           callback = function()
+            before_formatting(bufnr)
             lsp_formatting(bufnr)
           end,
         })
