@@ -9,7 +9,7 @@ end
 
 set -x SHELL (which fish)
 test -n "$LANG";   or set -x LANG en_US.UTF-8
-test -n "$EDITOR"; or type --quiet nvim; and set -x EDITOR nvim
+test -n "$EDITOR"; or type --quiet vim; and set -x EDITOR vim
 
 if test -e /opt/homebrew
   fish_add_path /opt/homebrew/sbin

@@ -20,7 +20,7 @@ setup() {
   link
   setup_fish
   setup_git
-  # setup_vim
+  setup_vim
   setup_wezterm
 }
 
@@ -44,16 +44,17 @@ bootstrap_ubuntu() {
     sudo apt purge -y fish || true
   fi
 
-  # if test -e /etc/apt/sources.list.d/jonathonf-ubuntu-vim-*.list; then
-  #   echo "skip: vim PPA is already enabled."
-  # else
-  #   echo "run: enable vim PPA."
-  #   sudo apt-add-repository ppa:jonathonf/vim -y
-  #   sudo apt purge -y vim || true
-  # fi
+  if test -e /etc/apt/sources.list.d/jonathonf-ubuntu-vim-*.list; then
+    echo "skip: vim PPA is already enabled."
+  else
+    echo "run: enable vim PPA."
+    sudo apt-add-repository ppa:jonathonf/vim -y
+    sudo apt purge -y vim || true
+  fi
 
   local packages=(
     fish
+    vim-gtk
     tmux
     git
     make
@@ -104,6 +105,7 @@ bootstrap_ubuntu() {
 bootstrap_darwin() {
  local packages=(
     fish
+    vim
     neovim
     tmux
     ripgrep
