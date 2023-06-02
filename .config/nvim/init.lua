@@ -27,9 +27,9 @@ end
 vim.g.mapleader = ' '
 vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
 vim.keymap.set('n', '<leader>n', ':<C-u>set number!<CR>')
-vim.keymap.set('n', '<leader>s', ':<C-u>gr!<space>')
+vim.keymap.set('n', '<leader>s', ':<C-u>gr!<Space>')
 vim.keymap.set('n', '<leader>e', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>')
-vim.keymap.set('n', '<leader>t', ':<C-u>split | terminal<space>')
+vim.keymap.set('n', '<leader>t', ':<C-u>split | terminal<Space>')
 
 -- https://vim.fandom.com/wiki/Search_for_visually_selected_text
 vim.cmd [[vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>]]
