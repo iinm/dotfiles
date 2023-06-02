@@ -90,23 +90,23 @@ bootstrap_ubuntu() {
     ln -s "$(which fdfind)" "$fd_path"
   fi
 
-  local nvim_path=~/tools/bin/nvim
-  if test -e "$nvim_path"; then
-    echo "skip: nvim is already linked."
-  else
-    echo "run: install nvim."
-    mkdir -p ~/tools/bin
-    curl --show-error --fail -L -o "$nvim_path" \
-      https://github.com/neovim/neovim/releases/download/stable/nvim.appimage
-    chmod +x "$nvim_path"
-  fi
+  # local nvim_path=~/tools/bin/nvim
+  # if test -e "$nvim_path"; then
+  #   echo "skip: nvim is already linked."
+  # else
+  #   echo "run: install nvim."
+  #   mkdir -p ~/tools/bin
+  #   curl --show-error --fail -L -o "$nvim_path" \
+  #     https://github.com/neovim/neovim/releases/download/stable/nvim.appimage
+  #   chmod +x "$nvim_path"
+  # fi
 }
 
 bootstrap_darwin() {
  local packages=(
     fish
     vim
-    neovim
+    # neovim
     tmux
     ripgrep
     fd
