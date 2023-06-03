@@ -49,7 +49,7 @@ vim.api.nvim_create_user_command('BOnly', '%bd | e # | bd #', {})
 vim.api.nvim_create_autocmd({ 'QuickFixCmdPost' }, {
   group = vim.api.nvim_create_augroup('UserOpenQuickfixWindow', {}),
   pattern = '*grep*',
-  command = 'cwindow'
+  command = 'cwindow | setlocal nowrap'
 })
 
 local indent_augroup = vim.api.nvim_create_augroup('UserIndentConfig', { clear = true })
@@ -83,10 +83,11 @@ require('packer').startup(function(use)
 
   -- utilities
   use 'ctrlpvim/ctrlp.vim'
-  use 'mattn/vim-molder'
   use 'tpope/vim-sleuth'
   use 'tpope/vim-commentary'
   use 'tpope/vim-fugitive'
+  use 'elihunter173/dirbuf.nvim'
+  use 'akinsho/toggleterm.nvim'
   use 'windwp/nvim-autopairs'
   use 'kamykn/spelunker.vim'
   use { 'phaazon/hop.nvim', branch = 'v2' }
@@ -110,7 +111,6 @@ require('packer').startup(function(use)
 
   -- lanugages
   use 'pangloss/vim-javascript'
-  use 'maxmellon/vim-jsx-pretty'
   use 'jose-elias-alvarez/typescript.nvim'
   use 'jparise/vim-graphql'
   use 'hashivim/vim-terraform'
@@ -128,10 +128,31 @@ require('packer').startup(function(use)
   vim.g.ctrlp_use_caching = 0
   vim.g.ctrlp_mruf_relative = 1
 
+  -- toggleterm
+  require("toggleterm").setup({
+    size = function(term)
+      if term.direction == "horizontal" then
+        return vim.o.lines * 0.4
+      elseif term.direction == "vertical" then
+        return vim.o.columns * 0.4
+      end
+    end,
+  })
+
   -- lsp
   require('mason').setup()
   -- https://github.com/williamboman/mason-lspconfig.nvim
-  require('mason-lspconfig').setup_handlers({
+  local mason_lspconfig = require('mason-lspconfig')
+  -- mason_lspconfig.setup({
+  --   ensure_installed = {
+  --     'lua_ls',
+  --     'gopls',
+  --     'tsserver',
+  --     'custom_elements_ls',
+  --     'emmet_ls',
+  --   },
+  -- })
+  mason_lspconfig.setup_handlers({
     function(server)
       require('lspconfig')[server].setup {
         capabilities = require('cmp_nvim_lsp').default_capabilities(),
@@ -257,7 +278,7 @@ require('packer').startup(function(use)
     }),
     formatting = {
       fields = { 'abbr', 'kind', 'menu' },
-      format = function(entry, vim_item)
+      format = function(_, vim_item)
         vim_item.kind = cmp_kinds[vim_item.kind] or ''
         -- if entry.completion_item.detail ~= nil then
         --   vim_item.menu = entry.completion_item.detail
@@ -265,14 +286,6 @@ require('packer').startup(function(use)
         return vim_item
       end
     }
-  })
-
-  -- File types
-  local file_type_augroup = vim.api.nvim_create_augroup('UserFileType', {})
-  vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
-    pattern = { '*.tsx', '*.jsx' },
-    group = file_type_augroup,
-    command = 'set filetype=typescriptreact'
   })
 
   -- etc.
@@ -301,6 +314,24 @@ require('packer').startup(function(use)
   vim.keymap.set('n', '<leader>f', ':<C-u>CtrlPMixed<CR>', {})
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
 
+  -- terminal
+  vim.keymap.set('n', '<C-w>t', ':ToggleTerm<CR>')
+  vim.keymap.set('n', '<leader>t', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
+  vim.api.nvim_create_autocmd({ 'TermOpen' }, {
+    group = vim.api.nvim_create_augroup('UserTerminalConfig', {}),
+    pattern = '*',
+    callback = function()
+      local opts = { buffer = 0 }
+      vim.keymap.set('t', '<C-w>h', [[<Cmd>wincmd h<CR>]], opts)
+      vim.keymap.set('t', '<C-w>j', [[<Cmd>wincmd j<CR>]], opts)
+      vim.keymap.set('t', '<C-w>k', [[<Cmd>wincmd k<CR>]], opts)
+      vim.keymap.set('t', '<C-w>l', [[<Cmd>wincmd l<CR>]], opts)
+      vim.keymap.set('t', '<C-w><C-w>', [[<Cmd>wincmd w<CR>]], opts)
+      vim.keymap.set('t', '<C-w>t', '<Cmd>ToggleTerm<CR>', {})
+    end,
+  })
+
+  -- lsp
   vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float)
   vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
   vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
@@ -328,10 +359,11 @@ require('packer').startup(function(use)
     end,
   })
 
+  -- git
   vim.keymap.set('n', '<leader>gf', ':<C-u>Git fetch --prune<CR>')
   vim.keymap.set('n', '<leader>gc', ':<C-u>Git checkout<Space>')
   vim.keymap.set('n', '<leader>gp', ':<C-u>Git pull origin <C-r>=FugitiveHead()<CR><CR>')
-  vim.keymap.set('n', '<leader>gP', ':<C-u>split | terminal fish -c "with_notify git push origin <C-r>=FugitiveHead()<CR>"<Space>')
+  vim.keymap.set('n', '<leader>gP', [[:5TermExec open=0 cmd='with_notify git push origin <C-r>=FugitiveHead()<CR>'<Left>]])
   vim.keymap.set('n', '<leader>gb', ':<C-u>Git blame<CR>')
 
   -- https://github.com/hrsh7th/vim-vsnip
