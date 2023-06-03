@@ -29,8 +29,9 @@ vim.g.netrw_liststyle = 3
 -- Utilities
 vim.cmd('source ' .. vim.fn.stdpath('config') .. '/outline.vim')
 vim.cmd('source ' .. vim.fn.stdpath('config') .. '/buffers.vim')
+vim.cmd('source ' .. vim.fn.stdpath('config') .. '/oldfiles.vim')
 
--- Key maps
+-- Key map
 vim.g.mapleader = ' '
 vim.keymap.set('n', '<leader>vr', ':<C-u>source $MYVIMRC<CR>')
 vim.keymap.set('n', '<C-w>m', '<C-w>_<C-w><bar>')
@@ -44,9 +45,11 @@ vim.keymap.set('n', '<leader>t', ':<C-u>split | terminal<Space>')
 vim.cmd [[vnoremap // y/\V<C-r>=escape(@",'/\')<CR><CR>]]
 
 -- Commands
-vim.api.nvim_create_user_command('Outline', 'call Outline()', {})
 vim.api.nvim_create_user_command('BDelete', 'b # | bd #', {})
 vim.api.nvim_create_user_command('BOnly', '%bd | e # | bd #', {})
+vim.api.nvim_create_user_command('Outline', 'call Outline()', {})
+vim.api.nvim_create_user_command('Oldfiles', 'call Oldfiles()', {})
+vim.api.nvim_create_user_command('OldfilesLocal', [[call Oldfiles('\v^' .. getcwd())]], {})
 
 -- etc.
 vim.api.nvim_create_autocmd({ 'QuickFixCmdPost' }, {
@@ -321,7 +324,7 @@ require('packer').startup(function(use)
 
   vim.g.javascript_plugin_jsdoc = 1
 
-  -- Keymaps
+  -- Key map
   vim.keymap.set('n', '<leader>f', ':<C-u>CtrlPMixed<CR>', {})
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
 
