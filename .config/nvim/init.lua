@@ -164,6 +164,7 @@ require('packer').startup(function(use)
 
   null_ls.setup({
     sources = {
+      null_ls.builtins.formatting.goimports,
       null_ls.builtins.formatting.eslint,
       null_ls.builtins.diagnostics.eslint.with({
         diagnostics_postprocess = function(diagnostic)
@@ -278,7 +279,7 @@ require('packer').startup(function(use)
       vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
       vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
       vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
-      vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
+      vim.keymap.set({ 'n', 'i' }, '<C-k>', vim.lsp.buf.signature_help, opts)
       vim.api.nvim_create_user_command('LspRename', function()
         vim.lsp.buf.rename()
       end, {})
