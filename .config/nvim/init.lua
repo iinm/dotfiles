@@ -204,6 +204,35 @@ require('packer').startup(function(use)
   end
 
   -- cmp
+  -- https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance
+  local cmp_kinds = {
+    Text = '  ',
+    Method = 'λ  ',
+    Function = '  ',
+    Constructor = '  ',
+    Field = '  ',
+    Variable = '  ',
+    Class = '  ',
+    Interface = '  ',
+    Module = '  ',
+    Property = '  ',
+    Unit = '  ',
+    Value = '  ',
+    Enum = '  ',
+    Keyword = '  ',
+    Snippet = '  ',
+    Color = '  ',
+    File = '  ',
+    Reference = '  ',
+    Folder = '  ',
+    EnumMember = '  ',
+    Constant = '  ',
+    Struct = '  ',
+    Event = '  ',
+    Operator = '  ',
+    TypeParameter = '  ',
+  }
+
   -- https://github.com/hrsh7th/nvim-cmp
   local cmp = require('cmp')
   cmp.setup({
@@ -225,6 +254,16 @@ require('packer').startup(function(use)
     }, {
       { name = 'buffer' },
     }),
+    formatting = {
+      fields = { 'abbr', 'kind', 'menu' },
+      format = function(entry, vim_item)
+        vim_item.kind = cmp_kinds[vim_item.kind] or ''
+        -- if entry.completion_item.detail ~= nil then
+        --   vim_item.menu = entry.completion_item.detail
+        -- end
+        return vim_item
+      end
+    }
   })
 
   -- File types
