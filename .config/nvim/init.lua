@@ -301,4 +301,7 @@ require('packer').startup(function(use)
   snoremap <expr> <C-b> vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<C-b>'
   ]]
 
+  -- Commands
+  vim.api.nvim_create_user_command('SpellToggle', 'call spelunker#toggle()', {})
+
 end)
