@@ -22,6 +22,9 @@ if vim.fn.executable('rg') then
 end
 
 vim.g.markdown_fenced_languages = { 'sh' }
+vim.g.netrw_banner = 0
+vim.g.newrw_hide = 0
+vim.g.netrw_liststyle = 3
 
 -- Utilities
 vim.cmd('source ' .. vim.fn.stdpath('config') .. '/outline.vim')
@@ -127,6 +130,7 @@ require('packer').startup(function(use)
   vim.g.ctrlp_by_filename = 1
   vim.g.ctrlp_use_caching = 0
   vim.g.ctrlp_mruf_relative = 1
+  vim.g.ctrlp_mruf_exclude = [[COMMIT_EDITMSG]]
 
   -- toggleterm
   require("toggleterm").setup({
