@@ -55,7 +55,7 @@ vim.api.nvim_create_autocmd({ 'QuickFixCmdPost' }, {
   command = 'cwindow | setlocal nowrap'
 })
 
-local indent_augroup = vim.api.nvim_create_augroup('UserIndentConfig', { clear = true })
+local indent_augroup = vim.api.nvim_create_augroup('UserIndentConfig', {})
 vim.api.nvim_create_autocmd({ 'FileType' }, {
   pattern = 'go',
   group = indent_augroup,
@@ -66,9 +66,9 @@ vim.api.nvim_create_autocmd({ 'FileType' }, {
 -- https://github.com/wbthomason/packer.nvim#bootstrapping
 local ensure_packer = function()
   local fn = vim.fn
-  local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
+  local install_path = fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
   if fn.empty(fn.glob(install_path)) > 0 then
-    fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
+    fn.system({ 'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path })
     vim.cmd [[packadd packer.nvim]]
     return true
   end
@@ -171,6 +171,7 @@ require('packer').startup(function(use)
   local lsp_formatting = function(bufnr)
     vim.lsp.buf.format({
       filter = function(client)
+        print(client.name)
         return client.name == 'null-ls'
       end,
       bufnr = bufnr,
@@ -292,6 +293,18 @@ require('packer').startup(function(use)
     }
   })
 
+  -- spelunker
+  vim.g.enable_spelunker_vim = 0
+  vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
+    group = vim.api.nvim_create_augroup('UserSpelunkerConfig', {}),
+    pattern = { '*.md', '*.json', '*.sh', '*.fish', '*.js', '*.ts', '*.tsx' },
+    command = 'call spelunker#toggle()',
+  })
+  vim.cmd([[
+  highlight SpelunkerSpellBad gui=underline
+  highlight SpelunkerComplexOrCompoundWord gui=underline
+  ]])
+
   -- etc.
   vim.cmd [[
   let g:everforest_background = 'soft'
@@ -307,31 +320,29 @@ require('packer').startup(function(use)
   require('typescript').setup({})
 
   vim.g.javascript_plugin_jsdoc = 1
-  vim.g.molder_show_hidden = 1
-
-  vim.cmd([[
-  highlight SpelunkerSpellBad gui=underline
-  highlight SpelunkerComplexOrCompoundWord gui=underline
-  ]])
 
   -- Keymaps
   vim.keymap.set('n', '<leader>f', ':<C-u>CtrlPMixed<CR>', {})
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
 
   -- terminal
-  vim.keymap.set('n', '<C-w>t', ':ToggleTerm<CR>')
+  vim.keymap.set('n', '<C-w>t', ':<C-u>ToggleTerm<CR>')
+  vim.keymap.set('n', '<C-w>T', ':<C-u>TermSelect<CR>')
   vim.keymap.set('n', '<leader>t', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
   vim.api.nvim_create_autocmd({ 'TermOpen' }, {
     group = vim.api.nvim_create_augroup('UserTerminalConfig', {}),
     pattern = '*',
     callback = function()
       local opts = { buffer = 0 }
+      vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
       vim.keymap.set('t', '<C-w>h', [[<Cmd>wincmd h<CR>]], opts)
       vim.keymap.set('t', '<C-w>j', [[<Cmd>wincmd j<CR>]], opts)
       vim.keymap.set('t', '<C-w>k', [[<Cmd>wincmd k<CR>]], opts)
       vim.keymap.set('t', '<C-w>l', [[<Cmd>wincmd l<CR>]], opts)
+      vim.keymap.set('t', '<C-w>c', [[<Cmd>wincmd c<CR>]], opts)
       vim.keymap.set('t', '<C-w><C-w>', [[<Cmd>wincmd w<CR>]], opts)
       vim.keymap.set('t', '<C-w>t', '<Cmd>ToggleTerm<CR>', {})
+      vim.keymap.set('t', '<C-w>T', '<Cmd>TermSelect<CR>', {})
     end,
   })
 
@@ -354,12 +365,23 @@ require('packer').startup(function(use)
       vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
       vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
       vim.keymap.set({ 'n', 'i' }, '<C-k>', vim.lsp.buf.signature_help, opts)
+
+      -- commands
       vim.api.nvim_create_user_command('LspRename', function()
         vim.lsp.buf.rename()
       end, {})
       vim.api.nvim_create_user_command('LspFormat', function()
-        vim.lsp.buf.format { async = true }
+        vim.lsp.buf.format({ async = false })
       end, {})
+
+      -- format on save
+      vim.api.nvim_create_autocmd({ 'BufWritePre' }, {
+        group = vim.api.nvim_create_augroup('UserLspFormattingOnSave', {}),
+        pattern = { '*.lua' },
+        callback = function()
+          vim.lsp.buf.format({ async = false })
+        end,
+      })
     end,
   })
 
@@ -367,7 +389,8 @@ require('packer').startup(function(use)
   vim.keymap.set('n', '<leader>gf', ':<C-u>Git fetch --prune<CR>')
   vim.keymap.set('n', '<leader>gc', ':<C-u>Git checkout<Space>')
   vim.keymap.set('n', '<leader>gp', ':<C-u>Git pull origin <C-r>=FugitiveHead()<CR><CR>')
-  vim.keymap.set('n', '<leader>gP', [[:5TermExec open=0 cmd='with_notify git push origin <C-r>=FugitiveHead()<CR>'<Left>]])
+  vim.keymap.set('n', '<leader>gP',
+    [[:5TermExec open=0 cmd='with_notify git push origin <C-r>=FugitiveHead()<CR>'<Left>]])
   vim.keymap.set('n', '<leader>gb', ':<C-u>Git blame<CR>')
 
   -- https://github.com/hrsh7th/vim-vsnip
@@ -379,6 +402,5 @@ require('packer').startup(function(use)
   ]]
 
   -- Commands
-  vim.api.nvim_create_user_command('SpellToggle', 'call spelunker#toggle()', {})
-
+  vim.api.nvim_create_user_command('ToggleSpell', 'call spelunker#toggle()', {})
 end)
