@@ -11,6 +11,7 @@ Usage: dotfiles COMMAND
   link            Create symlink to dotfiles
   setup_fish      Setup fish shell
   setup_git       Setup git
+  setup_tmux      Setup tmux
   setup_wezterm   Setup wezterm
 HELP
 }
@@ -21,6 +22,7 @@ setup() {
   setup_fish
   setup_git
   # setup_vim
+  setup_tmux
   setup_wezterm
 }
 
@@ -229,6 +231,22 @@ EOF
   fi
 }
 
+setup_tmux() {
+  # https://github.com/tmux/tmux/issues/1257#issuecomment-581378716
+  if test -d ~/.terminfo && find ~/.terminfo -name tmux-256color | grep -q tmux-256color; then
+    echo "skip: tmux terminfo exists."
+  else
+    echo "run: install tmux terminfo."
+    local tempfile
+    tempfile=$(mktemp)
+    local infocmp
+    infocmp=$(which /opt/homebrew/opt/ncurses/bin/infocmp || which infocmp)
+    $infocmp -x tmux-256color > "$tempfile"
+    tic -x -o ~/.terminfo "$tempfile"
+    rm "$tempfile"
+  fi
+}
+
 setup_wezterm() {
   local local_config=~/.config/wezterm/local_config.lua
   if test -e "$local_config"; then
@@ -246,6 +264,18 @@ return module
 EOF
   fi
 
+  # https://wezfurlong.org/wezterm/faq.html#how-do-i-enable-undercurl-curly-underlines
+  if test -d ~/.terminfo && find ~/.terminfo -name wezterm | grep -q wezterm; then
+    echo "skip: wezterm terminfo exists."
+  else
+    echo "run: install wezterm terminfo."
+    local tempfile
+    tempfile=$(mktemp)
+    curl --show-error --fail -L -o "$tempfile" \
+      https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo
+    tic -x -o ~/.terminfo "$tempfile"
+    rm "$tempfile"
+  fi
 }
 
 if test "${BASH_SOURCE[0]}" = "$0"; then
