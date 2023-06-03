@@ -1,5 +1,6 @@
 -- Options
 vim.opt.undofile = true
+vim.opt.ignorecase = true
 vim.opt.smartcase = true
 vim.opt.wildignore = { '.git', 'node_modules' }
 vim.opt.wildmode = { 'longest', 'full' }
