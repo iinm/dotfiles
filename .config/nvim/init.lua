@@ -224,6 +224,7 @@ local ensure_plugins = function()
     use 'windwp/nvim-autopairs'
     use 'kamykn/spelunker.vim'
     use { 'phaazon/hop.nvim', branch = 'v2' }
+    use 'folke/trouble.nvim'
 
     -- lsp
     use 'neovim/nvim-lspconfig'
@@ -351,6 +352,20 @@ local setup_lsp = function()
   --     'emmet_ls',
   --   },
   -- })
+
+  require('trouble').setup({
+    icons = false,
+    fold_open = 'v',
+    fold_closed = '>',
+    indent_lines = false,
+    signs = {
+      error = 'error',
+      warning = 'warn',
+      hint = 'hint',
+      information = 'info'
+    },
+    use_diagnostic_signs = true
+  })
 end
 
 local setup_null_ls = function(local_config)
