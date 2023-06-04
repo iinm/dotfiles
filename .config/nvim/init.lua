@@ -28,9 +28,10 @@ local set_options = function()
 end
 
 local load_utilities = function()
-  vim.cmd('source ' .. vim.fn.stdpath('config') .. '/outline.vim')
-  vim.cmd('source ' .. vim.fn.stdpath('config') .. '/buffers.vim')
-  vim.cmd('source ' .. vim.fn.stdpath('config') .. '/oldfiles.vim')
+  local config_path = vim.fn.stdpath('config')
+  vim.cmd('source ' .. config_path .. '/outline.vim')
+  vim.cmd('source ' .. config_path .. '/buffers.vim')
+  vim.cmd('source ' .. config_path .. '/oldfiles.vim')
 end
 
 local set_ui = function()
@@ -48,7 +49,7 @@ local set_keymap = function()
   vim.g.mapleader = ' '
   -- utilities
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
-  vim.keymap.set('n', '<leader>f', ':<C-u>CtrlPMixed<CR>', {})
+  vim.keymap.set('n', '<leader>f', ':<C-u>CtrlPMixed<CR>')
   vim.keymap.set('n', '<leader>e', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>')
   vim.keymap.set('n', '<leader>t', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
   vim.keymap.set('n', '<leader>b', ':<C-u>call Buffers()<CR>')
@@ -125,9 +126,12 @@ local create_commands = function()
   vim.api.nvim_create_user_command('BDelete', 'b # | bd #', {})
   vim.api.nvim_create_user_command('BOnly', '%bd | e # | bd #', {})
   vim.api.nvim_create_user_command('Outline', 'call Outline()', {})
-  vim.api.nvim_create_user_command('Oldfiles', 'call Oldfiles()', {})
-  vim.api.nvim_create_user_command('OldfilesLocal', [[call Oldfiles('\v^' .. getcwd())]], {})
-  vim.api.nvim_create_user_command('ToggleSpell', 'call spelunker#toggle()', {})
+  vim.api.nvim_create_user_command('Oldfiles', [[call Oldfiles('\v^' .. getcwd())]], {})
+  vim.api.nvim_create_user_command('OldfilesGlobal', 'call Oldfiles()', {})
+  vim.api.nvim_create_user_command('Spell', 'call spelunker#toggle()', {})
+  vim.api.nvim_create_user_command('Debugger', function()
+    require('dapui').toggle()
+  end, {})
 
   vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('UserLspCommandConfig', {}),
@@ -218,6 +222,11 @@ local ensure_plugins = function()
     use 'williamboman/mason-lspconfig.nvim'
     use 'jose-elias-alvarez/null-ls.nvim'
 
+    -- debugger
+    use 'mfussenegger/nvim-dap'
+    use 'jay-babu/mason-nvim-dap.nvim'
+    use 'rcarriga/nvim-dap-ui'
+
     -- snippets
     use 'hrsh7th/vim-vsnip'
     use 'rafamadriz/friendly-snippets'
@@ -264,6 +273,10 @@ local setup_toggleterm = function()
   })
 end
 
+local setup_mason = function()
+  require('mason').setup()
+end
+
 local setup_lsp = function()
   -- https://github.com/neovim/nvim-lspconfig/wiki/UI-Customization
   vim.diagnostic.config({
@@ -280,8 +293,6 @@ local setup_lsp = function()
     vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
   end
 
-  -- mason
-  require('mason').setup()
   -- https://github.com/williamboman/mason-lspconfig.nvim
   local mason_lspconfig = require('mason-lspconfig')
   -- :h mason-lspconfig.setup_handlers()
@@ -316,13 +327,13 @@ local setup_null_ls = function()
     })
   end
 
-  local before_null_ls_formatting = function(bufnr)
-    local filetype = vim.api.nvim_buf_get_option(bufnr, 'filetype')
-    if filetype == 'typescript' then
-      local ts = require("typescript").actions
-      -- ts.removeUnused({ sync = true })
-    end
-  end
+  -- local before_null_ls_formatting = function(bufnr)
+  --   local filetype = vim.api.nvim_buf_get_option(bufnr, 'filetype')
+  --   if filetype == 'typescript' then
+  --     local ts = require("typescript").actions
+  --     ts.removeUnused({ sync = true })
+  --   end
+  -- end
 
   local null_ls_formatting_augroup = vim.api.nvim_create_augroup('UserNullLSFormatting', {})
 
@@ -345,7 +356,7 @@ local setup_null_ls = function()
           group = null_ls_formatting_augroup,
           buffer = bufnr,
           callback = function()
-            before_null_ls_formatting(bufnr)
+            -- before_null_ls_formatting(bufnr)
             null_ls_formatting(bufnr)
           end,
         })
@@ -415,6 +426,33 @@ local setup_cmp = function()
   })
 end
 
+local setup_dap = function()
+  -- local dap = require('dap')
+  -- dap.configurations.typescript = {
+  --   {
+  --     name = 'Test (Jest)',
+  --     type = 'node2',
+  --     request = 'launch',
+  --     program = '${workspaceFolder}/node_modules/.bin/jest',
+  --     cwd = '${workspaceFolder}',
+  --     args = { '--runInBand', '${file}' },
+  --   }
+  -- }
+
+  -- https://github.com/jay-babu/mason-nvim-dap.nvim
+  require('mason-nvim-dap').setup({
+    -- ensure_installed = {
+    --   'node2',
+    -- },
+    handlers = {
+      function(config)
+        require('mason-nvim-dap').default_setup(config)
+      end,
+    },
+  })
+  require('dapui').setup()
+end
+
 local setup_plugins = function()
   vim.g.enable_spelunker_vim = 0
   vim.g.javascript_plugin_jsdoc = 1
@@ -435,9 +473,11 @@ end
 
 setup_ctrlp()
 setup_toggleterm()
+setup_mason()
 setup_lsp()
 setup_null_ls()
 setup_cmp()
+setup_dap()
 setup_plugins()
 
 set_ui()
