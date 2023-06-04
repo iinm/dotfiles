@@ -132,6 +132,9 @@ local create_commands = function()
   vim.api.nvim_create_user_command('Debug', function()
     require('dapui').toggle()
   end, {})
+  vim.api.nvim_create_user_command('ClearBreakpoints', function()
+    require('dap').clear_breakpoints()
+  end, {})
 
   vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('UserLspCommandConfig', {}),
