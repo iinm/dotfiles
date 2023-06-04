@@ -273,6 +273,14 @@ end
 require('mason').setup()
 -- https://github.com/williamboman/mason-lspconfig.nvim
 local mason_lspconfig = require('mason-lspconfig')
+-- :h mason-lspconfig.setup_handlers()
+mason_lspconfig.setup_handlers({
+  function(server)
+    require('lspconfig')[server].setup {
+      capabilities = require('cmp_nvim_lsp').default_capabilities(),
+    }
+  end
+})
 -- mason_lspconfig.setup({
 --   ensure_installed = {
 --     'lua_ls',
@@ -282,13 +290,6 @@ local mason_lspconfig = require('mason-lspconfig')
 --     'emmet_ls',
 --   },
 -- })
-mason_lspconfig.setup_handlers({
-  function(server)
-    require('lspconfig')[server].setup {
-      capabilities = require('cmp_nvim_lsp').default_capabilities(),
-    }
-  end
-})
 
 -- null-ls
 -- https://github.com/jose-elias-alvarez/null-ls.nvim/wiki/Avoiding-LSP-formatting-conflicts
