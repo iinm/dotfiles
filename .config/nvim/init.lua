@@ -428,6 +428,11 @@ set_options()
 load_utilities()
 
 ensure_plugins()
+local local_module = require('local')
+if local_module.setup then
+  local_module.setup()
+end
+
 setup_ctrlp()
 setup_toggleterm()
 setup_lsp()

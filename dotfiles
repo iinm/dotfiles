@@ -10,6 +10,7 @@ Usage: dotfiles COMMAND
   bootstrap       Install essential utilities
   link            Create symlink to dotfiles
   setup_fish      Setup fish shell
+  setup_nvim      Setup neovim
   setup_git       Setup git
   setup_tmux      Setup tmux
   setup_wezterm   Setup wezterm
@@ -20,6 +21,7 @@ setup() {
   bootstrap
   link
   setup_fish
+  setup_nvim
   setup_git
   # setup_vim
   setup_tmux
@@ -174,6 +176,36 @@ EOF
   else
     echo "run: set fish as default shell."
     sudo chsh "$(id -un)" -s "$(which fish)"
+  fi
+}
+
+setup_nvim() {
+  local nvim_local_config=~/.config/nvim/lua/local.lua
+  if test -e "$nvim_local_config"; then
+    echo "skip: $nvim_local_config exists."
+  else
+    echo "run: create $nvim_local_config"
+    mkdir -p "$(dirname "$nvim_local_config")"
+    cat > "$nvim_local_config" << 'EOF'
+local module = {}
+
+local local_config = {
+  ['^' .. os.getenv('HOME')] = function()
+    print("local.lua: home")
+    return {}
+  end
+}
+
+function module.setup()
+  for k, v in pairs(local_config) do
+    if string.find(vim.fn.getcwd(), k) then
+      return v()
+    end
+  end
+end
+
+return module
+EOF
   fi
 }
 
