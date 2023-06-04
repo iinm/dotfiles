@@ -129,7 +129,7 @@ local create_commands = function()
   vim.api.nvim_create_user_command('Oldfiles', [[call Oldfiles('\v^' .. getcwd())]], {})
   vim.api.nvim_create_user_command('OldfilesGlobal', 'call Oldfiles()', {})
   vim.api.nvim_create_user_command('Spell', 'call spelunker#toggle()', {})
-  vim.api.nvim_create_user_command('Debugger', function()
+  vim.api.nvim_create_user_command('Debug', function()
     require('dapui').toggle()
   end, {})
 
@@ -427,7 +427,8 @@ local setup_cmp = function()
 end
 
 local setup_dap = function(local_config)
-  local default_configurations = {
+  local dap = require('dap')
+  dap.configurations = local_config.dap_configurations or {
     typescript = {
       {
         name = 'Test (Jest)',
@@ -439,9 +440,6 @@ local setup_dap = function(local_config)
       }
     }
   }
-
-  local dap = require('dap')
-  dap.configurations = local_config.dap_configurations or default_configurations
 
   -- https://github.com/jay-babu/mason-nvim-dap.nvim
   require('mason-nvim-dap').setup({

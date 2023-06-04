@@ -189,7 +189,7 @@ setup_nvim() {
     cat > "$nvim_local_config" << 'EOF'
 local cwd = vim.fn.getcwd()
 
-if string.find(cwd, '^' .. os.getenv('HOME') .. '/path/to/project') then
+if string.find(cwd, '/path/to/project') then
   print('local.lua: load project config')
   return {}
 end
