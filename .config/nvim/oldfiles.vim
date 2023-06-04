@@ -1,13 +1,14 @@
 function! Oldfiles(pattern='') abort
   let l:files = filter(
   \  deepcopy(v:oldfiles),
-  \  {_, path -> a:pattern == '' || expand(path) =~ a:pattern}
+  \  {_, path -> (a:pattern == '' || expand(path) =~ a:pattern) && path !~? '\v^term://|^fugitive://|ControlP|NetrwTreeListing'}
   \ )
   " omit current directory
   let l:files = map(
   \  l:files,
-  \  {_, path -> substitute(expand(path), getcwd() .. '/', '', '')}
+  \  {_, path -> substitute(expand(path), getcwd() .. '/', './', '')}
   \ )
+  " let l:files = sort(l:files)
   enew
   setlocal buftype=nofile
   setlocal nobuflisted
