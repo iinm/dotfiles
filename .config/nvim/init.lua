@@ -46,9 +46,12 @@ local set_ui = function()
 end
 
 local set_keymap = function()
+  local telescope_builtin = require('telescope.builtin')
+
   vim.g.mapleader = ' '
   -- utilities
-  vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
+  vim.keymap.set('n', '<leader><leader>', telescope_builtin.commands, {})
+  vim.keymap.set('n', '<leader>r', telescope_builtin.command_history, {})
   vim.keymap.set('n', '<leader>f', ':<C-u>CtrlPMixed<CR>')
   vim.keymap.set('n', '<leader>e', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>')
   vim.keymap.set('n', '<leader>t', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
@@ -58,6 +61,7 @@ local set_keymap = function()
   vim.keymap.set('n', '<leader>s', ':<C-u>gr!<Space>')
   vim.keymap.set('n', '<leader>vr', ':<C-u>source $MYVIMRC<CR>')
   vim.keymap.set('v', '//', [[y/\V<C-r>=escape(@",'/\')<CR><CR>]])
+  vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
 
   -- window
   vim.keymap.set('n', '<C-w>m', '<C-w>_<C-w><bar>')
@@ -210,6 +214,8 @@ local ensure_plugins = function()
 
     -- utilities
     use 'ctrlpvim/ctrlp.vim'
+    use { 'nvim-telescope/telescope.nvim', tag = '0.1.1' }
+    use 'stevearc/dressing.nvim'
     use 'tpope/vim-sleuth'
     use 'tpope/vim-commentary'
     use 'tpope/vim-fugitive'
@@ -264,6 +270,34 @@ local setup_ctrlp = function()
   vim.g.ctrlp_use_caching = 0
   vim.g.ctrlp_mruf_relative = 1
   vim.g.ctrlp_mruf_exclude = [[COMMIT_EDITMSG]]
+end
+
+local setup_telescope = function()
+  local telescope = require('telescope')
+  local telescope_actions = require('telescope.actions')
+  telescope.setup({
+    defaults = {
+      path_display = { "smart" },
+      file_ignore_patterns = { 'node_modules', '.git' },
+      mappings = {
+        i = {
+          ['<esc>'] = telescope_actions.close,
+        }
+      }
+    },
+    pickers = {
+      find_files = {
+        hidden = true,
+      },
+      buffers = {
+        ignore_current_buffer = true,
+        sort_lastused = true,
+      },
+      oldfiles = {
+        only_cwd = true,
+      },
+    }
+  })
 end
 
 local setup_toggleterm = function()
@@ -482,6 +516,7 @@ local setup_plugins = function()
   require('hop').setup()
   require('nvim-autopairs').setup()
   require('typescript').setup({})
+  require('dressing').setup()
 end
 
 -- Setup
@@ -492,6 +527,7 @@ ensure_plugins()
 local local_config = require('local')
 
 setup_ctrlp()
+setup_telescope()
 setup_toggleterm()
 setup_mason()
 setup_lsp()
