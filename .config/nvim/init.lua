@@ -1,47 +1,49 @@
--- Options
-vim.opt.undofile = true
-vim.opt.ignorecase = true
-vim.opt.smartcase = true
-vim.opt.wildignore = { '.git', 'node_modules' }
-vim.opt.wildmode = { 'longest', 'full' }
-vim.opt.wildoptions = { 'fuzzy', 'pum', 'tagfile' }
-vim.opt.clipboard = "unnamedplus"
-vim.opt.termguicolors = true
-vim.opt.cursorline = true
-vim.opt.foldmethod = 'indent'
-vim.opt.foldlevel = 99
-vim.opt.splitbelow = true
-vim.opt.splitright = true
-vim.opt.tabstop = 8
-vim.opt.expandtab = true
-vim.opt.shiftwidth = 2
-vim.opt.softtabstop = 2
-vim.opt.grepprg = 'grep -n -H -R --exclude-dir ".git" $* .'
-if vim.fn.executable('rg') then
-  vim.opt.grepprg = 'rg --vimgrep --hidden --glob "!.git" --glob "!node_modules"'
+local set_options = function()
+  vim.opt.undofile = true
+  vim.opt.ignorecase = true
+  vim.opt.smartcase = true
+  vim.opt.wildignore = { '.git', 'node_modules' }
+  vim.opt.wildmode = { 'longest', 'full' }
+  vim.opt.wildoptions = { 'fuzzy', 'pum', 'tagfile' }
+  vim.opt.clipboard = "unnamedplus"
+  vim.opt.termguicolors = true
+  vim.opt.cursorline = true
+  vim.opt.foldmethod = 'indent'
+  vim.opt.foldlevel = 99
+  vim.opt.splitbelow = true
+  vim.opt.splitright = true
+  vim.opt.tabstop = 8
+  vim.opt.expandtab = true
+  vim.opt.shiftwidth = 2
+  vim.opt.softtabstop = 2
+  vim.opt.grepprg = 'grep -n -H -R --exclude-dir ".git" $* .'
+  if vim.fn.executable('rg') then
+    vim.opt.grepprg = 'rg --vimgrep --hidden --glob "!.git" --glob "!node_modules"'
+  end
+
+  vim.g.markdown_fenced_languages = { 'sh' }
+  vim.g.netrw_banner = 0
+  vim.g.newrw_hide = 0
+  vim.g.netrw_liststyle = 3
 end
 
-vim.g.markdown_fenced_languages = { 'sh' }
-vim.g.netrw_banner = 0
-vim.g.newrw_hide = 0
-vim.g.netrw_liststyle = 3
+local load_utilities = function()
+  vim.cmd('source ' .. vim.fn.stdpath('config') .. '/outline.vim')
+  vim.cmd('source ' .. vim.fn.stdpath('config') .. '/buffers.vim')
+  vim.cmd('source ' .. vim.fn.stdpath('config') .. '/oldfiles.vim')
+end
 
--- Utilities
-vim.cmd('source ' .. vim.fn.stdpath('config') .. '/outline.vim')
-vim.cmd('source ' .. vim.fn.stdpath('config') .. '/buffers.vim')
-vim.cmd('source ' .. vim.fn.stdpath('config') .. '/oldfiles.vim')
-
--- UI
 local set_ui = function()
-  vim.cmd [[
-  let g:everforest_background = 'soft'
-  set background=dark
-  colorscheme everforest
-  ]]
-  vim.cmd [[set statusline=%<%f\ %h%m%r%{FugitiveStatusline()}%=%-14.(%l,%c%V%)\ %P]]
+  vim.g.everforest_background = 'soft'
+  vim.opt.background = 'dark'
+  vim.cmd.colorscheme('everforest')
+
+  vim.cmd.highlight({ 'SpelunkerSpellBad', 'cterm=underline', 'gui=underline' })
+  vim.cmd.highlight({ 'SpelunkerComplexOrCompoundWord', 'cterm=underline', 'gui=underline' })
+
+  vim.opt.statusline = [[%<%f %h%m%r%{FugitiveStatusline()}%=%-14.(%l,%c%V%) %P]]
 end
 
--- Key map
 local set_keymap = function()
   vim.g.mapleader = ' '
   -- utilities
@@ -119,7 +121,6 @@ local set_keymap = function()
   ]]
 end
 
--- Commands
 local create_commands = function()
   vim.api.nvim_create_user_command('BDelete', 'b # | bd #', {})
   vim.api.nvim_create_user_command('BOnly', '%bd | e # | bd #', {})
@@ -141,7 +142,6 @@ local create_commands = function()
   })
 end
 
--- Auto Commands
 local create_auto_commands = function()
   vim.api.nvim_create_autocmd({ 'QuickFixCmdPost' }, {
     group = vim.api.nvim_create_augroup('UserOpenQuickfixWindow', {}),
@@ -168,262 +168,273 @@ local create_auto_commands = function()
       })
     end,
   })
-end
 
--- Plugins
--- https://github.com/wbthomason/packer.nvim#bootstrapping
-local ensure_packer = function()
-  local fn = vim.fn
-  local install_path = fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
-  if fn.empty(fn.glob(install_path)) > 0 then
-    fn.system({ 'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path })
-    vim.cmd [[packadd packer.nvim]]
-    return true
-  end
-  return false
-end
-
-local packer_bootstrap = ensure_packer()
-
-require('packer').startup(function(use)
-  use 'wbthomason/packer.nvim'
-  use "nvim-lua/plenary.nvim"
-
-  -- ui
-  use 'sainnhe/everforest'
-
-  -- utilities
-  use 'ctrlpvim/ctrlp.vim'
-  use 'tpope/vim-sleuth'
-  use 'tpope/vim-commentary'
-  use 'tpope/vim-fugitive'
-  use 'elihunter173/dirbuf.nvim'
-  use 'akinsho/toggleterm.nvim'
-  use 'windwp/nvim-autopairs'
-  use 'kamykn/spelunker.vim'
-  use { 'phaazon/hop.nvim', branch = 'v2' }
-
-  -- lsp
-  use 'neovim/nvim-lspconfig'
-  use "williamboman/mason.nvim"
-  use 'williamboman/mason-lspconfig.nvim'
-  use 'jose-elias-alvarez/null-ls.nvim'
-
-  -- snippets
-  use 'hrsh7th/vim-vsnip'
-  use 'rafamadriz/friendly-snippets'
-
-  -- completion
-  use 'hrsh7th/cmp-buffer'
-  use 'hrsh7th/cmp-vsnip'
-  use 'hrsh7th/cmp-nvim-lsp'
-  use 'hrsh7th/nvim-cmp'
-  use 'github/copilot.vim'
-
-  -- lanugages
-  use 'pangloss/vim-javascript'
-  use 'jose-elias-alvarez/typescript.nvim'
-  use 'jparise/vim-graphql'
-  use 'hashivim/vim-terraform'
-  use 'dag/vim-fish'
-
-  if packer_bootstrap then
-    require('packer').sync()
-  end
-end)
-
--- Plugin Config
--- ctrlp
-vim.g.ctrlp_user_command = 'fd --hidden --exclude .git --type f --color=never "" %s'
-vim.g.ctrlp_root_markers = { '.git', 'package.json' }
-vim.g.ctrlp_match_window = 'bottom,order:btt,min:1,max:15,results:15'
-vim.g.ctrlp_by_filename = 1
-vim.g.ctrlp_use_caching = 0
-vim.g.ctrlp_mruf_relative = 1
-vim.g.ctrlp_mruf_exclude = [[COMMIT_EDITMSG]]
-
--- toggleterm
-require("toggleterm").setup({
-  size = function(term)
-    if term.direction == "horizontal" then
-      return vim.o.lines * 0.4
-    elseif term.direction == "vertical" then
-      return vim.o.columns * 0.4
-    end
-  end,
-})
-
--- lsp
--- https://github.com/neovim/nvim-lspconfig/wiki/UI-Customization
-vim.diagnostic.config({
-  virtual_text = false,
-  signs = true,
-  underline = false,
-  update_in_insert = false,
-  severity_sort = true,
-})
-
-local signs = { Error = ' ', Warn = ' ', Hint = ' ', Info = ' ' }
-for type, icon in pairs(signs) do
-  local hl = 'DiagnosticSign' .. type
-  vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-end
-
--- mason
-require('mason').setup()
--- https://github.com/williamboman/mason-lspconfig.nvim
-local mason_lspconfig = require('mason-lspconfig')
--- :h mason-lspconfig.setup_handlers()
-mason_lspconfig.setup_handlers({
-  function(server)
-    require('lspconfig')[server].setup {
-      capabilities = require('cmp_nvim_lsp').default_capabilities(),
-    }
-  end
-})
--- mason_lspconfig.setup({
---   ensure_installed = {
---     'lua_ls',
---     'gopls',
---     'tsserver',
---     'custom_elements_ls',
---     'emmet_ls',
---   },
--- })
-
--- null-ls
--- https://github.com/jose-elias-alvarez/null-ls.nvim/wiki/Avoiding-LSP-formatting-conflicts
-local null_ls = require('null-ls')
-
-local null_ls_formatting = function(bufnr)
-  vim.lsp.buf.format({
-    filter = function(client)
-      print(client.name)
-      return client.name == 'null-ls'
+  -- spell check
+  vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
+    group = vim.api.nvim_create_augroup('UserSpelunkerConfig', {}),
+    pattern = { '*.md', '*.json', '*.sh', '*.fish', '*.js', '*.ts', '*.tsx' },
+    callback = function()
+      vim.fn['spelunker#toggle']()
     end,
-    bufnr = bufnr,
   })
 end
 
-local before_null_ls_formatting = function(bufnr)
-  local filetype = vim.api.nvim_buf_get_option(bufnr, 'filetype')
-  if filetype == 'typescript' then
-    local ts = require("typescript").actions
-    ts.removeUnused({ sync = true })
+local ensure_plugins = function()
+  -- https://github.com/wbthomason/packer.nvim#bootstrapping
+  local ensure_packer = function()
+    local fn = vim.fn
+    local install_path = fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
+    if fn.empty(fn.glob(install_path)) > 0 then
+      fn.system({ 'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path })
+      vim.cmd [[packadd packer.nvim]]
+      return true
+    end
+    return false
   end
+
+  local packer_bootstrap = ensure_packer()
+
+  require('packer').startup(function(use)
+    use 'wbthomason/packer.nvim'
+    use "nvim-lua/plenary.nvim"
+
+    -- ui
+    use 'sainnhe/everforest'
+
+    -- utilities
+    use 'ctrlpvim/ctrlp.vim'
+    use 'tpope/vim-sleuth'
+    use 'tpope/vim-commentary'
+    use 'tpope/vim-fugitive'
+    use 'elihunter173/dirbuf.nvim'
+    use 'akinsho/toggleterm.nvim'
+    use 'windwp/nvim-autopairs'
+    use 'kamykn/spelunker.vim'
+    use { 'phaazon/hop.nvim', branch = 'v2' }
+
+    -- lsp
+    use 'neovim/nvim-lspconfig'
+    use "williamboman/mason.nvim"
+    use 'williamboman/mason-lspconfig.nvim'
+    use 'jose-elias-alvarez/null-ls.nvim'
+
+    -- snippets
+    use 'hrsh7th/vim-vsnip'
+    use 'rafamadriz/friendly-snippets'
+
+    -- completion
+    use 'hrsh7th/cmp-buffer'
+    use 'hrsh7th/cmp-vsnip'
+    use 'hrsh7th/cmp-nvim-lsp'
+    use 'hrsh7th/nvim-cmp'
+    use 'github/copilot.vim'
+
+    -- lanugages
+    use 'pangloss/vim-javascript'
+    use 'jose-elias-alvarez/typescript.nvim'
+    use 'jparise/vim-graphql'
+    use 'hashivim/vim-terraform'
+    use 'dag/vim-fish'
+
+    if packer_bootstrap then
+      require('packer').sync()
+    end
+  end)
 end
 
-local null_ls_formatting_augroup = vim.api.nvim_create_augroup('UserNullLSFormatting', {})
+local setup_ctrlp = function()
+  vim.g.ctrlp_user_command = 'fd --hidden --exclude .git --type f --color=never "" %s'
+  vim.g.ctrlp_root_markers = { '.git', 'package.json' }
+  vim.g.ctrlp_match_window = 'bottom,order:btt,min:1,max:15,results:15'
+  vim.g.ctrlp_by_filename = 1
+  vim.g.ctrlp_use_caching = 0
+  vim.g.ctrlp_mruf_relative = 1
+  vim.g.ctrlp_mruf_exclude = [[COMMIT_EDITMSG]]
+end
 
-null_ls.setup({
-  sources = {
-    null_ls.builtins.formatting.goimports,
-    null_ls.builtins.formatting.eslint,
-    null_ls.builtins.diagnostics.eslint.with({
-      diagnostics_postprocess = function(diagnostic)
-        diagnostic.severity = vim.diagnostic.severity["WARN"]
-      end,
-    }),
-    null_ls.builtins.diagnostics.shellcheck,
-    null_ls.builtins.code_actions.shellcheck,
-  },
-  on_attach = function(client, bufnr)
-    if client.supports_method('textDocument/formatting') then
-      vim.api.nvim_clear_autocmds({ group = null_ls_formatting_augroup, buffer = bufnr })
-      vim.api.nvim_create_autocmd('BufWritePre', {
-        group = null_ls_formatting_augroup,
-        buffer = bufnr,
-        callback = function()
-          before_null_ls_formatting(bufnr)
-          null_ls_formatting(bufnr)
-        end,
-      })
-    end
-  end,
-})
-
--- cmp
--- https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance
-local cmp_kinds = {
-  Text = '  ',
-  Method = 'λ  ',
-  Function = '  ',
-  Constructor = '  ',
-  Field = '  ',
-  Variable = '  ',
-  Class = '  ',
-  Interface = '  ',
-  Module = '  ',
-  Property = '  ',
-  Unit = '  ',
-  Value = '  ',
-  Enum = '  ',
-  Keyword = '  ',
-  Snippet = '  ',
-  Color = '  ',
-  File = '  ',
-  Reference = '  ',
-  Folder = '  ',
-  EnumMember = '  ',
-  Constant = '  ',
-  Struct = '  ',
-  Event = '  ',
-  Operator = '  ',
-  TypeParameter = '  ',
-}
-
--- https://github.com/hrsh7th/nvim-cmp
-local cmp = require('cmp')
-cmp.setup({
-  snippet = {
-    expand = function(args)
-      vim.fn["vsnip#anonymous"](args.body)
+local setup_toggleterm = function()
+  require("toggleterm").setup({
+    size = function(term)
+      if term.direction == "horizontal" then
+        return vim.o.lines * 0.4
+      elseif term.direction == "vertical" then
+        return vim.o.columns * 0.4
+      end
     end,
-  },
-  mapping = cmp.mapping.preset.insert({
-    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete(),
-    ['<C-e>'] = cmp.mapping.abort(),
-    ['<CR>'] = cmp.mapping.confirm({ select = true }),
-  }),
-  sources = cmp.config.sources({
-    { name = 'nvim_lsp' },
-    { name = 'vsnip' },
-  }, {
-    { name = 'buffer' },
-  }),
-  formatting = {
-    fields = { 'abbr', 'kind', 'menu' },
-    format = function(_, vim_item)
-      vim_item.kind = cmp_kinds[vim_item.kind] or ''
-      -- if entry.completion_item.detail ~= nil then
-      --   vim_item.menu = entry.completion_item.detail
-      -- end
-      return vim_item
+  })
+end
+
+local setup_lsp = function()
+  -- https://github.com/neovim/nvim-lspconfig/wiki/UI-Customization
+  vim.diagnostic.config({
+    virtual_text = false,
+    signs = true,
+    underline = false,
+    update_in_insert = false,
+    severity_sort = true,
+  })
+
+  local signs = { Error = ' ', Warn = ' ', Hint = ' ', Info = ' ' }
+  for type, icon in pairs(signs) do
+    local hl = 'DiagnosticSign' .. type
+    vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+  end
+
+  -- mason
+  require('mason').setup()
+  -- https://github.com/williamboman/mason-lspconfig.nvim
+  local mason_lspconfig = require('mason-lspconfig')
+  -- :h mason-lspconfig.setup_handlers()
+  mason_lspconfig.setup_handlers({
+    function(server)
+      require('lspconfig')[server].setup {
+        capabilities = require('cmp_nvim_lsp').default_capabilities(),
+      }
     end
+  })
+  -- mason_lspconfig.setup({
+  --   ensure_installed = {
+  --     'lua_ls',
+  --     'gopls',
+  --     'tsserver',
+  --     'custom_elements_ls',
+  --     'emmet_ls',
+  --   },
+  -- })
+end
+
+local setup_null_ls = function()
+  -- https://github.com/jose-elias-alvarez/null-ls.nvim/wiki/Avoiding-LSP-formatting-conflicts
+  local null_ls = require('null-ls')
+
+  local null_ls_formatting = function(bufnr)
+    vim.lsp.buf.format({
+      filter = function(client)
+        return client.name == 'null-ls'
+      end,
+      bufnr = bufnr,
+    })
+  end
+
+  local before_null_ls_formatting = function(bufnr)
+    local filetype = vim.api.nvim_buf_get_option(bufnr, 'filetype')
+    if filetype == 'typescript' then
+      local ts = require("typescript").actions
+      -- ts.removeUnused({ sync = true })
+    end
+  end
+
+  local null_ls_formatting_augroup = vim.api.nvim_create_augroup('UserNullLSFormatting', {})
+
+  null_ls.setup({
+    sources = {
+      null_ls.builtins.formatting.goimports,
+      null_ls.builtins.formatting.prettier,
+      null_ls.builtins.diagnostics.eslint.with({
+        diagnostics_postprocess = function(diagnostic)
+          diagnostic.severity = vim.diagnostic.severity["WARN"]
+        end,
+      }),
+      null_ls.builtins.diagnostics.shellcheck,
+      null_ls.builtins.code_actions.shellcheck,
+    },
+    on_attach = function(client, bufnr)
+      if client.supports_method('textDocument/formatting') then
+        vim.api.nvim_clear_autocmds({ group = null_ls_formatting_augroup, buffer = bufnr })
+        vim.api.nvim_create_autocmd('BufWritePre', {
+          group = null_ls_formatting_augroup,
+          buffer = bufnr,
+          callback = function()
+            before_null_ls_formatting(bufnr)
+            null_ls_formatting(bufnr)
+          end,
+        })
+      end
+    end,
+  })
+end
+
+local setup_cmp = function()
+  -- https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance
+  local cmp_kinds = {
+    Text = '  ',
+    Method = '  ',
+    Function = 'λ  ',
+    Constructor = '  ',
+    Field = '  ',
+    Variable = '  ',
+    Class = '  ',
+    Interface = '  ',
+    Module = '  ',
+    Property = '  ',
+    Unit = '  ',
+    Value = '  ',
+    Enum = '  ',
+    Keyword = '  ',
+    Snippet = '>  ',
+    Color = '  ',
+    File = '  ',
+    Reference = '  ',
+    Folder = '  ',
+    EnumMember = '  ',
+    Constant = '  ',
+    Struct = '  ',
+    Event = '  ',
+    Operator = '  ',
+    TypeParameter = '  ',
   }
-})
 
--- spelunker
-vim.g.enable_spelunker_vim = 0
-vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
-  group = vim.api.nvim_create_augroup('UserSpelunkerConfig', {}),
-  pattern = { '*.md', '*.json', '*.sh', '*.fish', '*.js', '*.ts', '*.tsx' },
-  command = 'call spelunker#toggle()',
-})
-vim.cmd([[
-  highlight SpelunkerSpellBad gui=underline
-  highlight SpelunkerComplexOrCompoundWord gui=underline
-  ]])
+  -- https://github.com/hrsh7th/nvim-cmp
+  local cmp = require('cmp')
+  cmp.setup({
+    snippet = {
+      expand = function(args)
+        vim.fn["vsnip#anonymous"](args.body)
+      end,
+    },
+    mapping = cmp.mapping.preset.insert({
+      ['<C-e>'] = cmp.mapping.abort(),
+      ['<CR>'] = cmp.mapping.confirm({ select = true }),
+    }),
+    sources = cmp.config.sources({
+      { name = 'nvim_lsp' },
+      { name = 'vsnip' },
+    }, {
+      { name = 'buffer' },
+    }),
+    formatting = {
+      fields = { 'abbr', 'kind', 'menu' },
+      format = function(_, vim_item)
+        vim_item.kind = cmp_kinds[vim_item.kind] or ''
+        -- if entry.completion_item.detail ~= nil then
+        --   vim_item.menu = entry.completion_item.detail
+        -- end
+        return vim_item
+      end
+    }
+  })
+end
 
--- etc.
-vim.g.javascript_plugin_jsdoc = 1
-require('hop').setup()
-require('nvim-autopairs').setup()
-require('typescript').setup({})
+local setup_plugins = function()
+  vim.g.enable_spelunker_vim = 0
+  vim.g.javascript_plugin_jsdoc = 1
+  require('hop').setup()
+  require('nvim-autopairs').setup()
+  require('typescript').setup({})
+end
 
 -- Setup
+set_options()
+load_utilities()
+
+ensure_plugins()
+setup_ctrlp()
+setup_toggleterm()
+setup_lsp()
+setup_null_ls()
+setup_cmp()
+setup_plugins()
+
 set_ui()
 set_keymap()
 create_commands()
