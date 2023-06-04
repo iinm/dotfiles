@@ -187,24 +187,17 @@ setup_nvim() {
     echo "run: create $nvim_local_config"
     mkdir -p "$(dirname "$nvim_local_config")"
     cat > "$nvim_local_config" << 'EOF'
-local module = {}
+local cwd = vim.fn.getcwd()
 
-local local_config = {
-  ['^' .. os.getenv('HOME')] = function()
-    print("local.lua: home")
-    return {}
-  end
-}
-
-function module.setup()
-  for k, v in pairs(local_config) do
-    if string.find(vim.fn.getcwd(), k) then
-      return v()
-    end
-  end
+if string.find(cwd, '^' .. os.getenv('HOME') .. '/path/to/project') then
+  print('local.lua: load project config')
+  return {}
 end
 
-return module
+return {
+  dap_configurations = nil,
+  null_ls_sources = nil,
+}
 EOF
   fi
 }

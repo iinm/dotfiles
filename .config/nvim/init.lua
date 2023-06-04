@@ -314,7 +314,7 @@ local setup_lsp = function()
   -- })
 end
 
-local setup_null_ls = function()
+local setup_null_ls = function(local_config)
   -- https://github.com/jose-elias-alvarez/null-ls.nvim/wiki/Avoiding-LSP-formatting-conflicts
   local null_ls = require('null-ls')
 
@@ -338,7 +338,7 @@ local setup_null_ls = function()
   local null_ls_formatting_augroup = vim.api.nvim_create_augroup('UserNullLSFormatting', {})
 
   null_ls.setup({
-    sources = {
+    sources = local_config.null_ls_sources or {
       null_ls.builtins.formatting.goimports,
       null_ls.builtins.formatting.prettier,
       null_ls.builtins.diagnostics.eslint.with({
@@ -426,18 +426,22 @@ local setup_cmp = function()
   })
 end
 
-local setup_dap = function()
-  -- local dap = require('dap')
-  -- dap.configurations.typescript = {
-  --   {
-  --     name = 'Test (Jest)',
-  --     type = 'node2',
-  --     request = 'launch',
-  --     program = '${workspaceFolder}/node_modules/.bin/jest',
-  --     cwd = '${workspaceFolder}',
-  --     args = { '--runInBand', '${file}' },
-  --   }
-  -- }
+local setup_dap = function(local_config)
+  local default_configurations = {
+    typescript = {
+      {
+        name = 'Test (Jest)',
+        type = 'node2',
+        request = 'launch',
+        program = '${workspaceFolder}/node_modules/.bin/jest',
+        cwd = '${workspaceFolder}',
+        args = { '--runInBand', '${file}' },
+      }
+    }
+  }
+
+  local dap = require('dap')
+  dap.configurations = local_config.dap_configurations or default_configurations
 
   -- https://github.com/jay-babu/mason-nvim-dap.nvim
   require('mason-nvim-dap').setup({
@@ -466,18 +470,15 @@ set_options()
 load_utilities()
 
 ensure_plugins()
-local local_module = require('local')
-if local_module.setup then
-  local_module.setup()
-end
+local local_config = require('local')
 
 setup_ctrlp()
 setup_toggleterm()
 setup_mason()
 setup_lsp()
-setup_null_ls()
+setup_null_ls(local_config)
 setup_cmp()
-setup_dap()
+setup_dap(local_config)
 setup_plugins()
 
 set_ui()
