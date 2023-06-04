@@ -174,13 +174,13 @@ local create_auto_commands = function()
   })
 
   -- spell check
-  vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
-    group = vim.api.nvim_create_augroup('UserSpelunkerConfig', {}),
-    pattern = { '*.md', '*.json', '*.sh', '*.fish', '*.js', '*.ts', '*.tsx' },
-    callback = function()
-      vim.fn['spelunker#toggle']()
-    end,
-  })
+  -- vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
+  --   group = vim.api.nvim_create_augroup('UserSpelunkerConfig', {}),
+  --   pattern = { '*.md', '*.json', '*.sh', '*.fish', '*.js', '*.ts', '*.tsx' },
+  --   callback = function()
+  --     vim.fn['spelunker#toggle']()
+  --   end,
+  -- })
 end
 
 local ensure_plugins = function()
@@ -235,6 +235,8 @@ local ensure_plugins = function()
     use 'hrsh7th/cmp-buffer'
     use 'hrsh7th/cmp-vsnip'
     use 'hrsh7th/cmp-nvim-lsp'
+    use 'hrsh7th/cmp-path'
+    use 'hrsh7th/cmp-cmdline'
     use 'hrsh7th/nvim-cmp'
     use 'github/copilot.vim'
 
@@ -424,6 +426,22 @@ local setup_cmp = function()
       end
     }
   })
+
+  cmp.setup.cmdline({ '/', '?' }, {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = {
+      { name = 'buffer' }
+    }
+  })
+
+  cmp.setup.cmdline(':', {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = cmp.config.sources({
+      { name = 'path' }
+    }, {
+      { name = 'cmdline' }
+    })
+  })
 end
 
 local setup_dap = function(local_config)
@@ -456,7 +474,7 @@ local setup_dap = function(local_config)
 end
 
 local setup_plugins = function()
-  vim.g.enable_spelunker_vim = 0
+  -- vim.g.enable_spelunker_vim = 0
   vim.g.javascript_plugin_jsdoc = 1
   require('hop').setup()
   require('nvim-autopairs').setup()
