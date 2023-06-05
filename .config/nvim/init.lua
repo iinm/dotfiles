@@ -66,6 +66,7 @@ local set_keymap = function()
   -- window
   vim.keymap.set('n', '<C-w>m', '<C-w>_<C-w><bar>')
   vim.keymap.set('n', '<C-w>t', ':<C-u>ToggleTerm<CR>')
+  vim.keymap.set('n', '<C-w>t', ':<C-u><C-r>=v:count<CR>ToggleTerm<CR>')
   vim.keymap.set('n', '<C-w>T', ':<C-u>TermSelect<CR>')
 
   -- terminal
@@ -132,8 +133,8 @@ local create_commands = function()
   vim.api.nvim_create_user_command('Outline', 'call Outline()', {})
   vim.api.nvim_create_user_command('Oldfiles', [[call Oldfiles('\v^' .. getcwd())]], {})
   vim.api.nvim_create_user_command('OldfilesGlobal', 'call Oldfiles()', {})
-  vim.api.nvim_create_user_command('Spell', 'call spelunker#toggle()', {})
-  vim.api.nvim_create_user_command('Debug', function()
+  vim.api.nvim_create_user_command('ToggleSpell', 'call spelunker#toggle()', {})
+  vim.api.nvim_create_user_command('ToggleDebug', function()
     require('dapui').toggle()
   end, {})
   vim.api.nvim_create_user_command('ClearBreakpoints', function()
