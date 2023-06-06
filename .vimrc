@@ -54,6 +54,7 @@
 "                      :terminal -> Ctrl-w -> :  (command mode)
 "                      :terminal -> Ctrl-w -> "" (paste)
 " quickfix             :cw(indow) (open quickfix window)
+"                      :ccl(ose) (close quickfix window)
 "                      :colder (older quickfix list)
 "                      :cnewer (newer quickfix list)
 " open path            gf (goto file), gx (xdg-open)
