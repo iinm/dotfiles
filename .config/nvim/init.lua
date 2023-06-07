@@ -64,8 +64,7 @@ local set_keymap = function()
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
 
   -- window
-  vim.keymap.set('n', '<C-w>m', '<C-w>_<C-w><bar>')
-  vim.keymap.set('n', '<C-w>t', ':<C-u>ToggleTerm<CR>')
+  vim.keymap.set('n', '<C-w>m', '<C-w>_<C-w><bar>') -- maximize
   vim.keymap.set('n', '<C-w>t', ':<C-u><C-r>=v:count<CR>ToggleTerm<CR>')
   vim.keymap.set('n', '<C-w>T', ':<C-u>TermSelect<CR>')
 
@@ -86,6 +85,14 @@ local set_keymap = function()
       vim.keymap.set('t', '<C-w>T', '<Cmd>TermSelect<CR>', {})
     end,
   })
+
+  -- ctrlp
+  vim.g.ctrlp_prompt_mappings = {
+    ['PrtSelectMove("j")'] = { '<down>', '<c-n>' },
+    ['PrtSelectMove("k")'] = { '<up>', '<c-p>' },
+    ['PrtHistory(-1)'] = { '<c-j>' },
+    ['PrtHistory(1)'] = { '<c-k>' },
+  }
 
   -- lsp
   -- https://github.com/neovim/nvim-lspconfig
@@ -108,6 +115,10 @@ local set_keymap = function()
       vim.keymap.set({ 'n', 'i' }, '<C-k>', vim.lsp.buf.signature_help, opts)
     end,
   })
+
+  -- copilot
+  vim.cmd [[imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")]]
+  vim.g.copilot_no_tab_map = true
 
   -- git
   vim.keymap.set('n', '<leader>gf', ':<C-u>Git fetch --prune<CR>')
@@ -459,6 +470,15 @@ local setup_cmp = function()
       end,
     },
     mapping = cmp.mapping.preset.insert({
+      ['<Tab>'] = function(fallback)
+        if cmp.visible() then
+          cmp.select_next_item()
+        else
+          fallback()
+        end
+      end,
+      ['<C-p>'] = cmp.mapping.select_prev_item(),
+      ['<C-n>'] = cmp.mapping.select_next_item(),
       ['<C-e>'] = cmp.mapping.abort(),
       ['<CR>'] = cmp.mapping.confirm({ select = true }),
     }),
