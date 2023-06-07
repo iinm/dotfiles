@@ -12,6 +12,7 @@ local set_options = function()
   vim.opt.foldlevel = 99
   vim.opt.splitbelow = true
   vim.opt.splitright = true
+  vim.opt.maxmempattern = 5000 -- default: 1000
   vim.opt.tabstop = 8
   vim.opt.expandtab = true
   vim.opt.shiftwidth = 2
