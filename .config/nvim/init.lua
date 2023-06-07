@@ -144,12 +144,20 @@ local create_commands = function()
   vim.api.nvim_create_user_command('Outline', 'call Outline()', {})
   vim.api.nvim_create_user_command('Oldfiles', [[call Oldfiles('\v^' .. getcwd())]], {})
   vim.api.nvim_create_user_command('OldfilesGlobal', 'call Oldfiles()', {})
-  vim.api.nvim_create_user_command('ToggleSpell', 'call spelunker#toggle()', {})
-  vim.api.nvim_create_user_command('ToggleDebug', function()
+  vim.api.nvim_create_user_command('Spell', 'call spelunker#toggle()', {})
+  vim.api.nvim_create_user_command('Debug', function()
     require('dapui').toggle()
   end, {})
-  vim.api.nvim_create_user_command('ClearBreakpoints', function()
+  vim.api.nvim_create_user_command('Breakpoint', 'DapToggleBreakpoint', {})
+  vim.api.nvim_create_user_command('BreakpointClear', function()
     require('dap').clear_breakpoints()
+  end, {})
+  vim.api.nvim_create_user_command('Fold', function()
+    if vim.opt_local.foldlevel:get() < 50 then
+      vim.opt_local.foldlevel = 99
+    else
+      vim.opt_local.foldlevel = 2
+    end
   end, {})
 
   vim.api.nvim_create_autocmd('LspAttach', {
