@@ -7,10 +7,6 @@ if type --quiet config_local_first
   config_local_first
 end
 
-set -x SHELL (which fish)
-test -n "$LANG";   or set -x LANG en_US.UTF-8
-test -n "$EDITOR"; or type --quiet nvim; and set -x EDITOR nvim
-
 if test -e /opt/homebrew
   fish_add_path /opt/homebrew/sbin
   fish_add_path /opt/homebrew/bin
@@ -19,6 +15,14 @@ end
 if test -e $HOME/tools/bin
   fish_add_path $HOME/tools/bin
 end
+
+if test -e $HOME/tools/nvim-linux64/bin
+  fish_add_path $HOME/tools/nvim-linux64/bin
+end
+
+set -x SHELL (which fish)
+test -n "$LANG";   or set -x LANG en_US.UTF-8
+test -n "$EDITOR"; or type --quiet nvim; and set -x EDITOR nvim
 
 if test (uname) = 'Linux'
   alias open 'xdg-open'

@@ -94,15 +94,15 @@ bootstrap_ubuntu() {
     ln -s "$(which fdfind)" "$fd_path"
   fi
 
-  local nvim_path=~/tools/bin/nvim
+  local nvim_path=~/tools/nvim-linux64
   if test -e "$nvim_path"; then
-    echo "skip: nvim is already linked."
+    echo "skip: $nvim_path exists."
   else
     echo "run: install nvim."
-    mkdir -p ~/tools/bin
-    curl --show-error --fail -L -o "$nvim_path" \
-      https://github.com/neovim/neovim/releases/download/stable/nvim.appimage
-    chmod +x "$nvim_path"
+    mkdir -p ~/tools
+    curl --show-error --fail -L \
+      https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz \
+      | tar -C ~/tools -xzf -
   fi
 }
 
