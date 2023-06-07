@@ -118,8 +118,8 @@ local set_keymap = function()
   })
 
   -- copilot
-  vim.cmd [[imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")]]
-  vim.g.copilot_no_tab_map = true
+  -- vim.cmd [[imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")]]
+  -- vim.g.copilot_no_tab_map = true
 
   -- git
   vim.keymap.set('n', '<leader>gf', ':<C-u>Git fetch --prune<CR>')
@@ -479,13 +479,14 @@ local setup_cmp = function()
       end,
     },
     mapping = cmp.mapping.preset.insert({
-      ['<Tab>'] = function(fallback)
-        if cmp.visible() then
-          cmp.select_next_item()
-        else
-          fallback()
-        end
-      end,
+      -- It conflicts with copilot
+      -- ['<Tab>'] = function(fallback)
+      --   if cmp.visible() then
+      --     cmp.select_next_item()
+      --   else
+      --     fallback()
+      --   end
+      -- end,
       ['<C-p>'] = cmp.mapping.select_prev_item(),
       ['<C-n>'] = cmp.mapping.select_next_item(),
       ['<C-e>'] = cmp.mapping.abort(),
