@@ -68,12 +68,13 @@ local set_keymap = function()
   -- Maximize (Open in new tab)
   vim.keymap.set('n', '<C-w>z', function()
     if vim.fn.winnr('$') == 1 then
-      vim.cmd('tabclose')
+      if vim.fn.tabpagenr() > 1 then
+        vim.cmd.tabclose()
+        -- else, do nothing
+      end
     else
-      vim.cmd [[
-      tabe %
-      execute "normal! \<C-o>zz"
-      ]]
+      vim.cmd.tabe('%')
+      vim.cmd([[execute "normal \<C-o>zz"]])
     end
   end)
   vim.keymap.set('n', '<C-w>t', ':<C-u><C-r>=v:count<CR>ToggleTerm<CR>')
@@ -129,8 +130,8 @@ local set_keymap = function()
       vim.keymap.set({ 'n', 'v' }, '<leader>a', vim.lsp.buf.code_action, opts)
       vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
       vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
-      -- TODO: conflict with tab
-      vim.keymap.set('n', 'gt', vim.lsp.buf.type_definition, opts)
+      -- Disable to avoid conflict with :tabnext
+      -- vim.keymap.set('n', 'gt', vim.lsp.buf.type_definition, opts)
       vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
       vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
       vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
@@ -161,12 +162,12 @@ local set_keymap = function()
 end
 
 local create_commands = function()
-  vim.api.nvim_create_user_command('BDelete', 'b # | bd #', {})
+  vim.api.nvim_create_user_command('BD', 'b # | bd #', {})
   vim.api.nvim_create_user_command('BOnly', '%bd | e # | bd #', {})
   vim.api.nvim_create_user_command('Outline', 'call Outline()', {})
   vim.api.nvim_create_user_command('Oldfiles', [[call Oldfiles('\v^' .. getcwd())]], {})
   vim.api.nvim_create_user_command('OldfilesGlobal', 'call Oldfiles()', {})
-  vim.api.nvim_create_user_command('Spell', 'call spelunker#toggle()', {})
+  vim.api.nvim_create_user_command('ToggleSpell', 'call spelunker#toggle()', {})
 
   vim.api.nvim_create_user_command('CloseTerms', function()
     for i = vim.fn.winnr('$'), 1, -1 do
@@ -177,7 +178,7 @@ local create_commands = function()
     end
   end, {})
 
-  vim.api.nvim_create_user_command('Debug', function()
+  vim.api.nvim_create_user_command('ToggleDebugger', function()
     -- require('dapui').toggle()
     local is_open = false
     for i = vim.fn.winnr('$'), 1, -1 do
@@ -188,22 +189,20 @@ local create_commands = function()
       end
     end
 
-    if is_open then
+    if is_open then -- -> close tab
       require('dapui').close()
-      vim.cmd [[tabclose]]
+      vim.cmd.tabclose()
       return
     end
 
-    -- closed
-    vim.cmd [[
-    tabe %
-    execute "normal \<C-o>zz"
-    ]]
+    -- closed -> open with new tab
+    vim.cmd.tabe('%')
+    vim.cmd([[execute "normal \<C-o>zz"]])
     require('dapui').open()
   end, {})
 
-  vim.api.nvim_create_user_command('Breakpoint', 'DapToggleBreakpoint', {})
-  vim.api.nvim_create_user_command('BreakpointClear', function()
+  vim.api.nvim_create_user_command('ToggleBreakpoint', 'DapToggleBreakpoint', {})
+  vim.api.nvim_create_user_command('ClearBreakpoints', function()
     require('dap').clear_breakpoints()
   end, {})
 
@@ -224,6 +223,9 @@ local create_commands = function()
       vim.api.nvim_create_user_command('LspFormat', function()
         vim.lsp.buf.format({ async = false })
       end, {})
+      vim.api.nvim_create_user_command('LspTypeDefinition', function()
+        vim.lsp.buf.type_definition()
+      end, {})
     end,
   })
 end
@@ -232,7 +234,7 @@ local create_auto_commands = function()
   vim.api.nvim_create_autocmd({ 'QuickFixCmdPost' }, {
     group = vim.api.nvim_create_augroup('UserOpenQuickfixWindow', {}),
     pattern = '*grep*',
-    command = 'cwindow | setlocal nowrap'
+    command = 'botright cwindow | setlocal nowrap'
   })
 
   vim.api.nvim_create_autocmd({ 'FileType' }, {
@@ -456,6 +458,7 @@ local setup_null_ls = function(local_config)
     })
   end
 
+  -- Run actions before formatting
   -- local before_null_ls_formatting = function(bufnr)
   --   local filetype = vim.api.nvim_buf_get_option(bufnr, 'filetype')
   --   if filetype == 'typescript' then
@@ -533,7 +536,7 @@ local setup_cmp = function()
       end,
     },
     mapping = cmp.mapping.preset.insert({
-      -- It conflicts with copilot
+      -- Disable Tab to avoid conflicts with Copilot.
       -- ['<Tab>'] = function(fallback)
       --   if cmp.visible() then
       --     cmp.select_next_item()
