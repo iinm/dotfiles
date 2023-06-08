@@ -67,7 +67,12 @@ local set_keymap = function()
   -- window
   vim.keymap.set('n', '<C-w>m', '<C-w>_<C-w><bar>') -- maximize
   vim.keymap.set('n', '<C-w>t', ':<C-u><C-r>=v:count<CR>ToggleTerm<CR>')
-  vim.keymap.set('n', '<C-w>T', ':<C-u>TermSelect<CR>')
+  for i = 1, 5, 1 do
+    vim.keymap.set(
+      'n',
+      '<C-w>' .. i,
+      ':<C-u>CloseTerms<CR>' .. ':' .. i .. 'ToggleTerm<CR>')
+  end
 
   -- terminal
   vim.api.nvim_create_autocmd({ 'TermOpen' }, {
@@ -83,7 +88,12 @@ local set_keymap = function()
       vim.keymap.set('t', '<C-w>c', [[<Cmd>wincmd c<CR>]], opts)
       vim.keymap.set('t', '<C-w><C-w>', [[<Cmd>wincmd w<CR>]], opts)
       vim.keymap.set('t', '<C-w>t', '<Cmd>ToggleTerm<CR>', {})
-      vim.keymap.set('t', '<C-w>T', '<Cmd>TermSelect<CR>', {})
+      for i = 1, 5, 1 do
+        vim.keymap.set(
+          't',
+          '<C-w>' .. i,
+          [[<Cmd>CloseTerms<CR>]] .. '<Cmd>' .. i .. 'ToggleTerm<CR>')
+      end
     end,
   })
 
@@ -146,13 +156,25 @@ local create_commands = function()
   vim.api.nvim_create_user_command('Oldfiles', [[call Oldfiles('\v^' .. getcwd())]], {})
   vim.api.nvim_create_user_command('OldfilesGlobal', 'call Oldfiles()', {})
   vim.api.nvim_create_user_command('Spell', 'call spelunker#toggle()', {})
+
+  vim.api.nvim_create_user_command('CloseTerms', function()
+    for i = vim.fn.winnr('$'), 1, -1 do
+      local buf_name = vim.fn.bufname(vim.fn.winbufnr(i))
+      if vim.startswith(buf_name, 'term://') then
+        vim.cmd(i .. 'wincmd c')
+      end
+    end
+  end, {})
+
   vim.api.nvim_create_user_command('Debug', function()
     require('dapui').toggle()
   end, {})
+
   vim.api.nvim_create_user_command('Breakpoint', 'DapToggleBreakpoint', {})
   vim.api.nvim_create_user_command('BreakpointClear', function()
     require('dap').clear_breakpoints()
   end, {})
+
   vim.api.nvim_create_user_command('Fold', function()
     if vim.opt_local.foldlevel:get() < 50 then
       vim.opt_local.foldlevel = 99
