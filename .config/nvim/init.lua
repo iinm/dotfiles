@@ -65,7 +65,17 @@ local set_keymap = function()
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
 
   -- window
-  vim.keymap.set('n', '<C-w>m', '<C-w>_<C-w><bar>') -- maximize
+  -- Maximize (Open in new tab)
+  vim.keymap.set('n', '<C-w>z', function()
+    if vim.fn.winnr('$') == 1 then
+      vim.cmd('tabclose')
+    else
+      vim.cmd [[
+      tabe %
+      execute "normal! \<C-o>zz"
+      ]]
+    end
+  end)
   vim.keymap.set('n', '<C-w>t', ':<C-u><C-r>=v:count<CR>ToggleTerm<CR>')
   for i = 1, 5, 1 do
     vim.keymap.set(
@@ -119,6 +129,7 @@ local set_keymap = function()
       vim.keymap.set({ 'n', 'v' }, '<leader>a', vim.lsp.buf.code_action, opts)
       vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
       vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+      -- TODO: conflict with tab
       vim.keymap.set('n', 'gt', vim.lsp.buf.type_definition, opts)
       vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
       vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
@@ -167,7 +178,28 @@ local create_commands = function()
   end, {})
 
   vim.api.nvim_create_user_command('Debug', function()
-    require('dapui').toggle()
+    -- require('dapui').toggle()
+    local is_open = false
+    for i = vim.fn.winnr('$'), 1, -1 do
+      local buf_name = vim.fn.bufname(vim.fn.winbufnr(i))
+      if buf_name == 'DAP Breakpoints' then
+        is_open = true
+        break
+      end
+    end
+
+    if is_open then
+      require('dapui').close()
+      vim.cmd [[tabclose]]
+      return
+    end
+
+    -- closed
+    vim.cmd [[
+    tabe %
+    execute "normal \<C-o>zz"
+    ]]
+    require('dapui').open()
   end, {})
 
   vim.api.nvim_create_user_command('Breakpoint', 'DapToggleBreakpoint', {})
