@@ -215,7 +215,7 @@ local create_commands = function()
     require('dap').clear_breakpoints()
   end, {})
 
-  vim.api.nvim_create_user_command('Fold', function()
+  vim.api.nvim_create_user_command('ToggleFolding', function()
     if vim.opt_local.foldlevel:get() < 50 then
       vim.opt_local.foldlevel = 99
     else
