@@ -40,10 +40,11 @@ local set_ui = function()
   vim.opt.background = 'dark'
   vim.cmd.colorscheme('everforest')
 
+  -- vim.opt.statusline = [[%<%f %h%m%r%{FugitiveStatusline()}%=%-14.(%l,%c%V%) %P]]
+  require('lualine').setup()
+
   vim.cmd.highlight({ 'SpelunkerSpellBad', 'cterm=underline', 'gui=underline' })
   vim.cmd.highlight({ 'SpelunkerComplexOrCompoundWord', 'cterm=underline', 'gui=underline' })
-
-  vim.opt.statusline = [[%<%f %h%m%r%{FugitiveStatusline()}%=%-14.(%l,%c%V%) %P]]
 end
 
 local set_keymap = function()
@@ -288,6 +289,7 @@ local ensure_plugins = function()
 
     -- ui
     use 'sainnhe/everforest'
+    use 'nvim-lualine/lualine.nvim'
 
     -- utilities
     use 'ctrlpvim/ctrlp.vim'
