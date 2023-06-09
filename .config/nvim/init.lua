@@ -55,19 +55,21 @@ local set_keymap = function()
   vim.keymap.set('n', '<leader><leader>', telescope_builtin.commands, {})
   vim.keymap.set('n', '<leader>r', telescope_builtin.command_history, {})
   vim.keymap.set('n', '<leader>f', ':<C-u>CtrlPMixed<CR>')
-  vim.keymap.set('n', '<leader>e', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>')
-  vim.keymap.set('n', '<leader>t', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
-  vim.keymap.set('n', '<leader>b', ':<C-u>call Buffers()<CR>')
   vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
-  vim.keymap.set('n', '<leader>n', ':<C-u>set number!<CR>')
   vim.keymap.set('n', '<leader>s', ':<C-u>gr!<Space>')
   vim.keymap.set('n', '<leader>vr', ':<C-u>source $MYVIMRC<CR>')
   vim.keymap.set('v', '//', [[y/\V<C-r>=escape(@",'/\')<CR><CR>]])
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
+  vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>')
+
+  -- deprecated
+  -- vim.keymap.set('n', '<leader>t', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
+  -- vim.keymap.set('n', '<leader>b', ':<C-u>call Buffers()<CR>')
+  -- vim.keymap.set('n', '<leader>n', ':<C-u>set number!<CR>')
 
   -- window
   -- Maximize (Open in new tab)
-  vim.keymap.set('n', '<C-w>z', function()
+  local toggle_maximize = function()
     if vim.fn.winnr('$') == 1 then
       if vim.fn.tabpagenr() > 1 then
         vim.cmd.tabclose()
@@ -75,9 +77,14 @@ local set_keymap = function()
       end
     else
       vim.cmd.tabe('%')
-      vim.cmd([[execute "normal \<C-o>zz"]])
+      if not vim.startswith(vim.fn.bufname(), 'term://') then
+        -- restore cursor position
+        vim.cmd([[execute "normal \<C-o>zz"]])
+      end
     end
-  end)
+  end
+  vim.keymap.set('n', '<C-w>z', toggle_maximize)
+
   vim.keymap.set('n', '<C-w>t', ':<C-u><C-r>=v:count<CR>ToggleTerm<CR>')
   for i = 1, 5, 1 do
     vim.keymap.set(
@@ -100,6 +107,7 @@ local set_keymap = function()
       vim.keymap.set('t', '<C-w>c', [[<Cmd>wincmd c<CR>]], opts)
       vim.keymap.set('t', '<C-w><C-w>', [[<Cmd>wincmd w<CR>]], opts)
       vim.keymap.set('t', '<C-w>t', '<Cmd>ToggleTerm<CR>', {})
+      vim.keymap.set('t', '<C-w>z', toggle_maximize)
       for i = 1, 5, 1 do
         vim.keymap.set(
           't',
