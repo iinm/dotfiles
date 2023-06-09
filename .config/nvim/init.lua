@@ -40,8 +40,8 @@ local set_ui = function()
   vim.opt.background = 'dark'
   vim.cmd.colorscheme('everforest')
 
-  -- vim.opt.statusline = [[%<%f %h%m%r%{FugitiveStatusline()}%=%-14.(%l,%c%V%) %P]]
-  require('lualine').setup()
+  vim.opt.laststatus = 3
+  vim.opt.statusline = [[%<%f %h%m%r%{FugitiveStatusline()}%=%-14.(%l,%c%V%) %P]]
 
   vim.cmd.highlight({ 'SpelunkerSpellBad', 'cterm=underline', 'gui=underline' })
   vim.cmd.highlight({ 'SpelunkerComplexOrCompoundWord', 'cterm=underline', 'gui=underline' })
@@ -233,7 +233,7 @@ end
 
 local create_auto_commands = function()
   vim.api.nvim_create_autocmd({ 'QuickFixCmdPost' }, {
-    group = vim.api.nvim_create_augroup('UserOpenQuickfixWindow', {}),
+    group = vim.api.nvim_create_augroup('UserOpenQuickfixWindowAfterGrep', {}),
     pattern = '*grep*',
     command = 'botright cwindow | setlocal nowrap'
   })
@@ -246,7 +246,7 @@ local create_auto_commands = function()
 
   -- format on save
   vim.api.nvim_create_autocmd('LspAttach', {
-    group = vim.api.nvim_create_augroup('UserLspAutocmdConfig', {}),
+    group = vim.api.nvim_create_augroup('UserLspFormatOnSave', {}),
     callback = function()
       vim.api.nvim_create_autocmd({ 'BufWritePre' }, {
         group = vim.api.nvim_create_augroup('UserLspFormattingOnSave', {}),
@@ -289,7 +289,6 @@ local ensure_plugins = function()
 
     -- ui
     use 'sainnhe/everforest'
-    use 'nvim-lualine/lualine.nvim'
 
     -- utilities
     use 'ctrlpvim/ctrlp.vim'
@@ -557,6 +556,10 @@ local setup_cmp = function()
     }, {
       { name = 'buffer' },
     }),
+    window = {
+      completion = cmp.config.window.bordered(),
+      documentation = cmp.config.window.bordered(),
+    },
     formatting = {
       fields = { 'abbr', 'kind', 'menu' },
       format = function(_, vim_item)
@@ -566,7 +569,7 @@ local setup_cmp = function()
         -- end
         return vim_item
       end
-    }
+    },
   })
 
   cmp.setup.cmdline({ '/', '?' }, {
