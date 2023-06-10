@@ -118,6 +118,7 @@ local set_keymap = function()
   })
 
   -- ctrlp
+  vim.g.ctrlp_map = '<Nop>'
   vim.g.ctrlp_prompt_mappings = {
     ['PrtSelectMove("j")'] = { '<down>', '<c-n>' },
     ['PrtSelectMove("k")'] = { '<up>', '<c-p>' },
