@@ -1,7 +1,7 @@
 function! Oldfiles(pattern='') abort
   let l:files = filter(
   \  deepcopy(v:oldfiles),
-  \  {_, path -> (a:pattern == '' || expand(path) =~ a:pattern) && path !~? '\v^term://|^fugitive://|ControlP|NetrwTreeListing'}
+  \  {_, path -> (a:pattern == '' || expand(path) =~ a:pattern) && path !~? '\v^term://|^fugitive://|ControlP|NetrwTreeListing|DAP'}
   \ )
   " omit current directory
   let l:files = map(
