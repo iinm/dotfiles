@@ -54,7 +54,9 @@ local set_keymap = function()
   -- utilities
   vim.keymap.set('n', '<leader><leader>', telescope_builtin.commands, {})
   vim.keymap.set('n', '<leader>r', telescope_builtin.command_history, {})
-  vim.keymap.set('n', '<leader>f', ':<C-u>CtrlPMixed<CR>')
+  vim.keymap.set('n', '<leader>f', telescope_builtin.find_files, {})
+  vim.keymap.set('n', '<leader>o', telescope_builtin.oldfiles, {})
+  vim.keymap.set('n', '<leader>b', telescope_builtin.buffers, {})
   vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
   vim.keymap.set('n', '<leader>s', ':<C-u>gr!<Space>')
   vim.keymap.set('n', '<leader>vr', ':<C-u>source $MYVIMRC<CR>')
@@ -73,6 +75,7 @@ local set_keymap = function()
     if vim.fn.winnr('$') == 1 then
       if vim.fn.tabpagenr() > 1 then
         vim.cmd.tabclose()
+        vim.cmd([[execute "normal \<C-o>zz"]])
         -- else, do nothing
       end
     else
@@ -116,15 +119,6 @@ local set_keymap = function()
       end
     end,
   })
-
-  -- ctrlp
-  vim.g.ctrlp_map = '<Nop>'
-  vim.g.ctrlp_prompt_mappings = {
-    ['PrtSelectMove("j")'] = { '<down>', '<c-n>' },
-    ['PrtSelectMove("k")'] = { '<up>', '<c-p>' },
-    ['PrtHistory(-1)'] = { '<c-j>' },
-    ['PrtHistory(1)'] = { '<c-k>' },
-  }
 
   -- lsp
   -- https://github.com/neovim/nvim-lspconfig
@@ -175,6 +169,7 @@ local create_commands = function()
   vim.api.nvim_create_user_command('BD', 'b # | bd #', {})
   vim.api.nvim_create_user_command('BOnly', '%bd | e # | bd #', {})
   vim.api.nvim_create_user_command('Outline', 'call Outline()', {})
+  vim.api.nvim_create_user_command('Buffers', 'call Buffers()', {})
   vim.api.nvim_create_user_command('Oldfiles', [[call Oldfiles('\v^' .. getcwd())]], {})
   vim.api.nvim_create_user_command('OldfilesGlobal', 'call Oldfiles()', {})
   vim.api.nvim_create_user_command('ToggleSpell', 'call spelunker#toggle()', {})
@@ -300,7 +295,6 @@ local ensure_plugins = function()
     use 'sainnhe/everforest'
 
     -- utilities
-    use 'ctrlpvim/ctrlp.vim'
     use { 'nvim-telescope/telescope.nvim', tag = '0.1.1' }
     use 'stevearc/dressing.nvim'
     use 'tpope/vim-sleuth'
@@ -350,16 +344,6 @@ local ensure_plugins = function()
   end)
 end
 
-local setup_ctrlp = function()
-  vim.g.ctrlp_user_command = 'fd --hidden --exclude .git --type f --color=never "" %s'
-  vim.g.ctrlp_root_markers = { '.git', 'package.json' }
-  vim.g.ctrlp_match_window = 'bottom,order:btt,min:1,max:15,results:15'
-  vim.g.ctrlp_by_filename = 1
-  vim.g.ctrlp_use_caching = 0
-  vim.g.ctrlp_mruf_relative = 1
-  vim.g.ctrlp_mruf_exclude = [[COMMIT_EDITMSG]]
-end
-
 local setup_telescope = function()
   local telescope = require('telescope')
   local telescope_actions = require('telescope.actions')
@@ -374,15 +358,29 @@ local setup_telescope = function()
       }
     },
     pickers = {
+      commands = {
+        theme = 'dropdown',
+        previewer = false,
+      },
+      command_history = {
+        theme = 'dropdown',
+        previewer = false,
+      },
       find_files = {
         hidden = true,
+        theme = 'dropdown',
+        previewer = false,
+      },
+      oldfiles = {
+        only_cwd = true,
+        theme = 'dropdown',
+        previewer = false,
       },
       buffers = {
         ignore_current_buffer = true,
         sort_lastused = true,
-      },
-      oldfiles = {
-        only_cwd = true,
+        theme = 'dropdown',
+        previewer = false,
       },
     }
   })
@@ -643,7 +641,6 @@ load_utilities()
 ensure_plugins()
 local local_config = require('local')
 
-setup_ctrlp()
 setup_telescope()
 setup_toggleterm()
 setup_mason()
