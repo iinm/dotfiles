@@ -1,7 +1,11 @@
-function! Oldfiles(pattern='') abort
+function! Oldfiles(options={'only_cwd': v:false}) abort
+  let l:only_cwd = has_key(a:options, 'only_cwd') ? a:options['only_cwd'] : v:false
   let l:files = filter(
   \  deepcopy(v:oldfiles),
-  \  {_, path -> (a:pattern == '' || expand(path) =~ a:pattern) && path !~? '\v^term://|^fugitive://|ControlP|NetrwTreeListing|DAP'}
+  \  {
+  \    _, path -> filereadable(expand(path))
+  \      && (!l:only_cwd || expand(path) =~# '^' .. getcwd())
+  \  }
   \ )
   " omit current directory
   let l:files = map(
