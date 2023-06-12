@@ -72,10 +72,13 @@ local set_keymap = function()
   -- window
   -- Maximize (Open in new tab)
   local toggle_maximize = function()
+    local is_term = function()
+      return vim.startswith(vim.fn.bufname(), 'term://')
+    end
     if vim.fn.winnr('$') == 1 then
       if vim.fn.tabpagenr() > 1 then
         vim.cmd.tabclose()
-        if not vim.startswith(vim.fn.bufname(), 'term://') then
+        if not is_term() then
           -- restore cursor position
           vim.cmd([[execute "normal \<C-o>zz"]])
         end
@@ -83,7 +86,7 @@ local set_keymap = function()
       end
     else
       vim.cmd.tabe('%')
-      if not vim.startswith(vim.fn.bufname(), 'term://') then
+      if not is_term() then
         -- restore cursor position
         vim.cmd([[execute "normal \<C-o>zz"]])
       end
