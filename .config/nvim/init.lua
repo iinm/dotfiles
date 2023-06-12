@@ -75,7 +75,10 @@ local set_keymap = function()
     if vim.fn.winnr('$') == 1 then
       if vim.fn.tabpagenr() > 1 then
         vim.cmd.tabclose()
-        vim.cmd([[execute "normal \<C-o>zz"]])
+        if not vim.startswith(vim.fn.bufname(), 'term://') then
+          -- restore cursor position
+          vim.cmd([[execute "normal \<C-o>zz"]])
+        end
         -- else, do nothing
       end
     else
