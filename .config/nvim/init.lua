@@ -78,7 +78,9 @@ local set_keymap = function()
     if vim.fn.winnr('$') == 1 then
       if vim.fn.tabpagenr() > 1 then
         vim.cmd.tabclose()
-        if not is_term() then
+        if is_term() then
+          vim.cmd([[execute "stopinsert"]])
+        else
           -- restore cursor position
           vim.cmd([[execute "normal \<C-o>zz"]])
         end
