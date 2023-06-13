@@ -56,18 +56,15 @@ local set_keymap = function()
   vim.keymap.set('n', '<leader>r', telescope_builtin.command_history, {})
   vim.keymap.set('n', '<leader>f', telescope_builtin.find_files, {})
   vim.keymap.set('n', '<leader>o', telescope_builtin.oldfiles, {})
-  vim.keymap.set('n', '<leader>b', ':<C-u>Buffers<CR>', {})
+  vim.keymap.set('n', '<leader>b', ':<C-u>call Buffers()<CR>', {})
   vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
+  vim.keymap.set('n', '<leader>n', ':<C-u>set number!<CR>')
   vim.keymap.set('n', '<leader>s', ':<C-u>gr!<Space>')
+  vim.keymap.set('n', '<leader>t', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
   vim.keymap.set('n', '<leader>vr', ':<C-u>source $MYVIMRC<CR>')
   vim.keymap.set('v', '//', [[y/\V<C-r>=escape(@",'/\')<CR><CR>]])
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
   vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>')
-
-  -- deprecated
-  -- vim.keymap.set('n', '<leader>t', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
-  -- vim.keymap.set('n', '<leader>b', ':<C-u>call Buffers()<CR>')
-  -- vim.keymap.set('n', '<leader>n', ':<C-u>set number!<CR>')
 
   -- window
   -- Maximize (Open in new tab)
