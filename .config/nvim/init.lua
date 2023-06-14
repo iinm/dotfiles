@@ -41,7 +41,20 @@ local set_ui = function()
   vim.cmd.colorscheme('everforest')
 
   vim.opt.laststatus = 3
-  vim.opt.statusline = [[%<%f %h%m%r%{FugitiveStatusline()}%=%-14.(%l,%c%V%) %P]]
+
+  vim.cmd.highlight({ 'StatusLineFilename', 'ctermfg=245', 'ctermbg=237', 'guifg=LightGray', 'guibg=#434f55' })
+  vim.opt.statusline = table.concat({
+    '%<',                        -- truncate if too long
+    '%{expand("%:~:.:h")}/',     -- directory name (relative path)
+    '%#StatusLineFilename#%t%*', -- file name
+    ' ',
+    '%h',                        -- help
+    '%m',                        -- modified
+    '%r',                        -- read-only
+    '%{FugitiveStatusline()}',   -- git status
+    '%=',                        -- right align
+    '%-14.(%l,%c%V%) %P',        -- line, column, virtual column, percentage
+  }, '')
 
   vim.cmd.highlight({ 'SpelunkerSpellBad', 'cterm=underline', 'gui=underline' })
   vim.cmd.highlight({ 'SpelunkerComplexOrCompoundWord', 'cterm=underline', 'gui=underline' })
