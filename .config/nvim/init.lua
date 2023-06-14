@@ -12,7 +12,7 @@ local set_options = function()
   vim.opt.foldlevel = 99
   vim.opt.splitbelow = true
   vim.opt.splitright = true
-  vim.opt.maxmempattern = 5000 -- default: 1000
+  vim.opt.wrap = false
   vim.opt.tabstop = 8
   vim.opt.expandtab = true
   vim.opt.shiftwidth = 2
@@ -42,7 +42,7 @@ local set_ui = function()
 
   vim.opt.laststatus = 3
 
-  vim.cmd.highlight({ 'StatusLineFilename', 'ctermfg=245', 'ctermbg=237', 'guifg=LightGray', 'guibg=#434f55' })
+  vim.cmd.highlight({ 'StatusLineFilename', 'ctermbg=237', 'guibg=#434f55' })
   vim.opt.statusline = table.concat({
     '%<',                        -- truncate if too long
     '%{expand("%:~:.:h")}/',     -- directory name (relative path)
@@ -92,13 +92,13 @@ local set_keymap = function()
           -- fix blank screen
           vim.cmd([[execute "stopinsert"]])
         end
-        -- else, do nothing
       end
     else
+      local position = vim.fn.line('.')
       vim.cmd.tabe('%')
       if not is_term() then
-        -- restore cursor position
-        vim.cmd([[execute "normal \<C-o>zz"]])
+        -- restore position
+        vim.cmd([[execute "normal! " . ]] .. position .. [[ . "ggzz"]])
       end
     end
   end
