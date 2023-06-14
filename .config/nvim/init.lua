@@ -76,10 +76,8 @@ local set_keymap = function()
       if vim.fn.tabpagenr() > 1 then
         vim.cmd.tabclose()
         if is_term() then
+          -- fix blank screen
           vim.cmd([[execute "stopinsert"]])
-        else
-          -- restore cursor position
-          vim.cmd([[execute "normal \<C-o>zz"]])
         end
         -- else, do nothing
       end
