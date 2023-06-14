@@ -42,18 +42,21 @@ local set_ui = function()
 
   vim.opt.laststatus = 3
 
-  vim.cmd.highlight({ 'StatusLineFilename', 'ctermbg=237', 'guibg=#434f55' })
+  vim.cmd.highlight(
+  -- use default fg color
+    { 'StatusLineFilename', 'ctermbg=237', 'guibg=#434f55' }
+  )
   vim.opt.statusline = table.concat({
-    '%<',                        -- truncate if too long
-    '%{expand("%:~:.:h")}/',     -- directory name (relative path)
-    '%#StatusLineFilename#%t%*', -- file name
+    '%<',                                                      -- truncate if too long
+    '%{empty(expand("%:h")) ? "" : expand("%:~:.:h") .. "/"}', -- directory name (relative path)
+    '%#StatusLineFilename#%t%*',                               -- file name
     ' ',
-    '%h',                        -- help
-    '%m',                        -- modified
-    '%r',                        -- read-only
-    '%{FugitiveStatusline()}',   -- git status
-    '%=',                        -- right align
-    '%-14.(%l,%c%V%) %P',        -- line, column, virtual column, percentage
+    '%h',                                                      -- help
+    '%m',                                                      -- modified
+    '%r',                                                      -- read-only
+    '%{FugitiveStatusline()}',                                 -- git status
+    '%=',                                                      -- right align
+    '%-14.(%l,%c%V%) %P',                                      -- line, column, virtual column, percentage
   }, '')
 
   vim.cmd.highlight({ 'SpelunkerSpellBad', 'cterm=underline', 'gui=underline' })
