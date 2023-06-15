@@ -33,6 +33,7 @@ local load_utilities = function()
   vim.cmd('source ' .. config_path .. '/outline.vim')
   vim.cmd('source ' .. config_path .. '/buffers.vim')
   vim.cmd('source ' .. config_path .. '/oldfiles.vim')
+  vim.cmd('source ' .. config_path .. '/tabline.vim')
 end
 
 local set_appearance = function()
@@ -40,12 +41,9 @@ local set_appearance = function()
   vim.opt.background = 'dark'
   vim.cmd.colorscheme('everforest')
 
+  -- statusline
   vim.opt.laststatus = 3
-
-  vim.cmd.highlight(
-  -- use default fg color
-    { 'StatusLineFilename', 'ctermbg=237', 'guibg=#434f55' }
-  )
+  vim.cmd.highlight({ 'StatusLineFilename', 'ctermbg=237', 'guibg=#434f55' })
   vim.opt.statusline = table.concat({
     '%<',                                                      -- truncate if too long
     '%{empty(expand("%:h")) ? "" : expand("%:~:.:h") .. "/"}', -- directory name (relative path)
@@ -58,6 +56,11 @@ local set_appearance = function()
     '%=',                                                      -- right align
     '%-14.(%l,%c%V%) %P',                                      -- line, column, virtual column, percentage
   }, '')
+
+  -- tabline
+  -- vim.opt.showtabline = 2
+  vim.opt.tabline = '%!MyTabLine()'
+  vim.cmd.highlight({ 'MyTabLineSel', 'ctermbg=238', 'guibg=#4d5960' })
 
   vim.cmd.highlight({ 'SpelunkerSpellBad', 'cterm=underline', 'gui=underline' })
   vim.cmd.highlight({ 'SpelunkerComplexOrCompoundWord', 'cterm=underline', 'gui=underline' })
