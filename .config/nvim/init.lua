@@ -80,8 +80,10 @@ local open_debugger = function()
   if is_debugger_open() then
     return
   end
+  local position = vim.fn.line('.')
   vim.cmd.tabe('%')
-  vim.cmd([[execute "normal \<C-o>zz"]])
+  -- restore position
+  vim.cmd([[execute "normal! " . ]] .. position .. [[ . "ggzz"]])
   require('dapui').open()
 end
 
