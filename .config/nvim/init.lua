@@ -384,28 +384,17 @@ local setup_telescope = function()
       }
     },
     pickers = {
-      commands = {
-        theme = 'dropdown',
-        previewer = false,
-      },
-      command_history = {
-        theme = 'dropdown',
-        previewer = false,
-      },
       find_files = {
         hidden = true,
-        theme = 'dropdown',
         previewer = false,
       },
       oldfiles = {
         only_cwd = true,
-        theme = 'dropdown',
         previewer = false,
       },
       buffers = {
         ignore_current_buffer = true,
         sort_lastused = true,
-        theme = 'dropdown',
         previewer = false,
       },
     }
