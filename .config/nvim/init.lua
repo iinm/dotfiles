@@ -35,7 +35,7 @@ local load_utilities = function()
   vim.cmd('source ' .. config_path .. '/oldfiles.vim')
 end
 
-local set_ui = function()
+local set_appearance = function()
   vim.g.everforest_background = 'soft'
   vim.opt.background = 'dark'
   vim.cmd.colorscheme('everforest')
@@ -660,10 +660,10 @@ end
 -- Setup
 set_options()
 load_utilities()
-
 ensure_plugins()
 local local_config = require('local')
 
+-- plugins
 setup_telescope()
 setup_toggleterm()
 setup_mason()
@@ -673,7 +673,7 @@ setup_cmp()
 setup_dap(local_config)
 setup_plugins()
 
-set_ui()
+set_appearance()
 set_keymap()
 create_commands()
 create_auto_commands()
