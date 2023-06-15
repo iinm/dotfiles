@@ -66,6 +66,66 @@ local set_appearance = function()
   vim.cmd.highlight({ 'SpelunkerComplexOrCompoundWord', 'cterm=underline', 'gui=underline' })
 end
 
+local is_debugger_open = function()
+  for i = vim.fn.winnr('$'), 1, -1 do
+    local buf_name = vim.fn.bufname(vim.fn.winbufnr(i))
+    if buf_name == 'DAP Breakpoints' then
+      return true
+    end
+  end
+  return false
+end
+
+local open_debugger = function()
+  if is_debugger_open() then
+    return
+  end
+  vim.cmd.tabe('%')
+  vim.cmd([[execute "normal \<C-o>zz"]])
+  require('dapui').open()
+end
+
+local close_debugger = function()
+  if not is_debugger_open() then
+    return
+  end
+  require('dapui').close()
+  if vim.fn.tabpagenr() > 1 then
+    vim.cmd.tabclose()
+  end
+end
+
+local toggle_debugger = function()
+  if is_debugger_open() then
+    close_debugger()
+  else
+    open_debugger()
+  end
+end
+
+-- Maximize (Open in new tab)
+local toggle_maximize = function()
+  local is_term = function()
+    return vim.startswith(vim.fn.bufname(), 'term://')
+  end
+  if vim.fn.winnr('$') == 1 then
+    if vim.fn.tabpagenr() > 1 then
+      vim.cmd.tabclose()
+      if is_term() then
+        -- fix blank screen
+        vim.cmd([[execute "stopinsert"]])
+      end
+    end
+  else
+    local position = vim.fn.line('.')
+    vim.cmd.tabe('%')
+    if not is_term() then
+      -- restore position
+      vim.cmd([[execute "normal! " . ]] .. position .. [[ . "ggzz"]])
+    end
+  end
+end
+
 local set_keymap = function()
   local telescope_builtin = require('telescope.builtin')
 
@@ -86,28 +146,6 @@ local set_keymap = function()
   vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>')
 
   -- window
-  -- Maximize (Open in new tab)
-  local toggle_maximize = function()
-    local is_term = function()
-      return vim.startswith(vim.fn.bufname(), 'term://')
-    end
-    if vim.fn.winnr('$') == 1 then
-      if vim.fn.tabpagenr() > 1 then
-        vim.cmd.tabclose()
-        if is_term() then
-          -- fix blank screen
-          vim.cmd([[execute "stopinsert"]])
-        end
-      end
-    else
-      local position = vim.fn.line('.')
-      vim.cmd.tabe('%')
-      if not is_term() then
-        -- restore position
-        vim.cmd([[execute "normal! " . ]] .. position .. [[ . "ggzz"]])
-      end
-    end
-  end
   vim.keymap.set('n', '<C-w>z', toggle_maximize)
 
   vim.keymap.set('n', '<C-w>t', ':<C-u><C-r>=v:count<CR>ToggleTerm<CR>')
@@ -177,6 +215,13 @@ local set_keymap = function()
     [[:5TermExec open=0 cmd='with_notify git push origin <C-r>=FugitiveHead()<CR>'<Left>]])
   vim.keymap.set('n', '<leader>gb', ':<C-u>Git blame<CR>')
 
+  -- dap
+  vim.keymap.set('n', '<leader>dt', toggle_debugger)
+  vim.keymap.set('n', '<leader>db', ':<C-u>DapToggleBreakpoint<CR>')
+  vim.keymap.set('n', '<leader>dB', ':<C-u>ClearBreakpoints<CR>')
+  vim.keymap.set('n', '<leader>dc', ':<C-u>DapContinue<CR>')
+  vim.keymap.set({ 'n', 'v' }, '<leader>de', '<Cmd>lua require("dapui").eval()<CR>')
+
   -- vsnip
   -- https://github.com/hrsh7th/vim-vsnip
   vim.cmd [[
@@ -209,30 +254,7 @@ local create_commands = function()
     end
   end, {})
 
-  vim.api.nvim_create_user_command('ToggleDebugger', function()
-    -- require('dapui').toggle()
-    local is_open = false
-    for i = vim.fn.winnr('$'), 1, -1 do
-      local buf_name = vim.fn.bufname(vim.fn.winbufnr(i))
-      if buf_name == 'DAP Breakpoints' then
-        is_open = true
-        break
-      end
-    end
-
-    if is_open then -- -> close tab
-      require('dapui').close()
-      vim.cmd.tabclose()
-      return
-    end
-
-    -- closed -> open with new tab
-    vim.cmd.tabe('%')
-    vim.cmd([[execute "normal \<C-o>zz"]])
-    require('dapui').open()
-  end, {})
-
-  vim.api.nvim_create_user_command('ToggleBreakpoint', 'DapToggleBreakpoint', {})
+  vim.api.nvim_create_user_command('ToggleDebugger', toggle_debugger, {})
   vim.api.nvim_create_user_command('ClearBreakpoints', function()
     require('dap').clear_breakpoints()
   end, {})
@@ -613,6 +635,8 @@ end
 
 local setup_dap = function(local_config)
   local dap = require('dap')
+  local dapui = require("dapui")
+
   dap.configurations = local_config.dap_configurations or {
     typescript = {
       {
@@ -637,7 +661,17 @@ local setup_dap = function(local_config)
       end,
     },
   })
+
   require('dapui').setup()
+  dap.listeners.after.event_initialized["dapui_config"] = function()
+    open_debugger()
+  end
+  -- dap.listeners.before.event_terminated["dapui_config"] = function()
+  --   close_debugger()
+  -- end
+  dap.listeners.before.event_exited["dapui_config"] = function()
+    close_debugger()
+  end
 end
 
 local setup_plugins = function()
