@@ -145,6 +145,7 @@ local set_keymap = function()
   vim.keymap.set('n', '<leader>s', ':<C-u>gr!<Space>')
   vim.keymap.set('n', '<leader>t', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
   vim.keymap.set('n', '<leader>c', function()
+    require('nvim-highlight-colors').setup({})
     require("nvim-highlight-colors").toggle()
   end)
   vim.keymap.set('n', '<leader>vr', ':<C-u>source $MYVIMRC<CR>')
@@ -688,7 +689,6 @@ local setup_plugins = function()
   require('nvim-autopairs').setup()
   require('typescript').setup({})
   require('dressing').setup()
-  require('nvim-highlight-colors').setup({})
 end
 
 -- Setup
