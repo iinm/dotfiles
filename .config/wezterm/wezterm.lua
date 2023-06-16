@@ -12,6 +12,7 @@ config.font = wezterm.font_with_fallback {
   { family = "Operator Mono SSm", weight = "Book" },
   { family = "Hiragino Sans" },
   { family = "Noto Sans CJK JP" },
+  -- { family = "codicon" },
 }
 config.font_size = 12.5
 config.color_scheme = "Eighties (base16)"

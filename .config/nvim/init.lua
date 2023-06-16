@@ -62,6 +62,10 @@ local set_appearance = function()
   vim.opt.tabline = '%!MyTabLine()'
   vim.cmd.highlight({ 'MyTabLineSel', 'ctermbg=238', 'guibg=#4d5960' })
 
+  -- dap
+  vim.fn.sign_define('DapBreakpoint', { text = '•', texthl = 'DiagnosticSignError' })
+
+  -- spell
   vim.cmd.highlight({ 'SpelunkerSpellBad', 'cterm=underline', 'gui=underline' })
   vim.cmd.highlight({ 'SpelunkerComplexOrCompoundWord', 'cterm=underline', 'gui=underline' })
 end
@@ -142,6 +146,9 @@ local set_keymap = function()
   vim.keymap.set('n', '<leader>n', ':<C-u>set number!<CR>')
   vim.keymap.set('n', '<leader>s', ':<C-u>gr!<Space>')
   vim.keymap.set('n', '<leader>t', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
+  vim.keymap.set('n', '<leader>c', function()
+    require("nvim-highlight-colors").toggle()
+  end)
   vim.keymap.set('n', '<leader>vr', ':<C-u>source $MYVIMRC<CR>')
   vim.keymap.set('v', '//', [[y/\V<C-r>=escape(@",'/\')<CR><CR>]])
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
@@ -184,7 +191,7 @@ local set_keymap = function()
 
   -- lsp
   -- https://github.com/neovim/nvim-lspconfig
-  vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float)
+  -- vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float)
   vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
   vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
   vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
@@ -356,6 +363,7 @@ local ensure_plugins = function()
     use 'kamykn/spelunker.vim'
     use { 'phaazon/hop.nvim', branch = 'v2' }
     use 'folke/trouble.nvim'
+    use 'brenoprata10/nvim-highlight-colors'
 
     -- lsp
     use 'neovim/nvim-lspconfig'
@@ -637,7 +645,6 @@ end
 
 local setup_dap = function(local_config)
   local dap = require('dap')
-  local dapui = require("dapui")
 
   dap.configurations = local_config.dap_configurations or {
     typescript = {
@@ -683,6 +690,7 @@ local setup_plugins = function()
   require('nvim-autopairs').setup()
   require('typescript').setup({})
   require('dressing').setup()
+  require('nvim-highlight-colors').setup({})
 end
 
 -- Setup

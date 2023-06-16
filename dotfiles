@@ -301,6 +301,19 @@ EOF
     tic -x -o ~/.terminfo "$tempfile"
     rm "$tempfile"
   fi
+
+  # local codicon_url=https://github.com/microsoft/vscode-codicons/raw/main/dist/codicon.ttf
+  # local codicon_local_path=~/.fonts/codicon.ttf
+  # if test "$(uname)" = "Darwin"; then
+  #   codicon_local_path=~/Library/Fonts/codicon.ttf
+  # fi
+  # if test -e "$codicon_local_path"; then
+  #   echo "skip: $codicon_local_path exists."
+  # else
+  #   echo "run: install codicon.ttf."
+  #   mkdir -p "$(dirname "$codicon_local_path")"
+  #   curl --show-error --fail -L -o "$codicon_local_path" "$codicon_url"
+  # fi
 }
 
 if test "${BASH_SOURCE[0]}" = "$0"; then
