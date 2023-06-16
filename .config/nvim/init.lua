@@ -58,12 +58,10 @@ local set_appearance = function()
   }, '')
 
   -- tabline
-  -- vim.opt.showtabline = 2
   vim.opt.tabline = '%!MyTabLine()'
-  vim.cmd.highlight({ 'MyTabLineSel', 'ctermbg=238', 'guibg=#4d5960' })
 
   -- dap
-  vim.fn.sign_define('DapBreakpoint', { text = '•', texthl = 'DiagnosticSignError' })
+  vim.fn.sign_define('DapBreakpoint', { text = '', texthl = 'DiagnosticSignError' })
 
   -- spell
   vim.cmd.highlight({ 'SpelunkerSpellBad', 'cterm=underline', 'gui=underline' })
