@@ -318,6 +318,14 @@ local create_auto_commands = function()
     end,
   })
 
+  -- fix syntax highlighting
+  -- https://vim.fandom.com/wiki/Fix_syntax_highlighting
+  vim.api.nvim_create_autocmd({ 'BufEnter', 'InsertLeave' }, {
+    group = vim.api.nvim_create_augroup('UserFixSyntaxHighlighting', {}),
+    pattern = { '*' },
+    command = 'syntax sync fromstart'
+  })
+
   -- spell check
   -- vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
   --   group = vim.api.nvim_create_augroup('UserSpelunkerConfig', {}),
