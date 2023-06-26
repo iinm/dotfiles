@@ -370,8 +370,8 @@ local ensure_plugins = function()
     use { 'nvim-telescope/telescope.nvim', tag = '0.1.1' }
     use 'stevearc/dressing.nvim'
     use 'tpope/vim-sleuth'
+    use 'tpope/vim-commentary'
     use 'tpope/vim-fugitive'
-    use 'numToStr/Comment.nvim'
     use 'elihunter173/dirbuf.nvim'
     use 'akinsho/toggleterm.nvim'
     use 'windwp/nvim-autopairs'
@@ -701,7 +701,6 @@ end
 local setup_plugins = function()
   -- vim.g.enable_spelunker_vim = 0
   vim.g.javascript_plugin_jsdoc = 1
-  require('Comment').setup()
   require('hop').setup()
   require('nvim-autopairs').setup()
   require('typescript').setup({})
