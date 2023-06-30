@@ -131,15 +131,9 @@ local toggle_maximize = function()
 end
 
 local set_keymap = function()
-  local telescope_builtin = require('telescope.builtin')
-
   vim.g.mapleader = ' '
   -- utilities
-  vim.keymap.set('n', '<leader><leader>', telescope_builtin.commands, {})
-  vim.keymap.set('n', '<leader>r', telescope_builtin.command_history, {})
-  vim.keymap.set('n', '<leader>f', telescope_builtin.find_files, {})
-  vim.keymap.set('n', '<leader>o', telescope_builtin.oldfiles, {})
-  vim.keymap.set('n', '<leader>b', ':<C-u>call Buffers()<CR>', {})
+  vim.keymap.set('n', '<leader>f', ':<C-u>CtrlPMixed<CR>')
   vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
   vim.keymap.set('n', '<leader>n', ':<C-u>set number!<CR>')
   vim.keymap.set('n', '<leader>s', ':<C-u>gr!<Space>')
@@ -189,7 +183,6 @@ local set_keymap = function()
 
   -- lsp
   -- https://github.com/neovim/nvim-lspconfig
-  -- vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float)
   vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
   vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
   vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
@@ -201,18 +194,12 @@ local set_keymap = function()
       vim.keymap.set({ 'n', 'v' }, '<leader>a', vim.lsp.buf.code_action, opts)
       vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
       vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
-      -- Disable to avoid conflict with :tabnext
-      -- vim.keymap.set('n', 'gt', vim.lsp.buf.type_definition, opts)
       vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
       vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
       vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
       vim.keymap.set({ 'n', 'i' }, '<C-k>', vim.lsp.buf.signature_help, opts)
     end,
   })
-
-  -- copilot
-  -- vim.cmd [[imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")]]
-  -- vim.g.copilot_no_tab_map = true
 
   -- git
   vim.keymap.set('n', '<leader>gf', ':<C-u>Git fetch --prune<CR>')
@@ -225,9 +212,17 @@ local set_keymap = function()
   -- dap
   vim.keymap.set('n', '<leader>dt', toggle_debugger)
   vim.keymap.set('n', '<leader>db', ':<C-u>DapToggleBreakpoint<CR>')
-  vim.keymap.set('n', '<leader>dB', ':<C-u>ClearBreakpoints<CR>')
   vim.keymap.set('n', '<leader>dc', ':<C-u>DapContinue<CR>')
   vim.keymap.set({ 'n', 'v' }, '<leader>de', '<Cmd>lua require("dapui").eval()<CR>')
+
+  -- ctrlp
+  vim.g.ctrlp_map = '<Nop>'
+  vim.g.ctrlp_prompt_mappings = {
+    ['PrtSelectMove("j")'] = { '<down>', '<c-n>' },
+    ['PrtSelectMove("k")'] = { '<up>', '<c-p>' },
+    ['PrtHistory(-1)'] = { '<c-j>' },
+    ['PrtHistory(1)'] = { '<c-k>' },
+  }
 
   -- vsnip
   -- https://github.com/hrsh7th/vim-vsnip
@@ -240,10 +235,10 @@ local set_keymap = function()
 end
 
 local create_commands = function()
-  vim.api.nvim_create_user_command('BD', 'b # | bd #', {})
+  vim.api.nvim_create_user_command('BDelete', 'b # | bd #', {})
   vim.api.nvim_create_user_command('BOnly', '%bd | e # | bd #', {})
-  vim.api.nvim_create_user_command('Outline', 'call Outline()', {})
   vim.api.nvim_create_user_command('Buffers', 'call Buffers()', {})
+  vim.api.nvim_create_user_command('Outline', 'call Outline()', {})
   vim.api.nvim_create_user_command('Oldfiles', function()
     vim.fn['Oldfiles']({ only_cwd = true })
   end, {})
@@ -333,15 +328,6 @@ local create_auto_commands = function()
       require("nvim-highlight-colors").turnOff()
     end,
   })
-
-  -- spell check
-  -- vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead' }, {
-  --   group = vim.api.nvim_create_augroup('UserSpelunkerConfig', {}),
-  --   pattern = { '*.md', '*.json', '*.sh', '*.fish', '*.js', '*.ts', '*.tsx' },
-  --   callback = function()
-  --     vim.fn['spelunker#toggle']()
-  --   end,
-  -- })
 end
 
 local ensure_plugins = function()
@@ -361,14 +347,13 @@ local ensure_plugins = function()
 
   require('packer').startup(function(use)
     use 'wbthomason/packer.nvim'
-    use "nvim-lua/plenary.nvim"
+    use 'nvim-lua/plenary.nvim' -- required by null-ls
 
     -- ui
     use 'sainnhe/everforest'
 
     -- utilities
-    use { 'nvim-telescope/telescope.nvim', tag = '0.1.1' }
-    use 'stevearc/dressing.nvim'
+    use 'ctrlpvim/ctrlp.vim'
     use 'tpope/vim-sleuth'
     use 'tpope/vim-commentary'
     use 'tpope/vim-fugitive'
@@ -377,7 +362,6 @@ local ensure_plugins = function()
     use 'windwp/nvim-autopairs'
     use 'kamykn/spelunker.vim'
     use { 'phaazon/hop.nvim', branch = 'v2' }
-    use 'folke/trouble.nvim'
     use 'brenoprata10/nvim-highlight-colors'
 
     -- lsp
@@ -415,37 +399,6 @@ local ensure_plugins = function()
       require('packer').sync()
     end
   end)
-end
-
-local setup_telescope = function()
-  local telescope = require('telescope')
-  local telescope_actions = require('telescope.actions')
-  telescope.setup({
-    defaults = {
-      path_display = { "smart" },
-      file_ignore_patterns = { 'node_modules', '.git' },
-      mappings = {
-        i = {
-          ['<esc>'] = telescope_actions.close,
-        }
-      }
-    },
-    pickers = {
-      find_files = {
-        hidden = true,
-        previewer = false,
-      },
-      oldfiles = {
-        only_cwd = true,
-        previewer = false,
-      },
-      buffers = {
-        ignore_current_buffer = true,
-        sort_lastused = true,
-        previewer = false,
-      },
-    }
-  })
 end
 
 local setup_toggleterm = function()
@@ -489,29 +442,6 @@ local setup_lsp = function()
         capabilities = require('cmp_nvim_lsp').default_capabilities(),
       }
     end
-  })
-  -- mason_lspconfig.setup({
-  --   ensure_installed = {
-  --     'lua_ls',
-  --     'gopls',
-  --     'tsserver',
-  --     'custom_elements_ls',
-  --     'emmet_ls',
-  --   },
-  -- })
-
-  require('trouble').setup({
-    icons = false,
-    fold_open = 'v',
-    fold_closed = '>',
-    indent_lines = false,
-    signs = {
-      error = 'error',
-      warning = 'warn',
-      hint = 'hint',
-      information = 'info'
-    },
-    use_diagnostic_signs = true
   })
 end
 
@@ -568,35 +498,6 @@ local setup_null_ls = function(local_config)
 end
 
 local setup_cmp = function()
-  -- https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance
-  local cmp_kinds = {
-    Text = '  ',
-    Method = '  ',
-    Function = 'λ  ',
-    Constructor = '  ',
-    Field = '  ',
-    Variable = '  ',
-    Class = '  ',
-    Interface = '  ',
-    Module = '  ',
-    Property = '  ',
-    Unit = '  ',
-    Value = '  ',
-    Enum = '  ',
-    Keyword = '  ',
-    Snippet = '>  ',
-    Color = '  ',
-    File = '  ',
-    Reference = '  ',
-    Folder = '  ',
-    EnumMember = '  ',
-    Constant = '  ',
-    Struct = '  ',
-    Event = '  ',
-    Operator = '  ',
-    TypeParameter = '  ',
-  }
-
   -- https://github.com/hrsh7th/nvim-cmp
   local cmp = require('cmp')
   cmp.setup({
@@ -606,14 +507,6 @@ local setup_cmp = function()
       end,
     },
     mapping = cmp.mapping.preset.insert({
-      -- Disable Tab to avoid conflicts with Copilot.
-      -- ['<Tab>'] = function(fallback)
-      --   if cmp.visible() then
-      --     cmp.select_next_item()
-      --   else
-      --     fallback()
-      --   end
-      -- end,
       ['<C-p>'] = cmp.mapping.select_prev_item(),
       ['<C-n>'] = cmp.mapping.select_next_item(),
       ['<C-e>'] = cmp.mapping.abort(),
@@ -628,16 +521,6 @@ local setup_cmp = function()
     window = {
       completion = cmp.config.window.bordered(),
       documentation = cmp.config.window.bordered(),
-    },
-    formatting = {
-      fields = { 'abbr', 'kind', 'menu' },
-      format = function(_, vim_item)
-        vim_item.kind = cmp_kinds[vim_item.kind] or ''
-        -- if entry.completion_item.detail ~= nil then
-        --   vim_item.menu = entry.completion_item.detail
-        -- end
-        return vim_item
-      end
     },
   })
 
@@ -676,9 +559,6 @@ local setup_dap = function(local_config)
 
   -- https://github.com/jay-babu/mason-nvim-dap.nvim
   require('mason-nvim-dap').setup({
-    -- ensure_installed = {
-    --   'node2',
-    -- },
     handlers = {
       function(config)
         require('mason-nvim-dap').default_setup(config)
@@ -690,21 +570,26 @@ local setup_dap = function(local_config)
   dap.listeners.after.event_initialized["dapui_config"] = function()
     open_debugger()
   end
-  -- dap.listeners.before.event_terminated["dapui_config"] = function()
-  --   close_debugger()
-  -- end
   dap.listeners.before.event_exited["dapui_config"] = function()
     close_debugger()
   end
 end
 
+local setup_ctrlp = function()
+  vim.g.ctrlp_user_command = 'fd --hidden --exclude .git --type f --color=never "" %s'
+  vim.g.ctrlp_root_markers = { '.git', 'package.json' }
+  vim.g.ctrlp_match_window = 'bottom,order:btt,min:1,max:20,results:20'
+  vim.g.ctrlp_by_filename = 1
+  vim.g.ctrlp_use_caching = 0
+  vim.g.ctrlp_mruf_relative = 1
+  vim.g.ctrlp_mruf_exclude = [[COMMIT_EDITMSG]]
+end
+
 local setup_plugins = function()
-  -- vim.g.enable_spelunker_vim = 0
   vim.g.javascript_plugin_jsdoc = 1
   require('hop').setup()
   require('nvim-autopairs').setup()
   require('typescript').setup({})
-  require('dressing').setup()
   require('nvim-highlight-colors').setup({})
 end
 
@@ -715,7 +600,7 @@ ensure_plugins()
 local local_config = require('local')
 
 -- plugins
-setup_telescope()
+setup_ctrlp()
 setup_toggleterm()
 setup_mason()
 setup_lsp()
