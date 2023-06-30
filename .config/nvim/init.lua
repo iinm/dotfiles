@@ -137,11 +137,10 @@ local set_keymap = function()
   vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
   vim.keymap.set('n', '<leader>n', ':<C-u>set number!<CR>')
   vim.keymap.set('n', '<leader>s', ':<C-u>gr!<Space>')
-  vim.keymap.set('n', '<leader>t', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
+  vim.keymap.set('n', '<leader>x', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
   vim.keymap.set('n', '<leader>c', function()
     require("nvim-highlight-colors").toggle()
   end)
-  vim.keymap.set('n', '<leader>vr', ':<C-u>source $MYVIMRC<CR>')
   vim.keymap.set('v', '//', [[y/\V<C-r>=escape(@",'/\')<CR><CR>]])
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
   vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>')
@@ -235,6 +234,7 @@ local set_keymap = function()
 end
 
 local create_commands = function()
+  vim.api.nvim_create_user_command('ReloadVimrc', 'source $MYVIMRC', {})
   vim.api.nvim_create_user_command('BDelete', 'b # | bd #', {})
   vim.api.nvim_create_user_command('BOnly', '%bd | e # | bd #', {})
   vim.api.nvim_create_user_command('Buffers', 'call Buffers()', {})
@@ -286,12 +286,14 @@ local create_commands = function()
 end
 
 local create_auto_commands = function()
+  -- open quickfix window after grep
   vim.api.nvim_create_autocmd({ 'QuickFixCmdPost' }, {
     group = vim.api.nvim_create_augroup('UserOpenQuickfixWindowAfterGrep', {}),
     pattern = '*grep*',
     command = 'botright cwindow | setlocal nowrap'
   })
 
+  -- indent
   vim.api.nvim_create_autocmd({ 'FileType' }, {
     pattern = 'go',
     group = vim.api.nvim_create_augroup('UserIndentConfig', {}),
@@ -363,6 +365,7 @@ local ensure_plugins = function()
     use 'kamykn/spelunker.vim'
     use { 'phaazon/hop.nvim', branch = 'v2' }
     use 'brenoprata10/nvim-highlight-colors'
+    use 'kylechui/nvim-surround'
 
     -- lsp
     use 'neovim/nvim-lspconfig'
@@ -591,6 +594,7 @@ local setup_plugins = function()
   require('nvim-autopairs').setup()
   require('typescript').setup({})
   require('nvim-highlight-colors').setup({})
+  require("nvim-surround").setup({})
 end
 
 -- Setup
