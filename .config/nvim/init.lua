@@ -60,9 +60,6 @@ local set_appearance = function()
   -- tabline
   vim.opt.tabline = '%!MyTabLine()'
 
-  -- dap
-  vim.fn.sign_define('DapBreakpoint', { text = '', texthl = 'DiagnosticSignError' })
-
   -- spell
   vim.cmd.highlight({ 'SpelunkerSpellBad', 'cterm=underline', 'gui=underline' })
   vim.cmd.highlight({ 'SpelunkerComplexOrCompoundWord', 'cterm=underline', 'gui=underline' })
@@ -429,12 +426,6 @@ local setup_lsp = function()
     update_in_insert = false,
     severity_sort = true,
   })
-
-  local signs = { Error = ' ', Warn = ' ', Hint = ' ', Info = ' ' }
-  for type, icon in pairs(signs) do
-    local hl = 'DiagnosticSign' .. type
-    vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-  end
 
   -- https://github.com/williamboman/mason-lspconfig.nvim
   local mason_lspconfig = require('mason-lspconfig')
