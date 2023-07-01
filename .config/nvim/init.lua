@@ -135,6 +135,7 @@ local set_keymap = function()
   vim.keymap.set('n', '<leader>n', ':<C-u>set number!<CR>')
   vim.keymap.set('n', '<leader>s', ':<C-u>gr!<Space>')
   vim.keymap.set('n', '<leader>x', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
+  vim.keymap.set('n', '<leader>z', ':<C-u>setl foldlevel=')
   vim.keymap.set('n', '<leader>c', function()
     require("nvim-highlight-colors").toggle()
   end)
@@ -255,14 +256,6 @@ local create_commands = function()
   vim.api.nvim_create_user_command('ToggleDebugger', toggle_debugger, {})
   vim.api.nvim_create_user_command('ClearBreakpoints', function()
     require('dap').clear_breakpoints()
-  end, {})
-
-  vim.api.nvim_create_user_command('ToggleFolding', function()
-    if vim.opt_local.foldlevel:get() < 50 then
-      vim.opt_local.foldlevel = 99
-    else
-      vim.opt_local.foldlevel = 2
-    end
   end, {})
 
   vim.api.nvim_create_autocmd('LspAttach', {
