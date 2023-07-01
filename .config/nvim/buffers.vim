@@ -4,6 +4,7 @@ function! Buffers() abort
   let l:buffers = substitute(l:buffers, '^\n', '', '')
   let l:buffers = substitute(l:buffers, '\v[^"]{-}/' .. l:cwd_name .. '/', '', 'g')
   enew
+  execute 'file [Buffers]'
   setlocal buftype=nofile
   setlocal nobuflisted
   setlocal bufhidden=wipe

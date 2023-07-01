@@ -1,4 +1,4 @@
-function MyTabLine()
+function TabLine()
   let s = ''
   for i in range(tabpagenr('$'))
     if i + 1 == tabpagenr()

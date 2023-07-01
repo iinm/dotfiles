@@ -30,9 +30,9 @@ end
 
 local load_utilities = function()
   local config_path = vim.fn.stdpath('config')
-  vim.cmd('source ' .. config_path .. '/outline.vim')
-  vim.cmd('source ' .. config_path .. '/buffers.vim')
   vim.cmd('source ' .. config_path .. '/oldfiles.vim')
+  vim.cmd('source ' .. config_path .. '/buffers.vim')
+  vim.cmd('source ' .. config_path .. '/outline.vim')
   vim.cmd('source ' .. config_path .. '/tabline.vim')
 end
 
@@ -43,22 +43,20 @@ local set_appearance = function()
 
   -- statusline
   vim.opt.laststatus = 3
-  vim.cmd.highlight({ 'StatusLineFilename', 'ctermbg=237', 'guibg=#434f55' })
   vim.opt.statusline = table.concat({
-    '%<',                                                      -- truncate if too long
-    '%{empty(expand("%:h")) ? "" : expand("%:~:.:h") .. "/"}', -- directory name (relative path)
-    '%#StatusLineFilename#%t%*',                               -- file name
+    '%<',                      -- truncate if too long
+    '%{expand("%:~:.")}',      -- file path
     ' ',
-    '%h',                                                      -- help
-    '%m',                                                      -- modified
-    '%r',                                                      -- read-only
-    '%{FugitiveStatusline()}',                                 -- git status
-    '%=',                                                      -- right align
-    '%-14.(%l,%c%V%) %P',                                      -- line, column, virtual column, percentage
+    '%h',                      -- help
+    '%m',                      -- modified
+    '%r',                      -- read-only
+    '%{FugitiveStatusline()}', -- git status
+    '%=',                      -- right align
+    '%-14.(%l,%c%V%) %P',      -- line, column, virtual column, percentage
   }, '')
 
   -- tabline
-  vim.opt.tabline = '%!MyTabLine()'
+  vim.opt.tabline = '%!TabLine()'
 
   -- spell
   vim.cmd.highlight({ 'SpelunkerSpellBad', 'cterm=underline', 'gui=underline' })
@@ -131,6 +129,8 @@ local set_keymap = function()
   vim.g.mapleader = ' '
   -- utilities
   vim.keymap.set('n', '<leader>f', ':<C-u>CtrlPMixed<CR>')
+  vim.keymap.set('n', '<leader>o', ':<C-u>Oldfiles<CR>')
+  vim.keymap.set('n', '<leader>b', ':<C-u>Buffers<CR>')
   vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
   vim.keymap.set('n', '<leader>n', ':<C-u>set number!<CR>')
   vim.keymap.set('n', '<leader>s', ':<C-u>gr!<Space>')
@@ -144,7 +144,6 @@ local set_keymap = function()
 
   -- window
   vim.keymap.set('n', '<C-w>z', toggle_maximize)
-
   vim.keymap.set('n', '<C-w>t', ':<C-u><C-r>=v:count<CR>ToggleTerm<CR>')
   for i = 1, 5, 1 do
     vim.keymap.set(
@@ -283,11 +282,27 @@ local create_commands = function()
 end
 
 local create_auto_commands = function()
+  -- update oldfiles
+  vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead', 'BufFilePre' }, {
+    group = vim.api.nvim_create_augroup('UserUpdateOldfiles', {}),
+    pattern = '*',
+    callback = function()
+      vim.fn['UpdateOldfiles'](vim.fn.expand('<afile>:p'))
+    end,
+  })
+
   -- open quickfix window after grep
   vim.api.nvim_create_autocmd({ 'QuickFixCmdPost' }, {
     group = vim.api.nvim_create_augroup('UserOpenQuickfixWindowAfterGrep', {}),
     pattern = '*grep*',
     command = 'botright cwindow | setlocal nowrap'
+  })
+
+  -- open location window after lvimgrep
+  vim.api.nvim_create_autocmd({ 'QuickFixCmdPost' }, {
+    group = vim.api.nvim_create_augroup('UserOpenLocationWindowAfterGrep', {}),
+    pattern = '*lvimgrep*',
+    command = 'lwindow | setlocal nowrap'
   })
 
   -- indent

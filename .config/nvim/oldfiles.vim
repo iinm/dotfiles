@@ -12,16 +12,30 @@ function! Oldfiles(options={'only_cwd': v:false}) abort
   \  l:files,
   \  {_, path -> substitute(expand(path), getcwd() .. '/', './', '')}
   \ )
-  " let l:files = sort(l:files)
+
+  " write to buffer
   enew
+  execute 'file [Oldfiles]'
   setlocal buftype=nofile
   setlocal nobuflisted
   setlocal bufhidden=wipe
   0put =l:files
-  goto 1
+  " skip first line (current file)
+  execute 'normal! 2gg'
   setlocal readonly
   syntax match Grey /\v^.+\// " directory
   nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR>
   nnoremap <buffer> <Esc> :<C-u>b #<CR>
   nnoremap <buffer> <C-o> :<C-u>b #<CR>
+endfunction
+
+function! UpdateOldfiles(file) abort
+  if !exists('v:oldfiles')
+    return
+  endif
+  let idx = index(v:oldfiles, a:file)
+  if idx != -1
+    call remove(v:oldfiles, idx)
+  endif
+  call insert(v:oldfiles, a:file, 0)
 endfunction

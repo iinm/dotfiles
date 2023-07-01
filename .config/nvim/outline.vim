@@ -3,16 +3,18 @@ function! Outline() abort
 
   if l:filetype == 'typescript'
     if expand('%') =~ '\.test\.ts$'
-      vimgrep /\v^\s*(describe|beforeAll|afterAll|beforeEach|afterEach|it[^\w]|\]\)\()/j %
+      lvimgrep /\v^\s*(describe|beforeAll|afterAll|beforeEach|afterEach|it[^\w]|\]\)\()/j %
     else
-      vimgrep /\v^(export\s+)?(function|interface|type|enum|const|class)/j %
+      lvimgrep /\v^(export\s+)?(function|interface|type|enum|const|class)/j %
     endif
   else
     echom 'Not supported for ' .. l:filetype
     return
   endif
 
-  call setqflist([], 'r', {'title': 'Outline'})
+  lwindow
+  setlocal nowrap
+
   syntax match ConcealedDetails /\v^[^|]*\|[^|]*\| / conceal
   setlocal conceallevel=2
   setlocal concealcursor=nvic
