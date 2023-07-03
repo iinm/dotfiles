@@ -166,6 +166,17 @@ function config_local --description "Host specific configuration"
   end
 
   function config_local_last
+    # Project specific configuration
+    config_project
+  end
+
+  function config_project --on-variable PWD
+    if string match -rq "$HOME/dotfiles" "$PWD"
+      fish_add_path ~/dotfiles
+    end
+
+    # Remove duplicate PATH entries
+    set -x PATH (echo "$PATH" | tr ':' '\n' | awk '!a[$0]++')
   end
 end
 EOF
