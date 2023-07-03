@@ -185,10 +185,14 @@ EOF
   else
     echo "run: create $fish_project_config"
     cat > "$fish_project_config" << 'EOF'
-function project_config --on-variable PWD --description "Project specific configuration"
-  if string match -rq "$HOME/dotfiles.*" "$PWD"; and contains "$HOME/dotfiles" "$PATH"
-    # fish_add_path -g $HOME/dotfiles
+function project_config --description "Project specific configuration"
+  function project_config_on_pwd_change --on-variable PWD
+    if string match -rq "$HOME/dotfiles.*" "$PWD"
+      # fish_add_path -g $HOME/dotfiles
+    end
   end
+
+  cd $PWD
 end
 EOF
   fi

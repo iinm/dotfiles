@@ -46,6 +46,8 @@ if status is-interactive
   alias cp 'cp -i'
   alias mv 'mv -i'
 
+  alias v 'nvim'
+
   alias g   'nvim -c Git'
   alias gco 'git checkout'
   alias gst 'git status'
@@ -54,12 +56,19 @@ if status is-interactive
   alias gcb 'git rev-parse --abbrev-ref HEAD'
   alias gsm 'git submodule'
 
+  alias d 'docker'
+  alias dc 'docker-compose'
+
   if type --quiet fzf; and type --quiet fzf_key_bindings
     fzf_key_bindings
   end
 
   if type --quiet dir_history
     dir_history
+  end
+
+  if type --quiet project_config
+    project_config
   end
 end
 
