@@ -552,9 +552,19 @@ local setup_dap = function(local_config)
         name = 'Test (Jest)',
         type = 'node2',
         request = 'launch',
-        program = '${workspaceFolder}/node_modules/.bin/jest',
         cwd = '${workspaceFolder}',
+        program = '${workspaceFolder}/node_modules/.bin/jest',
         args = { '--runInBand', '${file}' },
+      }
+    },
+    javascript = {
+      {
+        name = 'Test (Node.js)',
+        type = 'node2',
+        request = 'launch',
+        cwd = '${workspaceFolder}',
+        -- program = 'node',
+        args = { '--test', '${file}' },
       }
     }
   }
