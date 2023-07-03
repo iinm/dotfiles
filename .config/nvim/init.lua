@@ -49,19 +49,6 @@ local set_appearance = function()
   ]]
   vim.opt.statusline = [[%{repeat('─', winwidth('.'))}]]
 
-  -- vim.opt.laststatus = 3
-  -- vim.opt.statusline = table.concat({
-  --   '%<',                      -- truncate if too long
-  --   '%{expand("%:~:.")}',      -- file path
-  --   ' ',
-  --   '%h',                      -- help
-  --   '%m',                      -- modified
-  --   '%r',                      -- read-only
-  --   '%{FugitiveStatusline()}', -- git status
-  --   '%=',                      -- right align
-  --   '%-14.(%l,%c%V%) %P',      -- line, column, virtual column, percentage
-  -- }, '')
-
   -- tabline
   vim.opt.tabline = '%!TabLine()'
 
@@ -286,7 +273,6 @@ end
 
 local create_auto_commands = function()
   -- update oldfiles
-  -- vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead', 'BufFilePre' }, {
   vim.api.nvim_create_autocmd({ 'BufEnter' }, {
     group = vim.api.nvim_create_augroup('UserUpdateOldfiles', {}),
     pattern = '*',
@@ -620,10 +606,10 @@ local setup_plugins = function()
   vim.g.javascript_plugin_jsdoc = 1
   require('hop').setup()
   require('nvim-autopairs').setup()
-  require('typescript').setup({})
-  require('nvim-highlight-colors').setup({})
   require("nvim-surround").setup({})
+  require('nvim-highlight-colors').setup({})
   require('dressing').setup()
+  require('typescript').setup({})
 end
 
 -- Setup
