@@ -42,18 +42,25 @@ local set_appearance = function()
   vim.cmd.colorscheme('everforest')
 
   -- statusline
-  vim.opt.laststatus = 3
-  vim.opt.statusline = table.concat({
-    '%<',                      -- truncate if too long
-    '%{expand("%:~:.")}',      -- file path
-    ' ',
-    '%h',                      -- help
-    '%m',                      -- modified
-    '%r',                      -- read-only
-    '%{FugitiveStatusline()}', -- git status
-    '%=',                      -- right align
-    '%-14.(%l,%c%V%) %P',      -- line, column, virtual column, percentage
-  }, '')
+  vim.opt.laststatus = 0
+  vim.cmd [[
+  hi! link StatusLine WinSeparator
+  hi! link StatusLineNC WinSeparator
+  ]]
+  vim.opt.statusline = [[%{repeat('─', winwidth('.'))}]]
+
+  -- vim.opt.laststatus = 3
+  -- vim.opt.statusline = table.concat({
+  --   '%<',                      -- truncate if too long
+  --   '%{expand("%:~:.")}',      -- file path
+  --   ' ',
+  --   '%h',                      -- help
+  --   '%m',                      -- modified
+  --   '%r',                      -- read-only
+  --   '%{FugitiveStatusline()}', -- git status
+  --   '%=',                      -- right align
+  --   '%-14.(%l,%c%V%) %P',      -- line, column, virtual column, percentage
+  -- }, '')
 
   -- tabline
   vim.opt.tabline = '%!TabLine()'
@@ -161,6 +168,7 @@ local set_keymap = function()
     callback = function()
       local opts = { buffer = 0 }
       vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
+      vim.keymap.set('t', '<C-g>', [[<Cmd>file<CR>]], opts)
       vim.keymap.set('t', '<C-w>h', [[<Cmd>wincmd h<CR>]], opts)
       vim.keymap.set('t', '<C-w>j', [[<Cmd>wincmd j<CR>]], opts)
       vim.keymap.set('t', '<C-w>k', [[<Cmd>wincmd k<CR>]], opts)
@@ -199,6 +207,7 @@ local set_keymap = function()
   })
 
   -- git
+  vim.keymap.set('n', '<leader>gs', ':<C-u>Git status<CR>')
   vim.keymap.set('n', '<leader>gf', ':<C-u>Git fetch --prune<CR>')
   vim.keymap.set('n', '<leader>gc', ':<C-u>Git checkout<Space>')
   vim.keymap.set('n', '<leader>gp', ':<C-u>Git pull origin <C-r>=FugitiveHead()<CR><CR>')
@@ -335,6 +344,13 @@ local create_auto_commands = function()
     callback = function()
       require("nvim-highlight-colors").turnOff()
     end,
+  })
+
+  -- show dirname on dirbuf
+  vim.api.nvim_create_autocmd({ 'FileType' }, {
+    group = vim.api.nvim_create_augroup('UserShowDirnameOnDirBuf', {}),
+    pattern = { 'dirbuf' },
+    command = 'file'
   })
 end
 
