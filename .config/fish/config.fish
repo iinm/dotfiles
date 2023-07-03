@@ -66,10 +66,6 @@ if status is-interactive
   if type --quiet dir_history
     dir_history
   end
-
-  if type --quiet project_config
-    project_config
-  end
 end
 
 # Host specific configuration

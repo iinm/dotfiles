@@ -610,7 +610,7 @@ end
 set_options()
 load_utilities()
 ensure_plugins()
-local local_config = require('local')
+local local_config = require('local_config')
 
 -- plugins
 setup_ctrlp()

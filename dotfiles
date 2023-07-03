@@ -175,20 +175,11 @@ function local_config --description "Host specific configuration"
       # end
     end
   end
-end
-EOF
-  fi
 
-  local fish_project_config=~/.config/fish/functions/project_config.fish
-  if test -e "$fish_project_config"; then
-    echo "skip: $fish_project_config exists."
-  else
-    echo "run: create $fish_project_config"
-    cat > "$fish_project_config" << 'EOF'
-function project_config --description "Project specific configuration"
-  function project_config_on_pwd_change --on-variable PWD
-    if string match -rq "$HOME/dotfiles.*" "$PWD"
-      # fish_add_path -g $HOME/dotfiles
+  function project_config_on_pwd_change --on-variable PWD --description "Project specific configuration"
+    if string match -rq "/path/to/project" "$PWD"
+      # fish_add_path -g $HOME/tools/bin
+      # set -g -x PROJECT_ROOT $PWD
     end
   end
 
@@ -206,7 +197,7 @@ EOF
 }
 
 setup_nvim() {
-  local nvim_local_config=~/.config/nvim/lua/local.lua
+  local nvim_local_config=~/.config/nvim/lua/local_config.lua
   if test -e "$nvim_local_config"; then
     echo "skip: $nvim_local_config exists."
   else
@@ -216,7 +207,7 @@ setup_nvim() {
 local cwd = vim.fn.getcwd()
 
 if string.find(cwd, '/path/to/project') then
-  print('local.lua: load project config')
+  print('local_config.lua: load project config')
   return {}
 end
 
