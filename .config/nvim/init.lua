@@ -128,6 +128,7 @@ end
 local set_keymap = function()
   vim.g.mapleader = ' '
   -- utilities
+  vim.keymap.set('n', '<leader>r', 'q:?')
   vim.keymap.set('n', '<leader>f', ':<C-u>CtrlPMixed<CR>')
   vim.keymap.set('n', '<leader>o', ':<C-u>Oldfiles<CR>')
   vim.keymap.set('n', '<leader>b', ':<C-u>Buffers<CR>')
@@ -371,6 +372,7 @@ local ensure_plugins = function()
     use { 'phaazon/hop.nvim', branch = 'v2' }
     use 'brenoprata10/nvim-highlight-colors'
     use 'kylechui/nvim-surround'
+    use 'stevearc/dressing.nvim'
 
     -- lsp
     use 'neovim/nvim-lspconfig'
@@ -604,6 +606,7 @@ local setup_plugins = function()
   require('typescript').setup({})
   require('nvim-highlight-colors').setup({})
   require("nvim-surround").setup({})
+  require('dressing').setup()
 end
 
 -- Setup
