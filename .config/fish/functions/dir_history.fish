@@ -1,7 +1,7 @@
-function cd_hooks
+function dir_history
   set -g DIRECTORY_HISTORY_FILE ~/.directory_history
 
-  function on_pwd_change --on-variable PWD
+  function save_dir_history --on-variable PWD
     if test "$PWD" != "$HOME"
       echo "$PWD" >> "$DIRECTORY_HISTORY_FILE"
     end

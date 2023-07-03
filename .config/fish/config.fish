@@ -1,23 +1,14 @@
 # Host specific configuration
-if type --quiet config_local
-  config_local
+if type --quiet local_config
+  local_config
 end
 
-if type --quiet config_local_first
-  config_local_first
-end
-
-if test -e /opt/homebrew
-  fish_add_path /opt/homebrew/sbin
-  fish_add_path /opt/homebrew/bin
+if type --quiet local_config_first
+  local_config_first
 end
 
 if test -e $HOME/tools/bin
-  fish_add_path $HOME/tools/bin
-end
-
-if test -e $HOME/tools/nvim-linux64/bin
-  fish_add_path $HOME/tools/nvim-linux64/bin
+  fish_add_path -g $HOME/tools/bin
 end
 
 set -x SHELL (which fish)
@@ -67,30 +58,14 @@ if status is-interactive
     fzf_key_bindings
   end
 
-  if type --quiet direnv
-    direnv hook fish | source
-  end
- 
-  if type --quiet cd_hooks
-    cd_hooks
-  end
-
-  if type --quiet colima
-    test -n "$COLIMA_START_OPTIONS"; \
-      or set -x COLIMA_START_OPTIONS '--cpu 2 --memory 4 --disk 30'
-    alias colima-start "colima start $COLIMA_START_OPTIONS"
-  end
-
-  if test -e $HOME/tools/anaconda3
-    function use_anaconda
-      eval "$($HOME/tools/anaconda3/bin/conda shell.fish hook)"
-    end
+  if type --quiet dir_history
+    dir_history
   end
 end
 
 # Host specific configuration
-if type --quiet config_local_last
-  config_local_last
+if type --quiet local_config_last
+  local_config_last
 end
 
 # Remove duplicate PATH entries
