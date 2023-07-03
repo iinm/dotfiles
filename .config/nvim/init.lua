@@ -286,7 +286,8 @@ end
 
 local create_auto_commands = function()
   -- update oldfiles
-  vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead', 'BufFilePre' }, {
+  -- vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufRead', 'BufFilePre' }, {
+  vim.api.nvim_create_autocmd({ 'BufEnter' }, {
     group = vim.api.nvim_create_augroup('UserUpdateOldfiles', {}),
     pattern = '*',
     callback = function()

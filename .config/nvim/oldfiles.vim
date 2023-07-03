@@ -20,8 +20,7 @@ function! Oldfiles(options={'only_cwd': v:false}) abort
   setlocal nobuflisted
   setlocal bufhidden=wipe
   0put =l:files
-  " skip first line (current file)
-  execute 'normal! 2gg'
+  execute 'normal! 1gg'
   setlocal readonly
   syntax match Grey /\v^.+\// " directory
   nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR>
