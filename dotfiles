@@ -65,7 +65,6 @@ bootstrap_ubuntu() {
     ripgrep
     fd-find
     fzf
-    direnv
     curl
     jq
     xsel
@@ -115,7 +114,6 @@ bootstrap_darwin() {
     ripgrep
     fd
     fzf
-    direnv
     jq
     shellcheck
     colima
