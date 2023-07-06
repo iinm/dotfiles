@@ -21,6 +21,7 @@ local set_options = function()
   if vim.fn.executable('rg') then
     vim.opt.grepprg = 'rg --vimgrep --hidden --glob "!.git" --glob "!node_modules"'
   end
+  vim.opt.maxmempattern = 10000
 
   vim.g.markdown_fenced_languages = { 'sh' }
   vim.g.netrw_banner = 0
