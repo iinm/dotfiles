@@ -288,13 +288,6 @@ local create_auto_commands = function()
     command = 'botright cwindow | setlocal nowrap'
   })
 
-  -- open location window after lvimgrep
-  vim.api.nvim_create_autocmd({ 'QuickFixCmdPost' }, {
-    group = vim.api.nvim_create_augroup('UserOpenLocationWindowAfterGrep', {}),
-    pattern = '*lvimgrep*',
-    command = 'lwindow | setlocal nowrap'
-  })
-
   -- indent
   vim.api.nvim_create_autocmd({ 'FileType' }, {
     pattern = 'go',
