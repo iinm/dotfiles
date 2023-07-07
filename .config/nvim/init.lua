@@ -22,6 +22,7 @@ local set_options = function()
     vim.opt.grepprg = 'rg --vimgrep --hidden --glob "!.git" --glob "!node_modules"'
   end
   vim.opt.maxmempattern = 10000
+  vim.opt.shortmess:append('s') -- don't show "search hit BOTTOM, ..."
 
   vim.g.markdown_fenced_languages = { 'sh' }
   vim.g.netrw_banner = 0
