@@ -137,7 +137,8 @@ local set_keymap = function()
   end)
   vim.keymap.set('v', '//', [[y/\V<C-r>=escape(@",'/\')<CR><CR>]])
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
-  vim.keymap.set('n', '-', ':<C-u>e %:h<CR>')
+  -- vim.keymap.set('n', '-', ':<C-u>e %:h<CR>')
+  vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>')
 
   -- window
   vim.keymap.set('n', '<C-w>z', toggle_maximize)

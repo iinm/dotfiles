@@ -12,7 +12,6 @@ Usage: dotfiles COMMAND
   setup_fish      Setup fish shell
   setup_nvim      Setup neovim
   setup_git       Setup git
-  setup_tmux      Setup tmux
   setup_wezterm   Setup wezterm
 HELP
 }
@@ -24,7 +23,6 @@ setup() {
   setup_nvim
   setup_git
   # setup_vim
-  setup_tmux
   setup_wezterm
 }
 
@@ -48,17 +46,8 @@ bootstrap_ubuntu() {
     sudo apt purge -y fish || true
   fi
 
-  # if test -e /etc/apt/sources.list.d/jonathonf-ubuntu-vim-*.list; then
-  #   echo "skip: vim PPA is already enabled."
-  # else
-  #   echo "run: enable vim PPA."
-  #   sudo apt-add-repository ppa:jonathonf/vim -y
-  #   sudo apt purge -y vim || true
-  # fi
-
   local packages=(
     fish
-    # vim-gtk
     tmux
     git
     make
@@ -93,7 +82,7 @@ bootstrap_ubuntu() {
     ln -s "$(which fdfind)" "$fd_path"
   fi
 
-  local nvim_path=~/tools/nvim-linux64
+  local nvim_path=~/tools/nvim
   if test -e "$nvim_path"; then
     echo "skip: $nvim_path exists."
   else
@@ -102,14 +91,13 @@ bootstrap_ubuntu() {
     curl --show-error --fail -L \
       https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz \
       | tar -C ~/tools -xzf -
+    ln -s nvim-linux64 "$nvim_path"
   fi
 }
 
 bootstrap_darwin() {
  local packages=(
     fish
-    # vim
-    neovim
     tmux
     ripgrep
     fd
@@ -130,6 +118,18 @@ bootstrap_darwin() {
   else
     echo "run: install ${missing_packages[*]}"
     brew install "${missing_packages[@]}"
+  fi
+
+  local nvim_path=~/tools/nvim
+  if test -e "$nvim_path"; then
+    echo "skip: $nvim_path exists."
+  else
+    echo "run: install nvim."
+    mkdir -p ~/tools
+    curl --show-error --fail -L \
+      https://github.com/neovim/neovim/releases/download/stable/nvim-macos.tar.gz \
+      | tar -C ~/tools -xzf -
+    ln -s nvim-macos "$nvim_path"
   fi
 }
 
@@ -160,20 +160,10 @@ setup_fish() {
     cat > "$fish_local_config" << 'EOF'
 function local_config --description "Host specific configuration"
   function local_config_first
-    # fish_add_path -g /opt/homebrew/sbin
-    # fish_add_path -g /opt/homebrew/bin
-
-    # fish_add_path -g $HOME/tools/nvim-linux64/bin
+    # fish_add_path -g /path/to/bin
   end
 
   function local_config_last
-    if status is-interactive
-      # alias colima-start 'colima start --cpu 2 --memory 4 --disk 30'
-
-      # function use_anaconda
-      #   eval "$($HOME/tools/anaconda3/bin/conda shell.fish hook)"
-      # end
-    end
   end
 
   function project_config_on_pwd_change --on-variable PWD --description "Project specific configuration"
@@ -273,22 +263,6 @@ EOF
   fi
 }
 
-setup_tmux() {
-  # https://github.com/tmux/tmux/issues/1257#issuecomment-581378716
-  if test -d ~/.terminfo && find ~/.terminfo -name tmux-256color | grep -q tmux-256color; then
-    echo "skip: tmux terminfo exists."
-  else
-    echo "run: install tmux terminfo."
-    local tempfile
-    tempfile=$(mktemp)
-    local infocmp
-    infocmp=$(which /opt/homebrew/opt/ncurses/bin/infocmp || which infocmp)
-    $infocmp -x tmux-256color > "$tempfile"
-    tic -x -o ~/.terminfo "$tempfile"
-    rm "$tempfile"
-  fi
-}
-
 setup_wezterm() {
   local local_config=~/.config/wezterm/local_config.lua
   if test -e "$local_config"; then
@@ -318,19 +292,6 @@ EOF
     tic -x -o ~/.terminfo "$tempfile"
     rm "$tempfile"
   fi
-
-  # local codicon_url=https://github.com/microsoft/vscode-codicons/raw/main/dist/codicon.ttf
-  # local codicon_local_path=~/.fonts/codicon.ttf
-  # if test "$(uname)" = "Darwin"; then
-  #   codicon_local_path=~/Library/Fonts/codicon.ttf
-  # fi
-  # if test -e "$codicon_local_path"; then
-  #   echo "skip: $codicon_local_path exists."
-  # else
-  #   echo "run: install codicon.ttf."
-  #   mkdir -p "$(dirname "$codicon_local_path")"
-  #   curl --show-error --fail -L -o "$codicon_local_path" "$codicon_url"
-  # fi
 }
 
 if test "${BASH_SOURCE[0]}" = "$0"; then

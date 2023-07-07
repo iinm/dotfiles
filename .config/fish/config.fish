@@ -7,8 +7,8 @@ if type --quiet local_config_first
   local_config_first
 end
 
-if test -e $HOME/tools/bin
-  fish_add_path -g $HOME/tools/bin
+if type --quiet setup_tools
+  setup_tools
 end
 
 set -x SHELL (which fish)
