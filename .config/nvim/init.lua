@@ -320,20 +320,16 @@ local create_auto_commands = function()
     command = 'syntax sync fromstart'
   })
 
-  -- disable color highlight on dirbuf
+  -- setup dirbuf
   vim.api.nvim_create_autocmd({ 'FileType' }, {
-    group = vim.api.nvim_create_augroup('UserDisableColorHighlightOnDirBuf', {}),
+    group = vim.api.nvim_create_augroup('UserSetupDirBuf', {}),
     pattern = { 'dirbuf' },
     callback = function()
+      -- disable color highlight
       require("nvim-highlight-colors").turnOff()
+      -- show path
+      vim.cmd.file()
     end,
-  })
-
-  -- show dirname on dirbuf
-  vim.api.nvim_create_autocmd({ 'FileType' }, {
-    group = vim.api.nvim_create_augroup('UserShowDirnameOnDirBuf', {}),
-    pattern = { 'dirbuf' },
-    command = 'file'
   })
 end
 
