@@ -19,6 +19,19 @@ config.color_scheme = "Eighties (base16)"
 config.use_ime = true
 config.hide_tab_bar_if_only_one_tab = true
 config.adjust_window_size_when_changing_font_size = false
+config.window_padding = {
+  left = "0.5cell",
+  right = "0.5cell",
+  top = "0.25cell",
+  bottom = "0.25cell",
+}
+config.keys = {
+  {
+    key = 'n',
+    mods = 'SHIFT|CTRL',
+    action = wezterm.action.ToggleFullScreen,
+  },
+}
 
 -- host specific config
 local_config.apply_to_config(config)
