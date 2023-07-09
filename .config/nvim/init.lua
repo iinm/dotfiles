@@ -399,6 +399,7 @@ local ensure_plugins = function()
     use 'jparise/vim-graphql'
     use 'hashivim/vim-terraform'
     use 'dag/vim-fish'
+    use 'digitaltoad/vim-pug'
 
     if packer_bootstrap then
       require('packer').sync()
