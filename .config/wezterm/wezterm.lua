@@ -22,8 +22,8 @@ config.adjust_window_size_when_changing_font_size = false
 config.window_padding = {
   left = "0.5cell",
   right = "0.5cell",
-  top = "0.25cell",
-  bottom = "0.25cell",
+  top = "0.5cell",
+  bottom = "0.5cell",
 }
 config.keys = {
   {
