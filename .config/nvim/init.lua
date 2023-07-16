@@ -136,7 +136,6 @@ local set_keymap = function()
   vim.keymap.set('n', '<leader>c', function()
     require("nvim-highlight-colors").toggle()
   end)
-  vim.keymap.set('n', '<leader>i', ':<C-u>IndentBlanklineToggle<CR>')
   vim.keymap.set('v', '//', [[y/\V<C-r>=escape(@",'/\')<CR><CR>]])
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
   -- vim.keymap.set('n', '-', ':<C-u>e %:h<CR>')
@@ -355,7 +354,6 @@ local ensure_plugins = function()
 
     -- ui
     use 'sainnhe/everforest'
-    use 'lukas-reineke/indent-blankline.nvim'
 
     -- utilities
     use 'ctrlpvim/ctrlp.vim'
@@ -599,7 +597,6 @@ end
 
 local setup_plugins = function()
   vim.g.javascript_plugin_jsdoc = 1
-  vim.g.indent_blankline_enabled = false
   require('hop').setup()
   require('nvim-autopairs').setup()
   require("nvim-surround").setup({})
