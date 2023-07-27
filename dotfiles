@@ -25,7 +25,6 @@ setup() {
   setup_fish
   setup_nvim
   setup_git
-  # setup_vim
   setup_wezterm
 }
 
@@ -139,6 +138,8 @@ bootstrap_darwin() {
     colima
     docker
     docker-compose
+    # lsp
+    lua-language-server
   )
   local missing_packages=()
   for package in "${packages[@]}"; do
@@ -236,39 +237,7 @@ end
 
 return {
   dap_configurations = nil,
-  null_ls_sources = nil,
 }
-EOF
-  fi
-}
-
-setup_git() {
-  if grep -q "gitconfig-global" ~/.gitconfig; then
-    echo "skip: git config enabled."
-  else
-    echo "run: enable git config."
-    echo -e "\n[include]\n\tpath = ~/.gitconfig-global" >> ~/.gitconfig
-  fi
-}
-
-setup_vim() {
-  if test -e ~/.vim/autoload/plug.vim; then
-    echo "skip: vim-plug exists."
-  else
-    echo "run: install vim-plug."
-    curl --show-error --fail -o ~/.vim/autoload/plug.vim --create-dirs \
-      https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-    vim -u NONE -c 'silent! source ~/.vimrc' -c 'PlugInstall' -c 'qa!'
-  fi
-
-  local vim_local_config=~/.local.vim
-  if test -e "$vim_local_config"; then
-    echo "skip: $vim_local_config exists."
-  else
-    echo "run: create $vim_local_config"
-    cat > "$vim_local_config" << 'EOF'
-" if getcwd() == expand('~/projects/foo')
-" endif
 EOF
   fi
 
@@ -293,6 +262,15 @@ EOF
       unzip /tmp/efm-langserver_v${efm_langserver_version}.zip -d /tmp
       mv /tmp/efm-langserver_v${efm_langserver_version}_darwin_arm64/efm-langserver ~/tools/bin
     fi
+  fi
+}
+
+setup_git() {
+  if grep -q "gitconfig-global" ~/.gitconfig; then
+    echo "skip: git config enabled."
+  else
+    echo "run: enable git config."
+    echo -e "\n[include]\n\tpath = ~/.gitconfig-global" >> ~/.gitconfig
   fi
 }
 

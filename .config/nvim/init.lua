@@ -38,7 +38,7 @@ local load_utilities = function()
   vim.cmd('source ' .. config_path .. '/vim/tabline.vim')
 end
 
-local set_appearance = function()
+local setup_appearance = function()
   vim.g.everforest_background = 'soft'
   vim.opt.background = 'dark'
   vim.cmd.colorscheme('everforest')
@@ -57,6 +57,15 @@ local set_appearance = function()
   -- spell
   vim.cmd.highlight({ 'SpelunkerSpellBad', 'cterm=underline', 'gui=underline' })
   vim.cmd.highlight({ 'SpelunkerComplexOrCompoundWord', 'cterm=underline', 'gui=underline' })
+
+  -- https://github.com/neovim/nvim-lspconfig/wiki/UI-Customization
+  vim.diagnostic.config({
+    virtual_text = false,
+    signs = true,
+    underline = false,
+    update_in_insert = false,
+    severity_sort = true,
+  })
 end
 
 local is_debugger_open = function()
@@ -90,11 +99,11 @@ local close_debugger = function()
   end
 end
 
-local toggle_debugger = function()
+local toggle_debugger = function(self)
   if is_debugger_open() then
-    close_debugger()
+    self.close_debugger()
   else
-    open_debugger()
+    self.open_debugger()
   end
 end
 
@@ -121,7 +130,7 @@ local toggle_maximize = function()
   end
 end
 
-local set_keymap = function()
+local setup_keymap = function()
   vim.g.mapleader = ' '
   -- utilities
   vim.keymap.set('n', '<leader>r', 'q:?')
@@ -230,7 +239,7 @@ local set_keymap = function()
   ]]
 end
 
-local create_commands = function()
+local setup_commands = function()
   vim.api.nvim_create_user_command('ReloadVimrc', 'source $MYVIMRC', {})
   vim.api.nvim_create_user_command('BDelete', 'b # | bd #', {})
   vim.api.nvim_create_user_command('BOnly', '%bd | e # | bd #', {})
@@ -274,7 +283,7 @@ local create_commands = function()
   })
 end
 
-local create_auto_commands = function()
+local setup_auto_commands = function()
   -- update oldfiles
   vim.api.nvim_create_autocmd({ 'BufEnter' }, {
     group = vim.api.nvim_create_augroup('UserUpdateOldfiles', {}),
@@ -296,20 +305,6 @@ local create_auto_commands = function()
     pattern = 'go',
     group = vim.api.nvim_create_augroup('UserIndentConfig', {}),
     command = 'setlocal tabstop=4 noexpandtab softtabstop=4 shiftwidth=4'
-  })
-
-  -- format on save
-  vim.api.nvim_create_autocmd('LspAttach', {
-    group = vim.api.nvim_create_augroup('UserLspFormatOnSave', {}),
-    callback = function()
-      vim.api.nvim_create_autocmd({ 'BufWritePre' }, {
-        group = vim.api.nvim_create_augroup('UserLspFormattingOnSave', {}),
-        pattern = { '*.lua' },
-        callback = function()
-          vim.lsp.buf.format({ async = false })
-        end,
-      })
-    end,
   })
 
   -- fix syntax highlighting
@@ -350,7 +345,6 @@ local ensure_plugins = function()
 
   require('packer').startup(function(use)
     use 'wbthomason/packer.nvim'
-    use 'nvim-lua/plenary.nvim' -- required by null-ls
 
     -- ui
     use 'sainnhe/everforest'
@@ -364,20 +358,16 @@ local ensure_plugins = function()
     use 'akinsho/toggleterm.nvim'
     use 'windwp/nvim-autopairs'
     use 'kamykn/spelunker.vim'
-    use { 'phaazon/hop.nvim', branch = 'v2' }
     use 'brenoprata10/nvim-highlight-colors'
     use 'kylechui/nvim-surround'
     use 'stevearc/dressing.nvim'
+    use { 'phaazon/hop.nvim', branch = 'v2' }
 
     -- lsp
     use 'neovim/nvim-lspconfig'
-    use "williamboman/mason.nvim"
-    use 'williamboman/mason-lspconfig.nvim'
-    use 'jose-elias-alvarez/null-ls.nvim'
 
     -- debugger
     use 'mfussenegger/nvim-dap'
-    use 'jay-babu/mason-nvim-dap.nvim'
     use 'rcarriga/nvim-dap-ui'
 
     -- snippets
@@ -419,81 +409,81 @@ local setup_toggleterm = function()
   })
 end
 
-local setup_mason = function()
-  require('mason').setup()
-end
-
 local setup_lsp = function()
-  -- https://github.com/neovim/nvim-lspconfig/wiki/UI-Customization
-  vim.diagnostic.config({
-    virtual_text = false,
-    signs = true,
-    underline = false,
-    update_in_insert = false,
-    severity_sort = true,
-  })
-
-  -- https://github.com/williamboman/mason-lspconfig.nvim
-  local mason_lspconfig = require('mason-lspconfig')
-  -- :h mason-lspconfig.setup_handlers()
-  mason_lspconfig.setup_handlers({
-    function(server)
-      require('lspconfig')[server].setup {
-        capabilities = require('cmp_nvim_lsp').default_capabilities(),
-      }
-    end
-  })
-end
-
-local setup_null_ls = function(local_config)
-  -- https://github.com/jose-elias-alvarez/null-ls.nvim/wiki/Avoiding-LSP-formatting-conflicts
-  local null_ls = require('null-ls')
-
-  local null_ls_formatting = function(bufnr)
-    vim.lsp.buf.format({
-      filter = function(client)
-        return client.name == 'null-ls'
-      end,
-      bufnr = bufnr,
-    })
-  end
-
-  -- Run actions before formatting
-  -- local before_null_ls_formatting = function(bufnr)
-  --   local filetype = vim.api.nvim_buf_get_option(bufnr, 'filetype')
-  --   if filetype == 'typescript' then
-  --     local ts = require("typescript").actions
-  --     ts.removeUnused({ sync = true })
-  --   end
-  -- end
-
-  local null_ls_formatting_augroup = vim.api.nvim_create_augroup('UserNullLSFormatting', {})
-
-  null_ls.setup({
-    sources = local_config.null_ls_sources or {
-      null_ls.builtins.formatting.goimports,
-      null_ls.builtins.formatting.prettier,
-      null_ls.builtins.diagnostics.eslint.with({
-        diagnostics_postprocess = function(diagnostic)
-          diagnostic.severity = vim.diagnostic.severity["WARN"]
+  -- format on save
+  vim.api.nvim_create_autocmd('LspAttach', {
+    group = vim.api.nvim_create_augroup('UserLspFormatOnSave', {}),
+    callback = function()
+      vim.api.nvim_create_autocmd({ 'BufWritePre' }, {
+        group = vim.api.nvim_create_augroup('UserLspFormattingOnSave', {}),
+        pattern = { '*' },
+        callback = function(ev)
+          -- print(vim.inspect(ev))
+          vim.lsp.buf.format({
+            async = false,
+            filter = function(client)
+              -- print(client.name)
+              if string.match(ev.file, '%.lua$') then
+                return client.name == 'lua_ls'
+              end
+              return client.name == 'efm'
+            end
+          })
         end,
-      }),
-      null_ls.builtins.diagnostics.shellcheck,
-      null_ls.builtins.code_actions.shellcheck,
-    },
-    on_attach = function(client, bufnr)
-      if client.supports_method('textDocument/formatting') then
-        vim.api.nvim_clear_autocmds({ group = null_ls_formatting_augroup, buffer = bufnr })
-        vim.api.nvim_create_autocmd('BufWritePre', {
-          group = null_ls_formatting_augroup,
-          buffer = bufnr,
-          callback = function()
-            -- before_null_ls_formatting(bufnr)
-            null_ls_formatting(bufnr)
-          end,
-        })
-      end
+      })
     end,
+  })
+
+  -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
+  local lspconfig = require('lspconfig')
+  local capabilities = require('cmp_nvim_lsp').default_capabilities()
+
+  local efm_tools = require('efm_tools')
+
+  lspconfig.lua_ls.setup({
+    capabilities = capabilities,
+  })
+
+  -- npm i -g typescript-language-server
+  lspconfig.tsserver.setup({
+    capabilities = capabilities,
+  })
+
+  local efm_languages = {
+    sh = {
+      efm_tools.linters.shellcheck,
+    },
+    javascript = {
+      efm_tools.linters.eslint,
+      efm_tools.formatters.prettier,
+    },
+    typescript = {
+      efm_tools.linters.eslint,
+      efm_tools.formatters.prettier,
+    },
+    typescriptreact = {
+      efm_tools.linters.eslint,
+      efm_tools.formatters.prettier,
+    },
+    go = {
+      efm_tools.formatters.gofmt,
+    },
+    terraform = {
+      efm_tools.formatters.terraform_fmt,
+    },
+    json = {
+      efm_tools.formatters.prettier,
+    },
+  }
+
+  lspconfig.efm.setup({
+    capabilities = capabilities,
+    init_options = { documentFormatting = true },
+    filetypes = vim.tbl_keys(efm_languages),
+    settings = {
+      rootMarkers = { ".git/" },
+      languages = efm_languages,
+    }
   })
 end
 
@@ -544,6 +534,13 @@ end
 local setup_dap = function(local_config)
   local dap = require('dap')
 
+  -- https://github.com/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation
+  dap.adapters.node2 = {
+    type = 'executable',
+    command = 'node',
+    args = { os.getenv('HOME') .. '/tools/vscode-node-debug2/out/src/nodeDebug.js' },
+  }
+
   dap.configurations = local_config.dap_configurations or {
     typescript = {
       {
@@ -566,15 +563,6 @@ local setup_dap = function(local_config)
       }
     }
   }
-
-  -- https://github.com/jay-babu/mason-nvim-dap.nvim
-  require('mason-nvim-dap').setup({
-    handlers = {
-      function(config)
-        require('mason-nvim-dap').default_setup(config)
-      end,
-    },
-  })
 
   require('dapui').setup()
   dap.listeners.after.event_initialized["dapui_config"] = function()
@@ -599,8 +587,8 @@ local setup_plugins = function()
   vim.g.javascript_plugin_jsdoc = 1
   require('hop').setup()
   require('nvim-autopairs').setup()
-  require("nvim-surround").setup({})
-  require('nvim-highlight-colors').setup({})
+  require("nvim-surround").setup()
+  require('nvim-highlight-colors').setup()
   require('dressing').setup()
   require('typescript').setup({})
 end
@@ -609,19 +597,18 @@ end
 set_options()
 load_utilities()
 ensure_plugins()
+
 local local_config = require('local_config')
 
 -- plugins
 setup_ctrlp()
 setup_toggleterm()
-setup_mason()
 setup_lsp()
-setup_null_ls(local_config)
 setup_cmp()
 setup_dap(local_config)
 setup_plugins()
 
-set_appearance()
-set_keymap()
-create_commands()
-create_auto_commands()
+setup_appearance()
+setup_keymap()
+setup_commands()
+setup_auto_commands()
