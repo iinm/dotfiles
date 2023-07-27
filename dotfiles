@@ -241,12 +241,13 @@ return {
 EOF
   fi
 
-  local efm_langserver_version=0.0.44
-  if test -e ~/tools/bin/efm-langserver; then
-    echo "skip: efm-langserver exists."
+  local efm_langserver_version=0.0.46
+  if ~/tools/bin/efm-langserver -v | grep -qE "$efm_langserver_version"; then
+    echo "skip: efm-langserver $efm_langserver_version exists."
   else
     echo "run: install efm-langserver."
     mkdir -p ~/tools/bin
+    rm -rf ~/tools/bin/efm-langserver
     rm -rf /tmp/efm-langserver_v*
     local base_url="https://github.com/mattn/efm-langserver/releases/download"
     if test "$(uname)" = "Linux"; then
