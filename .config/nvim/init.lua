@@ -393,7 +393,7 @@ local ensure_plugins = function()
     use 'hrsh7th/nvim-cmp'
     use 'github/copilot.vim'
 
-    -- lanugages
+    -- languages
     use 'pangloss/vim-javascript'
     use 'jose-elias-alvarez/typescript.nvim'
     use 'jparise/vim-graphql'
