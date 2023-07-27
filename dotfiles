@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+NVIM_VERSION=0.9.1
+EFM_LS_VERSION=0.0.46
+
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 help() {
@@ -81,7 +84,6 @@ bootstrap_ubuntu() {
     fish
     tmux
     git
-    neovim
     make
     ripgrep
     fd-find
@@ -112,18 +114,6 @@ bootstrap_ubuntu() {
     mkdir -p ~/tools/bin
     ln -s "$(which fdfind)" "$fd_path"
   fi
-
-  local nvim_path=~/tools/nvim
-  if test -e "$nvim_path"; then
-    echo "skip: $nvim_path exists."
-  else
-    echo "run: install nvim."
-    mkdir -p ~/tools
-    curl --show-error --fail -L \
-      https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz \
-      | tar -C ~/tools -xzf -
-    ln -s nvim-linux64 "$nvim_path"
-  fi
 }
 
 bootstrap_darwin() {
@@ -138,7 +128,6 @@ bootstrap_darwin() {
     colima
     docker
     docker-compose
-    # lsp
     lua-language-server
   )
   local missing_packages=()
@@ -151,18 +140,6 @@ bootstrap_darwin() {
   else
     echo "run: install ${missing_packages[*]}"
     brew install "${missing_packages[@]}"
-  fi
-
-  local nvim_path=~/tools/nvim
-  if test -e "$nvim_path"; then
-    echo "skip: $nvim_path exists."
-  else
-    echo "run: install nvim."
-    mkdir -p ~/tools
-    curl --show-error --fail -L \
-      https://github.com/neovim/neovim/releases/download/stable/nvim-macos.tar.gz \
-      | tar -C ~/tools -xzf -
-    ln -s nvim-macos "$nvim_path"
   fi
 }
 
@@ -221,6 +198,28 @@ EOF
 }
 
 setup_nvim() {
+  local nvim_path=~/tools/nvim
+  if $nvim_path/bin/nvim -v 2> /dev/null | grep -qE "$NVIM_VERSION"; then
+    echo "skip: $nvim_path $NVIM_VERSION exists."
+  else
+    echo "run: install nvim."
+    rm -rf ~/tools/nvim*
+    mkdir -p ~/tools
+
+    local nvim_base_url=https://github.com/neovim/neovim/releases/download/v$NVIM_VERSION
+    if test "$(uname)" = "Linux"; then
+      curl --show-error --fail -L $nvim_base_url/nvim-linux64.tar.gz \
+        | tar -C ~/tools -xzf -
+      ln -s nvim-linux64 "$nvim_path"
+    fi
+
+    if test "$(uname)" = "Darwin"; then
+      curl --show-error --fail -L $nvim_base_url/nvim-macos.tar.gz \
+        | tar -C ~/tools -xzf -
+      ln -s nvim-macos "$nvim_path"
+    fi
+  fi
+
   local nvim_local_config=~/.config/nvim/lua/local_config.lua
   if test -e "$nvim_local_config"; then
     echo "skip: $nvim_local_config exists."
@@ -241,27 +240,27 @@ return {
 EOF
   fi
 
-  local efm_langserver_version=0.0.46
-  if ~/tools/bin/efm-langserver -v | grep -qE "$efm_langserver_version"; then
-    echo "skip: efm-langserver $efm_langserver_version exists."
+  local efm_ls_path=~/tools/bin/efm-langserver
+  if $efm_ls_path -v 2> /dev/null | grep -qE "$EFM_LS_VERSION"; then
+    echo "skip: efm-langserver $EFM_LS_VERSION exists."
   else
     echo "run: install efm-langserver."
-    mkdir -p ~/tools/bin
-    rm -rf ~/tools/bin/efm-langserver
+    mkdir -p "$(dirname "$efm_ls_path")"
+    rm -rf $efm_ls_path
     rm -rf /tmp/efm-langserver_v*
     local base_url="https://github.com/mattn/efm-langserver/releases/download"
     if test "$(uname)" = "Linux"; then
       curl -L --show-error --fail \
-        "${base_url}/v${efm_langserver_version}/efm-langserver_v${efm_langserver_version}_linux_amd64.tar.gz" \
+        "${base_url}/v${EFM_LS_VERSION}/efm-langserver_v${EFM_LS_VERSION}_linux_amd64.tar.gz" \
         | tar -zxf - -C /tmp
-      mv /tmp/efm-langserver_v${efm_langserver_version}_linux_amd64/efm-langserver ~/tools/bin
+      mv /tmp/efm-langserver_v${EFM_LS_VERSION}_linux_amd64/efm-langserver $efm_ls_path
     fi
     if test "$(uname)" = "Darwin"; then
       curl -L --show-error --fail \
-        -o /tmp/efm-langserver_v${efm_langserver_version}.zip \
-        "${base_url}/v${efm_langserver_version}/efm-langserver_v${efm_langserver_version}_darwin_arm64.zip"
-      unzip /tmp/efm-langserver_v${efm_langserver_version}.zip -d /tmp
-      mv /tmp/efm-langserver_v${efm_langserver_version}_darwin_arm64/efm-langserver ~/tools/bin
+        -o /tmp/efm-langserver_v${EFM_LS_VERSION}.zip \
+        "${base_url}/v${EFM_LS_VERSION}/efm-langserver_v${EFM_LS_VERSION}_darwin_arm64.zip"
+      unzip /tmp/efm-langserver_v${EFM_LS_VERSION}.zip -d /tmp
+      mv /tmp/efm-langserver_v${EFM_LS_VERSION}_darwin_arm64/efm-langserver $efm_ls_path
     fi
   fi
 }
