@@ -32,10 +32,10 @@ end
 
 local load_utilities = function()
   local config_path = vim.fn.stdpath('config')
-  vim.cmd('source ' .. config_path .. '/oldfiles.vim')
-  vim.cmd('source ' .. config_path .. '/buffers.vim')
-  vim.cmd('source ' .. config_path .. '/outline.vim')
-  vim.cmd('source ' .. config_path .. '/tabline.vim')
+  vim.cmd('source ' .. config_path .. '/vim/oldfiles.vim')
+  vim.cmd('source ' .. config_path .. '/vim/buffers.vim')
+  vim.cmd('source ' .. config_path .. '/vim/outline.vim')
+  vim.cmd('source ' .. config_path .. '/vim/tabline.vim')
 end
 
 local set_appearance = function()
