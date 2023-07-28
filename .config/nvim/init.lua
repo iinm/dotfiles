@@ -99,11 +99,11 @@ local close_debugger = function()
   end
 end
 
-local toggle_debugger = function(self)
+local toggle_debugger = function()
   if is_debugger_open() then
-    self.close_debugger()
+    close_debugger()
   else
-    self.open_debugger()
+    open_debugger()
   end
 end
 
@@ -159,6 +159,7 @@ local setup_keymap = function()
       '<C-w>' .. i,
       ':<C-u>CloseTerms<CR>' .. ':' .. i .. 'ToggleTerm<CR>')
   end
+  vim.keymap.set('n', '<C-w>d', toggle_debugger)
 
   -- terminal
   vim.api.nvim_create_autocmd({ 'TermOpen' }, {
@@ -215,7 +216,6 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>gb', ':<C-u>Git blame<CR>')
 
   -- dap
-  vim.keymap.set('n', '<leader>dt', toggle_debugger)
   vim.keymap.set('n', '<leader>db', ':<C-u>DapToggleBreakpoint<CR>')
   vim.keymap.set('n', '<leader>dc', ':<C-u>DapContinue<CR>')
   vim.keymap.set({ 'n', 'v' }, '<leader>de', '<Cmd>lua require("dapui").eval()<CR>')
