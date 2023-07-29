@@ -582,7 +582,6 @@ local setup_plugins = function()
   require('hop').setup()
   require('nvim-autopairs').setup()
   require("nvim-surround").setup()
-  require('nvim-highlight-colors').setup()
   require('dressing').setup()
   require('typescript').setup({})
 end
