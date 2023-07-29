@@ -1,5 +1,17 @@
+local require_safe = function(name)
+  local ok, module = pcall(require, name)
+  if not ok then
+    print('Failed to load ' .. name .. ': ' .. module)
+    return {}
+  end
+  if type(module) == 'table' then
+    return module
+  end
+  return {}
+end
+
 local wezterm = require 'wezterm';
-local local_config = require 'local_config';
+local local_config = require_safe 'local_config';
 
 local config = {}
 
@@ -34,6 +46,8 @@ config.keys = {
 }
 
 -- host specific config
-local_config.apply_to_config(config)
+if type(local_config.apply_to_config) == 'function' then
+  local_config.apply_to_config(config)
+end
 
 return config

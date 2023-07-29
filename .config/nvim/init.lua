@@ -1,3 +1,15 @@
+local require_safe = function(name)
+  local ok, module = pcall(require, name)
+  if not ok then
+    print('Failed to load ' .. name .. ': ' .. module)
+    return {}
+  end
+  if type(module) == 'table' then
+    return module
+  end
+  return {}
+end
+
 local set_options = function()
   vim.opt.undofile = true
   vim.opt.ignorecase = true
@@ -88,7 +100,7 @@ local setup_keymap = function()
   vim.keymap.set('v', '//', [[y/\V<C-r>=escape(@",'/\')<CR><CR>]])
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
   -- vim.keymap.set('n', '-', ':<C-u>e %:h<CR>')
-  vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>')
+  vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>:file<CR>')
 
   -- window
   vim.keymap.set('n', '<C-w>z', window_utils.toggle_maximize)
@@ -345,7 +357,7 @@ local setup_toggleterm = function()
 end
 
 local setup_lsp = function()
-  local local_config = require('local_config')
+  local local_config = require_safe('local_config')
 
   -- format on save
   vim.api.nvim_create_autocmd('LspAttach', {
@@ -443,7 +455,7 @@ local setup_cmp = function()
 end
 
 local setup_dap = function()
-  local local_config = require('local_config')
+  local local_config = require_safe('local_config')
   local dap = require('dap')
 
   -- https://github.com/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation
