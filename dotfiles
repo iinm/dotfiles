@@ -190,7 +190,7 @@ end
 EOF
   fi
 
-  if (finger "$USER" || pinky -l "$USER") | grep -q "$(which fish)"; then
+  if (finger "$USER" 2> /dev/null || pinky -l "$USER") | grep -q "$(which fish)"; then
     echo "skip: fish is default shell."
   else
     echo "run: set fish as default shell."
