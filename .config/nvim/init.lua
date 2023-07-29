@@ -68,69 +68,9 @@ local setup_appearance = function()
   })
 end
 
-local is_debugger_open = function()
-  for i = vim.fn.winnr('$'), 1, -1 do
-    local buf_name = vim.fn.bufname(vim.fn.winbufnr(i))
-    if buf_name == 'DAP Breakpoints' then
-      return true
-    end
-  end
-  return false
-end
-
-local open_debugger = function()
-  if is_debugger_open() then
-    return
-  end
-  local position = vim.fn.line('.')
-  vim.cmd.tabe('%')
-  -- restore position
-  vim.cmd([[execute "normal! " . ]] .. position .. [[ . "ggzz"]])
-  require('dapui').open()
-end
-
-local close_debugger = function()
-  if not is_debugger_open() then
-    return
-  end
-  require('dapui').close()
-  if vim.fn.tabpagenr() > 1 then
-    vim.cmd.tabclose()
-  end
-end
-
-local toggle_debugger = function()
-  if is_debugger_open() then
-    close_debugger()
-  else
-    open_debugger()
-  end
-end
-
--- Maximize (Open in new tab)
-local toggle_maximize = function()
-  local is_term = function()
-    return vim.startswith(vim.fn.bufname(), 'term://')
-  end
-  if vim.fn.winnr('$') == 1 then
-    if vim.fn.tabpagenr() > 1 then
-      vim.cmd.tabclose()
-      if is_term() then
-        -- fix blank screen
-        vim.cmd([[execute "stopinsert"]])
-      end
-    end
-  else
-    local position = vim.fn.line('.')
-    vim.cmd.tabe('%')
-    if not is_term() then
-      -- restore position
-      vim.cmd([[execute "normal! " . ]] .. position .. [[ . "ggzz"]])
-    end
-  end
-end
-
 local setup_keymap = function()
+  local window_utils = require('window_utils')
+
   vim.g.mapleader = ' '
   -- utilities
   vim.keymap.set('n', '<leader>r', 'q:?')
@@ -151,7 +91,7 @@ local setup_keymap = function()
   vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>')
 
   -- window
-  vim.keymap.set('n', '<C-w>z', toggle_maximize)
+  vim.keymap.set('n', '<C-w>z', window_utils.toggle_maximize)
   vim.keymap.set('n', '<C-w>t', ':<C-u><C-r>=v:count<CR>ToggleTerm<CR>')
   for i = 1, 5, 1 do
     vim.keymap.set(
@@ -159,7 +99,7 @@ local setup_keymap = function()
       '<C-w>' .. i,
       ':<C-u>CloseTerms<CR>' .. ':' .. i .. 'ToggleTerm<CR>')
   end
-  vim.keymap.set('n', '<C-w>d', toggle_debugger)
+  vim.keymap.set('n', '<C-w>d', window_utils.toggle_debugger)
 
   -- terminal
   vim.api.nvim_create_autocmd({ 'TermOpen' }, {
@@ -176,7 +116,7 @@ local setup_keymap = function()
       vim.keymap.set('t', '<C-w>c', [[<Cmd>wincmd c<CR>]], opts)
       vim.keymap.set('t', '<C-w><C-w>', [[<Cmd>wincmd w<CR>]], opts)
       vim.keymap.set('t', '<C-w>t', '<Cmd>ToggleTerm<CR>', {})
-      vim.keymap.set('t', '<C-w>z', toggle_maximize)
+      vim.keymap.set('t', '<C-w>z', window_utils.toggle_maximize)
       for i = 1, 5, 1 do
         vim.keymap.set(
           't',
@@ -240,6 +180,7 @@ local setup_keymap = function()
 end
 
 local setup_commands = function()
+  local window_utils = require('window_utils')
   vim.api.nvim_create_user_command('ReloadVimrc', 'source $MYVIMRC', {})
   vim.api.nvim_create_user_command('BDelete', 'b # | bd #', {})
   vim.api.nvim_create_user_command('BOnly', '%bd | e # | bd #', {})
@@ -262,7 +203,7 @@ local setup_commands = function()
     end
   end, {})
 
-  vim.api.nvim_create_user_command('ToggleDebugger', toggle_debugger, {})
+  vim.api.nvim_create_user_command('ToggleDebugger', window_utils.toggle_debugger, {})
   vim.api.nvim_create_user_command('ClearBreakpoints', function()
     require('dap').clear_breakpoints()
   end, {})
@@ -525,7 +466,8 @@ local setup_cmp = function()
   })
 end
 
-local setup_dap = function(local_config)
+local setup_dap = function()
+  local local_config = require('local_config')
   local dap = require('dap')
 
   -- https://github.com/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation
@@ -558,12 +500,13 @@ local setup_dap = function(local_config)
     }
   }
 
+  local window_utils = require('window_utils')
   require('dapui').setup()
   dap.listeners.after.event_initialized["dapui_config"] = function()
-    open_debugger()
+    window_utils.open_debugger()
   end
   dap.listeners.before.event_exited["dapui_config"] = function()
-    close_debugger()
+    window_utils.close_debugger()
   end
 end
 
@@ -589,16 +532,13 @@ end
 -- Setup
 set_options()
 load_utilities()
+
 ensure_plugins()
-
-local local_config = require('local_config')
-
--- plugins
 setup_ctrlp()
 setup_toggleterm()
 setup_lsp()
 setup_cmp()
-setup_dap(local_config)
+setup_dap()
 setup_plugins()
 
 setup_appearance()
