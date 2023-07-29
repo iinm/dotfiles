@@ -57,6 +57,7 @@ bootstrap_archlinux() {
     jq
     xsel
     shellcheck
+    lua-language-server
   )
   local missing_packages=()
   for package in "${packages[@]}"; do
