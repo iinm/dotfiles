@@ -9,7 +9,8 @@ help() {
   cat << 'HELP'
 Usage: dotfiles COMMAND
 
-  setup           Run all following commands
+Commands:
+  setup           Run all setup commands
   bootstrap       Install essential utilities
   link            Create symlink to dotfiles
   setup_fish      Setup fish shell
@@ -17,7 +18,7 @@ Usage: dotfiles COMMAND
   setup_git       Setup git
   setup_wezterm   Setup wezterm
 
-  ---
+Optional commands:
   setup_chrome    Setup Chrome startup options. (Linux only)
 HELP
 }
