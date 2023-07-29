@@ -345,6 +345,8 @@ local setup_toggleterm = function()
 end
 
 local setup_lsp = function()
+  local local_config = require('local_config')
+
   -- format on save
   vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('UserLspFormatOnSave', {}),
@@ -373,8 +375,6 @@ local setup_lsp = function()
   local lspconfig = require('lspconfig')
   local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
-  local efm_tools = require('efm_tools')
-
   lspconfig.lua_ls.setup({
     capabilities = capabilities,
   })
@@ -384,41 +384,17 @@ local setup_lsp = function()
     capabilities = capabilities,
   })
 
-  local efm_languages = {
-    sh = {
-      efm_tools.linters.shellcheck,
-    },
-    javascript = {
-      efm_tools.linters.eslint,
-      efm_tools.formatters.prettier,
-    },
-    typescript = {
-      efm_tools.linters.eslint,
-      efm_tools.formatters.prettier,
-    },
-    typescriptreact = {
-      efm_tools.linters.eslint,
-      efm_tools.formatters.prettier,
-    },
-    go = {
-      efm_tools.formatters.gofmt,
-    },
-    terraform = {
-      efm_tools.formatters.terraform_fmt,
-    },
-    json = {
-      efm_tools.formatters.prettier,
-    },
-  }
-
+  local efm_default_settings = require('efm_config').default_settings
+  local efm_settings = vim.tbl_deep_extend(
+    'force',
+    efm_default_settings,
+    local_config.efm_settings or {}
+  )
   lspconfig.efm.setup({
     capabilities = capabilities,
     init_options = { documentFormatting = true },
-    filetypes = vim.tbl_keys(efm_languages),
-    settings = {
-      rootMarkers = { ".git/" },
-      languages = efm_languages,
-    }
+    filetypes = vim.tbl_keys(efm_settings.languages),
+    settings = efm_settings,
   })
 end
 

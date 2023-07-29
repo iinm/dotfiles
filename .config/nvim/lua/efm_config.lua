@@ -6,7 +6,7 @@ local efm_root_markers = {
   }
 }
 
-return {
+local tools = {
   linters = {
     shellcheck = {
       lintCommand = 'shellcheck -f gcc -x',
@@ -51,4 +51,40 @@ return {
       formatStdin = true,
     },
   },
+}
+
+local default_settings = {
+  rootMarkers = { ".git/" },
+  languages = {
+    sh = {
+      tools.linters.shellcheck,
+    },
+    javascript = {
+      tools.linters.eslint,
+      tools.formatters.prettier,
+    },
+    typescript = {
+      tools.linters.eslint,
+      tools.formatters.prettier,
+    },
+    typescriptreact = {
+      tools.linters.eslint,
+      tools.formatters.prettier,
+    },
+    go = {
+      tools.formatters.gofmt,
+    },
+    terraform = {
+      tools.formatters.terraform_fmt,
+    },
+    json = {
+      tools.formatters.prettier,
+    },
+
+  }
+}
+
+return {
+  tools = tools,
+  default_settings = default_settings,
 }
