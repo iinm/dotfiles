@@ -74,7 +74,7 @@ bootstrap_archlinux() {
 
 bootstrap_ubuntu() {
   if test -e /etc/apt/sources.list.d/fish-shell-ubuntu-release-3-*.list; then
-    echo "skip: fish PPA is already enabled."
+    echo "skip: fish PPA is enabled."
   else
     echo "run: enable fish PPA."
     sudo apt-add-repository ppa:fish-shell/release-3 -y
@@ -109,7 +109,7 @@ bootstrap_ubuntu() {
 
   local fd_path=~/tools/bin/fd
   if test -e "$fd_path"; then
-    echo "skip: fd is already linked."
+    echo "skip: fd is linked."
   else
     echo "run: link fd to $fd_path"
     mkdir -p ~/tools/bin
@@ -155,7 +155,7 @@ link() {
     # shellcheck disable=SC2001
     dest=$(sed "s,^$SOURCE_DIR,$HOME," <<< "$src")
     if file -E "$dest" > /dev/null; then
-      echo "skip: $dest is already exist."
+      echo "skip: $dest exists."
       continue
     fi
     echo "run: create symlink: $dest -> $src"
