@@ -86,7 +86,7 @@ local setup_keymap = function()
   vim.g.mapleader = ' '
   -- utilities
   vim.keymap.set('n', '<leader>r', 'q:?')
-  vim.keymap.set('n', '<leader>f', ':<C-u>CtrlPMixed<CR>')
+  vim.keymap.set('n', '<leader>f', ':<C-u>Files<CR>')
   vim.keymap.set('n', '<leader>o', ':<C-u>Oldfiles<CR>')
   vim.keymap.set('n', '<leader>b', ':<C-u>Buffers<CR>')
   vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
@@ -99,8 +99,8 @@ local setup_keymap = function()
   end)
   vim.keymap.set('v', '//', [[y/\V<C-r>=escape(@",'/\')<CR><CR>]])
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
-  -- vim.keymap.set('n', '-', ':<C-u>e %:h<CR>')
   vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>:file<CR>')
+  -- vim.keymap.set('n', '-', ':<C-u>e %:h<CR>')
 
   -- window
   vim.keymap.set('n', '<C-w>z', window_utils.toggle_maximize)
@@ -171,15 +171,6 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>db', ':<C-u>DapToggleBreakpoint<CR>')
   vim.keymap.set('n', '<leader>dc', ':<C-u>DapContinue<CR>')
   vim.keymap.set({ 'n', 'v' }, '<leader>de', '<Cmd>lua require("dapui").eval()<CR>')
-
-  -- ctrlp
-  vim.g.ctrlp_map = '<Nop>'
-  vim.g.ctrlp_prompt_mappings = {
-    ['PrtSelectMove("j")'] = { '<down>', '<c-n>' },
-    ['PrtSelectMove("k")'] = { '<up>', '<c-p>' },
-    ['PrtHistory(-1)'] = { '<c-j>' },
-    ['PrtHistory(1)'] = { '<c-k>' },
-  }
 
   -- vsnip
   -- https://github.com/hrsh7th/vim-vsnip
@@ -279,6 +270,14 @@ local setup_auto_commands = function()
       vim.cmd.file()
     end,
   })
+
+  vim.api.nvim_create_autocmd({ 'FileType' }, {
+    group = vim.api.nvim_create_augroup('UserFzfExitOnEsc', {}),
+    pattern = { 'fzf' },
+    callback = function()
+      vim.keymap.set('t', '<esc>', '<c-c>', { buffer = true })
+    end,
+  })
 end
 
 local ensure_plugins = function()
@@ -302,7 +301,8 @@ local ensure_plugins = function()
     'stevearc/dressing.nvim',
 
     -- utilities
-    'ctrlpvim/ctrlp.vim',
+    'junegunn/fzf',
+    'junegunn/fzf.vim',
     'tpope/vim-sleuth',
     'tpope/vim-commentary',
     'tpope/vim-fugitive',
@@ -498,18 +498,9 @@ local setup_dap = function()
   end
 end
 
-local setup_ctrlp = function()
-  vim.g.ctrlp_user_command = 'fd --hidden --exclude .git --type f --color=never "" %s'
-  vim.g.ctrlp_root_markers = { '.git', 'package.json' }
-  vim.g.ctrlp_match_window = 'bottom,order:btt,min:1,max:20,results:20'
-  vim.g.ctrlp_by_filename = 1
-  vim.g.ctrlp_use_caching = 0
-  vim.g.ctrlp_mruf_relative = 1
-  vim.g.ctrlp_mruf_exclude = [[COMMIT_EDITMSG]]
-end
-
 local setup_plugins = function()
   vim.g.javascript_plugin_jsdoc = 1
+  vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
   require('hop').setup()
   require('nvim-autopairs').setup()
   require("nvim-surround").setup()
@@ -522,7 +513,6 @@ set_options()
 load_utilities()
 
 ensure_plugins()
-setup_ctrlp()
 setup_toggleterm()
 setup_lsp()
 setup_cmp()

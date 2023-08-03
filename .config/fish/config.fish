@@ -59,8 +59,12 @@ if status is-interactive
   alias d 'docker'
   alias dc 'docker-compose'
 
-  if type --quiet fzf; and type --quiet fzf_key_bindings
-    fzf_key_bindings
+  if type --quiet fzf
+    set -x FZF_DEFAULT_COMMAND 'fd --type f --hidden --exclude .git'
+    set -x FZF_DEFAULT_OPTS '--layout=reverse'
+    if type --quiet fzf_key_bindings
+      fzf_key_bindings
+    end
   end
 
   if type --quiet dir_history
