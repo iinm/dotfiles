@@ -32,10 +32,10 @@ config.use_ime = true
 config.hide_tab_bar_if_only_one_tab = true
 config.adjust_window_size_when_changing_font_size = false
 config.window_padding = {
-  left = "0.5cell",
-  right = "0.5cell",
-  top = "0.5cell",
-  bottom = "0.5cell",
+  left = "0.2cell",
+  right = "0.2cell",
+  top = "0cell",
+  bottom = "0cell",
 }
 config.keys = {
   {
