@@ -56,6 +56,8 @@ local setup_appearance = function()
   vim.cmd.colorscheme('everforest')
 
   -- statusline
+  -- vim.opt.laststatus = 3
+  -- hide statusline
   vim.opt.laststatus = 0
   vim.cmd [[
   hi! link StatusLine WinSeparator
@@ -64,7 +66,7 @@ local setup_appearance = function()
   vim.opt.statusline = [[%{repeat('─', winwidth('.'))}]]
 
   -- tabline
-  vim.opt.tabline = '%!TabLine()'
+  vim.opt.tabline    = '%!TabLine()'
 
   -- spell
   vim.cmd.highlight({ 'SpelunkerSpellBad', 'cterm=underline', 'gui=underline' })
@@ -99,8 +101,9 @@ local setup_keymap = function()
   end)
   vim.keymap.set('v', '//', [[y/\V<C-r>=escape(@",'/\')<CR><CR>]])
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
-  vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>:file<CR>')
+  -- vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>:file<CR>')
   -- vim.keymap.set('n', '-', ':<C-u>e %:h<CR>')
+  vim.keymap.set('n', '-', '<Cmd>Oil<CR>')
 
   -- window
   vim.keymap.set('n', '<C-w>z', window_utils.toggle_maximize)
@@ -259,13 +262,11 @@ local setup_auto_commands = function()
     command = 'syntax sync fromstart'
   })
 
-  -- setup dirbuf
+  -- setup oil
   vim.api.nvim_create_autocmd({ 'FileType' }, {
-    group = vim.api.nvim_create_augroup('UserSetupDirBuf', {}),
-    pattern = { 'dirbuf' },
+    group = vim.api.nvim_create_augroup('UserSetupOil', {}),
+    pattern = { 'oil' },
     callback = function()
-      -- disable color highlight
-      require("nvim-highlight-colors").turnOff()
       -- show path
       vim.cmd.file()
     end,
@@ -306,7 +307,7 @@ local ensure_plugins = function()
     'tpope/vim-sleuth',
     'tpope/vim-commentary',
     'tpope/vim-fugitive',
-    'elihunter173/dirbuf.nvim',
+    'stevearc/oil.nvim',
     'akinsho/toggleterm.nvim',
     'windwp/nvim-autopairs',
     'kamykn/spelunker.vim',
@@ -498,6 +499,17 @@ local setup_dap = function()
   end
 end
 
+local setup_oil = function()
+  require("oil").setup({
+    view_options = {
+      show_hidden = true,
+    },
+    keymaps = {
+      ["<C-l>"] = false,
+    },
+  })
+end
+
 local setup_plugins = function()
   vim.g.javascript_plugin_jsdoc = 1
   vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
@@ -517,6 +529,7 @@ setup_toggleterm()
 setup_lsp()
 setup_cmp()
 setup_dap()
+setup_oil()
 setup_plugins()
 
 setup_appearance()
