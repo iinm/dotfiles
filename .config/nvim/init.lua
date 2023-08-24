@@ -253,6 +253,11 @@ local setup_auto_commands = function()
     group = vim.api.nvim_create_augroup('UserIndentConfig', {}),
     command = 'setlocal tabstop=4 noexpandtab softtabstop=4 shiftwidth=4'
   })
+  vim.api.nvim_create_autocmd({ 'FileType' }, {
+    pattern = 'xml',
+    group = vim.api.nvim_create_augroup('UserIndentConfig', {}),
+    command = 'setlocal tabstop=4'
+  })
 
   -- fix syntax highlighting
   -- https://vim.fandom.com/wiki/Fix_syntax_highlighting
@@ -360,6 +365,19 @@ end
 local setup_lsp = function()
   local local_config = require_safe('local_config')
 
+  -- formatter
+  local format_clients = {
+    { file = '%.lua$',  client = 'lua_ls' },
+    { file = '%.xml$',  client = 'lemminx' },
+    { file = '%.js$',   client = 'efm' },
+    { file = '%.ts$',   client = 'efm' },
+    { file = '%.jsx$',  client = 'efm' },
+    { file = '%.tsx$',  client = 'efm' },
+    { file = '%.go$',   client = 'efm' },
+    { file = '%.tf$',   client = 'efm' },
+    { file = '%.json$', client = 'efm' },
+  }
+
   -- format on save
   vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('UserLspFormatOnSave', {}),
@@ -372,11 +390,14 @@ local setup_lsp = function()
           vim.lsp.buf.format({
             async = false,
             filter = function(client)
+              -- print(vim.inspect(client))
               -- print(client.name)
-              if string.match(ev.file, '%.lua$') then
-                return client.name == 'lua_ls'
+              for _, v in ipairs(format_clients) do
+                if string.match(ev.file, v.file) then
+                  return client.name == v.client
+                end
               end
-              return client.name == 'efm'
+              return client.server_capabilities.documentFormattingProvider
             end
           })
         end,
@@ -390,6 +411,18 @@ local setup_lsp = function()
 
   lspconfig.lua_ls.setup({
     capabilities = capabilities,
+  })
+
+  -- https://github.com/redhat-developer/vscode-xml/releases
+  -- xattr -d com.apple.quarantine lemminx
+  lspconfig.lemminx.setup({
+    capabilities = capabilities,
+    settings = local_config.lemminx_settings or {}
+    -- settings = {
+    --   xml = {
+    --     catalogs = { vim.fn.expand('~/catalog.xml') }
+    --   }
+    -- }
   })
 
   -- npm i -g typescript-language-server
