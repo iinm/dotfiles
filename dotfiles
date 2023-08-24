@@ -231,14 +231,16 @@ setup_nvim() {
     cat > "$nvim_local_config" << 'EOF'
 local cwd = vim.fn.getcwd()
 
-if string.find(cwd, '/path/to/project') then
-  print('local_config.lua: load project config')
-  return {}
-end
-
-return {
+local default = {
   dap_configurations = nil,
 }
+
+if string.find(cwd, '/path/to/project') then
+  print('local_config.lua: load project config')
+  return vim.tbl_deep_extend('force', default, {})
+end
+
+return default
 EOF
   fi
 
