@@ -99,7 +99,7 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>c', function()
     require("nvim-highlight-colors").toggle()
   end)
-  vim.keymap.set('v', '//', [[y/\V<C-r>=escape(@",'/\')<CR><CR>]])
+  -- vim.keymap.set('v', '//', [[y/\V<C-r>=escape(@",'/\')<CR><CR>]]) -- -> use * or # instead
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
   -- vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>:file<CR>')
   -- vim.keymap.set('n', '-', ':<C-u>e %:h<CR>')
