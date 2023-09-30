@@ -66,7 +66,8 @@ local setup_appearance = function()
   vim.opt.statusline = [[%{repeat('─', winwidth('.'))}]]
 
   -- tabline
-  vim.opt.tabline    = '%!TabLine()'
+  vim.opt.tabline    = '%!MyTabLine()'
+  -- vim.opt.showtabline = 2
 
   -- spell
   vim.cmd.highlight({ 'SpelunkerSpellBad', 'cterm=underline', 'gui=underline' })
