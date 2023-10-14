@@ -350,10 +350,14 @@ local ensure_plugins = function()
     -- languages
     'dag/vim-fish',
     'pangloss/vim-javascript',
-    'jose-elias-alvarez/typescript.nvim',
     'jparise/vim-graphql',
     'hashivim/vim-terraform',
     'digitaltoad/vim-pug',
+    {
+      "pmizio/typescript-tools.nvim",
+      dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+      opts = {},
+    },
   })
 end
 
@@ -432,11 +436,6 @@ local setup_lsp = function()
     -- }
   })
 
-  -- npm i -g typescript-language-server
-  lspconfig.tsserver.setup({
-    capabilities = capabilities,
-  })
-
   local efm_default_settings = require('efm_config').default_settings
   local efm_settings = vim.tbl_deep_extend(
     'force',
@@ -448,6 +447,10 @@ local setup_lsp = function()
     init_options = { documentFormatting = true },
     filetypes = vim.tbl_keys(efm_settings.languages),
     settings = efm_settings,
+  })
+
+  require("typescript-tools").setup({
+    capabilities = capabilities,
   })
 end
 
@@ -561,7 +564,6 @@ local setup_plugins = function()
     pre_hook = require('ts_context_commentstring.integrations.comment_nvim').create_pre_hook(),
   })
   require('dressing').setup()
-  require('typescript').setup({})
 
   -- https://github.com/JoosepAlviste/nvim-ts-context-commentstring
   require('nvim-treesitter.configs').setup {
