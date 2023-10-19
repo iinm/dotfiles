@@ -59,6 +59,10 @@ if status is-interactive
   alias d 'docker'
   alias dc 'docker-compose'
 
+  function csvless
+    csvq --format TEXT "select * from `$argv[1]`" | less -S
+  end
+
   if type --quiet fzf
     set -x FZF_DEFAULT_COMMAND 'fd --type f --hidden --exclude .git'
     set -x FZF_DEFAULT_OPTS '--layout=reverse'

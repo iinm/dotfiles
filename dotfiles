@@ -17,6 +17,7 @@ Commands:
   setup_nvim      Setup neovim
   setup_git       Setup git
   setup_wezterm   Setup wezterm
+  setup_csvq      Setup csvq
 
 Optional commands:
   setup_chrome    Setup Chrome startup options. (Linux only)
@@ -30,6 +31,7 @@ setup() {
   setup_nvim
   setup_git
   setup_wezterm
+  setup_csvq
 }
 
 bootstrap() {
@@ -306,6 +308,32 @@ EOF
       https://raw.githubusercontent.com/wez/wezterm/main/termwiz/data/wezterm.terminfo
     tic -x -o ~/.terminfo "$tempfile"
     rm "$tempfile"
+  fi
+}
+
+setup_csvq() {
+  local csvq_version=1.18.1
+  local csvq_path=~/tools/bin/csvq
+  if $csvq_path -v 2> /dev/null | grep -q "$csvq_version"; then
+    echo "skip: $csvq_path $csvq_version exists."
+  else
+    echo "run: install csvq."
+    rm -rf "$csvq_path"
+    mkdir -p ~/tools/bin
+    rm -rf /tmp/csvq-v*
+
+    local base_url="https://github.com/mithrandie/csvq/releases/download/v$csvq_version"
+    if test "$(uname)" = "Linux"; then
+      curl --show-error --fail -L $base_url/csvq-v${csvq_version}-linux-amd64.tar.gz \
+        | tar -C /tmp -xzf -
+      cp -p /tmp/csvq-v*/csvq "$csvq_path"
+    fi
+
+    if test "$(uname)" = "Darwin"; then
+      curl --show-error --fail -L $base_url/csvq-v${csvq_version}-darwin-arm64.tar.gz \
+        | tar -C /tmp -xzf -
+      cp -p /tmp/csvq-v*/csvq "$csvq_path"
+    fi
   fi
 }
 
