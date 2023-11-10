@@ -400,6 +400,7 @@ local setup_lsp = function()
           -- print(vim.inspect(ev))
           vim.lsp.buf.format({
             async = false,
+            timeout_ms = 3000,
             filter = function(client)
               -- print(vim.inspect(client))
               -- print(client.name)
