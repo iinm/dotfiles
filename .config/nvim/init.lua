@@ -320,6 +320,8 @@ local ensure_plugins = function()
     'kylechui/nvim-surround',
     { 'phaazon/hop.nvim',      branch = 'v2' },
     { 'numToStr/Comment.nvim', lazy = false },
+    'nvim-treesitter/nvim-treesitter',
+    'JoosepAlviste/nvim-ts-context-commentstring',
 
     -- lsp
     'neovim/nvim-lspconfig',
@@ -559,6 +561,17 @@ local setup_plugins = function()
   require('nvim-autopairs').setup()
   require("nvim-surround").setup()
   require('dressing').setup()
+
+  require('nvim-treesitter.configs').setup({
+    ensure_installed = { 'tsx' },
+  })
+  -- https://github.com/JoosepAlviste/nvim-ts-context-commentstring/wiki/Integrations
+  require('ts_context_commentstring').setup {
+    enable_autocmd = false,
+  }
+  require('Comment').setup({
+    pre_hook = require('ts_context_commentstring.integrations.comment_nvim').create_pre_hook(),
+  })
 end
 
 -- Setup
