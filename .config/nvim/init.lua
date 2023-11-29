@@ -322,6 +322,7 @@ local ensure_plugins = function()
     { 'numToStr/Comment.nvim', lazy = false },
     'nvim-treesitter/nvim-treesitter',
     'JoosepAlviste/nvim-ts-context-commentstring',
+    'Almo7aya/openingh.nvim',
 
     -- lsp
     'neovim/nvim-lspconfig',
@@ -554,9 +555,9 @@ local setup_plugins = function()
   vim.g.javascript_plugin_jsdoc = 1
   vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
   vim.g.spelunker_check_type = 2 -- check words displayed on screen
-  -- vim.g.copilot_filetypes = {
-  --   markdown = true
-  -- }
+  vim.g.copilot_filetypes = {
+    markdown = true
+  }
   require('hop').setup()
   require('nvim-autopairs').setup()
   require("nvim-surround").setup()
