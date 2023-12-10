@@ -29,6 +29,7 @@
   "spelunker.vim": { "branch": "master", "commit": "a0bc530f62798bbe053905555a4aa9ed713485eb" },
   "toggleterm.nvim": { "branch": "main", "commit": "fb0c365534e7ee327b30205beff3f3a708dcba33" },
   "typescript-tools.nvim": { "branch": "master", "commit": "89675239daee17ea9cdd369d56e9622dc841ef88" },
+  "vim-browser-search": { "branch": "master", "commit": "8e8c09edba05c30fe1ced3d39569c2aa3b316e07" },
   "vim-fish": { "branch": "master", "commit": "50b95cbbcd09c046121367d49039710e9dc9c15f" },
   "vim-fugitive": { "branch": "master", "commit": "46eaf8918b347906789df296143117774e827616" },
   "vim-graphql": { "branch": "master", "commit": "6089a44e89e76f9eba138fb68bfd132420404ff7" },
