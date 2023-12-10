@@ -334,6 +334,12 @@ local ensure_plugins = function()
     'nvim-treesitter/nvim-treesitter',
     'JoosepAlviste/nvim-ts-context-commentstring',
     'Almo7aya/openingh.nvim',
+    {
+      "iamcco/markdown-preview.nvim",
+      cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+      ft = { "markdown" },
+      build = function() vim.fn["mkdp#util#install"]() end,
+    },
 
     -- lsp
     'neovim/nvim-lspconfig',
