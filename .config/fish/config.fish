@@ -7,14 +7,21 @@ if type --quiet local_config_first
   local_config_first
 end
 
-if type --quiet setup_tools
-  setup_tools
-end
+# Common PATH entries
+fish_add_path -g /opt/homebrew/sbin
+fish_add_path -g /opt/homebrew/bin
 
+fish_add_path -g $HOME/tools/bin
+fish_add_path -g $HOME/tools/nvim/bin
+fish_add_path -g $HOME/tools/node/bin
+fish_add_path -g $HOME/tools/google-cloud-sdk/bin
+
+# Environment variables
 set -x SHELL (which fish)
 test -n "$LANG";   or set -x LANG en_US.UTF-8
 test -n "$EDITOR"; or type --quiet nvim; and set -x EDITOR nvim
 
+# Aliases for compatibility
 if test (uname) = 'Linux'
   alias open 'xdg-open'
   if xsel -o &> /dev/null
@@ -36,19 +43,20 @@ if test (uname) = 'Darwin'; and not type --quiet tac
   alias tac 'tail -r'
 end
 
+# Interactive shell configuration
 if status is-interactive
+  # Appearance
   set -U fish_greeting
-
   fish_config theme choose 'Base16 Eighties'
   fish_config prompt choose astronaut
 
+  # Aliases
   alias rm 'rm -i'
   alias cp 'cp -i'
   alias mv 'mv -i'
 
   alias v 'nvim'
 
-  alias g   'nvim -c Git'
   alias gco 'git checkout'
   alias gst 'git status'
   alias gl  'git pull'
@@ -59,20 +67,40 @@ if status is-interactive
   alias d 'docker'
   alias dc 'docker-compose'
 
-  function csvless
-    csvq --format TEXT "select * from `$argv[1]`" | less -S
+  # Utilities
+  if type --quiet dir_history
+    dir_history
   end
 
   if type --quiet fzf
     set -x FZF_DEFAULT_COMMAND 'fd --type f --hidden --exclude .git'
     set -x FZF_DEFAULT_OPTS '--layout=reverse'
-    if type --quiet fzf_key_bindings
-      fzf_key_bindings
+    function fzf_file
+      commandline -t (fd --hidden --exclude .git | fzf --reverse)
+      commandline -f repaint
     end
+
+    function fzf_history
+      commandline -r (history | fzf --reverse)
+      commandline -f repaint
+    end
+
+    bind \cy fzf_file
+    bind \cr fzf_history
   end
 
-  if type --quiet dir_history
-    dir_history
+  function csvless
+    csvq --format TEXT "select * from `$argv[1]`" | less -S
+  end
+
+  if type --quiet colima
+    alias colima_start 'colima start --cpu 2 --memory 4 --disk 30'
+  end
+
+  if test -e $tools/anaconda3
+    function use_anaconda
+      eval "$($tools/anaconda3/bin/conda shell.fish hook)"
+    end
   end
 end
 
