@@ -19,6 +19,7 @@ function! Oldfiles(options={'only_cwd': v:false}) abort
   setlocal buftype=nofile
   setlocal nobuflisted
   setlocal bufhidden=wipe
+  setlocal nospell
   0put =l:files
   execute 'normal! 1gg'
   setlocal readonly

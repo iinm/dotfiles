@@ -8,6 +8,7 @@ function! Buffers() abort
   setlocal buftype=nofile
   setlocal nobuflisted
   setlocal bufhidden=wipe
+  setlocal nospell
   0put =l:buffers
   syntax match Grey /\v[^"]+\// " directory
   syntax match Grey /\vline\s+\d+/ " line number

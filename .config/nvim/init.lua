@@ -40,6 +40,10 @@ local set_options = function()
   vim.g.netrw_banner = 0
   vim.g.newrw_hide = 0
   vim.g.netrw_liststyle = 3
+  -- spell
+  vim.o.spell = true
+  vim.o.spelllang = 'en,cjk'
+  vim.o.spelloptions = 'camel'
 end
 
 local load_utilities = function()
@@ -68,10 +72,6 @@ local setup_appearance = function()
   -- tabline
   vim.opt.tabline    = '%!MyTabLine()'
   -- vim.opt.showtabline = 2
-
-  -- spell
-  vim.cmd.highlight({ 'SpelunkerSpellBad', 'cterm=underline', 'gui=underline' })
-  vim.cmd.highlight({ 'SpelunkerComplexOrCompoundWord', 'cterm=underline', 'gui=underline' })
 
   -- https://github.com/neovim/nvim-lspconfig/wiki/UI-Customization
   vim.diagnostic.config({
@@ -198,7 +198,6 @@ local setup_commands = function()
   vim.api.nvim_create_user_command('OldfilesGlobal', function()
     vim.fn['Oldfiles']()
   end, {})
-  vim.api.nvim_create_user_command('ToggleSpell', 'call spelunker#toggle()', {})
 
   vim.api.nvim_create_user_command('CloseTerms', function()
     for i = vim.fn.winnr('$'), 1, -1 do
@@ -271,6 +270,13 @@ local setup_auto_commands = function()
     command = 'setlocal tabstop=4'
   })
 
+  -- disable spell check for toggleterm
+  vim.api.nvim_create_autocmd({ 'FileType' }, {
+    pattern = { 'toggleterm' },
+    group = vim.api.nvim_create_augroup('UserDisableSpellCheck', {}),
+    command = 'setlocal nospell'
+  })
+
   -- fix syntax highlighting
   -- https://vim.fandom.com/wiki/Fix_syntax_highlighting
   vim.api.nvim_create_autocmd({ 'BufEnter', 'InsertLeave' }, {
@@ -326,7 +332,6 @@ local ensure_plugins = function()
     'stevearc/oil.nvim',
     'akinsho/toggleterm.nvim',
     'windwp/nvim-autopairs',
-    'kamykn/spelunker.vim',
     'brenoprata10/nvim-highlight-colors',
     'kylechui/nvim-surround',
     { 'phaazon/hop.nvim',      branch = 'v2' },
@@ -572,7 +577,6 @@ end
 local setup_plugins = function()
   vim.g.javascript_plugin_jsdoc = 1
   vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
-  vim.g.spelunker_check_type = 2 -- check words displayed on screen
   vim.g.copilot_filetypes = {
     markdown = true,
     gitcommit = true
