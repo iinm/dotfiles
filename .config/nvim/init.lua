@@ -270,9 +270,9 @@ local setup_auto_commands = function()
     command = 'setlocal tabstop=4'
   })
 
-  -- disable spell check for toggleterm
+  -- disable spell check
   vim.api.nvim_create_autocmd({ 'FileType' }, {
-    pattern = { 'toggleterm' },
+    pattern = { 'toggleterm', 'qf' },
     group = vim.api.nvim_create_augroup('UserDisableSpellCheck', {}),
     command = 'setlocal nospell'
   })
