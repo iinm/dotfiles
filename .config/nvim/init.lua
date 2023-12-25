@@ -445,6 +445,10 @@ local setup_lsp = function()
     capabilities = capabilities,
   })
 
+  lspconfig.terraformls.setup({
+    capabilities = capabilities,
+  })
+
   -- https://github.com/redhat-developer/vscode-xml/releases
   -- xattr -d com.apple.quarantine lemminx
   lspconfig.lemminx.setup({
