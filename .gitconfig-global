@@ -28,4 +28,4 @@
 	tool = vimdiff
 
 [rebase]
-	instructionFormat = "(%an) %s"
+	instructionFormat = "%ai (%an) %s"
