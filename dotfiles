@@ -17,6 +17,9 @@ Commands:
   setup_nvim      Setup neovim
   setup_git       Setup git
   setup_wezterm   Setup wezterm
+
+Optional commands:
+  setup_chrome    Setup Chrome startup options. (Linux only)
 HELP
 }
 
@@ -294,6 +297,21 @@ end
 return module
 EOF
   fi
+}
+
+setup_chrome() {
+  local original_desktop_entry=/usr/share/applications/google-chrome.desktop
+  local desktop_entry=~/.local/share/applications/google-chrome.desktop
+
+  echo "run: create chrome desktop entry. $desktop_entry"
+  local options=(
+    --force-device-scale-factor=1.15
+    # --enable-features=UseOzonePlatform
+    # --ozone-platform=wayland
+  )
+  sed -E "s,^(Exec=[^ ]+)(.*),\\1 ${options[*]}\\2,g" \
+    < "$original_desktop_entry" \
+    > "$desktop_entry"
 }
 
 if test "${BASH_SOURCE[0]}" = "$0"; then
