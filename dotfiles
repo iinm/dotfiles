@@ -176,7 +176,7 @@ setup_fish() {
     cat > "$fish_local_config" << 'EOF'
 function local_config --description "Host specific configuration"
   function local_config_first
-    # fish_add_path -g /path/to/bin
+    # fish_add_path /path/to/bin
   end
 
   function local_config_last
@@ -184,8 +184,8 @@ function local_config --description "Host specific configuration"
 
   function project_config_on_pwd_change --on-variable PWD --description "Project specific configuration"
     if string match -rq "/path/to/project" "$PWD"
-      # fish_add_path -g $HOME/tools/bin
-      # set -g -x PROJECT_ROOT $PWD
+      # fish_add_path -m $HOME/tools/bin
+      # set -x PROJECT_ROOT $PWD
     end
   end
 

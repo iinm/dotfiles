@@ -8,13 +8,13 @@ if type --quiet local_config_first
 end
 
 # Common PATH entries
-fish_add_path -g /opt/homebrew/sbin
-fish_add_path -g /opt/homebrew/bin
+fish_add_path /opt/homebrew/sbin
+fish_add_path /opt/homebrew/bin
 
-fish_add_path -g $HOME/tools/bin
-fish_add_path -g $HOME/tools/nvim/bin
-fish_add_path -g $HOME/tools/node/bin
-fish_add_path -g $HOME/tools/google-cloud-sdk/bin
+fish_add_path $HOME/tools/bin
+fish_add_path $HOME/tools/nvim/bin
+fish_add_path $HOME/tools/node/bin
+fish_add_path $HOME/tools/google-cloud-sdk/bin
 
 # Environment variables
 set -x SHELL (which fish)
