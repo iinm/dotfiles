@@ -58,6 +58,8 @@ bootstrap_archlinux() {
     jq
     xsel
     shellcheck
+    gnu-netcat
+    whois
     lua-language-server
   )
   local missing_packages=()
