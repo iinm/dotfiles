@@ -36,7 +36,7 @@ local set_options = function()
   vim.opt.maxmempattern = 10000
   vim.opt.shortmess:append('s') -- don't show "search hit BOTTOM, ..."
 
-  vim.g.markdown_fenced_languages = { 'sh' }
+  vim.g.markdown_fenced_languages = { 'sh', 'mermaid' }
   vim.g.netrw_banner = 0
   vim.g.newrw_hide = 0
   vim.g.netrw_liststyle = 3
