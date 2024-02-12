@@ -4,6 +4,9 @@ set smartcase
 set clipboard+=unnamed
 
 " Plugins
+" https://github.com/JetBrains/ideavim/wiki/IdeaVim-Plugins
 set easymotion
+set commentary
 
 nmap s <Plug>(easymotion-s2)
+nmap gr <Action>(FindUsages)
