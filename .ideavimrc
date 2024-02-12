@@ -1,0 +1,9 @@
+set scrolloff=5
+set incsearch
+set smartcase
+set clipboard+=unnamed
+
+" Plugins
+set easymotion
+
+nmap s <Plug>(easymotion-s2)
