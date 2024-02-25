@@ -14,6 +14,7 @@ fish_add_path /opt/homebrew/bin
 fish_add_path $HOME/tools/bin
 fish_add_path $HOME/tools/nvim/bin
 fish_add_path $HOME/tools/node/bin
+fish_add_path $HOME/tools/go/bin
 fish_add_path $HOME/tools/google-cloud-sdk/bin
 
 # Environment variables
