@@ -95,7 +95,7 @@ if status is-interactive
   end
 
   if type --quiet colima
-    alias colima_start 'colima start --cpu 4 --memory 4 --disk 30'
+    alias colima_start 'colima start --cpu 4 --memory 8 --disk 30'
   end
 
   if test -e $tools/anaconda3
