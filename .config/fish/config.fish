@@ -95,7 +95,9 @@ if status is-interactive
   end
 
   if type --quiet colima
-    alias colima_start 'colima start --cpu 4 --memory 8 --disk 30'
+    # cores: same as the host
+    # memory: half of the host
+    alias colima_start 'colima start --cpu (sysctl -n hw.ncpu) --memory (math (sysctl -n hw.memsize) / 1024^3 / 2) --disk 30'
   end
 
   if test -e $tools/anaconda3
