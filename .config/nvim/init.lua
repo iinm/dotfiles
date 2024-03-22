@@ -352,7 +352,10 @@ local ensure_plugins = function()
 
     -- debugger
     'mfussenegger/nvim-dap',
-    'rcarriga/nvim-dap-ui',
+    {
+      'rcarriga/nvim-dap-ui',
+      dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
+    },
 
     -- snippets
     'hrsh7th/vim-vsnip',
