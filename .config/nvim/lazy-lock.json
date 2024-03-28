@@ -29,12 +29,10 @@
   "plenary.nvim": { "branch": "master", "commit": "f7adfc4b3f4f91aab6caebf42b3682945fbc35be" },
   "toggleterm.nvim": { "branch": "main", "commit": "193786e0371e3286d3bc9aa0079da1cd41beaa62" },
   "typescript-tools.nvim": { "branch": "master", "commit": "c43d9580c3ff5999a1eabca849f807ab33787ea7" },
-  "vim-browser-search": { "branch": "master", "commit": "8e8c09edba05c30fe1ced3d39569c2aa3b316e07" },
   "vim-fish": { "branch": "master", "commit": "50b95cbbcd09c046121367d49039710e9dc9c15f" },
   "vim-fugitive": { "branch": "master", "commit": "193ba9b393931bad768c1d2eed688b0bcc240858" },
   "vim-graphql": { "branch": "master", "commit": "c1d6af3b93ec135e7e2fc182d4cae6cd0d9e20b1" },
   "vim-javascript": { "branch": "master", "commit": "c470ce1399a544fe587eab950f571c83cccfbbdc" },
-  "vim-pug": { "branch": "master", "commit": "ea39cd942cf3194230cf72bfb838901a5344d3b3" },
   "vim-sleuth": { "branch": "master", "commit": "1cc4557420f215d02c4d2645a748a816c220e99b" },
   "vim-terraform": { "branch": "master", "commit": "21f756b933cd11ac5990a6046fdc7c4e2a6c0aee" },
   "vim-vsnip": { "branch": "master", "commit": "02a8e79295c9733434aab4e0e2b8c4b7cea9f3a9" }

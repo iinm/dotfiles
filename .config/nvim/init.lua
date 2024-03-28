@@ -345,7 +345,6 @@ local ensure_plugins = function()
       ft = { "markdown" },
       build = function() vim.fn["mkdp#util#install"]() end,
     },
-    'voldikss/vim-browser-search',
 
     -- lsp
     'neovim/nvim-lspconfig',
@@ -375,7 +374,6 @@ local ensure_plugins = function()
     'pangloss/vim-javascript',
     'jparise/vim-graphql',
     'hashivim/vim-terraform',
-    'digitaltoad/vim-pug',
     {
       "pmizio/typescript-tools.nvim",
       dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
@@ -621,3 +619,4 @@ setup_appearance()
 setup_keymap()
 setup_commands()
 setup_auto_commands()
+
