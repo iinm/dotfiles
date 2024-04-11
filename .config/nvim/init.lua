@@ -175,14 +175,10 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>dc', ':<C-u>DapContinue<CR>')
   vim.keymap.set({ 'n', 'v' }, '<leader>de', '<Cmd>lua require("dapui").eval()<CR>')
 
-  -- vsnip
-  -- https://github.com/hrsh7th/vim-vsnip
-  vim.cmd [[
-  inoremap <expr> <C-f> vsnip#jumpable(1)  ? '<Plug>(vsnip-jump-next)' : '<C-f>'
-  snoremap <expr> <C-f> vsnip#jumpable(1)  ? '<Plug>(vsnip-jump-next)' : '<C-f>'
-  inoremap <expr> <C-b> vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<C-b>'
-  snoremap <expr> <C-b> vsnip#jumpable(-1) ? '<Plug>(vsnip-jump-prev)' : '<C-b>'
-  ]]
+  -- luasnip
+  local ls = require('luasnip')
+  vim.keymap.set({ "i", "s" }, "<C-f>", function() ls.jump(1) end, { silent = true })
+  vim.keymap.set({ "i", "s" }, "<C-b>", function() ls.jump(-1) end, { silent = true })
 end
 
 local setup_commands = function()
@@ -352,18 +348,21 @@ local ensure_plugins = function()
       dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
     },
 
-    -- snippets
-    'hrsh7th/vim-vsnip',
-    'rafamadriz/friendly-snippets',
-
     -- completion
     'hrsh7th/cmp-buffer',
-    'hrsh7th/cmp-vsnip',
     'hrsh7th/cmp-nvim-lsp',
     'hrsh7th/cmp-path',
     'hrsh7th/cmp-cmdline',
     'hrsh7th/nvim-cmp',
     'github/copilot.vim',
+
+    -- snippets
+    {
+      "L3MON4D3/LuaSnip",
+      version = "v2.*",
+      dependencies = { "rafamadriz/friendly-snippets" },
+    },
+    'saadparwaiz1/cmp_luasnip',
 
     -- languages
     'dag/vim-fish',
@@ -479,24 +478,31 @@ end
 local setup_cmp = function()
   -- https://github.com/hrsh7th/nvim-cmp
   local cmp = require('cmp')
+
+  -- https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#add-snippets
+  local luasnip = require('luasnip')
+  require("luasnip.loaders.from_vscode").lazy_load()
+
   cmp.setup({
     snippet = {
       expand = function(args)
-        vim.fn["vsnip#anonymous"](args.body)
+        luasnip.lsp_expand(args.body)
       end,
     },
+
     mapping = cmp.mapping.preset.insert({
       ['<C-p>'] = cmp.mapping.select_prev_item(),
       ['<C-n>'] = cmp.mapping.select_next_item(),
-      ['<C-e>'] = cmp.mapping.abort(),
-      ['<CR>'] = cmp.mapping.confirm({ select = false }),
+      ['<CR>'] = cmp.mapping.confirm({ select = false })
     }),
+
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },
-      { name = 'vsnip' },
+      { name = 'luasnip' },
     }, {
       { name = 'buffer' },
     }),
+
     window = {
       completion = cmp.config.window.bordered(),
       documentation = cmp.config.window.bordered(),
