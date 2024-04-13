@@ -337,6 +337,7 @@ local ensure_plugins = function()
     'Almo7aya/openingh.nvim',
     'previm/previm',
     'tyru/open-browser.vim',
+    'bullets-vim/bullets.vim',
 
     -- lsp
     'neovim/nvim-lspconfig',
