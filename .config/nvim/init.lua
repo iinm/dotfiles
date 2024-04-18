@@ -532,18 +532,23 @@ local setup_dap = function()
   local dap = require('dap')
 
   -- https://github.com/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation
-  dap.adapters.node2 = {
-    type = 'executable',
-    command = 'node',
-    args = { os.getenv('HOME') .. '/tools/vscode-node-debug2/out/src/nodeDebug.js' },
+  require("dap").adapters["pwa-node"] = {
+    type = "server",
+    host = "localhost",
+    port = "${port}",
+    executable = {
+      command = "node",
+      -- https://github.com/microsoft/vscode-js-debug/releases
+      args = { os.getenv('HOME') .. "/tools/js-debug/src/dapDebugServer.js", "${port}" },
+    }
   }
-
   dap.configurations = local_config.dap_configurations or {
     typescript = {
       {
         name = 'Test (Jest)',
-        type = 'node2',
+        type = 'pwa-node',
         request = 'launch',
+        console = "integratedTerminal",
         cwd = '${workspaceFolder}',
         program = '${workspaceFolder}/node_modules/.bin/jest',
         args = { '--runInBand', '${file}' },
@@ -552,8 +557,9 @@ local setup_dap = function()
     javascript = {
       {
         name = 'Test (Node.js)',
-        type = 'node2',
+        type = 'pwa-node',
         request = 'launch',
+        console = "integratedTerminal",
         cwd = '${workspaceFolder}',
         -- program = 'node',
         args = { '--test', '${file}' },
