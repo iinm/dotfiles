@@ -338,6 +338,7 @@ local ensure_plugins = function()
     'previm/previm',
     'tyru/open-browser.vim',
     'bullets-vim/bullets.vim',
+    'MattesGroeger/vim-bookmarks',
 
     -- lsp
     'neovim/nvim-lspconfig',
