@@ -5,6 +5,7 @@ function! Oldfiles(options={'only_cwd': v:false}) abort
   \  {
   \    _, path -> filereadable(expand(path))
   \      && (!l:only_cwd || expand(path) =~# '^' .. getcwd())
+  \      && path !~# 'COMMIT_EDITMSG$'
   \  }
   \ )
 
