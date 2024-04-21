@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-VIM_VERSION=v9.1.0356
 NVIM_VERSION=0.9.5
 EFM_LS_VERSION=0.0.46
 
@@ -201,33 +200,6 @@ EOF
   else
     echo "run: set fish as default shell."
     sudo chsh "$(id -un)" -s "$(which fish)"
-  fi
-}
-
-setup_vim() {
-  local vim_source_dir=~/tools/sources/vim
-  local vim_dir=~/tools/vim
-
-  if test -e "$vim_source_dir"; then
-    echo "info: $vim_source_dir exists. skip."
-  else
-    echo "info: clone vim source."
-    mkdir -p ~/tools/sources
-    git clone --depth 1 --branch "$VIM_VERSION" https://github.com/vim/vim "$vim_source_dir"
-  fi
-
-  if test -e "$vim_dir"; then
-    echo "info: $vim_dir exists. skip."
-  else
-    echo "info: build vim.";
-    (
-      set -eu;
-      cd "$vim_source_dir/src";
-      make distclean || true;
-      ./configure --prefix="$vim_dir"
-      make;
-      make install;
-    )
   fi
 }
 
