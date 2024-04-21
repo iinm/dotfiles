@@ -1,3 +1,36 @@
+local close_terms = function()
+  -- close all term windows in all tabs
+  for i = 1, vim.fn.tabpagenr('$'), 1 do
+    local current_tab = vim.fn.tabpagenr()
+    vim.cmd(i .. 'tabnext')
+    for j = vim.fn.winnr('$'), 1, -1 do
+      local buf_name = vim.fn.bufname(vim.fn.winbufnr(j))
+      if vim.startswith(buf_name, 'term://') then
+        vim.cmd(j .. 'wincmd c')
+      end
+    end
+    -- back to current tab
+    vim.cmd(current_tab .. 'tabnext')
+  end
+end
+
+local close_terms_in_other_tab = function()
+  local current_tab = vim.fn.tabpagenr()
+  for i = 1, vim.fn.tabpagenr('$'), 1 do
+    if i ~= current_tab then
+      vim.cmd(i .. 'tabnext')
+      for j = vim.fn.winnr('$'), 1, -1 do
+        local buf_name = vim.fn.bufname(vim.fn.winbufnr(j))
+        if vim.startswith(buf_name, 'term://') then
+          vim.cmd(j .. 'wincmd c')
+        end
+      end
+    end
+  end
+  -- back to current tab
+  vim.cmd(current_tab .. 'tabnext')
+end
+
 local is_debugger_open = function()
   for i = vim.fn.winnr('$'), 1, -1 do
     local buf_name = vim.fn.bufname(vim.fn.winbufnr(i))
@@ -12,10 +45,11 @@ local open_debugger = function()
   if is_debugger_open() then
     return
   end
-  local position = vim.fn.line('.')
+  -- mark current position
+  vim.cmd('normal! m"')
   vim.cmd.tabe('%')
   -- restore position
-  vim.cmd([[execute "normal! " . ]] .. position .. [[ . "ggzz"]])
+  vim.cmd('normal! `"')
   require('dapui').open()
 end
 
@@ -47,20 +81,26 @@ local toggle_maximize = function()
       vim.cmd.tabclose()
       if is_term() then
         -- fix blank screen
-        vim.cmd([[execute "stopinsert"]])
+        vim.cmd('stopinsert')
       end
     end
   else
-    local position = vim.fn.line('.')
+    if not is_term() then
+      -- mark current position
+      vim.cmd('normal! m"')
+    end
+    -- open in new tab
     vim.cmd.tabe('%')
     if not is_term() then
       -- restore position
-      vim.cmd([[execute "normal! " . ]] .. position .. [[ . "ggzz"]])
+      vim.cmd('normal! `"')
     end
   end
 end
 
 return {
+  close_terms = close_terms,
+  close_terms_in_other_tab = close_terms_in_other_tab,
   open_debugger = open_debugger,
   close_debugger = close_debugger,
   toggle_debugger = toggle_debugger,

@@ -48,10 +48,10 @@ end
 
 local setup_utilities = function()
   local config_path = vim.fn.stdpath('config')
-  vim.cmd('source ' .. config_path .. '/vim/oldfiles.vim')
-  vim.cmd('source ' .. config_path .. '/vim/buffers.vim')
-  vim.cmd('source ' .. config_path .. '/vim/outline.vim')
-  vim.cmd('source ' .. config_path .. '/vim/tabline.vim')
+  vim.cmd.source(config_path .. '/vim/oldfiles.vim')
+  vim.cmd.source(config_path .. '/vim/buffers.vim')
+  vim.cmd.source(config_path .. '/vim/outline.vim')
+  vim.cmd.source(config_path .. '/vim/tabline.vim')
 end
 
 local setup_appearance = function()
@@ -92,8 +92,8 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>f', ':<C-u>Files<CR>')
   vim.keymap.set('n', '<leader>o', ':<C-u>Oldfiles<CR>')
   vim.keymap.set('n', '<leader>b', ':<C-u>Buffers<CR>')
-  vim.keymap.set('n', '<leader>w', ':<C-u>set wrap!<CR>')
-  vim.keymap.set('n', '<leader>n', ':<C-u>set number!<CR>')
+  vim.keymap.set('n', '<leader>w', ':<C-u>setl wrap!<CR>')
+  vim.keymap.set('n', '<leader>n', ':<C-u>setl number!<CR>')
   vim.keymap.set('n', '<leader>s', ':<C-u>gr!<Space>')
   vim.keymap.set('n', '<leader>x', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
   vim.keymap.set('n', '<leader>z', ':<C-u>setl foldlevel=')
@@ -108,12 +108,12 @@ local setup_keymap = function()
 
   -- window
   vim.keymap.set('n', '<C-w>z', window_utils.toggle_maximize)
-  vim.keymap.set('n', '<C-w>t', ':<C-u><C-r>=v:count<CR>ToggleTerm<CR>')
+  vim.keymap.set('n', '<C-w>t', function()
+    window_utils.close_terms_in_other_tab()
+    vim.cmd(vim.v.count .. 'ToggleTerm')
+  end)
   for i = 1, 5, 1 do
-    vim.keymap.set(
-      'n',
-      '<C-w>' .. i,
-      ':<C-u>CloseTerms<CR>' .. ':' .. i .. 'ToggleTerm<CR>')
+    vim.keymap.set('n', '<C-w>' .. i, string.format('<Cmd>CloseTerms<CR><Cmd>%dToggleTerm<CR>', i))
   end
   vim.keymap.set('n', '<C-w>d', window_utils.toggle_debugger)
 
@@ -131,13 +131,12 @@ local setup_keymap = function()
       vim.keymap.set('t', '<C-w>l', '<Cmd>wincmd l<CR>', opts)
       vim.keymap.set('t', '<C-w>c', '<Cmd>wincmd c<CR>', opts)
       vim.keymap.set('t', '<C-w><C-w>', '<Cmd>wincmd w<CR>', opts)
+      vim.keymap.set('t', '<C-w>gt', '<Cmd>tabnext<CR>', opts)
+      vim.keymap.set('t', '<C-w>gT', '<Cmd>tabprevious<CR>', opts)
       vim.keymap.set('t', '<C-w>t', '<Cmd>ToggleTerm<CR>', {})
       vim.keymap.set('t', '<C-w>z', window_utils.toggle_maximize)
       for i = 1, 5, 1 do
-        vim.keymap.set(
-          't',
-          '<C-w>' .. i,
-          [[<Cmd>CloseTerms<CR>]] .. '<Cmd>' .. i .. 'ToggleTerm<CR>')
+        vim.keymap.set('t', '<C-w>' .. i, string.format('<Cmd>CloseTerms<CR><Cmd>%dToggleTerm<CR>', i))
       end
     end,
   })
@@ -194,14 +193,7 @@ local setup_commands = function()
     vim.fn['Oldfiles']()
   end, {})
 
-  vim.api.nvim_create_user_command('CloseTerms', function()
-    for i = vim.fn.winnr('$'), 1, -1 do
-      local buf_name = vim.fn.bufname(vim.fn.winbufnr(i))
-      if vim.startswith(buf_name, 'term://') then
-        vim.cmd(i .. 'wincmd c')
-      end
-    end
-  end, {})
+  vim.api.nvim_create_user_command('CloseTerms', window_utils.close_terms, {})
 
   vim.api.nvim_create_user_command('ToggleDebugger', window_utils.toggle_debugger, {})
   vim.api.nvim_create_user_command('ClearBreakpoints', function()
@@ -294,7 +286,7 @@ local setup_auto_commands = function()
     group = vim.api.nvim_create_augroup('UserFzfExitOnEsc', {}),
     pattern = { 'fzf' },
     callback = function()
-      vim.keymap.set('t', '<esc>', '<c-c>', { buffer = true })
+      vim.keymap.set('t', '<esc>', '<C-c>', { buffer = true })
     end,
   })
 end
