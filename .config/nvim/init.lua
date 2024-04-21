@@ -10,7 +10,7 @@ local require_safe = function(name)
   return {}
 end
 
-local set_options = function()
+local setup_options = function()
   vim.opt.undofile = true
   vim.opt.ignorecase = true
   vim.opt.smartcase = true
@@ -46,7 +46,7 @@ local set_options = function()
   vim.o.spelloptions = 'camel'
 end
 
-local load_utilities = function()
+local setup_utilities = function()
   local config_path = vim.fn.stdpath('config')
   vim.cmd('source ' .. config_path .. '/vim/oldfiles.vim')
   vim.cmd('source ' .. config_path .. '/vim/buffers.vim')
@@ -124,13 +124,13 @@ local setup_keymap = function()
     callback = function()
       local opts = { buffer = 0 }
       vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
-      vim.keymap.set('t', '<C-g>', [[<Cmd>file<CR>]], opts)
-      vim.keymap.set('t', '<C-w>h', [[<Cmd>wincmd h<CR>]], opts)
-      vim.keymap.set('t', '<C-w>j', [[<Cmd>wincmd j<CR>]], opts)
-      vim.keymap.set('t', '<C-w>k', [[<Cmd>wincmd k<CR>]], opts)
-      vim.keymap.set('t', '<C-w>l', [[<Cmd>wincmd l<CR>]], opts)
-      vim.keymap.set('t', '<C-w>c', [[<Cmd>wincmd c<CR>]], opts)
-      vim.keymap.set('t', '<C-w><C-w>', [[<Cmd>wincmd w<CR>]], opts)
+      vim.keymap.set('t', '<C-g>', '<Cmd>file<CR>', opts)
+      vim.keymap.set('t', '<C-w>h', '<Cmd>wincmd h<CR>', opts)
+      vim.keymap.set('t', '<C-w>j', '<Cmd>wincmd j<CR>', opts)
+      vim.keymap.set('t', '<C-w>k', '<Cmd>wincmd k<CR>', opts)
+      vim.keymap.set('t', '<C-w>l', '<Cmd>wincmd l<CR>', opts)
+      vim.keymap.set('t', '<C-w>c', '<Cmd>wincmd c<CR>', opts)
+      vim.keymap.set('t', '<C-w><C-w>', '<Cmd>wincmd w<CR>', opts)
       vim.keymap.set('t', '<C-w>t', '<Cmd>ToggleTerm<CR>', {})
       vim.keymap.set('t', '<C-w>z', window_utils.toggle_maximize)
       for i = 1, 5, 1 do
@@ -183,7 +183,6 @@ end
 
 local setup_commands = function()
   local window_utils = require('window_utils')
-  vim.api.nvim_create_user_command('ReloadVimrc', 'source $MYVIMRC', {})
   vim.api.nvim_create_user_command('BDelete', 'b # | bd #', {})
   vim.api.nvim_create_user_command('BOnly', '%bd | e # | bd #', {})
   vim.api.nvim_create_user_command('Buffers', 'call Buffers()', {})
@@ -300,7 +299,7 @@ local setup_auto_commands = function()
   })
 end
 
-local ensure_plugins = function()
+local setup_plugins = function()
   -- https://github.com/folke/lazy.nvim
   local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
   if not vim.loop.fs_stat(lazypath) then
@@ -330,8 +329,14 @@ local ensure_plugins = function()
     'windwp/nvim-autopairs',
     'brenoprata10/nvim-highlight-colors',
     'kylechui/nvim-surround',
-    { 'phaazon/hop.nvim',      branch = 'v2' },
-    { 'numToStr/Comment.nvim', lazy = false },
+    {
+      'phaazon/hop.nvim',
+      branch = 'v2'
+    },
+    {
+      'numToStr/Comment.nvim',
+      lazy = false
+    },
     'nvim-treesitter/nvim-treesitter',
     'JoosepAlviste/nvim-ts-context-commentstring',
     'Almo7aya/openingh.nvim',
@@ -589,18 +594,7 @@ local setup_oil = function()
   })
 end
 
-local setup_plugins = function()
-  vim.g.javascript_plugin_jsdoc = 1
-  vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
-  vim.g.copilot_filetypes = {
-    markdown = true,
-    gitcommit = true
-  }
-  require('hop').setup()
-  require('nvim-autopairs').setup()
-  require("nvim-surround").setup()
-  require('dressing').setup()
-
+local setup_comment = function()
   require('nvim-treesitter.configs').setup({
     ensure_installed = { 'tsx' },
   })
@@ -613,17 +607,31 @@ local setup_plugins = function()
   })
 end
 
--- Setup
-set_options()
-load_utilities()
+local setup_others = function()
+  vim.g.javascript_plugin_jsdoc = 1
+  vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
+  vim.g.copilot_filetypes = {
+    markdown = true,
+    gitcommit = true
+  }
+  require('hop').setup()
+  require('nvim-autopairs').setup()
+  require("nvim-surround").setup()
+  require('dressing').setup()
+end
 
-ensure_plugins()
+-- Setup
+setup_options()
+setup_utilities()
+
+setup_plugins()
 setup_toggleterm()
 setup_lsp()
 setup_cmp()
 setup_dap()
 setup_oil()
-setup_plugins()
+setup_comment()
+setup_others()
 
 setup_appearance()
 setup_keymap()

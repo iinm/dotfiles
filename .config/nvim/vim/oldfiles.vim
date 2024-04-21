@@ -7,6 +7,7 @@ function! Oldfiles(options={'only_cwd': v:false}) abort
   \      && (!l:only_cwd || expand(path) =~# '^' .. getcwd())
   \  }
   \ )
+
   " omit current directory
   let l:files = map(
   \  l:files,
@@ -15,18 +16,21 @@ function! Oldfiles(options={'only_cwd': v:false}) abort
 
   " write to buffer
   enew
-  execute 'file [Oldfiles]'
+  file [Oldfiles]
   setlocal buftype=nofile
   setlocal nobuflisted
   setlocal bufhidden=wipe
   setlocal nospell
-  0put =l:files
-  execute 'normal! 1gg'
+  sil 0put =l:files
   setlocal readonly
+
   syntax match Grey /\v^.+\// " directory
   nnoremap <buffer> <CR> :<C-u>e <C-r>=getline('.')<CR><CR>
   nnoremap <buffer> <Esc> :<C-u>b #<CR>
   nnoremap <buffer> <C-o> :<C-u>b #<CR>
+
+  " set cursor to the first line
+  normal! 1gg
 endfunction
 
 function! UpdateOldfiles(file) abort
