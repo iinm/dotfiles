@@ -1,4 +1,4 @@
---[[ Cheat Sheet
+--[[
 start                vim -u NONE (does not load init.lua)
 open file            :e **/foo.sh
                      :e %:h/ (open directory of current file)
