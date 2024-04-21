@@ -157,8 +157,6 @@ link() {
     find "$SOURCE_DIR" -maxdepth 1 -type f -name '.*';
     # ~/.config/*
     find "$SOURCE_DIR/.config" -mindepth 1 -maxdepth 1 -type d;
-    # ~/.vim
-    echo "$SOURCE_DIR/.vim";
   ); do
     # shellcheck disable=SC2001
     dest=$(sed "s,^$SOURCE_DIR,$HOME," <<< "$src")
