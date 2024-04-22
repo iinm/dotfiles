@@ -1,66 +1,64 @@
---[[
-start                vim -u NONE (does not load init.lua)
-open file            :e **/foo.sh
-                     :e %:h/ (open directory of current file)
-                     :sp foo.sh (split)
-                     :vsp foo.sh (vsplit)
-motions              } (next paragraph)
-                     { (previous paragraph)
-                     C-f (next page)
-                     C-b (previous page)
-scroll               zz (center)
-                     zt (top)
-                     zb (bottom)
-search               /foo -> n (next) -> N (previous)
-                     * (next <cword>)
-                     % (previous <cword>)
-command              :foo
-                     :execute "normal! ..." (execute normal mode command)
-                       - `execute` will handle special characters like `<CR>`
-                       - `normal!` ignores mappings
-                     :foo <C-r>" (paste from register)
-replace              :%s/foo/bar/g
-                     :%s/<C-r>/bar/g (replace last search)
-marks                :marks
-                     ma (set mark a)
-                     `a (jump to mark a)
-                     `` (jump to previous mark)
-                     :delmarks a (delete mark a)
-                     :delmarks! a (delete all marks)
-jumps                :jumps -> [N] Ctrl-o (older location) or Ctrl-i (newer location)
-recent files         :browse oldfiles
-                     :browse filter /foo.*/ oldfiles
-grep                 :grep! foo -> :cw
-                     :grep! foo % (current buffer)
-                     :grep! <cword> (cursor word)
-                     :grep! \b<cword>\b
-close buffers        :bd foo* -> Ctrl-a (close all matched)
-                     :%bd (close all) -> C-o (back to previous buffer)
-window               C-w C-w (next window)
-                     C-w -> o (close other windows)
-                     C-w -> = (equalize window size)
-                     C-w -> _ (maximize height)
-                     C-w -> | (maximize width)
-                     C-w -> c (close)
-netrw                :e .
-                     :e . -> i -> i -> i (tree view)
-                     :e . -> p (preview)
-                     :e . -> d (make directory)
-                     :e . -> % (new file)
-                     :e . -> D (delete)
-                     :e . -> R (rename)
-                     :e . -> mt (mark target) -> mf (markfile) -> mm (move)
-                     :e . -> mt (mark target) -> mf (markfile) -> mc (copy)
-                     :e . -> mu (unmark all)
-quickfix             :cw(indow) (open quickfix window)
-                     :colder (older quickfix list)
-                     :cnewer (newer quickfix list)
-                     :cdo %s/foo/bar/g (replace in quickfix list)
-open path            gf (goto file)
-                     gx (xdg-open)
-                     C-w gf (open in new tab)
-folding              zc (close), zo (open), zO (open all)
---]]
+-- start                vim -u NONE (does not load init.lua)
+-- open file            :e **/foo.sh
+--                      :e %:h/ (open directory of current file)
+--                      :sp foo.sh (split)
+--                      :vsp foo.sh (vsplit)
+-- motions              } (next paragraph)
+--                      { (previous paragraph)
+--                      C-f (next page)
+--                      C-b (previous page)
+-- scroll               zz (center)
+--                      zt (top)
+--                      zb (bottom)
+-- search               /foo -> n (next) -> N (previous)
+--                      * (next <cword>)
+--                      % (previous <cword>)
+-- command              :foo
+--                      :execute "normal! ..." (execute normal mode command)
+--                        - `execute` will handle special characters like `<CR>`
+--                        - `normal!` ignores mappings
+--                      :foo <C-r>" (paste from register)
+-- replace              :%s/foo/bar/g
+--                      :%s/<C-r>/bar/g (replace last search)
+-- marks                :marks
+--                      ma (set mark a)
+--                      `a (jump to mark a)
+--                      `` (jump to previous mark)
+--                      :delmarks a (delete mark a)
+--                      :delmarks! a (delete all marks)
+-- jumps                :jumps -> [N] Ctrl-o (older location) or Ctrl-i (newer location)
+-- recent files         :browse oldfiles
+--                      :browse filter /foo.*/ oldfiles
+-- grep                 :grep! foo -> :cw
+--                      :grep! foo % (current buffer)
+--                      :grep! <cword> (cursor word)
+--                      :grep! \b<cword>\b
+-- close buffers        :bd foo* -> Ctrl-a (close all matched)
+--                      :%bd (close all) -> C-o (back to previous buffer)
+-- window               C-w C-w (next window)
+--                      C-w -> o (close other windows)
+--                      C-w -> = (equalize window size)
+--                      C-w -> _ (maximize height)
+--                      C-w -> | (maximize width)
+--                      C-w -> c (close)
+-- netrw                :e .
+--                      :e . -> i -> i -> i (tree view)
+--                      :e . -> p (preview)
+--                      :e . -> d (make directory)
+--                      :e . -> % (new file)
+--                      :e . -> D (delete)
+--                      :e . -> R (rename)
+--                      :e . -> mt (mark target) -> mf (markfile) -> mm (move)
+--                      :e . -> mt (mark target) -> mf (markfile) -> mc (copy)
+--                      :e . -> mu (unmark all)
+-- quickfix             :cw(indow) (open quickfix window)
+--                      :colder (older quickfix list)
+--                      :cnewer (newer quickfix list)
+--                      :cdo %s/foo/bar/g (replace in quickfix list)
+-- open path            gf (goto file)
+--                      gx (xdg-open)
+--                      C-w gf (open in new tab)
+-- folding              zc (close), zo (open), zO (open all)
 
 local require_safe = function(name)
   local ok, module = pcall(require, name)
@@ -456,17 +454,21 @@ local setup_lsp = function()
   local local_config = require_safe('local_config')
 
   -- formatter
-  local format_clients = {
-    { file = '%.lua$',  client = 'lua_ls' },
-    { file = '%.xml$',  client = 'lemminx' },
-    { file = '%.js$',   client = 'efm' },
-    { file = '%.ts$',   client = 'efm' },
-    { file = '%.jsx$',  client = 'efm' },
-    { file = '%.tsx$',  client = 'efm' },
-    { file = '%.go$',   client = 'efm' },
-    { file = '%.tf$',   client = 'efm' },
-    { file = '%.json$', client = 'efm' },
-  }
+  local lsp_format_clients = vim.tbl_flatten({
+    local_config.lsp_format_clients or {},
+    -- default clients
+    {
+      { file = '%.lua$',  client = 'lua_ls' },
+      { file = '%.xml$',  client = 'lemminx' },
+      { file = '%.js$',   client = 'efm' },
+      { file = '%.ts$',   client = 'efm' },
+      { file = '%.jsx$',  client = 'efm' },
+      { file = '%.tsx$',  client = 'efm' },
+      { file = '%.go$',   client = 'efm' },
+      { file = '%.tf$',   client = 'efm' },
+      { file = '%.json$', client = 'efm' },
+    },
+  })
 
   -- format on save
   vim.api.nvim_create_autocmd('LspAttach', {
@@ -483,7 +485,7 @@ local setup_lsp = function()
             filter = function(client)
               -- print(vim.inspect(client))
               -- print(client.name)
-              for _, v in ipairs(format_clients) do
+              for _, v in ipairs(lsp_format_clients) do
                 if string.match(ev.file, v.file) then
                   return client.name == v.client
                 end

@@ -236,7 +236,10 @@ setup_nvim() {
 local cwd = vim.fn.getcwd()
 
 local default = {
+  lsp_format_clients = nil,
+  efm_settings = nil,
   dap_configurations = nil,
+  lemminx_settings = nil,
 }
 
 if string.find(cwd, '/path/to/project') then
