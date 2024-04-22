@@ -140,13 +140,14 @@ local setup_appearance = function()
 
   -- ruler
   vim.opt.rulerformat = table.concat({
-    -- terminal number
-    '%20(',
+    -- '%20(',
     -- align right
     '%=',
-    '%#Green#%{&ft == "toggleterm" ? "term #" . b:toggle_number : ""}%*',
-    '  %l,%c%V %P',
-    '%)',
+    -- terminal number
+    '%#Purple#%{&ft == "toggleterm" ? "#" . b:toggle_number : ""}%*',
+    '  ',
+    '%l,%c%V %P',
+    -- '%)',
   })
 
   -- https://github.com/neovim/nvim-lspconfig/wiki/UI-Customization
