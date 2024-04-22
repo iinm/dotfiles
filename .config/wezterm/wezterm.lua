@@ -30,6 +30,8 @@ config.color_scheme = "Eighties (base16)"
 config.use_ime = true
 config.hide_tab_bar_if_only_one_tab = true
 config.adjust_window_size_when_changing_font_size = false
+-- Note: The window can be dragged by SUPER+left mouse drag
+config.window_decorations = "RESIZE"
 config.window_padding = {
   left = "0.2cell",
   right = "0.2cell",
@@ -43,6 +45,7 @@ config.keys = {
     action = wezterm.action.ToggleFullScreen,
   },
 }
+config.native_macos_fullscreen_mode = true
 
 -- host specific config
 if type(local_config.apply_to_config) == 'function' then
