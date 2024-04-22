@@ -125,17 +125,29 @@ local setup_appearance = function()
 
   -- statusline
   -- vim.opt.laststatus = 3
+
   -- hide statusline
   vim.opt.laststatus = 0
   vim.cmd [[
   hi! link StatusLine WinSeparator
   hi! link StatusLineNC WinSeparator
   ]]
-  vim.opt.statusline = [[%{repeat('─', winwidth('.'))}]]
+  vim.opt.statusline  = [[%{repeat('─', winwidth('.'))}]]
 
   -- tabline
-  vim.opt.tabline    = '%!MyTabLine()'
+  vim.opt.tabline     = '%!MyTabLine()'
   -- vim.opt.showtabline = 2
+
+  -- ruler
+  vim.opt.rulerformat = table.concat({
+    -- terminal number
+    '%20(',
+    -- align right
+    '%=',
+    '%#Green#%{&ft == "toggleterm" ? "term #" . b:toggle_number : ""}%*',
+    '  %l,%c%V %P',
+    '%)',
+  })
 
   -- https://github.com/neovim/nvim-lspconfig/wiki/UI-Customization
   vim.diagnostic.config({
