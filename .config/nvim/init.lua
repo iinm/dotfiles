@@ -106,6 +106,8 @@ local setup_options = function()
   vim.o.spell = true
   vim.o.spelllang = 'en,cjk'
   vim.o.spelloptions = 'camel'
+  -- disable mouse
+  vim.o.mouse = ''
 end
 
 local setup_utilities = function()
