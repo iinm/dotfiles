@@ -191,6 +191,7 @@ local setup_keymap = function()
   end)
   for i = 1, 5, 1 do
     vim.keymap.set('n', '<C-w>' .. i, string.format('<Cmd>CloseTerms<CR><Cmd>%dToggleTerm<CR>', i))
+    vim.keymap.set('n', '<F' .. i .. '>', string.format('<Cmd>CloseTerms<CR><Cmd>%dToggleTerm<CR>', i))
   end
   vim.keymap.set('n', '<C-w>d', window_utils.toggle_debugger)
 
@@ -214,6 +215,7 @@ local setup_keymap = function()
       vim.keymap.set('t', '<C-w>z', window_utils.toggle_maximize)
       for i = 1, 5, 1 do
         vim.keymap.set('t', '<C-w>' .. i, string.format('<Cmd>CloseTerms<CR><Cmd>%dToggleTerm<CR>', i))
+        vim.keymap.set('t', '<F' .. i .. '>', string.format('<Cmd>CloseTerms<CR><Cmd>%dToggleTerm<CR>', i))
       end
     end,
   })
