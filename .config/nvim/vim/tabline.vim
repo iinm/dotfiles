@@ -35,9 +35,10 @@ function MyTabLabel(n)
   if filename == ''
     let filename = '[No Name]'
   endif
-  let filecount = ''
-  if len(buflist) > 1
-    let filecount = '(' .. len(buflist) .. ')'
-  endif
-  return a:n .. ':' .. filename .. ' ' .. filecount
+  return a:n .. ':' .. filename
+  " let filecount = ''
+  " if len(buflist) > 1
+  "   let filecount = '(' .. len(buflist) .. ')'
+  " endif
+  " return a:n .. ':' .. filename .. ' ' .. filecount
 endfunction
