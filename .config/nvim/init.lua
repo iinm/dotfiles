@@ -73,6 +73,13 @@ local require_safe = function(name)
 end
 
 local setup_options = function()
+  vim.opt.shada = {
+    '!',
+    "'1000", -- max number of previously edited files (oldfiles)
+    '<50',
+    's10',
+    'h'
+  }
   vim.opt.undofile = true
   vim.opt.ignorecase = true
   vim.opt.smartcase = true
