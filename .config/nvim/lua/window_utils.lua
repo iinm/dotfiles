@@ -71,6 +71,20 @@ local toggle_debugger = function()
   end
 end
 
+local toggle_fugitive = function()
+  for i = vim.fn.winnr('$'), 1, -1 do
+    local buf_name = vim.fn.bufname(vim.fn.winbufnr(i))
+    if vim.startswith(buf_name, 'fugitive://') then
+      -- close
+      vim.cmd(i .. 'wincmd c')
+      return
+    end
+  end
+
+  -- open
+  vim.cmd('G')
+end
+
 -- Maximize (Open in new tab)
 local toggle_maximize = function()
   local is_term = function()
@@ -104,5 +118,6 @@ return {
   open_debugger = open_debugger,
   close_debugger = close_debugger,
   toggle_debugger = toggle_debugger,
+  toggle_fugitive = toggle_fugitive,
   toggle_maximize = toggle_maximize,
 }
