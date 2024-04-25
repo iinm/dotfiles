@@ -201,7 +201,9 @@ local setup_keymap = function()
     vim.keymap.set('n', '<F' .. i .. '>', string.format('<Cmd>CloseTerms<CR><Cmd>%dToggleTerm<CR>', i))
   end
   vim.keymap.set('n', '<C-w>d', window_utils.toggle_debugger)
-  vim.keymap.set('n', '<C-w>g', window_utils.toggle_fugitive)
+
+  -- conflict with <C-w>gf (goto file in new tab)
+  -- vim.keymap.set('n', '<C-w>g', window_utils.toggle_fugitive)
 
   -- terminal
   vim.api.nvim_create_autocmd({ 'TermOpen' }, {
@@ -225,7 +227,7 @@ local setup_keymap = function()
         vim.keymap.set('t', '<C-w>' .. i, string.format('<Cmd>CloseTerms<CR><Cmd>%dToggleTerm<CR>', i))
         vim.keymap.set('t', '<F' .. i .. '>', string.format('<Cmd>CloseTerms<CR><Cmd>%dToggleTerm<CR>', i))
       end
-      vim.keymap.set('t', '<C-w>g', window_utils.toggle_fugitive)
+      -- vim.keymap.set('t', '<C-w>g', window_utils.toggle_fugitive)
     end,
   })
 
