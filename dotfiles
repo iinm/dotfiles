@@ -90,6 +90,7 @@ bootstrap_ubuntu() {
     tmux
     git
     make
+    build-essential
     ripgrep
     fd-find
     fzf
