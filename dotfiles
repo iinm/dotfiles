@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-NVIM_VERSION=0.9.5
+NVIM_VERSION=0.10.0
 EFM_LS_VERSION=0.0.53
 
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -221,9 +221,9 @@ setup_nvim() {
     fi
 
     if test "$(uname)" = "Darwin"; then
-      curl --show-error --fail -L $nvim_base_url/nvim-macos.tar.gz \
+      curl --show-error --fail -L $nvim_base_url/nvim-macos-arm64.tar.gz \
         | tar -C ~/tools -xzf -
-      ln -s nvim-macos "$nvim_path"
+      ln -s nvim-macos-arm64 "$nvim_path"
     fi
   fi
 
