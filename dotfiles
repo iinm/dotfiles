@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 NVIM_VERSION=0.9.5
-EFM_LS_VERSION=0.0.46
+EFM_LS_VERSION=0.0.53
 
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
