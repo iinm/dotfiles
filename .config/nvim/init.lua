@@ -245,7 +245,8 @@ local setup_keymap = function()
       vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
       vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
       vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
-      vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+      -- default
+      -- vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
       vim.keymap.set({ 'n', 'i' }, '<C-k>', vim.lsp.buf.signature_help, opts)
     end,
   })
@@ -468,6 +469,7 @@ end
 
 local setup_toggleterm = function()
   require("toggleterm").setup({
+    auto_scroll = false,
     size = function(term)
       if term.direction == "horizontal" then
         return vim.o.lines * 0.4
