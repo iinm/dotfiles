@@ -544,12 +544,14 @@ local setup_lsp = function()
   -- xattr -d com.apple.quarantine lemminx
   lspconfig.lemminx.setup({
     capabilities = capabilities,
-    settings = local_config.lemminx_settings or {}
-    -- settings = {
-    --   xml = {
-    --     catalogs = { vim.fn.expand('~/catalog.xml') }
-    --   }
-    -- }
+    settings = local_config.lemminx_settings or {
+      -- Example:
+      -- settings = {
+      --   xml = {
+      --     catalogs = { vim.fn.expand('~/catalog.xml') }
+      --   }
+      -- }
+    }
   })
 
   local efm_default_settings = require('efm_config').default_settings
@@ -565,9 +567,20 @@ local setup_lsp = function()
     settings = efm_settings,
   })
 
-  require("typescript-tools").setup({
-    capabilities = capabilities,
-  })
+  require("typescript-tools").setup(
+    vim.tbl_deep_extend("force",
+      { capabilities = capabilities },
+      local_config.typescript_tools or {
+        -- Example:
+        -- settings = {
+        --   tsserver_file_preferences = {
+        --     -- https://stackoverflow.com/questions/62503006/vscode-add-js-extension-on-import-autocomplete
+        --     importModuleSpecifierEnding = "js",
+        --   }
+        -- }
+      }
+    )
+  )
 end
 
 local setup_cmp = function()
