@@ -456,7 +456,7 @@ local setup_plugins = function()
 
     -- languages
     'dag/vim-fish',
-    'pangloss/vim-javascript',
+    -- 'pangloss/vim-javascript',
     'jparise/vim-graphql',
     'hashivim/vim-terraform',
     {
@@ -697,7 +697,8 @@ end
 
 local setup_comment = function()
   require('nvim-treesitter.configs').setup({
-    ensure_installed = { 'tsx' },
+    ensure_installed = { 'javascript', 'jsdoc', 'typescript', 'tsx' },
+    highlight = { enable = true },
   })
   -- https://github.com/JoosepAlviste/nvim-ts-context-commentstring/wiki/Integrations
   require('ts_context_commentstring').setup {
@@ -709,7 +710,7 @@ local setup_comment = function()
 end
 
 local setup_others = function()
-  vim.g.javascript_plugin_jsdoc = 1
+  -- vim.g.javascript_plugin_jsdoc = 1
   vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
   vim.g.copilot_filetypes = {
     markdown = true,
