@@ -696,7 +696,7 @@ end
 
 local setup_treesitter = function()
   require('nvim-treesitter.configs').setup({
-    ensure_installed = { 'jsdoc', 'tsx', 'mermaid' },
+    ensure_installed = { 'javascript', 'jsdoc', 'typescript', 'tsx', 'mermaid' },
     highlight = { enable = true },
   })
 end
