@@ -357,11 +357,11 @@ local setup_auto_commands = function()
 
   -- fix syntax highlighting
   -- https://vim.fandom.com/wiki/Fix_syntax_highlighting
-  vim.api.nvim_create_autocmd({ 'BufEnter', 'InsertLeave' }, {
-    group = vim.api.nvim_create_augroup('UserFixSyntaxHighlighting', {}),
-    pattern = { '*' },
-    command = 'syntax sync fromstart'
-  })
+  -- vim.api.nvim_create_autocmd({ 'BufEnter', 'InsertLeave' }, {
+  --   group = vim.api.nvim_create_augroup('UserFixSyntaxHighlighting', {}),
+  --   pattern = { '*' },
+  --   command = 'syntax sync fromstart'
+  -- })
 
   -- setup oil
   vim.api.nvim_create_autocmd({ 'FileType' }, {
