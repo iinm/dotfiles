@@ -456,7 +456,6 @@ local setup_plugins = function()
 
     -- languages
     'dag/vim-fish',
-    -- 'pangloss/vim-javascript',
     'jparise/vim-graphql',
     'hashivim/vim-terraform',
     {
@@ -695,11 +694,14 @@ local setup_oil = function()
   })
 end
 
-local setup_comment = function()
+local setup_treesitter = function()
   require('nvim-treesitter.configs').setup({
-    ensure_installed = { 'javascript', 'jsdoc', 'typescript', 'tsx' },
+    ensure_installed = { 'jsdoc', 'tsx', 'mermaid' },
     highlight = { enable = true },
   })
+end
+
+local setup_comment = function()
   -- https://github.com/JoosepAlviste/nvim-ts-context-commentstring/wiki/Integrations
   require('ts_context_commentstring').setup {
     enable_autocmd = false,
@@ -710,7 +712,6 @@ local setup_comment = function()
 end
 
 local setup_others = function()
-  -- vim.g.javascript_plugin_jsdoc = 1
   vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
   vim.g.copilot_filetypes = {
     markdown = true,
@@ -732,6 +733,7 @@ setup_lsp()
 setup_cmp()
 setup_dap()
 setup_oil()
+setup_treesitter()
 setup_comment()
 setup_others()
 
