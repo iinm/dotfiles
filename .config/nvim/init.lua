@@ -59,6 +59,10 @@
 --                      gx (xdg-open)
 --                      C-w gf (open in new tab)
 -- folding              zc (close), zo (open), zO (open all)
+-- spell                ]s (next), [s (previous)
+--                      z= (suggestions)
+--                      zg (add word to spellfile)
+--                      zw (remove word from spellfile)
 
 local require_safe = function(name)
   local ok, module = pcall(require, name)
