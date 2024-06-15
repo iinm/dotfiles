@@ -85,7 +85,6 @@ bootstrap_debian() {
     build-essential
     ripgrep
     fd-find
-    fzf
     curl
     jq
     xsel
@@ -111,6 +110,15 @@ bootstrap_debian() {
     echo "run: link fd to $fd_path"
     mkdir -p ~/tools/bin
     ln -s "$(which fdfind)" "$fd_path"
+  fi
+
+  local fzf_version=0.53.0
+  if fzf --version 2> /dev/null | grep -q "$fzf_version"; then
+    echo "skip: fzf $fzf_version is installed."
+  else
+    curl --show-error --fail -L \
+      "https://github.com/junegunn/fzf/releases/download/${fzf_version}/fzf-${fzf_version}-linux_amd64.tar.gz" \
+      | tar -C ~/tools/bin -xzf -
   fi
 }
 
