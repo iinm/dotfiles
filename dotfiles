@@ -17,6 +17,9 @@ Commands:
   setup_nvim      Setup neovim
   setup_git       Setup git
   setup_wezterm   Setup wezterm
+
+Optional commands:
+  setup_chrome    Setup Chrome startup options. (Linux only)
 HELP
 }
 
@@ -32,6 +35,8 @@ setup() {
 bootstrap() {
   if test -e /etc/pacman.conf; then
     bootstrap_archlinux
+  elif test "$(lsb_release -is 2> /dev/null)" = "Debian"; then
+    bootstrap_debian
   elif test "$(lsb_release -is 2> /dev/null)" = "Ubuntu"; then
     bootstrap_ubuntu
   elif test "$(uname)" = "Darwin"; then
@@ -68,6 +73,44 @@ bootstrap_archlinux() {
   else
     echo "run: install ${missing_packages[*]}"
     sudo pacman --noconfirm -Sy "${missing_packages[@]}"
+  fi
+}
+
+bootstrap_debian() {
+  local packages=(
+    fish
+    tmux
+    git
+    make
+    build-essential
+    ripgrep
+    fd-find
+    fzf
+    curl
+    jq
+    xsel
+    shellcheck
+  )
+  local missing_packages=()
+  for package in "${packages[@]}"; do
+    dpkg --status "$package" &> /dev/null || missing_packages+=("$package")
+  done
+
+  if test "${#missing_packages[@]}" -eq 0; then
+    echo "skip: all required packages are installed."
+  else
+    echo "run: install ${missing_packages[*]}"
+    sudo apt update
+    sudo apt install -y "${missing_packages[@]}"
+  fi
+
+  local fd_path=~/tools/bin/fd
+  if test -e "$fd_path"; then
+    echo "skip: fd is linked."
+  else
+    echo "run: link fd to $fd_path"
+    mkdir -p ~/tools/bin
+    ln -s "$(which fdfind)" "$fd_path"
   fi
 }
 
@@ -300,6 +343,21 @@ end
 return module
 EOF
   fi
+}
+
+setup_chrome() {
+  local original_desktop_entry=/usr/share/applications/google-chrome.desktop
+  local desktop_entry=~/.local/share/applications/google-chrome.desktop
+
+  echo "run: create chrome desktop entry. $desktop_entry"
+  local options=(
+    --force-device-scale-factor=1.15
+    # --enable-features=UseOzonePlatform
+    # --ozone-platform=wayland
+  )
+  sed -E "s,^(Exec=[^ ]+)(.*),\\1 ${options[*]}\\2,g" \
+    < "$original_desktop_entry" \
+    > "$desktop_entry"
 }
 
 if test "${BASH_SOURCE[0]}" = "$0"; then
