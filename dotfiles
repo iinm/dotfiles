@@ -3,7 +3,7 @@
 NVIM_VERSION=0.10.0
 EFM_LS_VERSION=0.0.53
 
-# Linux only
+# Debian only
 FZF_VERSION=0.53.0
 LUA_LANGUAGE_SERVER_VERSION=3.9.3
 
@@ -23,6 +23,8 @@ Commands:
   setup_wezterm   Setup wezterm
 
 Optional commands:
+  setup_nodejs    Setup Node.js
+                  Usage: setup_nodejs <version>
   setup_chrome    Setup Chrome startup options. (Linux only)
 HELP
 }
@@ -371,6 +373,33 @@ end
 
 return module
 EOF
+  fi
+}
+
+setup_nodejs() {
+  local nodejs_version="${1?"Please specify Node.js version"}"
+  local kernel
+  kernel="$(uname -s | awk '{ print tolower($0) }')"
+  local machine=x64
+  if test "$(uname -m)" = "arm64"; then
+    machine=arm64
+  fi
+  local ext=tar.xz
+  local extract_option=J
+  if test "$kernel" = "darwin"; then
+    ext=tar.gz
+    extract_option=z
+  fi
+
+  local nodejs_dir
+  nodejs_dir="$HOME/tools/node-v${nodejs_version}-${kernel}-${machine}"
+  if "${nodejs_dir}/bin/node" -v 2> /dev/null | grep -q "$nodejs_version"; then
+    echo "skip: Node.js $nodejs_version is installed in $nodejs_dir"
+  else
+    echo "run: install Node.js $nodejs_version"
+    local url="https://nodejs.org/dist/v${nodejs_version}/node-v${nodejs_version}-${kernel}-${machine}.${ext}"
+    rm -rf "$nodejs_dir"
+    curl --show-error --fail -L "$url" | tar -C ~/tools -x${extract_option}f -
   fi
 }
 
