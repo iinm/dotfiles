@@ -2,6 +2,7 @@
 
 NVIM_VERSION=0.10.0
 EFM_LS_VERSION=0.0.53
+FZF_VERSION=0.53.0
 
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -103,6 +104,21 @@ bootstrap_debian() {
     sudo apt install -y "${missing_packages[@]}"
   fi
 
+  setup_fzf_on_linux
+  setup_fd_link_on_debian
+}
+
+setup_fzf_on_linux() {
+  if fzf --version 2> /dev/null | grep -q "$FZF_VERSION"; then
+    echo "skip: fzf $FZF_VERSION is installed."
+  else
+    curl --show-error --fail -L \
+      "https://github.com/junegunn/fzf/releases/download/${FZF_VERSION}/fzf-${FZF_VERSION}-linux_amd64.tar.gz" \
+      | tar -C ~/tools/bin -xzf -
+  fi
+}
+
+setup_fd_link_on_debian() {
   local fd_path=~/tools/bin/fd
   if test -e "$fd_path"; then
     echo "skip: fd is linked."
@@ -110,15 +126,6 @@ bootstrap_debian() {
     echo "run: link fd to $fd_path"
     mkdir -p ~/tools/bin
     ln -s "$(which fdfind)" "$fd_path"
-  fi
-
-  local fzf_version=0.53.0
-  if fzf --version 2> /dev/null | grep -q "$fzf_version"; then
-    echo "skip: fzf $fzf_version is installed."
-  else
-    curl --show-error --fail -L \
-      "https://github.com/junegunn/fzf/releases/download/${fzf_version}/fzf-${fzf_version}-linux_amd64.tar.gz" \
-      | tar -C ~/tools/bin -xzf -
   fi
 }
 
@@ -160,14 +167,8 @@ bootstrap_ubuntu() {
     sudo apt install -y "${missing_packages[@]}"
   fi
 
-  local fd_path=~/tools/bin/fd
-  if test -e "$fd_path"; then
-    echo "skip: fd is linked."
-  else
-    echo "run: link fd to $fd_path"
-    mkdir -p ~/tools/bin
-    ln -s "$(which fdfind)" "$fd_path"
-  fi
+  setup_fzf_on_linux
+  setup_fd_link_on_debian
 }
 
 bootstrap_darwin() {
