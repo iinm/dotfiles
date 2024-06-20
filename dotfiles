@@ -201,11 +201,13 @@ bootstrap_darwin() {
     fd
     fzf
     jq
+    gawk
     shellcheck
     colima
     docker
     docker-compose
     lua-language-server
+    tlrc
     csvq
   )
   local missing_packages=()
