@@ -95,6 +95,7 @@ bootstrap_debian() {
     jq
     xsel
     shellcheck
+    tldr
   )
   local missing_packages=()
   for package in "${packages[@]}"; do
@@ -174,6 +175,7 @@ bootstrap_ubuntu() {
     jq
     xsel
     shellcheck
+    tldr
   )
   local missing_packages=()
   for package in "${packages[@]}"; do
