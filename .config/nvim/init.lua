@@ -487,7 +487,7 @@ local setup_lsp = function()
   local local_config = require_safe('local_config')
 
   -- formatter
-  local lsp_format_clients = vim.tbl_flatten({
+  local lsp_format_clients = vim.iter({
     local_config.lsp_format_clients or {},
     -- default clients
     {
@@ -501,7 +501,7 @@ local setup_lsp = function()
       { file = '%.tf$',   client = 'efm' },
       { file = '%.json$', client = 'efm' },
     },
-  })
+  }):flatten():totable()
 
   -- format on save
   vim.api.nvim_create_autocmd('LspAttach', {
@@ -512,6 +512,7 @@ local setup_lsp = function()
         pattern = { '*' },
         callback = function(ev)
           -- print(vim.inspect(ev))
+          -- print(vim.inspect(lsp_format_clients))
           vim.lsp.buf.format({
             async = false,
             timeout_ms = 3000,
