@@ -182,7 +182,6 @@ local setup_keymap = function()
   vim.g.mapleader = ' '
   -- utilities
   vim.keymap.set('n', '<leader>r', 'q:?')
-  vim.keymap.set('n', '<leader><leader>', ':<C-u>Commands<CR>')
   vim.keymap.set('n', '<leader>f', ':<C-u>Files<CR>')
   vim.keymap.set('n', '<leader>o', ':<C-u>Oldfiles<CR>')
   vim.keymap.set('n', '<leader>b', ':<C-u>Buffers<CR>')
@@ -207,7 +206,6 @@ local setup_keymap = function()
     vim.keymap.set('n', '<C-w>' .. i, string.format('<Cmd>CloseTerms<CR><Cmd>%dToggleTerm<CR>', i))
     vim.keymap.set('n', '<F' .. i .. '>', string.format('<Cmd>CloseTerms<CR><Cmd>%dToggleTerm<CR>', i))
   end
-  vim.keymap.set('n', '<C-w>d', window_utils.toggle_debugger)
 
   -- terminal
   vim.api.nvim_create_autocmd({ 'TermOpen' }, {
@@ -236,7 +234,6 @@ local setup_keymap = function()
 
   -- lsp
   -- https://github.com/neovim/nvim-lspconfig
-  vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
   vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
   vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
 
@@ -264,7 +261,6 @@ local setup_keymap = function()
 
   -- dap
   vim.keymap.set('n', '<leader>db', ':<C-u>DapToggleBreakpoint<CR>')
-  vim.keymap.set('n', '<leader>dc', ':<C-u>DapContinue<CR>')
   vim.keymap.set({ 'n', 'v' }, '<leader>de', '<Cmd>lua require("dapui").eval()<CR>')
 
   -- luasnip
@@ -281,9 +277,11 @@ local setup_commands = function()
     { 'OldfilesGlobal',       function() vim.fn['Oldfiles']() end,                      {} },
     { 'ToggleDebugger',       function() window_utils.toggle_debugger() end,            {} },
     { 'ClearBreakpoints',     function() require('dap').clear_breakpoints() end,        {} },
+    { 'Debug',                function() require('dap').continue() end,                 {} },
     { 'Outline',              'call Outline()',                                         {} },
     { 'CloseTerms',           function() window_utils.close_terms() end,                {} },
     { 'ToggleHighlightColor', function() require("nvim-highlight-colors").toggle() end, {} },
+    { 'Diagnostics',          function() vim.diagnostic.setloclist() end,               {} },
   }
 
   for _, command in ipairs(commands) do
@@ -711,7 +709,6 @@ end
 local setup_others = function()
   vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
   vim.g.copilot_filetypes = {
-    markdown = true,
     gitcommit = true,
   }
   require('hop').setup()
