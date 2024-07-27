@@ -64,6 +64,9 @@
 --                      zg (add word to spellfile)
 --                      zw (remove word from spellfile)
 
+-- lua version compatibility
+table.unpack = table.unpack or unpack
+
 local require_safe = function(name)
   local ok, module = pcall(require, name)
   if not ok then
@@ -129,24 +132,26 @@ local setup_utilities = function()
   vim.cmd.source(config_path .. '/vim/tabline.vim')
 end
 
+local hide_statusline = function()
+  vim.opt.laststatus = 0
+  vim.cmd [[
+  hi! link StatusLine WinSeparator
+  hi! link StatusLineNC WinSeparator
+  ]]
+  vim.opt.statusline = [[%{repeat('─', winwidth('.'))}]]
+end
+
 local setup_appearance = function()
   vim.g.everforest_background = 'soft'
   vim.opt.background = 'dark'
   vim.cmd.colorscheme('everforest')
 
   -- statusline
+  hide_statusline()
   -- vim.opt.laststatus = 3
 
-  -- hide statusline
-  vim.opt.laststatus = 0
-  vim.cmd [[
-  hi! link StatusLine WinSeparator
-  hi! link StatusLineNC WinSeparator
-  ]]
-  vim.opt.statusline  = [[%{repeat('─', winwidth('.'))}]]
-
   -- tabline
-  vim.opt.tabline     = '%!MyTabLine()'
+  vim.opt.tabline = '%!MyTabLine()'
   -- vim.opt.showtabline = 2
 
   -- ruler
@@ -185,9 +190,6 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>s', ':<C-u>gr!<Space>')
   vim.keymap.set('n', '<leader>x', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
   vim.keymap.set('n', '<leader>z', ':<C-u>setl foldlevel=')
-  vim.keymap.set('n', '<leader>c', function()
-    require("nvim-highlight-colors").toggle()
-  end)
   -- vim.keymap.set('v', '//', [[y/\V<C-r>=escape(@",'/\')<CR><CR>]]) -- -> use * or # instead
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
   -- vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>:file<CR>')
@@ -205,9 +207,6 @@ local setup_keymap = function()
     vim.keymap.set('n', '<F' .. i .. '>', string.format('<Cmd>CloseTerms<CR><Cmd>%dToggleTerm<CR>', i))
   end
   vim.keymap.set('n', '<C-w>d', window_utils.toggle_debugger)
-
-  -- conflict with <C-w>gf (goto file in new tab)
-  -- vim.keymap.set('n', '<C-w>g', window_utils.toggle_fugitive)
 
   -- terminal
   vim.api.nvim_create_autocmd({ 'TermOpen' }, {
@@ -231,15 +230,15 @@ local setup_keymap = function()
         vim.keymap.set('t', '<C-w>' .. i, string.format('<Cmd>CloseTerms<CR><Cmd>%dToggleTerm<CR>', i))
         vim.keymap.set('t', '<F' .. i .. '>', string.format('<Cmd>CloseTerms<CR><Cmd>%dToggleTerm<CR>', i))
       end
-      -- vim.keymap.set('t', '<C-w>g', window_utils.toggle_fugitive)
     end,
   })
 
   -- lsp
   -- https://github.com/neovim/nvim-lspconfig
   vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
-  vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
-  vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
+  -- default
+  -- vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
+  -- vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
 
   vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('UserLspKeymapConfig', {}),
@@ -256,13 +255,12 @@ local setup_keymap = function()
   })
 
   -- git
-  vim.keymap.set('n', '<leader>gs', ':<C-u>Git status<CR>')
+  vim.keymap.set('n', '<leader>gg', window_utils.toggle_fugitive)
   vim.keymap.set('n', '<leader>gf', ':<C-u>Git fetch --prune<CR>')
   vim.keymap.set('n', '<leader>gc', ':<C-u>Git checkout<Space>')
   vim.keymap.set('n', '<leader>gp', ':<C-u>Git pull origin <C-r>=FugitiveHead()<CR><CR>')
   vim.keymap.set('n', '<leader>gP',
     [[:5TermExec open=0 cmd='with_notify git push origin <C-r>=FugitiveHead()<CR>'<Left>]])
-  vim.keymap.set('n', '<leader>gb', ':<C-u>Git blame<CR>')
 
   -- dap
   vim.keymap.set('n', '<leader>db', ':<C-u>DapToggleBreakpoint<CR>')
@@ -277,48 +275,36 @@ end
 
 local setup_commands = function()
   local window_utils = require('window_utils')
-  vim.api.nvim_create_user_command('BDelete', 'b # | bd #', {})
-  vim.api.nvim_create_user_command('BOnly', '%bd | e # | bd #', {})
-  vim.api.nvim_create_user_command('Buffers', 'call Buffers()', {})
-  vim.api.nvim_create_user_command('Outline', 'call Outline()', {})
-  vim.api.nvim_create_user_command('Oldfiles', function()
-    vim.fn['Oldfiles']({ only_cwd = true })
-  end, {})
-  vim.api.nvim_create_user_command('OldfilesGlobal', function()
-    vim.fn['Oldfiles']()
-  end, {})
+  local commands = {
+    { 'Buffers',              'call Buffers()',                                         {} },
+    { 'Oldfiles',             function() vim.fn['Oldfiles']({ only_cwd = true }) end,   {} },
+    { 'OldfilesGlobal',       function() vim.fn['Oldfiles']() end,                      {} },
+    { 'ToggleDebugger',       function() window_utils.toggle_debugger() end,            {} },
+    { 'ClearBreakpoints',     function() require('dap').clear_breakpoints() end,        {} },
+    { 'Outline',              'call Outline()',                                         {} },
+    { 'CloseTerms',           function() window_utils.close_terms() end,                {} },
+    { 'ToggleHighlightColor', function() require("nvim-highlight-colors").toggle() end, {} },
+  }
 
-  vim.api.nvim_create_user_command('CloseTerms', window_utils.close_terms, {})
-
-  vim.api.nvim_create_user_command('ToggleDebugger', window_utils.toggle_debugger, {})
-  vim.api.nvim_create_user_command('ClearBreakpoints', function()
-    require('dap').clear_breakpoints()
-  end, {})
+  for _, command in ipairs(commands) do
+    vim.api.nvim_create_user_command(table.unpack(command))
+  end
 
   vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('UserLspCommandConfig', {}),
     callback = function()
-      vim.api.nvim_create_user_command('LspRename', function()
-        vim.lsp.buf.rename()
-      end, {})
-      vim.api.nvim_create_user_command('LspFormat', function()
-        vim.lsp.buf.format({ async = false })
-      end, {})
-      vim.api.nvim_create_user_command('LspTypeDefinition', function()
-        vim.lsp.buf.type_definition()
-      end, {})
-      vim.api.nvim_create_user_command('LspDeclaration', function()
-        vim.lsp.buf.declaration()
-      end, {})
-      vim.api.nvim_create_user_command('LspImplementation', function()
-        vim.lsp.buf.implementation()
-      end, {})
-      vim.api.nvim_create_user_command('LspIncomingCall', function()
-        vim.lsp.buf.incoming_calls()
-      end, {})
-      vim.api.nvim_create_user_command('LspOutgoingCall', function()
-        vim.lsp.buf.outgoing_calls()
-      end, {})
+      local lsp_commands = {
+        { 'LspRename',         function() vim.lsp.buf.rename() end,                  {} },
+        { 'LspFormat',         function() vim.lsp.buf.format({ async = false }) end, {} },
+        { 'LspTypeDefinition', function() vim.lsp.buf.type_definition() end,         {} },
+        { 'LspDeclaration',    function() vim.lsp.buf.declaration() end,             {} },
+        { 'LspImplementation', function() vim.lsp.buf.implementation() end,          {} },
+        { 'LspIncomingCall',   function() vim.lsp.buf.incoming_calls() end,          {} },
+        { 'LspOutgoingCall',   function() vim.lsp.buf.outgoing_calls() end,          {} },
+      }
+      for _, command in ipairs(lsp_commands) do
+        vim.api.nvim_create_user_command(table.unpack(command))
+      end
     end,
   })
 end
@@ -367,9 +353,9 @@ local setup_auto_commands = function()
   --   command = 'syntax sync fromstart'
   -- })
 
-  -- setup oil
+  -- oil
   vim.api.nvim_create_autocmd({ 'FileType' }, {
-    group = vim.api.nvim_create_augroup('UserSetupOil', {}),
+    group = vim.api.nvim_create_augroup('UserOilShowPath', {}),
     pattern = { 'oil' },
     callback = function()
       -- show path
@@ -377,6 +363,7 @@ local setup_auto_commands = function()
     end,
   })
 
+  -- fzf
   vim.api.nvim_create_autocmd({ 'FileType' }, {
     group = vim.api.nvim_create_augroup('UserFzfExitOnEsc', {}),
     pattern = { 'fzf' },
@@ -389,15 +376,18 @@ end
 local setup_plugins = function()
   -- https://github.com/folke/lazy.nvim
   local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
-  if not vim.loop.fs_stat(lazypath) then
-    vim.fn.system({
-      'git',
-      'clone',
-      '--filter=blob:none',
-      'https://github.com/folke/lazy.nvim.git',
-      '--branch=stable', -- latest stable release
-      lazypath,
-    })
+  if not (vim.uv or vim.loop).fs_stat(lazypath) then
+    local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
+    local out = vim.fn.system({ 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath })
+    if vim.v.shell_error ~= 0 then
+      vim.api.nvim_echo({
+        { 'Failed to clone lazy.nvim:\n', 'ErrorMsg' },
+        { out,                            'WarningMsg' },
+        { '\nPress any key to exit...' },
+      }, true, {})
+      vim.fn.getchar()
+      os.exit(1)
+    end
   end
   vim.opt.rtp:prepend(lazypath)
 
@@ -459,9 +449,6 @@ local setup_plugins = function()
     'saadparwaiz1/cmp_luasnip',
 
     -- languages
-    'dag/vim-fish',
-    'jparise/vim-graphql',
-    'hashivim/vim-terraform',
     {
       "pmizio/typescript-tools.nvim",
       dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
@@ -512,13 +499,10 @@ local setup_lsp = function()
         pattern = { '*' },
         callback = function(ev)
           -- print(vim.inspect(ev))
-          -- print(vim.inspect(lsp_format_clients))
           vim.lsp.buf.format({
             async = false,
             timeout_ms = 3000,
             filter = function(client)
-              -- print(vim.inspect(client))
-              -- print(client.name)
               for _, v in ipairs(lsp_format_clients) do
                 if string.match(ev.file, v.file) then
                   return client.name == v.client
@@ -701,7 +685,15 @@ end
 
 local setup_treesitter = function()
   require('nvim-treesitter.configs').setup({
-    ensure_installed = { 'javascript', 'jsdoc', 'typescript', 'tsx', 'mermaid', 'vim', 'vimdoc' },
+    ensure_installed = {
+      'vim', 'vimdoc',
+      'javascript', 'jsdoc',
+      'typescript', 'tsx',
+      'mermaid',
+      'fish',
+      'terraform',
+      'graphql'
+    },
     highlight = { enable = true },
   })
 end
@@ -720,7 +712,7 @@ local setup_others = function()
   vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
   vim.g.copilot_filetypes = {
     markdown = true,
-    gitcommit = true
+    gitcommit = true,
   }
   require('hop').setup()
   require('nvim-autopairs').setup()

@@ -3,9 +3,11 @@ function! Oldfiles(options={'only_cwd': v:false}) abort
   let l:files = filter(
   \  deepcopy(v:oldfiles),
   \  {
-  \    _, path -> filereadable(expand(path))
-  \      && (!l:only_cwd || expand(path) =~# '^' .. getcwd() .. '/')
+  \    _, path ->
+  \      path !~# 'dap-repl'
   \      && path !~# 'COMMIT_EDITMSG$'
+  \      && filereadable(expand(path))
+  \      && (!l:only_cwd || expand(path) =~# '^' .. getcwd() .. '/')
   \  }
   \ )
 
