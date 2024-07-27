@@ -182,6 +182,7 @@ local setup_keymap = function()
   vim.g.mapleader = ' '
   -- utilities
   vim.keymap.set('n', '<leader>r', 'q:?')
+  vim.keymap.set('n', '<leader><leader>', ':<C-u>Commands<CR>')
   vim.keymap.set('n', '<leader>f', ':<C-u>Files<CR>')
   vim.keymap.set('n', '<leader>o', ':<C-u>Oldfiles<CR>')
   vim.keymap.set('n', '<leader>b', ':<C-u>Buffers<CR>')
