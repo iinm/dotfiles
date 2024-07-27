@@ -65,6 +65,7 @@
 --                      zw (remove word from spellfile)
 
 -- lua version compatibility
+---@diagnostic disable-next-line: deprecated
 table.unpack = table.unpack or unpack
 
 local require_safe = function(name)
