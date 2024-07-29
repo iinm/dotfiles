@@ -115,42 +115,6 @@ bootstrap_debian() {
   setup_fd_link_on_debian
 }
 
-setup_fzf_on_linux() {
-  if fzf --version 2> /dev/null | grep -q "$FZF_VERSION"; then
-    echo "skip: fzf $FZF_VERSION is installed."
-  else
-    run "run: install fzf $FZF_VERSION"
-    curl --show-error --fail -L \
-      "https://github.com/junegunn/fzf/releases/download/${FZF_VERSION}/fzf-${FZF_VERSION}-linux_amd64.tar.gz" \
-      | tar -C ~/tools/bin -xzf -
-  fi
-}
-
-setup_lua_language_server_on_linux() {
-  local lua_language_server_dir=~/tools/lua-language-server
-  if lua-language-server --version 2> /dev/null | grep -q "$LUA_LANGUAGE_SERVER_VERSION"; then
-    echo "skip: lua-language-server $LUA_LANGUAGE_SERVER_VERSION is installed."
-  else
-    echo "run: install lua-language-server $LUA_LANGUAGE_SERVER_VERSION"
-    rm -rf "$lua_language_server_dir"
-    mkdir -p "$lua_language_server_dir"
-    curl --show-error --fail -L \
-      "https://github.com/LuaLS/lua-language-server/releases/download/${LUA_LANGUAGE_SERVER_VERSION}/lua-language-server-${LUA_LANGUAGE_SERVER_VERSION}-linux-x64.tar.gz" \
-      | tar -C "$lua_language_server_dir" -xzf -
-  fi
-}
-
-setup_fd_link_on_debian() {
-  local fd_path=~/tools/bin/fd
-  if test -e "$fd_path"; then
-    echo "skip: fd is linked."
-  else
-    echo "run: link fd to $fd_path"
-    mkdir -p ~/tools/bin
-    ln -s "$(which fdfind)" "$fd_path"
-  fi
-}
-
 bootstrap_ubuntu() {
   if lsb_release -r | grep -qE "20.04"; then
     if test -e /etc/apt/sources.list.d/fish-shell-ubuntu-release-3-*.list; then
@@ -193,6 +157,42 @@ bootstrap_ubuntu() {
   setup_fzf_on_linux
   setup_lua_language_server_on_linux
   setup_fd_link_on_debian
+}
+
+setup_fzf_on_linux() {
+  if fzf --version 2> /dev/null | grep -q "$FZF_VERSION"; then
+    echo "skip: fzf $FZF_VERSION is installed."
+  else
+    run "run: install fzf $FZF_VERSION"
+    curl --show-error --fail -L \
+      "https://github.com/junegunn/fzf/releases/download/${FZF_VERSION}/fzf-${FZF_VERSION}-linux_amd64.tar.gz" \
+      | tar -C ~/tools/bin -xzf -
+  fi
+}
+
+setup_lua_language_server_on_linux() {
+  local lua_language_server_dir=~/tools/lua-language-server
+  if lua-language-server --version 2> /dev/null | grep -q "$LUA_LANGUAGE_SERVER_VERSION"; then
+    echo "skip: lua-language-server $LUA_LANGUAGE_SERVER_VERSION is installed."
+  else
+    echo "run: install lua-language-server $LUA_LANGUAGE_SERVER_VERSION"
+    rm -rf "$lua_language_server_dir"
+    mkdir -p "$lua_language_server_dir"
+    curl --show-error --fail -L \
+      "https://github.com/LuaLS/lua-language-server/releases/download/${LUA_LANGUAGE_SERVER_VERSION}/lua-language-server-${LUA_LANGUAGE_SERVER_VERSION}-linux-x64.tar.gz" \
+      | tar -C "$lua_language_server_dir" -xzf -
+  fi
+}
+
+setup_fd_link_on_debian() {
+  local fd_path=~/tools/bin/fd
+  if test -e "$fd_path"; then
+    echo "skip: fd is linked."
+  else
+    echo "run: link fd to $fd_path"
+    mkdir -p ~/tools/bin
+    ln -s "$(which fdfind)" "$fd_path"
+  fi
 }
 
 bootstrap_darwin() {
