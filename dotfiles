@@ -14,18 +14,17 @@ help() {
 Usage: dotfiles COMMAND
 
 Commands:
-  setup           Run all setup commands
-  bootstrap       Install essential utilities
-  link            Create symlink to dotfiles
-  setup_fish      Setup fish shell
-  setup_nvim      Setup neovim
-  setup_git       Setup git
-  setup_wezterm   Setup wezterm
+  setup          Run all setup commands
+  bootstrap      Install essential utilities
+  link           Create symlink to dotfiles
+  setup_fish     Setup fish shell
+  setup_nvim     Setup neovim
+  setup_git      Setup git
+  setup_wezterm  Setup wezterm
 
 Optional commands:
-  setup_nodejs    Setup Node.js
-                  Usage: setup_nodejs <version>
-  setup_chrome    Setup Chrome startup options. (Linux only)
+  setup_nodejs  Setup Node.js
+  setup_chrome  Setup Chrome startup options. (Linux only)
 HELP
 }
 
@@ -381,7 +380,8 @@ EOF
 }
 
 setup_nodejs() {
-  local nodejs_version="${1?"Please specify Node.js version"}"
+  local usage="setup_nodejs VERSION"
+  local nodejs_version="${1?"Usage: $usage"}"
   local kernel
   kernel="$(uname -s | awk '{ print tolower($0) }')"
   local machine=x64
