@@ -259,6 +259,7 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>gp', ':<C-u>Git pull origin <C-r>=FugitiveHead()<CR><CR>')
   vim.keymap.set('n', '<leader>gP',
     [[:5TermExec open=0 cmd='with_notify git push origin <C-r>=FugitiveHead()<CR>'<Left>]])
+  vim.keymap.set('n', '<leader>gb', ':<C-u>Git blame<CR>')
 
   -- dap
   vim.keymap.set('n', '<leader>db', ':<C-u>DapToggleBreakpoint<CR>')
