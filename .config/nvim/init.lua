@@ -327,6 +327,18 @@ local setup_auto_commands = function()
     command = 'botright cwindow | setlocal nowrap'
   })
 
+  -- folding method
+  vim.api.nvim_create_autocmd({ 'FileType' }, {
+    callback = function()
+      if require('nvim-treesitter.parsers').has_parser() then
+        vim.opt.foldmethod = 'expr'
+        vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
+      else
+        vim.opt.foldmethod = "indent"
+      end
+    end,
+  })
+
   -- indent
   vim.api.nvim_create_autocmd({ 'FileType' }, {
     pattern = 'go',
