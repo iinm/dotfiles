@@ -112,6 +112,16 @@ local toggle_maximize = function()
   end
 end
 
+local toggle_quickfix = function()
+  for _, win in pairs(vim.fn.getwininfo()) do
+    if win.quickfix == 1 then
+      vim.cmd('cclose')
+      return
+    end
+  end
+  vim.cmd('copen')
+end
+
 return {
   close_terms = close_terms,
   close_terms_in_other_tab = close_terms_in_other_tab,
@@ -120,4 +130,5 @@ return {
   toggle_debugger = toggle_debugger,
   toggle_fugitive = toggle_fugitive,
   toggle_maximize = toggle_maximize,
+  toggle_quickfix = toggle_quickfix,
 }

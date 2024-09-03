@@ -191,6 +191,7 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>s', ':<C-u>gr!<Space>')
   vim.keymap.set('n', '<leader>x', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
   vim.keymap.set('n', '<leader>z', ':<C-u>setl foldlevel=')
+  vim.keymap.set('n', '<leader>q', window_utils.toggle_quickfix)
   -- vim.keymap.set('v', '//', [[y/\V<C-r>=escape(@",'/\')<CR><CR>]]) -- -> use * or # instead
   vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
   -- vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>:file<CR>')
