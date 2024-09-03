@@ -175,6 +175,11 @@ local setup_appearance = function()
     update_in_insert = false,
     severity_sort = true,
   })
+
+  -- spell
+  vim.cmd [[
+  hi! SpellBad cterm=underline gui=underline
+  ]]
 end
 
 local setup_keymap = function()
