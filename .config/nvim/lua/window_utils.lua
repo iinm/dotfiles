@@ -119,7 +119,7 @@ local toggle_quickfix = function()
       return
     end
   end
-  vim.cmd('copen')
+  vim.cmd('botright cwindow | setlocal nowrap')
 end
 
 return {
