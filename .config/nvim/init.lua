@@ -178,7 +178,8 @@ local setup_appearance = function()
 
   -- spell
   vim.cmd [[
-  hi! SpellBad cterm=underline gui=underline
+  hi clear SpellBad
+  hi SpellBad cterm=underline gui=underline
   ]]
 end
 
