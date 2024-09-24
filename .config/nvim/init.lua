@@ -458,6 +458,11 @@ local setup_plugins = function()
     'hrsh7th/cmp-cmdline',
     'hrsh7th/nvim-cmp',
     'github/copilot.vim',
+    {
+      'CopilotC-Nvim/CopilotChat.nvim',
+      branch = 'canary',
+      build = 'make tiktoken',
+    },
 
     -- snippets
     {
@@ -736,6 +741,9 @@ local setup_others = function()
   require('nvim-autopairs').setup()
   require("nvim-surround").setup()
   require('dressing').setup()
+  require("CopilotChat").setup({
+    debug = false,
+  })
 end
 
 -- Setup
