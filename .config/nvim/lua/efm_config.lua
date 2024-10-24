@@ -60,15 +60,15 @@ local default_settings = {
       tools.linters.shellcheck,
     },
     javascript = {
-      tools.linters.eslint,
+      -- tools.linters.eslint,
       tools.formatters.prettier,
     },
     typescript = {
-      tools.linters.eslint,
+      -- tools.linters.eslint,
       tools.formatters.prettier,
     },
     typescriptreact = {
-      tools.linters.eslint,
+      -- tools.linters.eslint,
       tools.formatters.prettier,
     },
     go = {
