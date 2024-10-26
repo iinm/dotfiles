@@ -497,6 +497,74 @@ end
 local setup_lsp = function()
   local local_config = require_safe('local_config')
 
+  -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md
+  local lspconfig = require('lspconfig')
+  local capabilities = require('cmp_nvim_lsp').default_capabilities()
+
+  if vim.fn.executable('lua-language-server') then
+    lspconfig.lua_ls.setup({
+      capabilities = capabilities,
+    })
+  end
+
+  -- brew install terraform-ls
+  if vim.fn.executable('terraform-ls') then
+    lspconfig.terraformls.setup({
+      capabilities = capabilities,
+    })
+  end
+
+  -- npm i -g vscode-langservers-extracted
+  if vim.fn.executable('vscode-eslint-language-server') then
+    lspconfig.eslint.setup({
+      capabilities = capabilities,
+    })
+  end
+
+  -- https://github.com/redhat-developer/vscode-xml/releases
+  -- xattr -d com.apple.quarantine lemminx
+  if vim.fn.executable('lemminx') then
+    lspconfig.lemminx.setup({
+      capabilities = capabilities,
+      settings = local_config.lemminx_settings or {
+        -- Example:
+        -- settings = {
+        --   xml = {
+        --     catalogs = { vim.fn.expand('~/catalog.xml') }
+        --   }
+        -- }
+      }
+    })
+  end
+
+  local efm_default_settings = require('efm_config').default_settings
+  local efm_settings = vim.tbl_deep_extend(
+    'force',
+    efm_default_settings,
+    local_config.efm_settings or {}
+  )
+  lspconfig.efm.setup({
+    capabilities = capabilities,
+    init_options = { documentFormatting = true },
+    filetypes = vim.tbl_keys(efm_settings.languages),
+    settings = efm_settings,
+  })
+
+  require("typescript-tools").setup(
+    vim.tbl_deep_extend("force",
+      { capabilities = capabilities },
+      local_config.typescript_tools or {
+        -- Example:
+        -- settings = {
+        --   tsserver_file_preferences = {
+        --     -- https://stackoverflow.com/questions/62503006/vscode-add-js-extension-on-import-autocomplete
+        --     importModuleSpecifierEnding = "js",
+        --   }
+        -- }
+      }
+    )
+  )
+
   -- formatter
   local lsp_format_clients = vim.iter({
     local_config.lsp_format_clients or {},
@@ -539,60 +607,6 @@ local setup_lsp = function()
       })
     end,
   })
-
-  -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
-  local lspconfig = require('lspconfig')
-  local capabilities = require('cmp_nvim_lsp').default_capabilities()
-
-  lspconfig.lua_ls.setup({
-    capabilities = capabilities,
-  })
-
-  lspconfig.terraformls.setup({
-    capabilities = capabilities,
-  })
-
-  -- https://github.com/redhat-developer/vscode-xml/releases
-  -- xattr -d com.apple.quarantine lemminx
-  lspconfig.lemminx.setup({
-    capabilities = capabilities,
-    settings = local_config.lemminx_settings or {
-      -- Example:
-      -- settings = {
-      --   xml = {
-      --     catalogs = { vim.fn.expand('~/catalog.xml') }
-      --   }
-      -- }
-    }
-  })
-
-  local efm_default_settings = require('efm_config').default_settings
-  local efm_settings = vim.tbl_deep_extend(
-    'force',
-    efm_default_settings,
-    local_config.efm_settings or {}
-  )
-  lspconfig.efm.setup({
-    capabilities = capabilities,
-    init_options = { documentFormatting = true },
-    filetypes = vim.tbl_keys(efm_settings.languages),
-    settings = efm_settings,
-  })
-
-  require("typescript-tools").setup(
-    vim.tbl_deep_extend("force",
-      { capabilities = capabilities },
-      local_config.typescript_tools or {
-        -- Example:
-        -- settings = {
-        --   tsserver_file_preferences = {
-        --     -- https://stackoverflow.com/questions/62503006/vscode-add-js-extension-on-import-autocomplete
-        --     importModuleSpecifierEnding = "js",
-        --   }
-        -- }
-      }
-    )
-  )
 end
 
 local setup_cmp = function()
