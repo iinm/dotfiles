@@ -66,6 +66,7 @@ bootstrap_archlinux() {
     xsel
     gnu-netcat
     whois
+    lua-language-server
   )
   local missing_packages=()
   for package in "${packages[@]}"; do
@@ -92,6 +93,8 @@ bootstrap_debian() {
     curl
     jq
     xsel
+    shellcheck
+    tldr
   )
   local missing_packages=()
   for package in "${packages[@]}"; do
@@ -134,6 +137,8 @@ bootstrap_ubuntu() {
     curl
     jq
     xsel
+    shellcheck
+    tldr
   )
   local missing_packages=()
   for package in "${packages[@]}"; do
@@ -198,9 +203,13 @@ bootstrap_darwin() {
     fzf
     jq
     gawk
+    shellcheck
     colima
     docker
     docker-compose
+    lua-language-server
+    tlrc
+    csvq
   )
   local missing_packages=()
   for package in "${packages[@]}"; do
