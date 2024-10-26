@@ -1,10 +1,4 @@
-local efm_root_markers = {
-  eslint = {
-    '.eslintrc.cjs',
-    '.eslintrc.js',
-    '.eslintrc.json',
-  }
-}
+local efm_root_markers = {}
 
 local tools = {
   linters = {
@@ -17,17 +11,6 @@ local tools = {
         '%f:%l:%c: %tote: %m',
       },
     },
-    eslint = {
-      lintCommand = 'bash $HOME/.config/efm-langserver/eslint-stdin.sh ${INPUT}',
-      lintIgnoreExitCode = true,
-      lintStdin = true,
-      lintFormats = {
-        '%f(%l,%c): %tarning %m',
-        '%f(%l,%c): %trror %m',
-        '%f(%l,%c): %tnfo %m',
-      },
-      rootMarkers = efm_root_markers.eslint,
-    },
   },
   formatters = {
     prettier = {
@@ -36,11 +19,6 @@ local tools = {
       rootMarkers = {
         '.prettierrc.json'
       },
-    },
-    eslint_fix = {
-      formatCommand = 'bash $HOME/.config/efm-langserver/eslint-format-stdin.sh ${INPUT}',
-      formatStdin = true,
-      rootMarkers = efm_root_markers.eslint,
     },
     terraform_fmt = {
       formatCommand = 'terraform fmt -',
@@ -60,15 +38,12 @@ local default_settings = {
       tools.linters.shellcheck,
     },
     javascript = {
-      -- tools.linters.eslint,
       tools.formatters.prettier,
     },
     typescript = {
-      -- tools.linters.eslint,
       tools.formatters.prettier,
     },
     typescriptreact = {
-      -- tools.linters.eslint,
       tools.formatters.prettier,
     },
     go = {
