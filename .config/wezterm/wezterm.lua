@@ -31,7 +31,7 @@ config.use_ime = true
 config.hide_tab_bar_if_only_one_tab = true
 config.adjust_window_size_when_changing_font_size = false
 -- Note: The window can be dragged by SUPER+SHIFT+left mouse drag
-config.window_decorations = "RESIZE"
+-- config.window_decorations = "RESIZE"
 config.window_padding = {
   left = "0.2cell",
   right = "0.2cell",
