@@ -17,7 +17,8 @@ local tools = {
       formatCommand = 'npx --no-install prettier --stdin-filepath ${INPUT}',
       formatStdin = true,
       rootMarkers = {
-        '.prettierrc.json'
+        '.prettierrc.json',
+        '.prettierrc',
       },
     },
     terraform_fmt = {
@@ -55,7 +56,6 @@ local default_settings = {
     json = {
       tools.formatters.prettier,
     },
-
   }
 }
 
