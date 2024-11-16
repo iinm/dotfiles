@@ -759,6 +759,11 @@ local setup_others = function()
   require('dressing').setup()
   require("CopilotChat").setup({
     debug = false,
+    mappings = {
+      complete = {
+        insert = '',
+      },
+    },
   })
 end
 
