@@ -552,6 +552,7 @@ local setup_lsp = function()
     settings = efm_settings,
   })
 
+  -- npm install -g typescript typescript-language-server
   require("typescript-tools").setup(
     vim.tbl_deep_extend("force",
       { capabilities = capabilities },
