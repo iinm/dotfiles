@@ -253,6 +253,7 @@ setup_fish() {
 function local_config --description "Host specific configuration"
   function local_config_first
     # fish_add_path /path/to/bin
+    # set -x CLOUDSDK_PYTHON /usr/bin/python3
   end
 
   function local_config_last
@@ -260,7 +261,8 @@ function local_config --description "Host specific configuration"
 
   function project_config_on_pwd_change --on-variable PWD --description "Project specific configuration"
     if string match -rq "/path/to/project" "$PWD"
-      # fish_add_path -m $HOME/tools/bin
+      # fish_remove_path_pattern ".+/tools/node-v.+/bin"
+      # fish_add_path --path -m ~/tools/node-vXX.XX.X/bin
       # set -x PROJECT_ROOT $PWD
     end
   end
