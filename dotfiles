@@ -4,7 +4,7 @@ NVIM_VERSION=0.10.2
 EFM_LS_VERSION=0.0.53
 
 # Debian only
-FZF_VERSION=0.53.0
+FZF_VERSION=0.56.3
 LUA_LANGUAGE_SERVER_VERSION=3.9.3
 
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -162,9 +162,9 @@ setup_fzf_on_linux() {
   if fzf --version 2> /dev/null | grep -q "$FZF_VERSION"; then
     echo "skip: fzf $FZF_VERSION is installed."
   else
-    run "run: install fzf $FZF_VERSION"
+    echo "run: install fzf $FZF_VERSION"
     curl --show-error --fail -L \
-      "https://github.com/junegunn/fzf/releases/download/${FZF_VERSION}/fzf-${FZF_VERSION}-linux_amd64.tar.gz" \
+      "https://github.com/junegunn/fzf/releases/download/v${FZF_VERSION}/fzf-${FZF_VERSION}-linux_amd64.tar.gz" \
       | tar -C ~/tools/bin -xzf -
   fi
 }
