@@ -260,10 +260,15 @@ function local_config --description "Host specific configuration"
   end
 
   function project_config_on_pwd_change --on-variable PWD --description "Project specific configuration"
-    if string match -rq "/path/to/project" "$PWD"
+    # Set node version
+    if string match -rq "/path/to/project1" "$PWD"
       # fish_remove_path_pattern ".+/tools/node-v.+/bin"
       # fish_add_path --path -m ~/tools/node-vXX.XX.X/bin
-      # set -x PROJECT_ROOT $PWD
+    else if string match -rq "/path/to/project2" "$PWD"
+      # fish_remove_path_pattern ".+/tools/node-v.+/bin"
+      # fish_add_path --path -m ~/tools/node-vYY.YY.Y/bin
+    else
+      # fish_remove_path_pattern ".+/tools/node-v.+/bin"
     end
   end
 
