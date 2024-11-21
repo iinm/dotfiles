@@ -264,9 +264,11 @@ function local_config --description "Host specific configuration"
     if string match -rq "/path/to/project1" "$PWD"
       # fish_remove_path_pattern ".+/tools/node-v.+/bin"
       # fish_add_path --path -m ~/tools/node-vXX.XX.X/bin
+      # echo "use node" (node -v) >&2
     else if string match -rq "/path/to/project2" "$PWD"
       # fish_remove_path_pattern ".+/tools/node-v.+/bin"
       # fish_add_path --path -m ~/tools/node-vYY.YY.Y/bin
+      # echo "use node" (node -v) >&2
     else
       # fish_remove_path_pattern ".+/tools/node-v.+/bin"
     end
