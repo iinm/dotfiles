@@ -462,7 +462,6 @@ local setup_plugins = function()
     'github/copilot.vim',
     {
       'CopilotC-Nvim/CopilotChat.nvim',
-      branch = 'canary',
       build = 'make tiktoken',
     },
 
