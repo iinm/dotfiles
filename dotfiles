@@ -163,6 +163,7 @@ setup_fzf_on_linux() {
     echo "skip: fzf $FZF_VERSION is installed."
   else
     echo "run: install fzf $FZF_VERSION"
+    mkdir -p ~/tools/bin
     curl --show-error --fail -L \
       "https://github.com/junegunn/fzf/releases/download/v${FZF_VERSION}/fzf-${FZF_VERSION}-linux_amd64.tar.gz" \
       | tar -C ~/tools/bin -xzf -
