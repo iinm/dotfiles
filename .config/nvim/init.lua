@@ -761,7 +761,7 @@ local setup_others = function()
     debug = false,
     mappings = {
       complete = {
-        insert = '',
+        insert = '<Tab>',
       },
     },
   })
