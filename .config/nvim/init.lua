@@ -293,6 +293,8 @@ local setup_commands = function()
     { 'CloseTerms',           function() window_utils.close_terms() end,                {} },
     { 'ToggleHighlightColor', function() require("nvim-highlight-colors").toggle() end, {} },
     { 'Diagnostics',          function() vim.diagnostic.setloclist() end,               {} },
+    { 'CopyRelativePath',     function() vim.fn.setreg('+', vim.fn.expand('%')) end,    {} },
+    { 'CopyAbsolutePath',     function() vim.fn.setreg('+', vim.fn.expand('%:p')) end,  {} }
   }
 
   for _, command in ipairs(commands) do
