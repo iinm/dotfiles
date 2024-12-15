@@ -96,6 +96,7 @@ local setup_options = function()
   vim.opt.wildignore = { '.git', 'node_modules' }
   vim.opt.wildmode = { 'longest', 'full' }
   vim.opt.wildoptions = { 'fuzzy', 'pum', 'tagfile' }
+  vim.opt.completeopt = { 'menu', 'menuone', 'noinsert', 'popup' }
   vim.opt.clipboard = "unnamedplus"
   vim.opt.termguicolors = true
   vim.opt.cursorline = true
