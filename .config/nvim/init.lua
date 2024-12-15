@@ -250,6 +250,11 @@ local setup_keymap = function()
   vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('UserLspKeymapConfig', {}),
     callback = function(ev)
+      -- avoid conflict
+      if vim.bo.filetype == 'copilot-chat' then
+        return
+      end
+
       local opts = { buffer = ev.buf }
       vim.keymap.set({ 'n', 'v' }, '<leader>a', vim.lsp.buf.code_action, opts)
       vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
@@ -817,7 +822,7 @@ local setup_others = function()
     debug = false,
     mappings = {
       complete = {
-        insert = '<Tab>',
+        insert = '<S-Tab>',
       },
     },
   })
