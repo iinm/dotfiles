@@ -319,18 +319,43 @@ local setup_commands = function()
     end,
   })
 
-  -- terraform
-  vim.api.nvim_create_autocmd('FileType', {
-    pattern = 'terraform',
-    group = vim.api.nvim_create_augroup('UserTerraformCommandConfig', {}),
-    callback = function()
-      vim.api.nvim_create_user_command('TerraformDoc', function()
-        local cursor_word = vim.fn.expand('<cword>')
-        local url = 'https://registry.terraform.io/search/providers?q=' .. cursor_word
-        vim.ui.open(url)
-      end, {})
-    end,
-  })
+  -- Function to get selected text in visual mode
+  local get_visual_selection = function()
+    local start_pos = vim.fn.getpos("'<")
+    local end_pos = vim.fn.getpos("'>")
+    local lines = vim.fn.getline(start_pos[2], end_pos[2])
+    if #lines == 0 then
+      return ''
+    elseif #lines == 1 then
+      return string.sub(lines[1], start_pos[3], end_pos[3])
+    else
+      lines[1] = string.sub(lines[1], start_pos[3])
+      lines[#lines] = string.sub(lines[#lines], 1, end_pos[3])
+      return table.concat(lines, '\n')
+    end
+  end
+
+  -- Generic document reference command
+  vim.api.nvim_create_user_command('Doc', function(opts)
+    local filetype = vim.bo.filetype
+    local cursor_word
+
+    if opts.range > 0 then
+      -- Get the selected text in visual mode
+      cursor_word = get_visual_selection()
+      cursor_word = cursor_word:gsub('\n', ' ')
+    else
+      -- Get the word under the cursor in normal mode
+      cursor_word = vim.fn.expand('<cword>')
+    end
+
+    if filetype == 'terraform' then
+      local url = 'https://registry.terraform.io/search/providers?q=' .. cursor_word
+      vim.fn.system({ 'open', url })
+    else
+      print('This filetype is not supported: ' .. filetype)
+    end
+  end, { range = true })
 end
 
 local setup_auto_commands = function()
