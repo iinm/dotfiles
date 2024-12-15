@@ -353,9 +353,25 @@ local setup_commands = function()
       local url = 'https://registry.terraform.io/search/providers?q=' .. cursor_word
       vim.fn.system({ 'open', url })
     else
-      print('This filetype is not supported: ' .. filetype)
+      local url = 'https://www.google.com/search?q=' .. cursor_word
+      vim.fn.system({ 'open', url })
     end
   end, { range = true })
+
+  -- Ask (LLM) command
+  vim.api.nvim_create_user_command('Ask', function(opts)
+    local cursor_word = ''
+    local question = table.concat(opts.fargs, " ")
+
+    if opts.range > 0 then
+      -- Get the selected text in visual mode
+      cursor_word = get_visual_selection()
+    end
+
+    local query = cursor_word .. "\n" .. question
+    local url = 'https://www.perplexity.ai/?q=' .. query
+    vim.fn.system({ 'open', url })
+  end, { range = true, nargs = '*' })
 end
 
 local setup_auto_commands = function()
