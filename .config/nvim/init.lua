@@ -318,6 +318,19 @@ local setup_commands = function()
       end
     end,
   })
+
+  -- terraform
+  vim.api.nvim_create_autocmd('FileType', {
+    pattern = 'terraform',
+    group = vim.api.nvim_create_augroup('UserTerraformCommandConfig', {}),
+    callback = function()
+      vim.api.nvim_create_user_command('TerraformDoc', function()
+        local cursor_word = vim.fn.expand('<cword>')
+        local url = 'https://registry.terraform.io/search/providers?q=' .. cursor_word
+        vim.ui.open(url)
+      end, {})
+    end,
+  })
 end
 
 local setup_auto_commands = function()
