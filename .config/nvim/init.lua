@@ -825,6 +825,10 @@ local setup_others = function()
       complete = {
         insert = '<S-Tab>',
       },
+      reset = {
+        normal = '',
+        insert = '',
+      },
     },
   })
 end
