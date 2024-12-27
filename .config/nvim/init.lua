@@ -206,6 +206,7 @@ local setup_keymap = function()
   -- vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>:file<CR>')
   -- vim.keymap.set('n', '-', ':<C-u>e %:h<CR>')
   vim.keymap.set('n', '-', '<Cmd>Oil<CR>')
+  vim.keymap.set({ 'n', 'v' }, '<leader>c', ':<C-u>CopilotChat<space>')
 
   -- window
   vim.keymap.set('n', '<C-w>z', window_utils.toggle_maximize)
