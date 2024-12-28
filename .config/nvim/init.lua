@@ -356,12 +356,13 @@ local setup_commands = function()
       cursor_word = vim.fn.expand('<cword>')
     end
 
+    local open_cmd = vim.fn.has('linux') == 1 and 'xdg-open' or 'open'
     if filetype == 'terraform' then
       local url = 'https://registry.terraform.io/search/providers?q=' .. cursor_word
-      vim.fn.system({ 'open', url })
+      vim.fn.system({ open_cmd, url })
     else
       local url = 'https://www.google.com/search?q=' .. cursor_word
-      vim.fn.system({ 'open', url })
+      vim.fn.system({ open_cmd, url })
     end
   end, { range = true })
 
@@ -377,7 +378,8 @@ local setup_commands = function()
 
     local query = cursor_word .. "\n" .. question
     local url = 'https://www.perplexity.ai/?q=' .. query
-    vim.fn.system({ 'open', url })
+    local open_cmd = vim.fn.has('linux') == 1 and 'xdg-open' or 'open'
+    vim.fn.system({ open_cmd, url })
   end, { range = true, nargs = '*' })
 end
 
