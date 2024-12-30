@@ -1,9 +1,5 @@
---- @class ItemTreeNode
---- @field item table
---- @field level number
---- @field children table<string, ItemTreeNode>
-
---- @param direction string: 'incoming' or 'outgoing'
+--- Show recursive call hierarchy in quickfix window
+--- @param direction "incoming" | "outgoing": The direction of the call hierarchy
 --- @param max_depth number: The maximum depth to trace the call hierarchy
 local function lsp_call_hierarchy_recursive(direction, max_depth)
   local lsp = require('vim.lsp')
@@ -14,6 +10,11 @@ local function lsp_call_hierarchy_recursive(direction, max_depth)
       vim.notify('No call hierarchy found', vim.log.levels.INFO)
       return
     end
+
+    --- @class ItemTreeNode
+    --- @field item table
+    --- @field level number
+    --- @field children table<string, ItemTreeNode>
 
     --- @type ItemTreeNode
     local item_tree_root = {
@@ -35,16 +36,16 @@ local function lsp_call_hierarchy_recursive(direction, max_depth)
       vim.notify(string.format('Tracing %s (Level: %d)', item.name, parent_node.level), vim.log.levels.INFO)
       local method = direction == 'incoming' and 'callHierarchy/incomingCalls' or 'callHierarchy/outgoingCalls'
       pending_requests = pending_requests + 1
-      lsp.buf_request(0, method, { item = item }, function(call_err, call_result)
+      lsp.buf_request(0, method, { item = item }, function(calls_err, calls_result)
         pending_requests = pending_requests - 1
-        if call_err then
-          vim.notify('Error while tracing call hierarchy: ' .. call_err, vim.log.levels.ERROR)
+        if calls_err then
+          vim.notify('Error while tracing call hierarchy: ' .. calls_err, vim.log.levels.ERROR)
           -- stop recursion
-        elseif not call_result then
+        elseif not calls_result then
           vim.notify('No call hierarchy found', vim.log.levels.ERROR)
           -- stop recursion
         else
-          for _, call in ipairs(call_result) do
+          for _, call in ipairs(calls_result) do
             local call_target = direction == 'incoming' and call.from or call.to
             local item_key = string.format(
               '%s:%d,%d',
@@ -72,17 +73,24 @@ local function lsp_call_hierarchy_recursive(direction, max_depth)
       end)
     end
 
-    local function trace_item_tree(item_tree, nodes)
-      -- depth-first search
+    --- @param item_tree ItemTreeNode
+    --- @param nodes table<number, { item: table, level: number }>
+    local function trace_item_tree_depth_first(item_tree, nodes)
       table.insert(nodes, { item = item_tree.item, level = item_tree.level })
       for _, child_node in pairs(item_tree.children) do
-        trace_item_tree(child_node, nodes)
+        trace_item_tree_depth_first(child_node, nodes)
       end
     end
 
+    --- @param item_tree ItemTreeNode
     local function on_trace_complete(item_tree)
+      --- @type table<number, { item: table, level: number }>
       local nodes = {}
-      trace_item_tree(item_tree, nodes)
+      trace_item_tree_depth_first(item_tree, nodes)
+      if #nodes == 0 then
+        vim.notify('No call hierarchy found', vim.log.levels.INFO)
+        return
+      end
 
       local quickfix_items = {}
       for _, node in ipairs(nodes) do
