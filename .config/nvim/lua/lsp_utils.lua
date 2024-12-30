@@ -108,6 +108,7 @@ local function lsp_call_hierarchy_recursive(direction, max_depth)
 
       vim.fn.setqflist({}, ' ', { title = 'Call Hierarchy Recursive', items = quickfix_items })
       vim.cmd [[
+        cclose
         cwindow
         setlocal nowrap
         syntax match ConcealedDetails /\v^[^|]*\|[^|]*\| / conceal
