@@ -308,17 +308,21 @@ local setup_commands = function()
     vim.api.nvim_create_user_command(table.unpack(command))
   end
 
+
   vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('UserLspCommandConfig', {}),
     callback = function()
+      local lsp_utils = require('lsp_utils')
       local lsp_commands = {
-        { 'LspRename',         function() vim.lsp.buf.rename() end,                  {} },
-        { 'LspFormat',         function() vim.lsp.buf.format({ async = false }) end, {} },
-        { 'LspTypeDefinition', function() vim.lsp.buf.type_definition() end,         {} },
-        { 'LspDeclaration',    function() vim.lsp.buf.declaration() end,             {} },
-        { 'LspImplementation', function() vim.lsp.buf.implementation() end,          {} },
-        { 'LspIncomingCall',   function() vim.lsp.buf.incoming_calls() end,          {} },
-        { 'LspOutgoingCall',   function() vim.lsp.buf.outgoing_calls() end,          {} },
+        { 'LspRename',                function() vim.lsp.buf.rename() end,                                  {} },
+        { 'LspFormat',                function() vim.lsp.buf.format({ async = false }) end,                 {} },
+        { 'LspTypeDefinition',        function() vim.lsp.buf.type_definition() end,                         {} },
+        { 'LspDeclaration',           function() vim.lsp.buf.declaration() end,                             {} },
+        { 'LspImplementation',        function() vim.lsp.buf.implementation() end,                          {} },
+        { 'LspIncomingCall',          function() vim.lsp.buf.incoming_calls() end,                          {} },
+        { 'LspOutgoingCall',          function() vim.lsp.buf.outgoing_calls() end,                          {} },
+        { 'LspIncomingCallRecursive', function() lsp_utils.lsp_call_hierarchy_recursive('incoming', 4) end, {} },
+        { 'LspOutgoingCallRecursive', function() lsp_utils.lsp_call_hierarchy_recursive('outgoing', 2) end, {} },
       }
       for _, command in ipairs(lsp_commands) do
         vim.api.nvim_create_user_command(table.unpack(command))
