@@ -107,15 +107,7 @@ local function lsp_call_hierarchy_recursive(direction, max_depth)
       end
 
       vim.fn.setqflist({}, ' ', { title = 'Call Hierarchy Recursive', items = quickfix_items })
-      vim.cmd [[
-        cclose
-        cwindow
-        setlocal nowrap
-        syntax match ConcealedDetails /\v^[^|]*\|[^|]*\| / conceal
-        setlocal conceallevel=2
-        setlocal concealcursor=nvic
-        syntax match Grey /\v\(.+\)/ " filename
-      ]]
+      vim.cmd('cwindow')
     end
 
     trace_hierachy(
@@ -126,6 +118,26 @@ local function lsp_call_hierarchy_recursive(direction, max_depth)
   end)
 end
 
+local function lsp_call_hierarchy_recursive_setup_autocmd()
+  vim.api.nvim_create_autocmd({ 'BufWinEnter' }, {
+    group = vim.api.nvim_create_augroup('UserLspCallHierarchyRecursive', {}),
+    pattern = 'quickfix',
+    callback = function(event)
+      local qflist = vim.fn.getqflist({ title = 1 })
+      if qflist.title == 'Call Hierarchy Recursive' then
+        vim.cmd [[
+          setlocal nowrap
+          syntax match ConcealedDetails /\v^[^|]*\|[^|]*\| / conceal
+          setlocal conceallevel=2
+          setlocal concealcursor=nvic
+          syntax match Grey /\v\(.+\)/ " filename
+        ]]
+      end
+    end
+  })
+end
+
 return {
   lsp_call_hierarchy_recursive = lsp_call_hierarchy_recursive,
+  lsp_call_hierarchy_recursive_setup_autocmd = lsp_call_hierarchy_recursive_setup_autocmd,
 }

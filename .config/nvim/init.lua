@@ -461,6 +461,9 @@ local setup_auto_commands = function()
       vim.keymap.set('t', '<esc>', '<C-c>', { buffer = true })
     end,
   })
+
+  local lsp_utils = require('lsp_utils')
+  lsp_utils.lsp_call_hierarchy_recursive_setup_autocmd()
 end
 
 local setup_plugins = function()
