@@ -5,7 +5,7 @@ function! Outline() abort
   if l:filetype == 'typescript'
     " - Top level functions, interfaces, ...
     " - Test blocks
-    vimgrep /\v(^(export\s+)?(function|interface|type|enum|const|class))|(^\s{0,4}(describe|beforeAll|afterAll|beforeEach|afterEach|it[^\w]|['"].+['"],))/j %
+    vimgrep /\v(^(export\s+)?(function|interface|type|enum|const|class))|(^\s{0,6}(describe|beforeAll|afterAll|beforeEach|afterEach|it[(.]|['"].+['"],))/j %
   elseif l:filetype == 'markdown'
     " - Headings
     vimgrep /\v^#{1,3}\s+.+/j %
