@@ -208,6 +208,7 @@ bootstrap_darwin() {
     colima
     docker
     docker-compose
+    docker-buildx
     lua-language-server
     tlrc
     csvq
