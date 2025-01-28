@@ -1,0 +1,26 @@
+modmap:
+  - name: Global
+    remap:
+      # CapsLock to Ctrl
+      CapsLock: LeftCtrl
+      # Swap Alt and Meta
+      LeftAlt: LeftMeta
+      LeftMeta: LeftAlt
+
+keymap:
+  - name: Global
+    remap:
+      # Ctrl+[ to Esc like Vim
+      LeftCtrl-Leftbrace: Esc
+
+      # Alt+hjkl to arrow keys
+      LeftAlt-h: Left
+      LeftAlt-j: Down
+      LeftAlt-k: Up
+      LeftAlt-l: Right
+
+      # Mac-like key bindings
+      LeftMeta-c: C-c
+      LeftMeta-v: C-v
+      LeftMeta-w: C-w
+      LeftMeta-l: C-l

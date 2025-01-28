@@ -1,0 +1,12 @@
+# cp xremap.service ~/.config/systemd/user/xremap.service
+# systemctl --user daemon-reload
+# systemctl --user enable xremap
+[Unit]
+Description=xremap
+
+[Service]
+Restart=always
+ExecStart=/home/shumpei/tools/bin/xremap /home/shumpei/dotfiles/xremap-config.yml
+
+[Install]
+WantedBy=default.target
