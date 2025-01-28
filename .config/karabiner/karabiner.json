@@ -25,13 +25,13 @@
                         ]
                     },
                     {
-                        "description": "Change fn+hjkl to arrow keys",
+                        "description": "Change option+hjkl to arrow keys",
                         "manipulators": [
                             {
                                 "from": {
                                     "key_code": "h",
                                     "modifiers": {
-                                        "mandatory": ["fn"],
+                                        "mandatory": ["option"],
                                         "optional": ["any"]
                                     }
                                 },
@@ -42,7 +42,7 @@
                                 "from": {
                                     "key_code": "j",
                                     "modifiers": {
-                                        "mandatory": ["fn"],
+                                        "mandatory": ["option"],
                                         "optional": ["any"]
                                     }
                                 },
@@ -53,7 +53,7 @@
                                 "from": {
                                     "key_code": "k",
                                     "modifiers": {
-                                        "mandatory": ["fn"],
+                                        "mandatory": ["option"],
                                         "optional": ["any"]
                                     }
                                 },
@@ -64,7 +64,7 @@
                                 "from": {
                                     "key_code": "l",
                                     "modifiers": {
-                                        "mandatory": ["fn"],
+                                        "mandatory": ["option"],
                                         "optional": ["any"]
                                     }
                                 },
