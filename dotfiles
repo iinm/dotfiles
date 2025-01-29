@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-NVIM_VERSION=0.10.3
-EFM_LS_VERSION=0.0.53
+NVIM_VERSION=0.10.4
+EFM_LS_VERSION=0.0.54
 
 # Debian only
 FZF_VERSION=0.56.3
