@@ -4,6 +4,27 @@
             "complex_modifications": {
                 "rules": [
                     {
+                        "description": "Change ctrl+h to delete",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "h",
+                                    "modifiers": {
+                                        "mandatory": ["control"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "delete_or_backspace",
+                                        "modifiers": []
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "Change ctrl+[ to esc",
                         "manipulators": [
                             {
