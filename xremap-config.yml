@@ -14,6 +14,9 @@ keymap:
       # Ctrl+[ to Esc like Vim
       LeftCtrl-Leftbrace: Esc
 
+      # Ctrl+h to Backspace
+      LeftCtrl-h: Backspace
+
       # Alt+hjkl to arrow keys
       LeftAlt-h: Left
       LeftAlt-j: Down
@@ -25,3 +28,4 @@ keymap:
       LeftMeta-v: C-v
       LeftMeta-w: C-w
       LeftMeta-l: C-l
+      LeftMeta-z: C-z
