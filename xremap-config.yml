@@ -26,6 +26,15 @@ keymap:
       # Mac-like key bindings
       LeftMeta-c: C-c
       LeftMeta-v: C-v
+      LeftMeta-f: C-f
+      LeftMeta-t: C-t
       LeftMeta-w: C-w
       LeftMeta-l: C-l
       LeftMeta-z: C-z
+      # +Shift
+      LeftMeta-Shift-t: C-Shift-t
+      LeftMeta-Shift-z: C-Shift-z
+      # zoom in/out
+      LeftMeta-Shift-Equal: C-Shift-Equal
+      LeftMeta-Shift-Minus: C-Shift-Minus
+      LeftMeta-0: C-0
