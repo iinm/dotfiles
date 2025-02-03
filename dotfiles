@@ -300,9 +300,9 @@ setup_nvim() {
 
     local nvim_base_url=https://github.com/neovim/neovim/releases/download/v$NVIM_VERSION
     if test "$(uname)" = "Linux"; then
-      curl --show-error --fail -L $nvim_base_url/nvim-linux64.tar.gz \
+      curl --show-error --fail -L $nvim_base_url/nvim-linux-x86_64.tar.gz \
         | tar -C ~/tools -xzf -
-      ln -s nvim-linux64 "$nvim_path"
+      ln -s nvim-linux-x86_64 "$nvim_path"
     fi
 
     if test "$(uname)" = "Darwin"; then
