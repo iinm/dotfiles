@@ -23,8 +23,9 @@ Commands:
   setup_wezterm  Setup wezterm
 
 Optional commands:
-  setup_nodejs  Setup Node.js
-  setup_chrome  Setup Chrome startup options. (Linux only)
+  install_golang  Install Golang
+  install_nodejs  Install Node.js
+  setup_chrome    Setup Chrome startup options. (Linux only)
 HELP
 }
 
@@ -390,8 +391,31 @@ EOF
   fi
 }
 
-setup_nodejs() {
-  local usage="setup_nodejs VERSION"
+install_golang() {
+  local usage="install_golang VERSION"
+  local golang_version="${1?"Usage: $usage"}"
+  local golang_dir
+  golang_dir="$HOME/tools/go${golang_version}"
+  if test -e "${golang_dir}/bin/go"; then
+    echo "skip: Go $golang_version is installed in $golang_dir"
+  else
+    echo "run: install Go $golang_version"
+    
+    local platform="linux-amd64"
+    if test "$(uname)" = "Darwin"; then
+      platform="darwin-arm64"
+    fi
+    
+    local url="https://go.dev/dl/go${golang_version}.${platform}.tar.gz"
+    rm -rf /tmp/go-download
+    mkdir -p /tmp/go-download
+    curl --show-error --fail -L "$url" | tar -C /tmp/go-download -xzf -
+    mv /tmp/go-download/go "$golang_dir"
+  fi
+}
+
+install_nodejs() {
+  local usage="install_nodejs VERSION"
   local nodejs_version="${1?"Usage: $usage"}"
   local kernel
   kernel="$(uname -s | awk '{ print tolower($0) }')"
