@@ -24,6 +24,10 @@ keymap:
       LeftAlt-l: Right
 
       # Mac-like key bindings
+      LeftMeta-c: C-c
+      LeftMeta-v: C-v
+      LeftMeta-t: C-t
+      LeftMeta-w: C-w
       LeftMeta-f: C-f
       LeftMeta-l: C-l
       LeftMeta-z: C-z
@@ -34,21 +38,3 @@ keymap:
       LeftMeta-Shift-Equal: C-Shift-Equal
       LeftMeta-Shift-Minus: C-Shift-Minus
       LeftMeta-0: C-0
-
-  - name: Global except Terminal
-    application:
-      not: [wezterm]
-    remap:
-      LeftMeta-t: C-t
-      LeftMeta-w: C-w
-      LeftMeta-c: C-c
-      LeftMeta-v: C-v
-
-  - name: Terminal
-    application:
-      only: [wezterm]
-    remap:
-      LeftMeta-t: C-Shift-t
-      LeftMeta-w: C-Shift-w
-      LeftMeta-c: C-Shift-c
-      LeftMeta-v: C-Shift-v
