@@ -39,10 +39,10 @@ keymap:
     application:
       not: [wezterm]
     remap:
-      LeftMeta-t: C-Shift-t
-      LeftMeta-w: C-Shift-w
-      LeftMeta-c: C-Shift-c
-      LeftMeta-v: C-Shift-v
+      LeftMeta-t: C-t
+      LeftMeta-w: C-w
+      LeftMeta-c: C-c
+      LeftMeta-v: C-v
 
   - name: Terminal
     application:
