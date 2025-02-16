@@ -21,6 +21,13 @@ local tools = {
         '.prettierrc',
       },
     },
+    biome = {
+      formatCommand = 'npx --no-install biome format --stdin-file-path ${INPUT}',
+      formatStdin = true,
+      rootMarkers = {
+        'biome.json',
+      },
+    },
     terraform_fmt = {
       formatCommand = 'terraform fmt -',
       formatStdin = true,

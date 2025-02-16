@@ -326,9 +326,23 @@ local default = {
   typescript_tools = nil,
 }
 
-if string.find(cwd, '/path/to/project') then
+if string.find(cwd, '/path/to/project', 0, true) then
   print('local_config.lua: load project config')
   return vim.tbl_deep_extend('force', default, {})
+
+  -- local efm_tools = require('efm_config').tools
+  -- return vim.tbl_deep_extend('force', default, {
+  --   efm_settings = {
+  --     languages = {
+  --       typescript = {
+  --         efm_tools.formatters.biome,
+  --       },
+  --       json = {
+  --         efm_tools.formatters.biome,
+  --       },
+  --     },
+  --   }
+  -- })
 end
 
 return default
