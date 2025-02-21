@@ -103,9 +103,15 @@ if status is-interactive
     alias colima_start 'colima start --cpu (sysctl -n hw.ncpu) --memory (math (sysctl -n hw.memsize) / 1024^3 / 2) --disk 100 --arch aarch64 --vm-type=vz --vz-rosetta --mount-type virtiofs --dns 8.8.8.8 --dns 1.1.1.1'
   end
 
-  if test -e $tools/anaconda3
+  if test -e $HOME/tools/anaconda3
     function use_anaconda
-      eval "$($tools/anaconda3/bin/conda shell.fish hook)"
+      eval "$($HOME/tools/anaconda3/bin/conda shell.fish hook)"
+    end
+  end
+
+  if test -e $HOME/tools/miniconda3
+    function use_miniconda
+      eval "$($HOME/tools/miniconda3/bin/conda shell.fish hook)"
     end
   end
 end
