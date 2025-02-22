@@ -4,17 +4,20 @@
     "node": "22"
   },
   "scripts": {
+    "start": "./env.sh tsx index.ts",
     "format": "prettier --write .",
-    "lint": "eslint"
+    "check": "prettier --check . && eslint . && tsc --noEmit"
   },
   "dependencies": {
     "@langchain/community": "^0.3.32",
     "@langchain/core": "^0.3.40",
     "@langchain/langgraph": "^0.2.48",
-    "@langchain/openai": "^0.4.4"
+    "@langchain/openai": "^0.4.4",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
+    "@types/node": "^22.13.5",
     "eslint": "^9.21.0",
     "globals": "^16.0.0",
     "prettier": "3.5.2",
