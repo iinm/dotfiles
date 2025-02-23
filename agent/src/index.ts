@@ -82,7 +82,7 @@ cli.on("line", async (input) => {
         ...config,
         streamMode: "updates",
       });
-      await printAgentStreamValues(agentResponse);
+      await printAgentUpdatesStream(agentResponse);
     } else {
       // Rejected
       const lastMessage: AIMessage =
@@ -104,7 +104,7 @@ cli.on("line", async (input) => {
           streamMode: "updates",
         },
       );
-      await printAgentStreamValues(agentResponse);
+      await printAgentUpdatesStream(agentResponse);
     }
   } else {
     // No pending tool calls
@@ -117,7 +117,7 @@ cli.on("line", async (input) => {
         streamMode: "updates",
       },
     );
-    await printAgentStreamValues(agentResponse);
+    await printAgentUpdatesStream(agentResponse);
   }
 
   // Auto-approve tool calls
@@ -135,7 +135,7 @@ cli.on("line", async (input) => {
           ...config,
           streamMode: "updates",
         });
-        await printAgentStreamValues(values);
+        await printAgentUpdatesStream(values);
       } else {
         console.log(styleText("yellow", "Approve tool calls? (y or feedback)"));
         break;
@@ -150,7 +150,7 @@ cli.on("line", async (input) => {
   cli.resume();
 });
 
-const printAgentStreamValues = async (values: AgentUpdatesStream) => {
+const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
   for await (const value of values) {
     if ("agent" in value) {
       // show message and tool calls
