@@ -1,17 +1,49 @@
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
 import { AIMessage, HumanMessage, ToolMessage } from "@langchain/core/messages";
 import { ToolCall } from "@langchain/core/messages/tool";
+import { tool } from "@langchain/core/tools";
 import { IterableReadableStream } from "@langchain/core/utils/stream";
 import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
 import CallbackHandler from "langfuse-langchain";
+import { exec } from "node:child_process";
 import readline from "node:readline";
 import { styleText } from "node:util";
 import { v4 as uuidv4 } from "uuid";
+import z from "zod";
+
+// Tools
+const isAutoApprovableToolCall = (toolCall: ToolCall) => {
+  if (toolCall.name === "tavily_search_results_json") {
+    return true;
+  }
+  return false;
+};
+
+const shellCommandTool = tool(
+  async (input) => {
+    const { command } = input;
+    return new Promise((resolve, reject) => {
+      exec(command, (error, stdout, stderr) => {
+        if (error) {
+          reject(error);
+        }
+        resolve(["stdout:", stdout, "\n", "stderr:", stderr].join("\n"));
+      });
+    });
+  },
+  {
+    name: "shell_command",
+    description: "Run a shell command.",
+    schema: z.object({
+      command: z.string().describe("The shell command to run."),
+    }),
+  },
+);
 
 // Setup agent
-const tools = [new TavilySearchResults({ maxResults: 5 })];
+const tools = [shellCommandTool, new TavilySearchResults({ maxResults: 5 })];
 const model = new ChatOpenAI({
   model: "gpt-4o-mini",
   temperature: 0,
@@ -28,13 +60,6 @@ const agent = createReactAgent({
 // Setup Langfuse
 const langfuseHandler = new CallbackHandler();
 const callbacks = [langfuseHandler];
-
-const isAutoApprovableToolCall = (toolCall: ToolCall) => {
-  if (toolCall.name === "tavily_search_results_json") {
-    return true;
-  }
-  return false;
-};
 
 // Start CLI
 const threadId = uuidv4();

@@ -14,7 +14,8 @@
     "@langchain/langgraph": "^0.2.48",
     "@langchain/openai": "^0.4.4",
     "langfuse-langchain": "^3.35.2",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
