@@ -156,13 +156,7 @@ const printAgentStreamValues = async (values: AgentUpdatesStream) => {
         for (const toolCall of message.tool_calls || []) {
           console.log(styleText("bold", "\nTool call:"));
           console.log(`${toolCall.name}`);
-          if (typeof toolCall.args === "object") {
-            for (const arg in Object.keys(toolCall.args)) {
-              console.log(`${arg}:\n${toolCall.args[arg]}`);
-            }
-          } else {
-            console.log(toolCall.args);
-          }
+          console.log(JSON.stringify(toolCall.args, null, 2));
         }
         console.log(
           styleText(
