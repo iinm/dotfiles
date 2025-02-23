@@ -51,6 +51,9 @@ cli.on("SIGINT", () => {
     inputBuffer.length = 0;
     process.stdout.write(styleText("yellow", "(Input cancelled)\n"));
     cli.prompt();
+  } else {
+    // Exit
+    cli.close();
   }
 });
 
