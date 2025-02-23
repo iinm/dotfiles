@@ -15,6 +15,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { patchFile } from "./tools/patchFile";
 import { shellCommandTool } from "./tools/shellCommandTool";
+import { tmuxTool } from "./tools/tmuxTool";
 import { writeFileTool } from "./tools/writeFileTool";
 
 // Setup agent
@@ -27,6 +28,7 @@ const memorySaver = new MemorySaver();
 
 const tools = [
   shellCommandTool,
+  tmuxTool,
   writeFileTool,
   patchFile,
   new TavilySearchResults({ maxResults: 5 }),
