@@ -175,9 +175,14 @@ const printAgentStreamValues = async (values: AgentUpdatesStream) => {
     if ("tools" in value) {
       // show tool messages
       for (const message of value.tools.messages) {
-        console.log(styleText("bold", "\nTool:"));
+        console.log(styleText("bold", "\nTool Result:"));
         console.log(`${message.name}`);
-        console.log(`${message.content.slice(0, 100)}...`);
+        const maxContentLength = 500;
+        if (message.content.length > maxContentLength) {
+          console.log(`${message.content.slice(0, maxContentLength)}...`);
+        } else {
+          console.log(message.content);
+        }
       }
     }
   }
