@@ -12,4 +12,4 @@ fi
 
 # Run the agent
 export NODE_OPTIONS="--disable-warning=DEP0040"
-"$app_root/env.sh" node "$app_root/node_modules/.bin/tsx" "$app_root/index.ts" "$@"
+"$app_root/env.sh" node "$app_root/node_modules/.bin/tsx" "$app_root/src/index.ts" "$@"

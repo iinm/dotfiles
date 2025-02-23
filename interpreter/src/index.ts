@@ -8,6 +8,7 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
 import CallbackHandler from "langfuse-langchain";
 import { exec } from "node:child_process";
+import fs from "node:fs";
 import readline from "node:readline";
 import { styleText } from "node:util";
 import { v4 as uuidv4 } from "uuid";
@@ -29,7 +30,16 @@ const shellCommandTool = tool(
         if (error) {
           reject(error);
         }
-        resolve(["stdout:", stdout, "\n", "stderr:", stderr].join("\n"));
+        resolve(
+          [
+            "<stdout>",
+            stdout,
+            "</stdout>",
+            "<stderr>",
+            stderr,
+            "</stderr>",
+          ].join("\n"),
+        );
       });
     });
   },
@@ -42,12 +52,74 @@ const shellCommandTool = tool(
   },
 );
 
+const writeFileTool = tool(
+  async (input) => {
+    const { path, content } = input;
+    return new Promise((resolve, reject) => {
+      fs.writeFile(path, content, (error) => {
+        if (error) {
+          reject(error);
+        }
+        resolve(`Wrote to file: ${path}`);
+      });
+    });
+  },
+  {
+    name: "write_to_file",
+    description: "Write to a file.",
+    schema: z.object({
+      path: z.string().describe("The file path."),
+      content: z.string().describe("The content of the file."),
+    }),
+  },
+);
+
+const patchFile = tool(
+  async (_input) => {
+    return new Promise((_resolve, reject) => {
+      reject(new Error("Not implemented"));
+    });
+  },
+  {
+    name: "patch_file",
+    description: "Patch a file.",
+    schema: z.object({
+      path: z.string().describe("The file path."),
+      diff: z.string().describe(`
+The diff to apply to the file.
+
+Format:
+<<<<<<< SEARCH
+(content to be removed)
+=======
+(new content to replace the removed content)
+>>>>>>> REPLACE
+
+<<<<<<< SEARCH
+(second content to be removed)
+=======
+(new content to replace the second removed content)
+>>>>>>> REPLACE
+
+...
+`),
+    }),
+  },
+);
+
 // Setup agent
-const tools = [shellCommandTool, new TavilySearchResults({ maxResults: 5 })];
+const tools = [
+  shellCommandTool,
+  writeFileTool,
+  patchFile,
+  new TavilySearchResults({ maxResults: 5 }),
+];
+
 const model = new ChatOpenAI({
   model: "gpt-4o-mini",
   temperature: 0,
 });
+
 const memorySaver = new MemorySaver();
 
 const agent = createReactAgent({
@@ -105,11 +177,10 @@ process.stdin.on("keypress", async (_, key) => {
     if (hasPendingToolCalls(state)) {
       if (input.trim() === "y") {
         // Approved
-        const agentResponse: IterableReadableStream<AgentStreamValue> =
-          await agent.stream(null, {
-            ...config,
-            streamMode: "updates",
-          });
+        const agentResponse: AgentUpdatesStream = await agent.stream(null, {
+          ...config,
+          streamMode: "updates",
+        });
         await printAgentStreamValues(agentResponse);
       } else {
         // Rejected
@@ -123,22 +194,7 @@ process.stdin.on("keypress", async (_, key) => {
           });
         });
         await agent.updateState(config, { messages: cancelMessages });
-        const agentResponse: IterableReadableStream<AgentStreamValue> =
-          await agent.stream(
-            {
-              messages: [new HumanMessage(input)],
-            },
-            {
-              ...config,
-              streamMode: "updates",
-            },
-          );
-        await printAgentStreamValues(agentResponse);
-      }
-    } else {
-      // No pending tool calls
-      const agentResponse: IterableReadableStream<AgentStreamValue> =
-        await agent.stream(
+        const agentResponse: AgentUpdatesStream = await agent.stream(
           {
             messages: [new HumanMessage(input)],
           },
@@ -147,6 +203,19 @@ process.stdin.on("keypress", async (_, key) => {
             streamMode: "updates",
           },
         );
+        await printAgentStreamValues(agentResponse);
+      }
+    } else {
+      // No pending tool calls
+      const agentResponse: AgentUpdatesStream = await agent.stream(
+        {
+          messages: [new HumanMessage(input)],
+        },
+        {
+          ...config,
+          streamMode: "updates",
+        },
+      );
       await printAgentStreamValues(agentResponse);
     }
 
@@ -161,11 +230,10 @@ process.stdin.on("keypress", async (_, key) => {
         );
         if (isEveryToolCallApproved) {
           console.log(styleText("green", "Tool calls auto-approved."));
-          const values: IterableReadableStream<AgentStreamValue> =
-            await agent.stream(null, {
-              ...config,
-              streamMode: "updates",
-            });
+          const values: AgentUpdatesStream = await agent.stream(null, {
+            ...config,
+            streamMode: "updates",
+          });
           await printAgentStreamValues(values);
         } else {
           console.log(
@@ -184,19 +252,19 @@ process.stdin.on("keypress", async (_, key) => {
   }
 });
 
-const printAgentStreamValues = async (
-  values: IterableReadableStream<AgentStreamValue>,
-) => {
+const printAgentStreamValues = async (values: AgentUpdatesStream) => {
   for await (const value of values) {
     if ("agent" in value) {
       // show message and tool calls
       for (const message of value.agent.messages) {
         console.log(styleText("bold", "\nAgent:"));
         console.log(message.content);
-        for (const toolCall of message.tool_calls) {
+        for (const toolCall of message.tool_calls || []) {
           console.log(styleText("bold", "\nTool call:"));
           console.log(`${toolCall.name}`);
-          console.log(`${JSON.stringify(toolCall.args, null, 2)}`);
+          for (const arg in Object.keys(toolCall.args)) {
+            console.log(`${arg}:\n${toolCall.args[arg]}`);
+          }
         }
         console.log(
           styleText(
@@ -223,34 +291,21 @@ const printAgentStreamValues = async (
   }
 };
 
-type AgentStreamValue =
+type AgentUpdatesStream = IterableReadableStream<
   | {
       agent: {
-        messages: {
-          id: string;
-          content: string;
-          tool_calls: [
-            {
-              id: string;
-              name: string;
-              args: unknown;
-            },
-          ];
+        messages: (AIMessage & {
           usage_metadata: {
             output_tokens: number;
             input_tokens: number;
             total_tokens: number;
           };
-        }[];
+        })[];
       };
     }
   | {
       tools: {
-        messages: {
-          id: string;
-          name: string;
-          content: string;
-          tool_call_id: string;
-        }[];
+        messages: ToolMessage[];
       };
-    };
+    }
+>;
