@@ -49,25 +49,25 @@ const agent = createReactAgent({
 const langfuseHandler = new CallbackHandler();
 const callbacks = [langfuseHandler];
 
-// Start CLI
+// Setup session
 const threadId = uuidv4();
+const config = {
+  configurable: {
+    thread_id: threadId,
+  },
+  callbacks,
+};
 
+// Start CLI
 const cli = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
-  prompt: styleText("green", "(Ctrl-j to submit)") + "\n> ",
+  prompt: "> ",
 });
 
 cli.prompt();
 
 cli.on("line", async (input) => {
-  const config = {
-    configurable: {
-      thread_id: threadId,
-    },
-    callbacks,
-  };
-
   const state = await agent.getState(config);
   const hasPendingToolCalls = (s: typeof state) => s.next.includes("tools");
 
