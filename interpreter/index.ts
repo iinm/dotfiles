@@ -5,6 +5,7 @@ import { IterableReadableStream } from "@langchain/core/utils/stream";
 import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
+import CallbackHandler from "langfuse-langchain";
 import readline from "node:readline";
 import { styleText } from "node:util";
 import { v4 as uuidv4 } from "uuid";
@@ -23,6 +24,10 @@ const agent = createReactAgent({
   checkpointSaver: memorySaver,
   interruptBefore: ["tools"],
 });
+
+// Setup Langfuse
+const langfuseHandler = new CallbackHandler();
+const callbacks = [langfuseHandler];
 
 const isAutoApprovableToolCall = (toolCall: ToolCall) => {
   if (toolCall.name === "tavily_search_results_json") {
@@ -66,6 +71,7 @@ process.stdin.on("keypress", async (_, key) => {
       configurable: {
         thread_id: threadId,
       },
+      callbacks,
     };
 
     const state = await agent.getState(config);
