@@ -1,5 +1,6 @@
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
 import { AIMessage, HumanMessage, ToolMessage } from "@langchain/core/messages";
+import { ToolCall } from "@langchain/core/messages/tool";
 import { IterableReadableStream } from "@langchain/core/utils/stream";
 import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
@@ -23,10 +24,15 @@ const agent = createReactAgent({
   interruptBefore: ["tools"],
 });
 
-// Setup session
-const threadId = uuidv4();
+const isAutoApprovableToolCall = (toolCall: ToolCall) => {
+  if (toolCall.name === "tavily_search_results_json") {
+    return true;
+  }
+  return false;
+};
 
 // Start CLI
+const threadId = uuidv4();
 const cli = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
@@ -60,67 +66,83 @@ process.stdin.on("keypress", async (_, key) => {
     };
 
     const state = await agent.getState(config);
-    if (state.next.includes("tools") && input.trim() === "y") {
-      // Tool calls approved
-      const values: IterableReadableStream<AgentStreamValue> =
-        await agent.stream(null, { ...config, streamMode: "updates" });
-      await printAgentStreamValues(values);
-    } else if (state.next.includes("tools")) {
-      // Tool calls rejected
-      const lastMessage: AIMessage =
-        state.values.messages[state.values.messages.length - 1];
-      const cancelMessages = lastMessage.tool_calls?.map((toolCall) => {
-        return new ToolMessage({
-          status: "error",
-          content: "Cancelled by user.",
-          tool_call_id: toolCall.id as string,
-        });
-      });
-      await agent.updateState(config, { messages: cancelMessages });
-      const values: IterableReadableStream<AgentStreamValue> =
-        await agent.stream(
-          {
-            messages: [new HumanMessage(input)],
-          },
-          {
-            ...config,
-            streamMode: "updates",
-          },
-        );
-      await printAgentStreamValues(values);
-    } else {
-      const values: IterableReadableStream<AgentStreamValue> =
-        await agent.stream(
-          {
-            messages: [new HumanMessage(input)],
-          },
-          {
-            ...config,
-            streamMode: "updates",
-          },
-        );
-      await printAgentStreamValues(values);
-    }
+    const hasPendingToolCalls = (s: typeof state) => s.next.includes("tools");
 
-    const updatedState = await agent.getState(config);
-    if (updatedState.next.includes("tools")) {
-      const lastMessage: AIMessage =
-        updatedState.values.messages[updatedState.values.messages.length - 1];
-      // Auto approve tool calls
-      const isEveryToolCallApproved = lastMessage.tool_calls?.every(
-        (toolCall) => toolCall.name === "tavily_search_results_json",
-      );
-      if (isEveryToolCallApproved) {
-        const values: IterableReadableStream<AgentStreamValue> =
+    if (hasPendingToolCalls(state)) {
+      if (input.trim() === "y") {
+        // Approved
+        const agentResponse: IterableReadableStream<AgentStreamValue> =
           await agent.stream(null, {
             ...config,
             streamMode: "updates",
           });
-        await printAgentStreamValues(values);
-        // TODO: ここでtool呼び出しがあると止まってしまう
+        await printAgentStreamValues(agentResponse);
       } else {
-        console.log(styleText("yellow", "Approve tool calls? (y/n)"));
+        // Rejected
+        const lastMessage: AIMessage =
+          state.values.messages[state.values.messages.length - 1];
+        const cancelMessages = lastMessage.tool_calls?.map((toolCall) => {
+          return new ToolMessage({
+            status: "error",
+            content: "Cancelled by user.",
+            tool_call_id: toolCall.id as string,
+          });
+        });
+        await agent.updateState(config, { messages: cancelMessages });
+        const agentResponse: IterableReadableStream<AgentStreamValue> =
+          await agent.stream(
+            {
+              messages: [new HumanMessage(input)],
+            },
+            {
+              ...config,
+              streamMode: "updates",
+            },
+          );
+        await printAgentStreamValues(agentResponse);
       }
+    } else {
+      // No pending tool calls
+      const agentResponse: IterableReadableStream<AgentStreamValue> =
+        await agent.stream(
+          {
+            messages: [new HumanMessage(input)],
+          },
+          {
+            ...config,
+            streamMode: "updates",
+          },
+        );
+      await printAgentStreamValues(agentResponse);
+    }
+
+    // Auto-approve tool calls
+    while (true) {
+      const updatedState = await agent.getState(config);
+      if (hasPendingToolCalls(updatedState)) {
+        const lastMessage: AIMessage =
+          updatedState.values.messages[updatedState.values.messages.length - 1];
+        const isEveryToolCallApproved = lastMessage.tool_calls?.every(
+          isAutoApprovableToolCall,
+        );
+        if (isEveryToolCallApproved) {
+          console.log(styleText("green", "Tool calls auto-approved."));
+          const values: IterableReadableStream<AgentStreamValue> =
+            await agent.stream(null, {
+              ...config,
+              streamMode: "updates",
+            });
+          await printAgentStreamValues(values);
+        } else {
+          console.log(
+            styleText("yellow", "Approve tool calls? (y or feedback)"),
+          );
+          break;
+        }
+      }
+
+      // No pending tool calls
+      break;
     }
 
     cli.prompt();
