@@ -11,10 +11,7 @@ describe("shellCommandTool", () => {
     });
 
     // then:
-    assert.equal(
-      result,
-      "<stdout>\nHello World\n\n</stdout>\n<stderr>\n\n</stderr>",
-    );
+    assert.equal(result, "<stdout>Hello World\n</stdout>\n<stderr></stderr>");
   });
 
   it("captures stderr", async () => {
@@ -24,10 +21,7 @@ describe("shellCommandTool", () => {
     });
 
     // then:
-    assert.equal(
-      result,
-      "<stdout>\n\n</stdout>\n<stderr>\nHello World\n\n</stderr>",
-    );
+    assert.equal(result, "<stdout></stdout>\n<stderr>Hello World\n</stderr>");
   });
 
   it("captures error with output", async () => {
@@ -40,19 +34,12 @@ describe("shellCommandTool", () => {
     await assert.rejects(result, {
       name: "Error",
       message: `
-<stdout>
-Hello Stdout
-
+<stdout>Hello Stdout
 </stdout>
-<stderr>
-Hello Stderr
-
+<stderr>Hello Stderr
 </stderr>
-<error>
-Error
-Command failed: bash -c "echo 'Hello Stdout' && echo 'Hello Stderr' >&2 && exit 1"
+<error>Error: Command failed: bash -c "echo 'Hello Stdout' && echo 'Hello Stderr' >&2 && exit 1"
 Hello Stderr
-
 </error>
 `.trim(),
     });

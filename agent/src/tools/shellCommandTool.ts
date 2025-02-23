@@ -10,15 +10,11 @@ export const shellCommandTool = tool(
     return new Promise((resolve, reject) => {
       exec(command, (err, stdout, stderr) => {
         const result = [
-          "<stdout>",
-          stdout,
-          "</stdout>",
-          "<stderr>",
-          stderr,
-          "</stderr>",
+          `<stdout>${stdout}</stdout>`,
+          `<stderr>${stderr}</stderr>`,
         ];
         if (err) {
-          result.push(...["<error>", err.name, err.message, "</error>"]);
+          result.push(`<error>${err.name}: ${err.message}</error>`);
           return reject(new Error(result.join("\n")));
         }
         return resolve(result.join("\n"));
