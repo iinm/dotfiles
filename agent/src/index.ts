@@ -2,6 +2,7 @@ import readline from "node:readline";
 import { styleText } from "node:util";
 
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
+import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
 import { AIMessage, HumanMessage, ToolMessage } from "@langchain/core/messages";
 import { ToolCall } from "@langchain/core/messages/tool";
 import { IterableReadableStream } from "@langchain/core/utils/stream";
@@ -45,9 +46,12 @@ const agent = createReactAgent({
   interruptBefore: ["tools"],
 });
 
-// Setup Langfuse
-const langfuseHandler = new CallbackHandler();
-const callbacks = [langfuseHandler];
+const callbacks: BaseCallbackHandler[] = [];
+if (process.argv.includes("--enable-langfuse")) {
+  // Enable Langfuse
+  const langfuseHandler = new CallbackHandler();
+  callbacks.push(langfuseHandler);
+}
 
 // Setup session
 const threadId = uuidv4();
