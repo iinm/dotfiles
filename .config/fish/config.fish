@@ -19,7 +19,7 @@ fish_add_path $HOME/tools/go/bin
 fish_add_path $HOME/tools/lua-language-server/bin
 fish_add_path $HOME/tools/google-cloud-sdk/bin
 
-fish_add_path $HOME/dotfiles/agent/bin
+fish_add_path $HOME/dotfiles/interpreter/bin
 
 # Environment variables
 set -x SHELL (which fish)

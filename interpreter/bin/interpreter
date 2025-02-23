@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+this_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+app_root="$(cd "$this_dir/.." && pwd)"
+
+# Install dependencies
+if ! test -d "$app_root/node_modules"; then
+  (cd "$app_root"; npm install --silent)
+fi
+
+# Run the agent
+export NODE_OPTIONS="--disable-warning=DEP0040"
+"$app_root/env.sh" node "$app_root/node_modules/.bin/tsx" "$app_root/index.ts" "$@"
