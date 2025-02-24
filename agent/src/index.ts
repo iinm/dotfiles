@@ -18,13 +18,10 @@ import { shellCommandTool } from "./tools/shellCommandTool";
 import { tmuxTool } from "./tools/tmuxTool";
 import { writeFileTool } from "./tools/writeFileTool";
 
-// Setup agent
 const model = new ChatOpenAI({
   model: "gpt-4o-mini",
   temperature: 0,
 });
-
-const memorySaver = new MemorySaver();
 
 const tools = [
   shellCommandTool,
@@ -41,10 +38,12 @@ const isAutoApprovableToolCall = (toolCall: ToolCall) => {
   return false;
 };
 
+const checkpointSaver = new MemorySaver();
+
 const agent = createReactAgent({
   llm: model,
   tools: tools,
-  checkpointSaver: memorySaver,
+  checkpointSaver: checkpointSaver,
   interruptBefore: ["tools"],
 });
 
@@ -80,11 +79,11 @@ cli.on("line", async (input) => {
   if (hasPendingToolCalls(state)) {
     if (input.trim() === "y") {
       // Approved
-      const agentResponse: AgentUpdatesStream = await agent.stream(null, {
+      const updates: AgentUpdatesStream = await agent.stream(null, {
         ...config,
         streamMode: "updates",
       });
-      await printAgentUpdatesStream(agentResponse);
+      await printAgentUpdatesStream(updates);
     } else {
       // Rejected
       const lastMessage: AIMessage =
@@ -97,7 +96,7 @@ cli.on("line", async (input) => {
         });
       });
       await agent.updateState(config, { messages: cancelMessages });
-      const agentResponse: AgentUpdatesStream = await agent.stream(
+      const updates: AgentUpdatesStream = await agent.stream(
         {
           messages: [new HumanMessage(input)],
         },
@@ -106,11 +105,11 @@ cli.on("line", async (input) => {
           streamMode: "updates",
         },
       );
-      await printAgentUpdatesStream(agentResponse);
+      await printAgentUpdatesStream(updates);
     }
   } else {
     // No pending tool calls
-    const agentResponse: AgentUpdatesStream = await agent.stream(
+    const updates: AgentUpdatesStream = await agent.stream(
       {
         messages: [new HumanMessage(input)],
       },
@@ -119,7 +118,7 @@ cli.on("line", async (input) => {
         streamMode: "updates",
       },
     );
-    await printAgentUpdatesStream(agentResponse);
+    await printAgentUpdatesStream(updates);
   }
 
   // Auto-approve tool calls
@@ -157,7 +156,6 @@ cli.on("line", async (input) => {
 const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
   for await (const value of values) {
     if ("agent" in value) {
-      // show message and tool calls
       for (const message of value.agent.messages) {
         console.log(styleText("bold", "\nAgent:"));
         console.log(message.content);
@@ -181,15 +179,20 @@ const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
       }
     }
     if ("tools" in value) {
-      // show tool messages
       for (const message of value.tools.messages) {
         console.log(styleText("bold", "\nTool Result:"));
         console.log(`${message.name}`);
+
+        const contentString =
+          typeof message.content === "string"
+            ? message.content
+            : JSON.stringify(message.content, null, 2);
+
         const maxContentLength = 500;
-        if (message.content.length > maxContentLength) {
-          console.log(`${message.content.slice(0, maxContentLength)}...`);
+        if (contentString.length > maxContentLength) {
+          console.log(`${contentString.slice(0, maxContentLength)}...`);
         } else {
-          console.log(message.content);
+          console.log(contentString);
         }
       }
     }
