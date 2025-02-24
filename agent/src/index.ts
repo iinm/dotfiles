@@ -61,12 +61,14 @@ Basic commands:
   - You always capture-pane to get the output of the command before/after running it.
 - Get output of session: capture-pane -p -t agent-${sessionId}:1 | grep -vE '^$' | tail -100
   - In this example, it removes empty lines and shows the last 100 lines.
-- Create new window: new-window -t agent-${sessionId}
 - List window: list-windows -t agent-${sessionId}
+- Create new window: new-window -t agent-${sessionId}
 
 Usecase: Browser automation
 - Start node.js interpreter: send-keys -t agent-${sessionId}:1 'node' Enter
-- Send the following code to the interpreter:
+- Check if node.js interpreter is running: capture-pane -p -t agent-${sessionId}:1 | grep -vE '^$' | tail -100
+  - You always capture-pane to get the output of the command before/after running it.
+- Send the following code to the interpreter: (It should be send one by one, capturing the output after each command)
   \`\`\`js
   const { chromium } = require("playwright");
   const browser = await chromium.launch({ headless: false })
