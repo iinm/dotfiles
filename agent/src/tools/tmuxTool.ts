@@ -23,9 +23,10 @@ export const tmuxTool = tool(
   },
   {
     name: "tmux",
-    description: "Run tmux command",
+    description: "Run a tmux command.".trim(),
     schema: z.object({
-      command: z.string().describe("The tmux command to run."),
+      command: z.string().describe("The tmux command to run.".trim()),
     }),
   },
 );
+
