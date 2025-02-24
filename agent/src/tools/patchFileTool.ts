@@ -4,7 +4,7 @@ import { tool } from "@langchain/core/tools";
 
 import z from "zod";
 
-export const patchFile = tool(
+export const patchFileTool = tool(
   async (input) => {
     const { path, diff } = input;
     const content = fs.readFileSync(path, "utf8");

@@ -4,7 +4,6 @@ import { tool } from "@langchain/core/tools";
 
 import z from "zod";
 
-// TODO: 起動時に専用のセッションを作成。終了時にセッションを削除するか確認する。
 export const tmuxTool = tool(
   async (input) => {
     const { command } = input;

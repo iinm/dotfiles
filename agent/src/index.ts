@@ -13,7 +13,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import CallbackHandler from "langfuse-langchain";
 import { v4 as uuidv4 } from "uuid";
 
-import { patchFile } from "./tools/patchFile";
+import { patchFileTool } from "./tools/patchFileTool";
 import { shellCommandTool } from "./tools/shellCommandTool";
 import { tmuxTool } from "./tools/tmuxTool";
 import { writeFileTool } from "./tools/writeFileTool";
@@ -30,7 +30,7 @@ const tools = [
   shellCommandTool,
   tmuxTool,
   writeFileTool,
-  patchFile,
+  patchFileTool,
   new TavilySearchResults({ maxResults: 5 }),
 ];
 
@@ -138,14 +138,16 @@ cli.on("line", async (input) => {
           streamMode: "updates",
         });
         await printAgentUpdatesStream(values);
+        continue;
       } else {
+        // Tool calls need approval
         console.log(styleText("yellow", "Approve tool calls? (y or feedback)"));
         break;
       }
+    } else {
+      // No pending tool calls
+      break;
     }
-
-    // No pending tool calls
-    break;
   }
 
   cli.prompt();

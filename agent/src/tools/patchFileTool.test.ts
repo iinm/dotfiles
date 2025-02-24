@@ -4,9 +4,9 @@ import { afterEach, describe, it } from "node:test";
 
 import { v4 as uuidv4 } from "uuid";
 
-import { patchFile } from "./patchFile";
+import { patchFileTool } from "./patchFileTool";
 
-describe("patchFile", () => {
+describe("patchFileTool", () => {
   const cleanups: (() => Promise<void>)[] = [];
 
   afterEach(async () => {
@@ -44,7 +44,7 @@ This is a test file content updated 2.
 This is a test file content updated 3.
 >>>>>>> REPLACE
 `;
-    const result = await patchFile.invoke({ path: tmpFilePath, diff });
+    const result = await patchFileTool.invoke({ path: tmpFilePath, diff });
 
     // then:
     assert.equal(result, `Patched file: ${tmpFilePath}`);
