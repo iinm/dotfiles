@@ -22,6 +22,14 @@ Expected format:
 (new content to replace the removed content)
 >>>>>>> REPLACE
 
+<<<<<<< SEARCH
+(second content to be removed)
+=======
+(new content to replace the second removed content)
+>>>>>>> REPLACE
+
+...
+
 Note:
 - <<<<<<< (7 < characters) is the start of the search content.
 - ======= (7 = characters) is the separator between the search and replace content.
