@@ -12,5 +12,5 @@
 # direnv
 .envrc
 
-# personal directory
-.my/
+# agent working directory
+.agent

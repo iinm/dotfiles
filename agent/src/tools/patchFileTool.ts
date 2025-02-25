@@ -8,9 +8,27 @@ export const patchFileTool = tool(
   async (input) => {
     const { path, diff } = input;
     const content = fs.readFileSync(path, "utf8");
-    const matches = diff.matchAll(
-      /<<<<<<< SEARCH\n(.*?)\n=======\n(.*?)\n>>>>>>> REPLACE/gs,
+    const matches = Array.from(
+      diff.matchAll(/<<<<<<< SEARCH\n(.*?)\n=======\n(.*?)\n>>>>>>> REPLACE/gs),
     );
+    if (matches.length === 0) {
+      throw new Error(
+        `
+No matches found in diff.
+Expected format:
+<<<<<<< SEARCH
+(content to be removed)
+=======
+(new content to replace the removed content)
+>>>>>>> REPLACE
+
+Note:
+- <<<<<<< (7 < characters) is the start of the search content.
+- ======= (7 = characters) is the separator between the search and replace content.
+- >>>>>>> (7 > characters) is the end of the replace content.
+`.trim(),
+      );
+    }
     let newContent = content;
     for (const match of matches) {
       const [_, search, replace] = match;
@@ -44,6 +62,11 @@ Format:
 >>>>>>> REPLACE
 
 ...
+
+Note:
+- <<<<<<< (7 < characters) is the start of the search content.
+- ======= (7 = characters) is the separator between the search and replace content.
+- >>>>>>> (7 > characters) is the end of the replace content.
 `),
     }),
   },

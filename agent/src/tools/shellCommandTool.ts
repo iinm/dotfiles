@@ -4,17 +4,27 @@ import { tool } from "@langchain/core/tools";
 
 import z from "zod";
 
+const OUTPUT_MAX_LENGTH = 10_000;
+
 export const shellCommandTool = tool(
   async (input) => {
     const { command } = input;
     return new Promise((resolve, reject) => {
       exec(command, (err, stdout, stderr) => {
+        const stdoutTruncated = stdout.slice(0, OUTPUT_MAX_LENGTH);
+        const isStdoutTruncated = stdout.length > OUTPUT_MAX_LENGTH;
+        const stderrTruncated = stderr.slice(0, OUTPUT_MAX_LENGTH);
+        const isStderrTruncated = stderr.length > OUTPUT_MAX_LENGTH;
         const result = [
-          `<stdout>${stdout}</stdout>`,
-          `<stderr>${stderr}</stderr>`,
+          `<stdout truncated="${isStdoutTruncated}">${stdoutTruncated}</stdout>`,
+          `<stderr truncated="${isStderrTruncated}">${stderrTruncated}</stderr>`,
         ];
         if (err) {
-          result.push(`<error>${err.name}: ${err.message}</error>`);
+          const errMessageTruncated = err.message.slice(0, OUTPUT_MAX_LENGTH);
+          const isErrMessageTruncated = err.message.length > OUTPUT_MAX_LENGTH;
+          result.push(
+            `<error truncated="${isErrMessageTruncated}">${err.name}: ${errMessageTruncated}</error>`,
+          );
           return reject(new Error(result.join("\n")));
         }
         return resolve(result.join("\n"));

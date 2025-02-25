@@ -12,6 +12,7 @@ import { ChatOpenAI } from "@langchain/openai";
 
 import CallbackHandler from "langfuse-langchain";
 import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
 
 import { patchFileTool } from "./tools/patchFileTool";
 import { shellCommandTool } from "./tools/shellCommandTool";
@@ -39,8 +40,17 @@ Rules:
 ## shell command
 
 Basic commands:
-- List files: fd --max-depth 2 --hidden
-- List directories: fd --max-depth 2 --hidden --type d
+- Find file: fd file.txt --hidden
+- List directories:
+  \`\`\`
+  fd --max-depth 2 --type d --hidden
+  fd . 'path/to/directory/' --max-depth 2 --type d --hidden
+  \`\`\`
+- List files:
+  \`\`\`
+  fd --max-depth 2 --type f --hidden
+  fd . '/path/to/directory' --max-depth 2 --type f --hidden
+  \`\`\`
 - Show file content: cat file.txt
 - Search for a string in files: rg 'string'
 
@@ -234,7 +244,21 @@ const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
         for (const toolCall of message.tool_calls || []) {
           console.log(styleText("bold", "\nTool call:"));
           console.log(`${toolCall.name}`);
-          console.log(JSON.stringify(toolCall.args, null, 2));
+          if (toolCall.name === writeFileTool.name) {
+            const typedArgs = toolCall.args as z.infer<
+              typeof writeFileTool.schema
+            >;
+            console.log(`path: ${typedArgs.path}`);
+            console.log(`content:\n${typedArgs.content}`);
+          } else if (toolCall.name === patchFileTool.name) {
+            const typedArgs = toolCall.args as z.infer<
+              typeof patchFileTool.schema
+            >;
+            console.log(`path: ${typedArgs.path}`);
+            console.log(`diff:\n${typedArgs.diff}`);
+          } else {
+            console.log(JSON.stringify(toolCall.args, null, 2));
+          }
         }
         console.log(
           styleText(
