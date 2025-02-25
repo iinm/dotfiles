@@ -14,8 +14,8 @@ import CallbackHandler from "langfuse-langchain";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 
+import { execCommandTool } from "./tools/execCommandTool";
 import { patchFileTool } from "./tools/patchFileTool";
-import { shellCommandTool } from "./tools/shellCommandTool";
 import { tmuxTool } from "./tools/tmuxTool";
 import { writeFileTool } from "./tools/writeFileTool";
 
@@ -42,33 +42,38 @@ What is the expected output?
 # Tools
 
 Rules:
-- Call tools one by one. Do not call multiple tools at once.
+- Call one tool at a time.
 
-## shell command
+## exec command
+
+exec_command is used to run a one-shot command.
+Use tmux to run daemon processes and interactive processes.
 
 Rules:
 - Current working directory is ${process.cwd()}.
 - Use relative paths to refer to files and directories.
 
 Basic commands:
-- Find file: fd file.txt --type f --hidden
+- Show file content: cat ['file.txt']
+- List files: ls ['-la']
+- Find file: fd ['file.txt', '--type', 'f', '--hidden']
 - List directories:
-  \`\`\`
-  fd --max-depth 2 --type d --hidden
-  fd . 'path/to/directory/' --max-depth 2 --type d --hidden
-  \`\`\`
+  - in current directory: fd ['--max-depth', '2', '--type', 'd', '--hidden']
+  - in a specific directory: fd ['.', 'path/to/directory/', '--max-depth', '2', '--type', 'd', '--hidden']
 - List files:
-  \`\`\`
-  fd --max-depth 2 --type f --hidden
-  fd . '/path/to/directory' --max-depth 2 --type f --hidden
-  \`\`\`
-- Show file content: cat file.txt
-- Search for a string in files: rg 'string'
+  - in current directory: fd ['--max-depth', '2', '--type', 'f', '--hidden']
+  - in a specific directory: fd ['.', 'path/to/directory', '--max-depth', '2', '--type', 'f', '--hidden']
+- Search for a string in files: rg ['regex']
+- Get outline of a file:
+  - markdown: rg ['^#+', 'file.md']
+  - typescript: rg ['^(export|const|function|class|interface|type|enum)', 'file.ts']
+- Get part of a file: rg ['regex', 'file.txt', '-B', '5', '-A', '5']
+  - It shows 5 lines (b)efore and (a)fter the matched line.
 
 ## tmux
 
-tmux is used to manage daemon processes such as http servers and interactive processes
-such as node.js interpreter.
+tmux is used to manage daemon processes such as http servers and interactive processes such as node.js interpreter.
+Use exec_command to run one-shot commands.
 
 Rules:
 - Use the given sessionId ( agent-${sessionId} ) to run the command.
@@ -77,41 +82,29 @@ Rules:
 - Use relative paths to refer to files and directories.
 
 Basic commands:
-- Start session: new-session -d -s agent-${sessionId}
+- Start session: new-session ['-d', '-s', 'agent-${sessionId}']
 - Send key to session:
-  \`\`\`
-  send-keys -t agent-${sessionId}:1 'echo hello' Enter
+  send-keys ['-t', 'agent-${sessionId}:1', 'echo hello', 'Enter']
   # Note that last ';' should be escaped.
-  send-keys -t agent-${sessionId}:1 'echo hello\\;' Enter
+  send-keys ['-t', 'agent-${sessionId}:1', 'echo hello\\;', 'Enter']
   # Delete line
-  send-keys -t agent-${sessionId}:1 C-a C-k
-  \`\`\`
+  send-keys ['-t', 'agent-${sessionId}:1', 'C-a', 'C-k']
 - Get output of session:
-  \`\`\`
-  capture-pane -p -t agent-${sessionId}:1 | grep -vE '^$' | tail -10
-  \`\`\`
-  - In this example, it removes empty lines and shows the last 10 lines.
-  - You can change the number of lines to show.
-- List window: list-windows -t agent-${sessionId}
-- Create new window: new-window -t agent-${sessionId}
+  capture-pane ['-p', '-t', 'agent-${sessionId}:1']
+- List window: list-windows ['-t', 'agent-${sessionId}']
+- Create new window: new-window ['-t', 'agent-${sessionId}']
 
 Usecase: Browser automation
 - Change directory to the directory where you have playwright installed.
-  \`\`\`
-  send-keys -t agent-${sessionId}:1 'cd ${__dirname}' Enter
-  \`\`\`
+  send-keys ['-t', 'agent-${sessionId}:1', 'cd ${__dirname}', 'Enter']
 - Start node.js interpreter.
-  \`\`\`
-  send-keys -t agent-${sessionId}:1 'node' Enter
-  capture-pane -p -t agent-${sessionId}:1 | grep -vE '^$' | tail -10
-  \`\`\`
+  send-keys ['-t', 'agent-${sessionId}:1', 'node', 'Enter']
+  capture-pane -p -t agent-${sessionId}:1
 - Send the following code to the interpreter: (It should be send one by one, check the output after each command)
-  \`\`\`
-  send-keys -t agent-${sessionId}:1 'const { chromium } = require("playwright")' Enter
-  send-keys -t agent-${sessionId}:1 'const browser = await chromium.launch({ headless: false })' Enter
-  send-keys -t agent-${sessionId}:1 'let page = await browser.newPage({ viewport: { width: 1280, height: 960 } })' Enter
-  send-keys -t agent-${sessionId}:1 'let page.goto("http://example.com")' Enter
-  \`\`\`
+  send-keys ['-t', 'agent-${sessionId}:1', 'const { chromium } = require("playwright")', 'Enter']
+  send-keys ['-t', 'agent-${sessionId}:1', 'const browser = await chromium.launch({ headless: false })', 'Enter']
+  send-keys ['-t', 'agent-${sessionId}:1', 'let page = await browser.newPage({ viewport: { width: 1280, height: 960 } })', 'Enter']
+  send-keys ['-t', 'agent-${sessionId}:1', 'let page.goto("http://example.com")', 'Enter']
 `.trim();
 
 const model = new ChatOpenAI({
@@ -122,7 +115,7 @@ const model = new ChatOpenAI({
 
 const tavilySearchResultsTool = new TavilySearchResults({ maxResults: 5 });
 const tools = [
-  shellCommandTool,
+  execCommandTool,
   tmuxTool,
   writeFileTool,
   patchFileTool,
@@ -133,24 +126,23 @@ const isAutoApprovableToolCall = (toolCall: ToolCall) => {
   if (toolCall.name === tavilySearchResultsTool.name) {
     return true;
   }
-  if (toolCall.name === shellCommandTool.name) {
-    const args = toolCall.args as z.infer<typeof shellCommandTool.schema>;
-    if (args.command.startsWith("fd ")) {
-      return true;
-    }
-    if (args.command.startsWith("rg ")) {
-      return true;
-    }
-    if (args.command.startsWith("cat ")) {
+  if (toolCall.name === execCommandTool.name) {
+    const args = toolCall.args as z.infer<typeof execCommandTool.schema>;
+    if (["cat", "ls", "fd", "rg", "wc"].includes(args.command)) {
       return true;
     }
   }
   if (toolCall.name === tmuxTool.name) {
     const args = toolCall.args as z.infer<typeof tmuxTool.schema>;
-    if (args.command.startsWith("capture-pane ")) {
-      return true;
-    }
-    if (args.command.startsWith("list-windows ")) {
+    if (
+      [
+        "list-sessions",
+        "list-windows",
+        "new-session",
+        "new-window",
+        "capture-pane",
+      ].includes(args.command.at(0) || "")
+    ) {
       return true;
     }
   }
