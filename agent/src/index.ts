@@ -29,7 +29,6 @@ You are a problem solver.
 - You clarify the goal of the problem solving and confirm it with the user before solving the problem.
 - You break down the problem into smaller parts and confirm the plan with the user before solving it.
   Then you solve each part one by one.
-- You use only provided tools to solve problems.
 - You respond to users in the same language they use.
 
 # Tools
@@ -39,8 +38,12 @@ Rules:
 
 ## shell command
 
+Rules:
+- Current working directory is ${process.cwd()}.
+- Use relative paths to refer to files and directories.
+
 Basic commands:
-- Find file: fd file.txt --hidden
+- Find file: fd file.txt --type f --hidden
 - List directories:
   \`\`\`
   fd --max-depth 2 --type d --hidden
@@ -62,6 +65,8 @@ such as node.js interpreter.
 Rules:
 - Use the given sessionId ( agent-${sessionId} ) to run the command.
 - If it's not avaiable, create a new session with the given sessionId.
+- Current working directory is ${process.cwd()}.
+- Use relative paths to refer to files and directories.
 
 Basic commands:
 - Start session: new-session -d -s agent-${sessionId}
@@ -83,6 +88,10 @@ Basic commands:
 - Create new window: new-window -t agent-${sessionId}
 
 Usecase: Browser automation
+- Change directory to the directory where you have playwright installed.
+  \`\`\`
+  send-keys -t agent-${sessionId}:1 'cd ${__dirname}' Enter
+  \`\`\`
 - Start node.js interpreter.
   \`\`\`
   send-keys -t agent-${sessionId}:1 'node' Enter
@@ -94,9 +103,6 @@ Usecase: Browser automation
   send-keys -t agent-${sessionId}:1 'const browser = await chromium.launch({ headless: false })' Enter
   send-keys -t agent-${sessionId}:1 'let page = await browser.newPage({ viewport: { width: 1280, height: 960 } })' Enter
   send-keys -t agent-${sessionId}:1 'let page.goto("http://example.com")' Enter
-  send-keys -t agent-${sessionId}:1 'let pageContent = await page.content()' Enter
-  send-keys -t agent-${sessionId}:1 'pageContent = pageContent.replace(/<(script|style|svg).*?<\\/\\1>/gs, "")' Enter
-  send-keys -t agent-${sessionId}:1 'pageContent = pageContent.replace(/<(link|\\!--).*?>/gs, "")' Enter
   \`\`\`
 `.trim();
 
@@ -106,17 +112,39 @@ const model = new ChatOpenAI({
   temperature: 0,
 });
 
+const tavilySearchResultsTool = new TavilySearchResults({ maxResults: 5 });
 const tools = [
   shellCommandTool,
   tmuxTool,
   writeFileTool,
   patchFileTool,
-  new TavilySearchResults({ maxResults: 5 }),
+  tavilySearchResultsTool,
 ];
 
 const isAutoApprovableToolCall = (toolCall: ToolCall) => {
-  if (toolCall.name === "tavily_search_results_json") {
+  if (toolCall.name === tavilySearchResultsTool.name) {
     return true;
+  }
+  if (toolCall.name === shellCommandTool.name) {
+    const args = toolCall.args as z.infer<typeof shellCommandTool.schema>;
+    if (args.command.startsWith("fd ")) {
+      return true;
+    }
+    if (args.command.startsWith("rg ")) {
+      return true;
+    }
+    if (args.command.startsWith("cat ")) {
+      return true;
+    }
+  }
+  if (toolCall.name === tmuxTool.name) {
+    const args = toolCall.args as z.infer<typeof tmuxTool.schema>;
+    if (args.command.startsWith("capture-pane ")) {
+      return true;
+    }
+    if (args.command.startsWith("list-windows ")) {
+      return true;
+    }
   }
   return false;
 };
@@ -132,8 +160,7 @@ const agent = createReactAgent({
 });
 
 const callbacks: BaseCallbackHandler[] = [];
-if (process.argv.includes("--enable-langfuse")) {
-  // Enable Langfuse
+if (process.env.LANGFUSE_BASEURL) {
   const langfuseHandler = new CallbackHandler();
   callbacks.push(langfuseHandler);
 }
