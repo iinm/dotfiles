@@ -31,9 +31,9 @@ Expected format:
 ...
 
 Note:
-- <<<<<<< (7 < characters) is the start of the search content.
+- <<<<<<< (7 < characters) SEARCH is the start of the search content.
 - ======= (7 = characters) is the separator between the search and replace content.
-- >>>>>>> (7 > characters) is the end of the replace content.
+- >>>>>>> (7 > characters) REPLACE is the end of the replace content.
 `.trim(),
       );
     }
@@ -72,9 +72,9 @@ Format:
 ...
 
 Note:
-- <<<<<<< (7 < characters) is the start of the search content.
+- <<<<<<< (7 < characters) SEARCH is the start of the search content.
 - ======= (7 = characters) is the separator between the search and replace content.
-- >>>>>>> (7 > characters) is the end of the replace content.
+- >>>>>>> (7 > characters) REPLACE is the end of the replace content.
 `),
     }),
   },
