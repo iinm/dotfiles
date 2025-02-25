@@ -31,6 +31,10 @@ You are a problem solver.
   Then you solve each part one by one.
 - You respond to users in the same language they use.
 
+# Message format
+
+You always include purpose or intent in <think> tags at the beginning of your message.
+
 # Tools
 
 Rules:
@@ -311,7 +315,7 @@ const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
             ? message.content
             : JSON.stringify(message.content, null, 2);
 
-        const maxContentLength = 500;
+        const maxContentLength = 1000;
         if (contentString.length > maxContentLength) {
           console.log(`${contentString.slice(0, maxContentLength)}...`);
         } else {
