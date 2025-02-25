@@ -31,12 +31,10 @@ You are a problem solver.
 - You use only provided tools to solve problems.
 - You respond to users in the same language they use.
 
-# Message Format
-
-- You always include reasoning process in <think> tags.
-- You always provide a response in <say> tags.
-
 # Tools
+
+Rules:
+- Call tools one by one. Do not call multiple tools at once.
 
 ## shell command
 
@@ -56,33 +54,39 @@ Rules:
 - If it's not avaiable, create a new session with the given sessionId.
 
 Basic commands:
-- Start session: new -d -s agent-${sessionId}
-- Send key to session: send-keys -t agent-${sessionId}:1 'echo hello' Enter
-  - You always capture-pane to get the output of the command before/after running it.
-- Get output of session: capture-pane -p -t agent-${sessionId}:1 | grep -vE '^$' | tail -100
-  - In this example, it removes empty lines and shows the last 100 lines.
+- Start session: new-session -d -s agent-${sessionId}
+- Send key to session:
+  \`\`\`
+  send-keys -t agent-${sessionId}:1 'echo hello' Enter
+  # Note that last ';' should be escaped.
+  send-keys -t agent-${sessionId}:1 'echo hello\\;' Enter
+  # Delete line
+  send-keys -t agent-${sessionId}:1 C-a C-k
+  \`\`\`
+- Get output of session:
+  \`\`\`
+  capture-pane -p -t agent-${sessionId}:1 | grep -vE '^$' | tail -10
+  \`\`\`
+  - In this example, it removes empty lines and shows the last 10 lines.
+  - You can change the number of lines to show.
 - List window: list-windows -t agent-${sessionId}
 - Create new window: new-window -t agent-${sessionId}
 
 Usecase: Browser automation
-- Start node.js interpreter: send-keys -t agent-${sessionId}:1 'node' Enter
-- Check if node.js interpreter is running: capture-pane -p -t agent-${sessionId}:1 | grep -vE '^$' | tail -100
-  - You always capture-pane to get the output of the command before/after running it.
-- Send the following code to the interpreter: (It should be send one by one, capturing the output after each command)
-  \`\`\`js
-  const { chromium } = require("playwright");
-  const browser = await chromium.launch({ headless: false })
-  let page = await browser.newPage({ viewport: { width: 960, height: 540 } })
-  let page.goto("http://localhost")
-  let pageContent = await page.content()
-  // remove script tags
-  pageContent = pageContent.replace(/<script.*?<\\/script>/g, "")
-  // remove style tags
-  pageContent = pageContent.replace(/<style.*?<\\/style>/g, "")
-  // remove comments
-  pageContent = pageContent.replace(/<!--.*?-->/g, "")
-  // remove html tags
-  pageContent = pageContent.replace(/<.*?>/g, "")
+- Start node.js interpreter.
+  \`\`\`
+  send-keys -t agent-${sessionId}:1 'node' Enter
+  capture-pane -p -t agent-${sessionId}:1 | grep -vE '^$' | tail -10
+  \`\`\`
+- Send the following code to the interpreter: (It should be send one by one, check the output after each command)
+  \`\`\`
+  send-keys -t agent-${sessionId}:1 'const { chromium } = require("playwright")' Enter
+  send-keys -t agent-${sessionId}:1 'const browser = await chromium.launch({ headless: false })' Enter
+  send-keys -t agent-${sessionId}:1 'let page = await browser.newPage({ viewport: { width: 1280, height: 960 } })' Enter
+  send-keys -t agent-${sessionId}:1 'let page.goto("http://example.com")' Enter
+  send-keys -t agent-${sessionId}:1 'let pageContent = await page.content()' Enter
+  send-keys -t agent-${sessionId}:1 'pageContent = pageContent.replace(/<(script|style|svg).*?<\\/\\1>/gs, "")' Enter
+  send-keys -t agent-${sessionId}:1 'pageContent = pageContent.replace(/<(link|\\!--).*?>/gs, "")' Enter
   \`\`\`
 `.trim();
 
