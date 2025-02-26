@@ -120,8 +120,56 @@ Usecase: Browser automation
   send-keys ['-t', 'agent-${sessionId}:1', 'let page = await browser.newPage({ viewport: { width: 1280, height: 960 } })', 'Enter']
   send-keys ['-t', 'agent-${sessionId}:1', 'let page.goto("http://example.com")', 'Enter']
 
+# Memory Bank
+
+You save the important information in the memory bank to resume the work later.
+
+Usecase:
+- User requests to save the memory bank by saying "save memory bank", "save memory".
+- User asks you to resume the work by saying "resume work".
+  - Show the memory files and ask user to choose the memory file to resume the work.
+
+Path: ${process.cwd()}/.agent/memory/<snake-case-title>.md
+- Make consice and clear title that represents the content.
+- Create directories if needed.
+
+Memory Bank Format:
+\`\`\`markdown
+# <title>
+
+## (Why/What) Task Description
+
+Purpose of the task, what you are trying to achieve, what you are trying to solve, etc.
+
+## (How) Plan
+
+Steps you are going to follow to achieve the goal.
+Devide the task into smaller parts and write the plan for each part.
+
+## Current Status
+
+What you have done so far, what is the current status, what is pending, etc.
+
+## Next Steps
+
+What you are going to do next, what you are planning to do next, etc.
+
+## Notes for Future
+
+What you have learned, what you have tried, what you have found, etc.
+
+## System Information
+
+- Current working directory:
+- tmux session:
+- git branch:
+...
+
+\`\`\`
+
 # When conversation ends
 
+- Save the memory bank when user ends the conversation by saying "bye", "exit", "quit".
 - Kill tmux session agent-${sessionId} when user ends the conversation by saying "bye", "exit", "quit".
   - It's OK if tmux session is not exist.
 `.trim();
@@ -194,7 +242,11 @@ const config = {
 const cli = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
-  prompt: styleText("gray", `(Session ID: ${sessionId})`) + "\n> ",
+  prompt:
+    styleText(
+      "gray",
+      `(Session ID: ${sessionId}, Examples: "resume work", "save memory", "bye")`,
+    ) + "\n> ",
 });
 
 cli.prompt();
