@@ -68,6 +68,7 @@ Basic commands:
   - in a specific directory: fd ['.', 'path/to/directory', '--max-depth', '2', '--type', 'f', '--hidden']
 - Search for a string in files: rg ['regex', './']
   - Directory or file must be specified.
+  - Note that special characters like $, ^, *, [, ], (, ), etc. in regex must be escaped with a backslash.
 - Show file content: cat ['file.txt']
   - Output is truncated if the file is too large.
   - Use rg to get outline or part of a large file.
@@ -118,6 +119,11 @@ Usecase: Browser automation
   send-keys ['-t', 'agent-${sessionId}:1', 'const browser = await chromium.launch({ headless: false })', 'Enter']
   send-keys ['-t', 'agent-${sessionId}:1', 'let page = await browser.newPage({ viewport: { width: 1280, height: 960 } })', 'Enter']
   send-keys ['-t', 'agent-${sessionId}:1', 'let page.goto("http://example.com")', 'Enter']
+
+# When conversation ends
+
+- Kill tmux session agent-${sessionId} when user ends the conversation by saying "bye", "exit", "quit".
+  - It's OK if tmux session is not exist.
 `.trim();
 
 const model = new ChatOpenAI({
@@ -198,7 +204,7 @@ cli.on("line", async (input) => {
   const hasPendingToolCalls = (s: typeof state) => s.next.includes("tools");
 
   if (hasPendingToolCalls(state)) {
-    if (input.trim() === "y") {
+    if (/^(y|yes|ｙ)$/.test(input.trim())) {
       // Approved
       const updates: AgentUpdatesStream = await agent.stream(null, {
         ...config,
