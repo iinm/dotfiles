@@ -189,7 +189,7 @@ const config = {
 const cli = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
-  prompt: "> ",
+  prompt: styleText("gray", `(Session ID: ${sessionId})`) + "\n> ",
 });
 
 cli.prompt();
