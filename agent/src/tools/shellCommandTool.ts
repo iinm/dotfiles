@@ -6,9 +6,6 @@ import z from "zod";
 
 const OUTPUT_MAX_LENGTH = 10_000;
 
-/**
- * @deprecated ; && || などを使って危険なコマンドを実行する可能性があるので使わない
- */
 export const shellCommandTool = tool(
   async (input) => {
     const { command } = input;

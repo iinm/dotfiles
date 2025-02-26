@@ -16,6 +16,7 @@ import { z } from "zod";
 
 import { execCommandTool } from "./tools/execCommandTool";
 import { patchFileTool } from "./tools/patchFileTool";
+import { shellCommandTool } from "./tools/shellCommandTool";
 import { tmuxTool } from "./tools/tmuxTool";
 import { writeFileTool } from "./tools/writeFileTool";
 
@@ -70,6 +71,14 @@ Basic commands:
 - Get part of a file: rg ['regex', 'file.txt', '-B', '5', '-A', '5']
   - It shows 5 lines (b)efore and (a)fter the matched line.
 
+## shell command
+
+shell_command is used to run a shell command that cotains pipes and redirections.
+Use exec_command when you don't need pipes and redirections.
+
+Example:
+- Write command output to a file: echo 'hello' > file.txt
+
 ## tmux
 
 tmux is used to manage daemon processes such as http servers and interactive processes such as node.js interpreter.
@@ -116,6 +125,7 @@ const model = new ChatOpenAI({
 const tavilySearchResultsTool = new TavilySearchResults({ maxResults: 5 });
 const tools = [
   execCommandTool,
+  shellCommandTool,
   tmuxTool,
   writeFileTool,
   patchFileTool,
