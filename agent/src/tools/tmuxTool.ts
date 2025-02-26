@@ -9,6 +9,16 @@ const OUTPUT_MAX_LENGTH = 10_000;
 export const tmuxTool = tool(
   async (input) => {
     const { command } = input;
+    // tmuxはセミコロンを複数コマンドの区切りとして扱うためエスケープが必要
+    // LLMがこのルールを無視するのでここでエスケープする
+    if (command.at(0) === "send-keys") {
+      for (let i = 1; i < command.length; i++) {
+        const arg = command[i];
+        if (arg.endsWith(";") && !arg.endsWith("\\;")) {
+          command[i] = arg.slice(0, -1) + "\\;";
+        }
+      }
+    }
     return new Promise((resolve, reject) => {
       execFile("tmux", command, async (err, stdout, stderr) => {
         const stdoutTruncated = stdout.slice(0, OUTPUT_MAX_LENGTH);
@@ -46,10 +56,10 @@ export const tmuxTool = tool(
           const isCapturedTruncated = captured.length > OUTPUT_MAX_LENGTH;
           result.push(
             [
-              `<tmux:capture-pane-result target="${target}" tail="10" trucated="${isCapturedTruncated}">`,
+              `<tmux:capture-pane-result target="${target}" trucated="${isCapturedTruncated}">`,
               capturedTruncated,
               `</tmux:capture-pane-result>`,
-            ].join(""),
+            ].join("\n"),
           );
         }
         return resolve(result.join("\n"));

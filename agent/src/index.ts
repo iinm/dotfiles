@@ -44,6 +44,8 @@ What is the expected output?
 
 Rules:
 - Call one tool at a time.
+- When tool output is not as expected, check the output carefully and think about the next trial.
+- When you fail to call tool repeatedly, ask user for feedback.
 
 ## exec command
 
@@ -55,17 +57,20 @@ Rules:
 - Use relative paths to refer to files and directories.
 
 Basic commands:
-- Show file content: cat ['file.txt']
 - List files: ls ['-la']
 - Find file: fd ['file.txt', '--type', 'f', '--hidden']
 - List directories:
   - in current directory: fd ['--max-depth', '2', '--type', 'd', '--hidden']
   - in a specific directory: fd ['.', 'path/to/directory/', '--max-depth', '2', '--type', 'd', '--hidden']
+  - --max-depth is used to limit the depth of the search.
 - List files:
   - in current directory: fd ['--max-depth', '2', '--type', 'f', '--hidden']
   - in a specific directory: fd ['.', 'path/to/directory', '--max-depth', '2', '--type', 'f', '--hidden']
 - Search for a string in files: rg ['regex', './']
   - Directory or file must be specified.
+- Show file content: cat ['file.txt']
+  - Output is truncated if the file is too large.
+  - Use rg to get outline or part of a large file.
 - Get outline of a file:
   - markdown: rg ['^#+', 'file.md']
   - typescript: rg ['^(export|const|function|class|interface|type|enum)', 'file.ts']
@@ -95,8 +100,6 @@ Basic commands:
 - Start session: new-session ['-d', '-s', 'agent-${sessionId}']
 - Send key to session:
   send-keys ['-t', 'agent-${sessionId}:1', 'echo hello', 'Enter']
-  # Note that last ';' should be escaped.
-  send-keys ['-t', 'agent-${sessionId}:1', 'echo hello\\;', 'Enter']
   # Delete line
   send-keys ['-t', 'agent-${sessionId}:1', 'C-a', 'C-k']
 - Get output of session:
