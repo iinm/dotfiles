@@ -148,13 +148,9 @@ const isAutoApprovableToolCall = (toolCall: ToolCall) => {
   if (toolCall.name === tmuxTool.name) {
     const args = toolCall.args as z.infer<typeof tmuxTool.schema>;
     if (
-      [
-        "list-sessions",
-        "list-windows",
-        "new-session",
-        "new-window",
-        "capture-pane",
-      ].includes(args.command.at(0) || "")
+      ["list-sessions", "list-windows", "capture-pane"].includes(
+        args.command.at(0) || "",
+      )
     ) {
       return true;
     }
