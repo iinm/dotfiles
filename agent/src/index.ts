@@ -64,7 +64,8 @@ Basic commands:
 - List files:
   - in current directory: fd ['--max-depth', '2', '--type', 'f', '--hidden']
   - in a specific directory: fd ['.', 'path/to/directory', '--max-depth', '2', '--type', 'f', '--hidden']
-- Search for a string in files: rg ['regex']
+- Search for a string in files: rg ['regex', './']
+  - Directory or file must be specified.
 - Get outline of a file:
   - markdown: rg ['^#+', 'file.md']
   - typescript: rg ['^(export|const|function|class|interface|type|enum)', 'file.ts']
@@ -77,7 +78,7 @@ shell_command is used to run a shell command that cotains pipes and redirections
 Use exec_command when you don't need pipes and redirections.
 
 Example:
-- Write command output to a file: echo 'hello' > file.txt
+- Write command output to a file: "echo 'hello' > file.txt"
 
 ## tmux
 
