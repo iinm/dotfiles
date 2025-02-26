@@ -86,6 +86,30 @@ Use exec_command when you don't need pipes and redirections.
 Example:
 - Write command output to a file: "echo 'hello' > file.txt"
 
+## patch file
+
+patch_file is used to modify a file by replacing specific content with new content.
+
+Format:
+<<<<<<< SEARCH
+(content to be removed)
+=======
+(new content to replace the removed content)
+>>>>>>> REPLACE
+
+<<<<<<< SEARCH
+(second content to be removed)
+=======
+(new content to replace the second removed content)
+>>>>>>> REPLACE
+
+...
+
+Note:
+- <<<<<<< SEARCH (7 < characters + SEARCH) is the start of the search content.
+- ======= (7 = characters) is the separator between the search and replace content.
+- >>>>>>> REPLACE (7 > characters + REPLACE) is the end of the replace content.
+
 ## tmux
 
 tmux is used to manage daemon processes such as http servers and interactive processes such as node.js interpreter.

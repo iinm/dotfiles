@@ -53,29 +53,7 @@ Note:
     description: "Patch a file.",
     schema: z.object({
       path: z.string().describe("The file path."),
-      diff: z.string().describe(`
-The diff to apply to the file.
-
-Format:
-<<<<<<< SEARCH
-(content to be removed)
-=======
-(new content to replace the removed content)
->>>>>>> REPLACE
-
-<<<<<<< SEARCH
-(second content to be removed)
-=======
-(new content to replace the second removed content)
->>>>>>> REPLACE
-
-...
-
-Note:
-- <<<<<<< SEARCH (7 < characters + SEARCH) is the start of the search content.
-- ======= (7 = characters) is the separator between the search and replace content.
-- >>>>>>> REPLACE (7 > characters + REPLACE) is the end of the replace content.
-`),
+      diff: z.string().describe("The diff to apply to the file in SEARCH/REPLACE format. See prompt for details."),
     }),
   },
 );
