@@ -42,7 +42,8 @@ What is the expected output?
 
 # Message from user
 
-- Users specify file paths with relative paths from the current directory.
+User specifies file path with relative path from the current directory.
+Crrent working directory is ${process.cwd()}.
 
 # Tools
 
@@ -177,8 +178,8 @@ Memory Bank Format:
 ## System Information
 
 - Current working directory:
-- tmux session:
 - git branch:
+- tmux session: (if it's running)
 \`\`\`
 
 # When conversation ends
