@@ -9,7 +9,9 @@ export const patchFileTool = tool(
     const { path, diff } = input;
     const content = fs.readFileSync(path, "utf8");
     const matches = Array.from(
-      diff.matchAll(/<<<<<<< SEARCH\n(.*?)\n=======\n(.*?)\n>>>>>>> REPLACE/gs),
+      diff.matchAll(
+        /<<<<<<< SEARCH\n(.*?)\n?=======\n(.*?)\n?>>>>>>> REPLACE/gs,
+      ),
     );
     if (matches.length === 0) {
       throw new Error(
@@ -41,9 +43,14 @@ Note:
     for (const match of matches) {
       const [_, search, replace] = match;
       if (!newContent.includes(search)) {
-        throw new Error(`Search content not found: ${search}`);
+        throw new Error(JSON.stringify(`Search content not found: ${search}`));
       }
-      newContent = newContent.replace(search, replace);
+      newContent =
+        replace === "" && newContent.includes(search + "\n")
+          ? newContent.replace(search + "\n", replace)
+          : replace === "" && newContent.includes("\n" + search)
+            ? newContent.replace("\n" + search, replace)
+            : newContent.replace(search, replace);
     }
     fs.writeFileSync(path, newContent);
     return `Patched file: ${path}`;

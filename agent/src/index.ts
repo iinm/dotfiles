@@ -179,8 +179,7 @@ Memory Bank Format:
 
 - Current working directory:
 - git branch:
-- tmux session: (if it's running)
-\`\`\`
+- \`\`\`
 
 # When conversation ends
 
