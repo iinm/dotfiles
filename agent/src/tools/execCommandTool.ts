@@ -46,4 +46,3 @@ ${err.name}: ${errMessageTruncated}</error>`,
     }),
   },
 );
-

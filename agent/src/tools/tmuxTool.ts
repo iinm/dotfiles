@@ -39,6 +39,7 @@ export const tmuxTool = tool(
         }
 
         if (command.at(0) === "send-keys") {
+          // capture the pane after sending keys
           // wait for the command to be executed
           await new Promise((resolve) => setTimeout(resolve, 2000));
           const targetPosition = command.indexOf("-t") + 1;
@@ -47,12 +48,17 @@ export const tmuxTool = tool(
             execFile(
               "tmux",
               ["capture-pane", "-p", "-t", target],
-              (_err, stdout, _stderr) => {
+              (err, stdout, _stderr) => {
+                if (err) {
+                  console.error(
+                    `Failed to capture pane: ${err.message}, stack=${err.stack}`,
+                  );
+                }
                 return resolve(stdout.trim());
               },
             );
           });
-          const capturedTruncated = captured.slice(0, OUTPUT_MAX_LENGTH);
+          const capturedTruncated = captured.slice(-OUTPUT_MAX_LENGTH);
           const isCapturedTruncated = captured.length > OUTPUT_MAX_LENGTH;
           result.push(
             [
@@ -62,6 +68,33 @@ export const tmuxTool = tool(
             ].join("\n"),
           );
         }
+        if (
+          ["new-session", "new", "new-window"].includes(command.at(0) || "")
+        ) {
+          // show window list after creating a new session or window
+          const targetPosition = command?.at(0)?.includes("window")
+            ? command.indexOf("-t") + 1
+            : command.indexOf("-s") + 1;
+          const target = command[targetPosition];
+          const listWindowResult = await new Promise((resolve, _reject) => {
+            execFile(
+              "tmux",
+              ["list-windows", "-t", target],
+              (err, stdout, _stderr) => {
+                if (err) {
+                  console.error(
+                    `Failed to list windows: ${err.message}, stack=${err.stack}`,
+                  );
+                }
+                return resolve(stdout);
+              },
+            );
+          });
+          result.push(
+            `<tmux:list-windows>\n${listWindowResult}\n</tmux:list-windows>`,
+          );
+        }
+
         return resolve(result.join("\n"));
       });
     });

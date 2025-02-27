@@ -53,7 +53,11 @@ Note:
     description: "Patch a file.",
     schema: z.object({
       path: z.string().describe("The file path."),
-      diff: z.string().describe("The diff to apply to the file in SEARCH/REPLACE format. See prompt for details."),
+      diff: z
+        .string()
+        .describe(
+          "The diff to apply to the file in SEARCH/REPLACE format. See prompt for details.",
+        ),
     }),
   },
 );

@@ -17,7 +17,6 @@ import { z } from "zod";
 
 import { execCommandTool } from "./tools/execCommandTool";
 import { patchFileTool } from "./tools/patchFileTool";
-import { shellCommandTool } from "./tools/shellCommandTool";
 import { tmuxTool } from "./tools/tmuxTool";
 import { writeFileTool } from "./tools/writeFileTool";
 
@@ -57,11 +56,11 @@ Rules:
 exec_command is used to run a one-shot command.
 Use tmux to run daemon processes and interactive processes.
 
-Rules:
 - Current working directory is ${process.cwd()}.
 - Use relative paths to refer to files and directories.
+- Output is truncated if it is too large.
 
-Basic commands:
+File and directory command examples:
 - List files: ls ['-la']
 - Find file: fd ['file.txt', '--type', 'f', '--hidden']
 - List directories:
@@ -83,13 +82,8 @@ Basic commands:
 - Get part of a file: rg ['regex', 'file.txt', '-B', '5', '-A', '5']
   - It shows 5 lines (b)efore and (a)fter the matched line.
 
-## shell command
-
-shell_command is used to run a shell command that cotains pipes and redirections.
-Do not use shell_command when you don't need pipes and redirections. Use exec_command instead.
-
-Example:
-- Write command output to a file: "echo 'hello' > file.txt"
+Git command examples:
+- Get git status: git ['status']
 
 ## patch file
 
@@ -128,39 +122,35 @@ Rules:
 
 Basic commands:
 - Start session: new-session ['-d', '-s', 'agent-${sessionId}']
-- Send key to session:
-  send-keys ['-t', 'agent-${sessionId}:1', 'echo hello', 'Enter']
-  # Delete line
-  send-keys ['-t', 'agent-${sessionId}:1', 'C-a', 'C-k']
-- Get output of session:
-  capture-pane ['-p', '-t', 'agent-${sessionId}:1']
-- List window: list-windows ['-t', 'agent-${sessionId}']
-- Create new window: new-window ['-t', 'agent-${sessionId}']
+- Detect window number to send keys: list-windows ['-t', 'agent-${sessionId}']
+- Get output of window before sending keys: capture-pane ['-p', '-t', 'agent-${sessionId}:<window>']
+- Send key to session: send-keys ['-t', 'agent-${sessionId}:<window>, 'echo hello', 'Enter']
+- Delete line: send-keys ['-t', 'agent-${sessionId}:<window>, 'C-a', 'C-k']
 
-Usecase: Browser automation
+Usecase: Browser automation (Experimental)
 - Change directory to the directory where you have playwright installed.
-  send-keys ['-t', 'agent-${sessionId}:1', 'cd ${__dirname}', 'Enter']
+  send-keys ['-t', 'agent-${sessionId}:<window>, 'cd ${__dirname}', 'Enter']
 - Start node.js interpreter.
-  send-keys ['-t', 'agent-${sessionId}:1', 'node', 'Enter']
-  capture-pane -p -t agent-${sessionId}:1
-- Send the following code to the interpreter: (It should be send one by one, check the output after each command)
-  send-keys ['-t', 'agent-${sessionId}:1', 'const { chromium } = require("playwright")', 'Enter']
-  send-keys ['-t', 'agent-${sessionId}:1', 'const browser = await chromium.launch({ headless: false })', 'Enter']
-  send-keys ['-t', 'agent-${sessionId}:1', 'let page = await browser.newPage({ viewport: { width: 1280, height: 960 } })', 'Enter']
-  send-keys ['-t', 'agent-${sessionId}:1', 'let page.goto("http://example.com")', 'Enter']
+  send-keys ['-t', 'agent-${sessionId}:<window>, 'node', 'Enter']
+- Open specified URL in the browser.
+  send-keys ['-t', 'agent-${sessionId}:<window>, 'const { chromium } = require("playwright")', 'Enter']
+  send-keys ['-t', 'agent-${sessionId}:<window>, 'const browser = await chromium.launch({ headless: false })', 'Enter']
+  send-keys ['-t', 'agent-${sessionId}:<window>, 'let page = await browser.newPage({ viewport: { width: 1280, height: 960 } })', 'Enter']
+  send-keys ['-t', 'agent-${sessionId}:<window>, 'let page.goto("http://example.com")', 'Enter']
 
 # Memory Bank
 
 You save the important information in the memory bank to resume the work later.
+Content in the memory should cover nessesary information to resume the work even if you forget all the details.
 
 Usecase:
 - User requests to save the memory bank by saying "save memory bank", "save memory".
 - User asks you to resume the work by saying "resume work".
-  - Show the memory files and ask user to choose the memory file to resume the work.
+  - Show the memory files with timestamp and ask user to choose the memory file to resume the work.
 
 Path: ${process.cwd()}/.agent/memory/<snake-case-title>.md
 - Make consice and clear title that represents the content.
-- Create directories if needed.
+- Create directories if it is not exist.
 
 Memory Bank Format:
 \`\`\`markdown
@@ -174,14 +164,11 @@ Memory Bank Format:
 
 <Steps you are going to follow to achieve the goal.>
 <Devide the task into smaller parts and write the plan for each part.>
+<Include the files with specific paths you are going to work on.>
 
 ## Current Status
 
 <What you have done so far, what is the current status, what is pending, etc.>
-
-## Next Steps
-
-<What you are going to do next, what you are planning to do next, etc.>
 
 ## Notes for Future
 
@@ -196,22 +183,23 @@ Memory Bank Format:
 
 # When conversation ends
 
-- Save the memory bank when user ends the conversation by saying "bye", "exit", "quit".
-- Kill tmux session agent-${sessionId} when user ends the conversation by saying "bye", "exit", "quit".
-  - It's OK if tmux session is not exist.
+When user ends the conversation by saying "bye", "exit", "quit":
+Do the following steps one by one:
+- Kill tmux session agent-${sessionId} if it's running.
+- Save memory bank.
 `.trim();
 
 const createModel = () => {
   if (process.env.OPENAI_API_KEY) {
     return new ChatOpenAI(
-      // {
-      //   model: "gpt-4o-mini",
-      //   temperature: 0,
-      // }
       {
-        model: "o3-mini",
-        // temperature is not supported for this model
+        model: "gpt-4o-mini",
+        temperature: 0,
       },
+      // {
+      //   model: "o3-mini",
+      //   // temperature is not supported for this model
+      // },
     );
   }
 
@@ -230,7 +218,6 @@ const model = createModel();
 const tavilySearchResultsTool = new TavilySearchResults({ maxResults: 5 });
 const tools = [
   execCommandTool,
-  shellCommandTool,
   tmuxTool,
   writeFileTool,
   patchFileTool,
@@ -244,7 +231,15 @@ const isAutoApprovableToolCall = (toolCall: ToolCall) => {
   if (toolCall.name === execCommandTool.name) {
     const args = toolCall.args as z.infer<typeof execCommandTool.schema>;
     if (
-      ["cat", "ls", "fd", "rg", "wc", "head", "tail"].includes(args.command)
+      ["cat", "ls", "fd", "rg", "wc", "head", "tail", "date"].includes(
+        args.command,
+      )
+    ) {
+      return true;
+    }
+    if (
+      args.command === "git" &&
+      ["status", "diff", "log"].includes(args.args?.at(0) || "")
     ) {
       return true;
     }
