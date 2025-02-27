@@ -86,7 +86,7 @@ Basic commands:
 ## shell command
 
 shell_command is used to run a shell command that cotains pipes and redirections.
-Use exec_command when you don't need pipes and redirections.
+Do not use shell_command when you don't need pipes and redirections. Use exec_command instead.
 
 Example:
 - Write command output to a file: "echo 'hello' > file.txt"
@@ -203,11 +203,16 @@ Memory Bank Format:
 
 const createModel = () => {
   if (process.env.OPENAI_API_KEY) {
-    return new ChatOpenAI({
-      // model: "gpt-4o",
-      model: "gpt-4o-mini",
-      temperature: 0,
-    });
+    return new ChatOpenAI(
+      // {
+      //   model: "gpt-4o-mini",
+      //   temperature: 0,
+      // }
+      {
+        model: "o3-mini",
+        // temperature is not supported for this model
+      },
+    );
   }
 
   if (process.env.ANTHROPIC_API_KEY) {
