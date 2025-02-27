@@ -10,6 +10,7 @@
     "test": "tsx --test"
   },
   "dependencies": {
+    "@langchain/anthropic": "^0.3.14",
     "@langchain/community": "^0.3.32",
     "@langchain/core": "^0.3.40",
     "@langchain/langgraph": "^0.2.48",

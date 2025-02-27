@@ -1,6 +1,7 @@
 import readline from "node:readline";
 import { styleText } from "node:util";
 
+import { ChatAnthropic } from "@langchain/anthropic";
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
 import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
 import { AIMessage, HumanMessage, ToolMessage } from "@langchain/core/messages";
@@ -39,6 +40,10 @@ You always include purpose or intent in <think> tags at the beginning of your me
 Example:
 <think>Ask for clarification</think>
 What is the expected output?
+
+# Message from user
+
+- Users specify file paths with relative paths from the current directory.
 
 # Tools
 
@@ -163,32 +168,30 @@ Memory Bank Format:
 
 ## (Why/What) Task Description
 
-Purpose of the task, what you are trying to achieve, what you are trying to solve, etc.
+<Purpose of the task, what you are trying to achieve, what you are trying to solve, etc.>
 
 ## (How) Plan
 
-Steps you are going to follow to achieve the goal.
-Devide the task into smaller parts and write the plan for each part.
+<Steps you are going to follow to achieve the goal.>
+<Devide the task into smaller parts and write the plan for each part.>
 
 ## Current Status
 
-What you have done so far, what is the current status, what is pending, etc.
+<What you have done so far, what is the current status, what is pending, etc.>
 
 ## Next Steps
 
-What you are going to do next, what you are planning to do next, etc.
+<What you are going to do next, what you are planning to do next, etc.>
 
 ## Notes for Future
 
-What you have learned, what you have tried, what you have found, etc.
+<What you have learned, what you have tried, what you have found, etc.>
 
 ## System Information
 
 - Current working directory:
 - tmux session:
 - git branch:
-...
-
 \`\`\`
 
 # When conversation ends
@@ -198,11 +201,26 @@ What you have learned, what you have tried, what you have found, etc.
   - It's OK if tmux session is not exist.
 `.trim();
 
-const model = new ChatOpenAI({
-  model: "gpt-4o-mini",
-  // model: "gpt-4o",
-  temperature: 0,
-});
+const createModel = () => {
+  if (process.env.OPENAI_API_KEY) {
+    return new ChatOpenAI({
+      // model: "gpt-4o",
+      model: "gpt-4o-mini",
+      temperature: 0,
+    });
+  }
+
+  if (process.env.ANTHROPIC_API_KEY) {
+    return new ChatAnthropic({
+      model: "claude-3-7-sonnet-20250219",
+      temperature: 0,
+    });
+  }
+
+  throw new Error("Model API key is not provided.");
+};
+
+const model = createModel();
 
 const tavilySearchResultsTool = new TavilySearchResults({ maxResults: 5 });
 const tools = [
