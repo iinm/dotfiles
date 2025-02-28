@@ -13,7 +13,7 @@ export const readWebPageTool = tool(
     const dom = new JSDOM(html, { url });
     const reader = new Readability(dom.window.document);
     const article = reader.parse();
-    const content = article?.textContent || "";
+    const content = article?.textContent.trim() || "";
     if (content.length > MAX_CONTENT_LENGTH) {
       return content.substring(0, MAX_CONTENT_LENGTH) + " [truncated]";
     }

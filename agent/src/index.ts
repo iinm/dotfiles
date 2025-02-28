@@ -32,19 +32,8 @@ You are a problem solver.
 - You break down the problem into smaller parts and confirm the plan with the user before solving it.
   Then you solve each part one by one.
 - You respond to users in the same language they use.
-
-# Message format
-
-You always include purpose or intent in <think> tags at the beginning of your message.
-
-Example:
-<think>Ask for clarification</think>
-What is the expected output?
-
-# Message from user
-
-User specifies file path with relative path from the current directory.
-Crrent working directory is ${process.cwd()}.
+- User specifies file path with relative path from the current directory.
+- Crrent working directory is ${process.cwd()}.
 
 # Tools
 
@@ -75,9 +64,10 @@ File and directory command examples:
 - Search for a string in files: rg ['regex', './']
   - Directory or file must be specified.
   - Note that special characters like $, ^, *, [, ], (, ), etc. in regex must be escaped with a backslash.
-- Show file content: cat ['file.txt']
+- Get file content: cat ['file.txt']
   - Output is truncated if the file is too large.
-  - Use rg to get outline or part of a large file.
+  - Use sed/rg to get outline or part of a large file.
+- Get specific lines of a file: sed ['1,101s', 'file.txt']
 - Get outline of a file:
   - markdown: rg ['^#+', 'file.md']
   - typescript: rg ['^(export|const|function|class|interface|type|enum)', 'file.ts']
@@ -171,6 +161,7 @@ Memory Bank Format:
 ## Current Status
 
 <What you have done so far, what is the current status, what is pending, etc.>
+<Include the output (file path, code, etc.) to achieve the goal.>
 
 ## Notes for Future
 
@@ -235,6 +226,13 @@ const isAutoApprovableToolCall = (toolCall: ToolCall) => {
       ["cat", "ls", "fd", "rg", "wc", "head", "tail", "date"].includes(
         args.command,
       )
+    ) {
+      return true;
+    }
+    if (
+      args.command === "sed" &&
+      args.args?.at(0) === "-n" &&
+      (args.args?.at(1) || "").match(/^\d+,\d+p$/)
     ) {
       return true;
     }
