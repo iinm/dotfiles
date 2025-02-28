@@ -17,6 +17,7 @@ import { z } from "zod";
 
 import { execCommandTool } from "./tools/execCommandTool";
 import { patchFileTool } from "./tools/patchFileTool";
+import { readWebPageTool } from "./tools/readWebPageTool";
 import { tmuxTool } from "./tools/tmuxTool";
 import { writeFileTool } from "./tools/writeFileTool";
 
@@ -221,6 +222,7 @@ const tools = [
   writeFileTool,
   patchFileTool,
   tavilySearchResultsTool,
+  readWebPageTool,
 ];
 
 const isAutoApprovableToolCall = (toolCall: ToolCall) => {
