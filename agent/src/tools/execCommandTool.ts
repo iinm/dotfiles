@@ -13,7 +13,9 @@ export const execCommandTool = tool(
     return new Promise((resolve, reject) => {
       execFile(command, args, { timeout: 20 * 1000 }, (err, stdout, stderr) => {
         if (
-          ["cat", "head", "tail", "sed", "ls", "fd", "rg"].includes(command) &&
+          ["ls", "cat", "head", "tail", "sed", "find", "fd", "rg"].includes(
+            command,
+          ) &&
           stdout.length > OUTPUT_MAX_LENGTH
         ) {
           return reject(
@@ -28,6 +30,8 @@ export const execCommandTool = tool(
         const stderrTruncated = stderr.slice(0, OUTPUT_MAX_LENGTH);
         const isStderrTruncated = stderr.length > OUTPUT_MAX_LENGTH;
         const result = [
+          `<command>${command}</command>`,
+          "",
           `<stdout truncated="${isStdoutTruncated}">${stdoutTruncated ? "\n" : ""}${stdoutTruncated}</stdout>`,
           "",
           `<stderr truncated="${isStderrTruncated}">${stderrTruncated ? "\n" : ""}${stderrTruncated}</stderr>`,
@@ -57,9 +61,12 @@ export const execCommandTool = tool(
   },
 );
 
-export const execCommandToolOutputFormatter = (output: string) => {
-  return output
-    .replace(/(<stdout.+>|<\/stdout>)/g, styleText("blue", "$1"))
-    .replace(/(<stderr.+>|<\/stderr>)/g, styleText("yellow", "$1"))
-    .replace(/(<error.+>|<\/error>)/g, styleText("red", "$1"));
+export const execCommandToolOutputUserPrinter = (output: string) => {
+  const omittedOutput = output.match(/<command>(cat|head|tail|sed)<\/command>/)
+    ? "<stdout>(Output omitted)</stdout>"
+    : output;
+  return omittedOutput
+    .replace(/(<stdout.*?>|<\/stdout>)/g, styleText("blue", "$1"))
+    .replace(/(<stderr.*?>|<\/stderr>)/g, styleText("yellow", "$1"))
+    .replace(/(<error.*?>|<\/error>)/g, styleText("red", "$1"));
 };

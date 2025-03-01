@@ -17,11 +17,11 @@ import { z } from "zod";
 
 import {
   execCommandTool,
-  execCommandToolOutputFormatter,
+  execCommandToolOutputUserPrinter,
 } from "./tools/execCommandTool";
 import { patchFileTool } from "./tools/patchFileTool";
 import { readWebPageTool } from "./tools/readWebPageTool";
-import { tmuxTool, tmuxToolOutputFormatter } from "./tools/tmuxTool";
+import { tmuxTool, tmuxToolOutputUserPrinter } from "./tools/tmuxTool";
 import { writeFileTool } from "./tools/writeFileTool";
 
 const sessionId = uuidv4().slice(0, 8);
@@ -67,14 +67,16 @@ File and directory command examples:
 - Search for a string in files: rg ['regex', './']
   - Directory or file must be specified.
   - Note that special characters like $, ^, *, [, ], (, ), etc. in regex must be escaped with a backslash.
-- Get the content of a file:
+- Get a file content:
   - Check the number of lines: wc ['-l', 'file.txt']
-  - Get the specific lines: sed ['-n', '1,101s', 'file.txt']
+  - Get the specific lines: sed ['-n', '1,200p', 'file.txt']
 - Get outline of a file:
   - markdown: rg ['^#+', 'file.md']
   - typescript: rg ['^(export|const|function|class|interface|type|enum)', 'file.ts']
-- Get part of a file: rg ['regex', 'file.txt', '-B', '5', '-A', '5']
-  - It shows 5 lines (b)efore and (a)fter the matched line.
+- Get part of a file:
+- Get a file content with specific line:
+  - After the matched line: rg ['regex', 'file.txt', '-A', '100']
+  - Before the matched line: rg ['regex', 'file.txt', '-B', '100']
 - Get current date and time: date ['+%Y-%m-%d %H:%M:%S']
 
 Git command examples:
@@ -229,7 +231,7 @@ const isAutoApprovableToolCall = (toolCall: ToolCall) => {
   if (toolCall.name === execCommandTool.name) {
     const args = toolCall.args as z.infer<typeof execCommandTool.schema>;
     if (
-      ["cat", "ls", "fd", "rg", "wc", "head", "tail", "date"].includes(
+      ["ls", "wc", "cat", "head", "tail", "find", "fd", "rg", "date"].includes(
         args.command,
       )
     ) {
@@ -432,12 +434,12 @@ const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
         console.log(`${message.name}`);
 
         if (message.name === execCommandTool.name) {
-          const formattedOutput = execCommandToolOutputFormatter(
+          const formattedOutput = execCommandToolOutputUserPrinter(
             message.content as string,
           );
           console.log(`\n${formattedOutput}`);
         } else if (message.name === tmuxTool.name) {
-          const formattedOutput = tmuxToolOutputFormatter(
+          const formattedOutput = tmuxToolOutputUserPrinter(
             message.content as string,
           );
           console.log(`\n${formattedOutput}`);
