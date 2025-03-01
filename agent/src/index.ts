@@ -12,7 +12,6 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
 
 import CallbackHandler from "langfuse-langchain";
-import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 
 import {
@@ -24,7 +23,14 @@ import { readWebPageTool } from "./tools/readWebPageTool";
 import { tmuxTool, tmuxToolOutputUserPrinter } from "./tools/tmuxTool";
 import { writeFileTool } from "./tools/writeFileTool";
 
-const sessionId = uuidv4().slice(0, 8);
+const startTime = new Date();
+
+// yyyy-mm-dd-hhmm
+const sessionId =
+  startTime.toISOString().slice(0, 10) +
+  "-" +
+  ("0" + startTime.getHours()).slice(-2) +
+  ("0" + startTime.getMinutes()).slice(-2);
 
 const PROMPT = `
 You are a problem solver.
@@ -145,7 +151,7 @@ Usecase:
 - User asks you to resume the work by saying "resume work".
   - Show the memory files and ask user to choose the memory file to resume the work.
 
-Path: ${process.cwd()}/.agent/memory/${new Date().toISOString().slice(0, 10)}--<snake-case-title>.md
+Path: ${process.cwd()}/.agent/memory/${sessionId}--<snake-case-title>.md
 - Make consice and clear title that represents the content.
 - Create directories if it is not exist.
 
