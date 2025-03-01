@@ -14,11 +14,13 @@ describe("execCommandTool", () => {
     // then:
     assert.equal(
       result,
-      `<stdout truncated="false">
+      `
+<stdout truncated="false">
 Hello World
 </stdout>
-<stderr truncated="false">
-</stderr>`.trim(),
+
+<stderr truncated="false"></stderr>
+`.trim(),
     );
   });
 
@@ -32,10 +34,12 @@ Hello World
     // then:
     assert.equal(
       result,
-      `<stdout truncated="false">
-</stdout>
+      `
+<stdout truncated="false"></stdout>
+
 <stderr truncated="false">
-Hello from stderr</stderr>`.trim(),
+Hello from stderr</stderr>
+`.trim(),
     );
   });
 
@@ -49,13 +53,15 @@ Hello from stderr</stderr>`.trim(),
     // then:
     await assert.rejects(result, {
       name: "Error",
-      message: `<stdout truncated="false">
-</stdout>
-<stderr truncated="false">
-</stderr>
+      message: `
+<stdout truncated="false"></stdout>
+
+<stderr truncated="false"></stderr>
+
 <error truncated="false">
 Error: Command failed: node -e process.exit(1)
-</error>`,
+</error>
+`.trim(),
     });
   });
 });

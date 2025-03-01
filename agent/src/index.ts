@@ -433,11 +433,11 @@ const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
             ? message.content
             : JSON.stringify(message.content, null, 2);
 
-        const maxContentLength = 1000;
+        const maxContentLength = 5000;
         if (contentString.length > maxContentLength) {
-          console.log(`${contentString.slice(0, maxContentLength)}...`);
+          console.log(`\n${contentString.slice(0, maxContentLength)}...`);
         } else {
-          console.log(contentString);
+          console.log(`\n${contentString}`);
         }
       }
     }

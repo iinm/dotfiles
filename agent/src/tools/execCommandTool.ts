@@ -16,17 +16,15 @@ export const execCommandTool = tool(
         const stderrTruncated = stderr.slice(0, OUTPUT_MAX_LENGTH);
         const isStderrTruncated = stderr.length > OUTPUT_MAX_LENGTH;
         const result = [
-          `<stdout truncated="${isStdoutTruncated}">
-${stdoutTruncated}</stdout>`,
-          `<stderr truncated="${isStderrTruncated}">
-${stderrTruncated}</stderr>`,
+          `<stdout truncated="${isStdoutTruncated}">${stdoutTruncated ? "\n" : ""}${stdoutTruncated}</stdout>`,
+          "",
+          `<stderr truncated="${isStderrTruncated}">${stderrTruncated ? "\n" : ""}${stderrTruncated}</stderr>`,
         ];
         if (err) {
           const errMessageTruncated = err.message.slice(0, OUTPUT_MAX_LENGTH);
           const isErrMessageTruncated = err.message.length > OUTPUT_MAX_LENGTH;
           result.push(
-            `<error truncated="${isErrMessageTruncated}">
-${err.name}: ${errMessageTruncated}</error>`,
+            `\n<error truncated="${isErrMessageTruncated}">\n${err.name}: ${errMessageTruncated}</error>`,
           );
           return reject(new Error(result.join("\n")));
         }
