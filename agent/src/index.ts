@@ -15,10 +15,13 @@ import CallbackHandler from "langfuse-langchain";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 
-import { execCommandTool } from "./tools/execCommandTool";
+import {
+  execCommandTool,
+  execCommandToolOutputFormatter,
+} from "./tools/execCommandTool";
 import { patchFileTool } from "./tools/patchFileTool";
 import { readWebPageTool } from "./tools/readWebPageTool";
-import { tmuxTool } from "./tools/tmuxTool";
+import { tmuxTool, tmuxToolOutputFormatter } from "./tools/tmuxTool";
 import { writeFileTool } from "./tools/writeFileTool";
 
 const sessionId = uuidv4().slice(0, 8);
@@ -49,7 +52,7 @@ Use tmux to run daemon processes and interactive processes.
 
 - Current working directory is ${process.cwd()}.
 - Use relative paths to refer to files and directories.
-- Output is truncated if it is too large.
+- Do not read a file content at once. Use head, tail, sed, rg to read a part of the file.
 
 File and directory command examples:
 - List files: ls ['-la']
@@ -64,10 +67,9 @@ File and directory command examples:
 - Search for a string in files: rg ['regex', './']
   - Directory or file must be specified.
   - Note that special characters like $, ^, *, [, ], (, ), etc. in regex must be escaped with a backslash.
-- Get file content: cat ['file.txt']
-  - Output is truncated if the file is too large.
-  - Use sed/rg to get outline or part of a large file.
-- Get specific lines of a file: sed ['1,101s', 'file.txt']
+- Get the content of a file:
+  - Check the number of lines: wc ['-l', 'file.txt']
+  - Get the specific lines: sed ['-n', '1,101s', 'file.txt']
 - Get outline of a file:
   - markdown: rg ['^#+', 'file.md']
   - typescript: rg ['^(export|const|function|class|interface|type|enum)', 'file.ts']
@@ -235,7 +237,8 @@ const isAutoApprovableToolCall = (toolCall: ToolCall) => {
     }
     if (
       args.command === "sed" &&
-      (args.args?.at(0) || "").match(/^\d+,\d+p$/)
+      (args.args?.at(0) || "") === "-n" &&
+      (args.args?.at(1) || "").match(/^\d+,\d+p$/)
     ) {
       return true;
     }
@@ -428,16 +431,28 @@ const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
         console.log(styleText("bold", "\nTool Result:"));
         console.log(`${message.name}`);
 
-        const contentString =
-          typeof message.content === "string"
-            ? message.content
-            : JSON.stringify(message.content, null, 2);
-
-        const maxContentLength = 5000;
-        if (contentString.length > maxContentLength) {
-          console.log(`\n${contentString.slice(0, maxContentLength)}...`);
+        if (message.name === execCommandTool.name) {
+          const formattedOutput = execCommandToolOutputFormatter(
+            message.content as string,
+          );
+          console.log(`\n${formattedOutput}`);
+        } else if (message.name === tmuxTool.name) {
+          const formattedOutput = tmuxToolOutputFormatter(
+            message.content as string,
+          );
+          console.log(`\n${formattedOutput}`);
         } else {
-          console.log(`\n${contentString}`);
+          const contentString =
+            typeof message.content === "string"
+              ? message.content
+              : JSON.stringify(message.content, null, 2);
+
+          const maxContentLength = 1000;
+          if (contentString.length > maxContentLength) {
+            console.log(`\n${contentString.slice(0, maxContentLength)}...`);
+          } else {
+            console.log(`\n${contentString}`);
+          }
         }
       }
     }

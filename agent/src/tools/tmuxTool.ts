@@ -1,4 +1,5 @@
 import { execFile } from "node:child_process";
+import { styleText } from "node:util";
 
 import { tool } from "@langchain/core/tools";
 
@@ -110,3 +111,11 @@ export const tmuxTool = tool(
     }),
   },
 );
+
+export const tmuxToolOutputFormatter = (output: string) => {
+  return output
+    .replace(/(<stdout.+>|<\/stdout>)/g, styleText("blue", "$1"))
+    .replace(/(<stderr.+>|<\/stderr>)/g, styleText("yellow", "$1"))
+    .replace(/(<error.+>|<\/error>)/g, styleText("red", "$1"))
+    .replace(/(<tmux.+>|<\/tmux:.+>)/g, styleText("green", "$1"));
+};

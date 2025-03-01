@@ -1,4 +1,5 @@
 import { execFile } from "node:child_process";
+import { styleText } from "node:util";
 
 import { tool } from "@langchain/core/tools";
 
@@ -11,6 +12,17 @@ export const execCommandTool = tool(
     const { command, args } = input;
     return new Promise((resolve, reject) => {
       execFile(command, args, { timeout: 20 * 1000 }, (err, stdout, stderr) => {
+        if (
+          ["cat", "head", "tail", "sed", "ls", "fd", "rg"].includes(command) &&
+          stdout.length > OUTPUT_MAX_LENGTH
+        ) {
+          return reject(
+            new Error(
+              `Output too large. Here is the head:\n${stdout.slice(0, 1000)}`,
+            ),
+          );
+        }
+
         const stdoutTruncated = stdout.slice(0, OUTPUT_MAX_LENGTH);
         const isStdoutTruncated = stdout.length > OUTPUT_MAX_LENGTH;
         const stderrTruncated = stderr.slice(0, OUTPUT_MAX_LENGTH);
@@ -44,3 +56,10 @@ export const execCommandTool = tool(
     }),
   },
 );
+
+export const execCommandToolOutputFormatter = (output: string) => {
+  return output
+    .replace(/(<stdout.+>|<\/stdout>)/g, styleText("blue", "$1"))
+    .replace(/(<stderr.+>|<\/stderr>)/g, styleText("yellow", "$1"))
+    .replace(/(<error.+>|<\/error>)/g, styleText("red", "$1"));
+};
