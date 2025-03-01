@@ -143,12 +143,11 @@ Content in the memory should cover nessesary information to resume the work even
 Usecase:
 - User requests to save the memory bank by saying "save memory bank", "save memory".
 - User asks you to resume the work by saying "resume work".
-  - Show the memory files with timestamp and ask user to choose the memory file to resume the work.
+  - Show the memory files and ask user to choose the memory file to resume the work.
 
-Path: ${process.cwd()}/.agent/memory/<yyyyMMdd-HHmm>-<snake-case-title>.md
+Path: ${process.cwd()}/.agent/memory/${new Date().toISOString().slice(0, 10)}--<snake-case-title>.md
 - Make consice and clear title that represents the content.
 - Create directories if it is not exist.
-- Check current date and time by running "date" command.
 
 Memory Bank Format:
 \`\`\`markdown
