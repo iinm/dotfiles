@@ -19,6 +19,7 @@ import {
   execCommandToolOutputUserPrinter,
 } from "./tools/execCommandTool";
 import { patchFileTool } from "./tools/patchFileTool";
+import { readWebPageByBrowserTool } from "./tools/readWebPageByUserTool";
 import { readWebPageTool } from "./tools/readWebPageTool";
 import { tmuxTool, tmuxToolOutputUserPrinter } from "./tools/tmuxTool";
 import { writeFileTool } from "./tools/writeFileTool";
@@ -226,6 +227,7 @@ const tools = [
   patchFileTool,
   tavilySearchResultsTool,
   readWebPageTool,
+  readWebPageByBrowserTool,
 ];
 
 model.bindTools(tools, { parallel_tool_calls: false });

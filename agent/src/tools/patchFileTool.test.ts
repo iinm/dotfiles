@@ -1,13 +1,13 @@
-import { strict as assert } from "node:assert";
+import assert from "node:assert";
 import fs from "node:fs";
 import { afterEach, describe, it } from "node:test";
-
-import { v4 as uuidv4 } from "uuid";
 
 import { patchFileTool } from "./patchFileTool";
 
 describe("patchFileTool", () => {
   const cleanups: (() => Promise<void>)[] = [];
+
+  const generateRandomString = () => Math.random().toString(36).substring(2);
 
   afterEach(async () => {
     for (const cleanup of [...cleanups].reverse()) {
@@ -18,7 +18,7 @@ describe("patchFileTool", () => {
 
   it("patches a file", async () => {
     // given:
-    const tmpFilePath = `/tmp/patchFileTest-${uuidv4()}.txt`;
+    const tmpFilePath = `/tmp/patchFileTest-${generateRandomString()}.txt`;
     const initialContent = [
       "Hello World",
       "This is a test file content 1.",
@@ -60,7 +60,7 @@ This is a test file content updated 3.
 
   it("removes header content", async () => {
     // given:
-    const tmpFilePath = `/tmp/patchFileTest-${uuidv4()}.txt`;
+    const tmpFilePath = `/tmp/patchFileTest-${generateRandomString()}.txt`;
     const initialContent = [
       "Hello World",
       "This is a test file content 1.",
@@ -92,7 +92,7 @@ Hello World
 
   it("removes footer content", async () => {
     // given:
-    const tmpFilePath = `/tmp/patchFileTest-${uuidv4()}.txt`;
+    const tmpFilePath = `/tmp/patchFileTest-${generateRandomString()}.txt`;
     const initialContent = [
       "Hello World",
       "This is a test file content 1.",

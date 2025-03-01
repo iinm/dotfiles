@@ -15,6 +15,8 @@ describe("execCommandTool", () => {
     assert.equal(
       result,
       `
+<command>echo</command>
+
 <stdout truncated="false">
 Hello World
 </stdout>
@@ -35,6 +37,8 @@ Hello World
     assert.equal(
       result,
       `
+<command>node</command>
+
 <stdout truncated="false"></stdout>
 
 <stderr truncated="false">
@@ -54,6 +58,8 @@ Hello from stderr</stderr>
     await assert.rejects(result, {
       name: "Error",
       message: `
+<command>node</command>
+
 <stdout truncated="false"></stdout>
 
 <stderr truncated="false"></stderr>
