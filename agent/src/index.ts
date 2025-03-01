@@ -73,6 +73,7 @@ File and directory command examples:
   - typescript: rg ['^(export|const|function|class|interface|type|enum)', 'file.ts']
 - Get part of a file: rg ['regex', 'file.txt', '-B', '5', '-A', '5']
   - It shows 5 lines (b)efore and (a)fter the matched line.
+- Get current date and time: date ['+%Y-%m-%d %H:%M:%S']
 
 Git command examples:
 - Get git status: git ['status']
@@ -140,9 +141,10 @@ Usecase:
 - User asks you to resume the work by saying "resume work".
   - Show the memory files with timestamp and ask user to choose the memory file to resume the work.
 
-Path: ${process.cwd()}/.agent/memory/<snake-case-title>.md
+Path: ${process.cwd()}/.agent/memory/<yyyyMMdd-HHmm>-<snake-case-title>.md
 - Make consice and clear title that represents the content.
 - Create directories if it is not exist.
+- Check current date and time by running "date" command.
 
 Memory Bank Format:
 \`\`\`markdown
@@ -216,6 +218,8 @@ const tools = [
   readWebPageTool,
 ];
 
+model.bindTools(tools, { parallel_tool_calls: false });
+
 const isAutoApprovableToolCall = (toolCall: ToolCall) => {
   if (toolCall.name === tavilySearchResultsTool.name) {
     return true;
@@ -231,8 +235,7 @@ const isAutoApprovableToolCall = (toolCall: ToolCall) => {
     }
     if (
       args.command === "sed" &&
-      args.args?.at(0) === "-n" &&
-      (args.args?.at(1) || "").match(/^\d+,\d+p$/)
+      (args.args?.at(0) || "").match(/^\d+,\d+p$/)
     ) {
       return true;
     }
@@ -252,6 +255,14 @@ const isAutoApprovableToolCall = (toolCall: ToolCall) => {
     ) {
       return true;
     }
+    if (
+      ["new-session", "new"].includes(args.command.at(0) || "") &&
+      args.command.at(1) === "-d" &&
+      args.command.at(2) === "-s" &&
+      args.command.at(3) === `agent-${sessionId}`
+    ) {
+      return true;
+    }
   }
   return false;
 };
@@ -260,7 +271,7 @@ const checkpointSaver = new MemorySaver();
 
 const agent = createReactAgent({
   llm: model,
-  tools: tools,
+  tools,
   checkpointSaver: checkpointSaver,
   interruptBefore: ["tools"],
   prompt: PROMPT,
