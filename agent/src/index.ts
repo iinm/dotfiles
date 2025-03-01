@@ -172,7 +172,7 @@ Memory Bank Format:
 ## Current Status
 
 <What you have done so far, what is the current status, what is pending, etc.>
-<Include the output (file path, code, etc.) to achieve the goal.>
+<Describe the intermediate output and final output required to achieve the goal.>
 
 ## Notes for Future
 
