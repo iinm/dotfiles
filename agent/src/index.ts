@@ -194,30 +194,45 @@ Do the following steps one by one:
 `.trim();
 
 const createModel = () => {
-  if (process.env.OPENAI_API_KEY) {
-    return new ChatOpenAI(
-      {
-        model: "o3-mini",
-        reasoningEffort: "high",
-      },
-      // {
-      //   model: "gpt-4o-mini",
-      //   temperature: 0,
-      // },
-    );
+  switch (process.env.MODEL || "o3-mini-medium") {
+    case "gpt-4o-mini":
+      return {
+        model: new ChatOpenAI({
+          model: "gpt-4o-mini",
+          temperature: 0,
+        }),
+        modelName: "gpt-4o-mini",
+      };
+    case "o3-mini-medium":
+      return {
+        model: new ChatOpenAI({
+          model: "o3-mini",
+          reasoningEffort: "medium",
+        }),
+        modelName: "o3-mini-medium",
+      };
+    case "o3-mini-high":
+      return {
+        model: new ChatOpenAI({
+          model: "o3-mini",
+          reasoningEffort: "high",
+        }),
+        modelName: "o3-mini-high",
+      };
+    case "claude-3-7-sonnet":
+      return {
+        model: new ChatAnthropic({
+          model: "claude-3-7-sonnet-20250219",
+          temperature: 0,
+        }),
+        modelName: "claude-3-7-sonnet",
+      };
+    default:
+      throw new Error(`Invalid MODEL: ${process.env.MODEL}`);
   }
-
-  if (process.env.ANTHROPIC_API_KEY) {
-    return new ChatAnthropic({
-      model: "claude-3-7-sonnet-20250219",
-      temperature: 0,
-    });
-  }
-
-  throw new Error("Model API key is not provided.");
 };
 
-const model = createModel();
+const { model, modelName } = createModel();
 
 const tavilySearchResultsTool = new TavilySearchResults({ maxResults: 5 });
 const tools = [
@@ -309,8 +324,8 @@ const cli = readline.createInterface({
   output: process.stdout,
   prompt:
     styleText(
-      "gray",
-      `(Session ID: ${sessionId}, Examples: "resume work", "save memory", "bye")`,
+      ["white", "bgGray"],
+      `\nSession: ${sessionId}, Model: ${modelName}, Commands: "resume work", "save memory", "bye"`,
     ) + "\n> ",
 });
 
@@ -427,10 +442,9 @@ const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
             "gray",
             [
               "\n",
-              "Usage: ",
-              `total tokens: ${message.usage_metadata.total_tokens}, `,
-              `input tokens: ${message.usage_metadata.input_tokens}, `,
-              `ouput tokens: ${message.usage_metadata.output_tokens}`,
+              `total: ${message.usage_metadata.total_tokens.toLocaleString()}, `,
+              `input: ${message.usage_metadata.input_tokens.toLocaleString()}, `,
+              `ouput: ${message.usage_metadata.output_tokens.toLocaleString()}`,
             ].join(""),
           ),
         );
