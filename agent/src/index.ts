@@ -171,7 +171,7 @@ Memory Bank Format:
 
 - Current working directory:
 - git branch:
-- \`\`\`
+\`\`\`
 
 # When conversation ends
 
