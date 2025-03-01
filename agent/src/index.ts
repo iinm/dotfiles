@@ -189,13 +189,14 @@ Do the following steps one by one:
 const createModel = () => {
   if (process.env.OPENAI_API_KEY) {
     return new ChatOpenAI(
+      {
+        model: "o3-mini",
+        reasoningEffort: "high",
+      },
       // {
       //   model: "gpt-4o-mini",
       //   temperature: 0,
       // },
-      {
-        model: "o3-mini",
-      },
     );
   }
 
