@@ -71,19 +71,26 @@ File and directory command examples:
 - List files:
   - in current directory: fd ['--max-depth', '2', '--type', 'f', '--hidden']
   - in a specific directory: fd ['.', 'path/to/directory', '--max-depth', '2', '--type', 'f', '--hidden']
-- Search for a string in files: rg ['regex', './']
+- Search for a string in files: rg ['-n', 'regex', './']
   - Directory or file must be specified.
   - Note that special characters like $, ^, *, [, ], (, ), etc. in regex must be escaped with a backslash.
+  - Examples:
+    - Ignore case: rg ['-n', '-i', 'regex', './']
+    - Ignore specific file pattern: rg ['-n', 'regex', './', '--glob', '!*.log']
 - Get a file content:
   - Check the number of lines: wc ['-l', 'file.txt']
   - Get the specific lines: sed ['-n', '1,200p', 'file.txt']
+    This example gets 200 lines from the 1st line.
 - Get outline of a file:
-  - markdown: rg ['^#+', 'file.md']
-  - typescript: rg ['^(export|const|function|class|interface|type|enum)', 'file.ts']
+  - markdown: rg ['-n', '^#+', 'file.md']
+  - typescript: rg ['-n', '^(export|const|function|class|interface|type|enum)', 'file.ts']
 - Get part of a file:
-- Get a file content with specific line:
+- Get a file content around the specific line found by rg:
+  - After specific line number: sed ['-n', '100,200p', 'file.txt']
+    This example gets 100 lines after the 100th line.
   - After the matched line: rg ['regex', 'file.txt', '-A', '100']
   - Before the matched line: rg ['regex', 'file.txt', '-B', '100']
+  - Around the matched line: rg ['regex', 'file.txt', '-C', '100']
 - Get current date and time: date ['+%Y-%m-%d %H:%M:%S']
 
 Git command examples:
