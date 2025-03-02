@@ -105,7 +105,8 @@ File and directory command examples:
   - Check the number of lines: wc ['-l', 'file.txt']
   - Get the specific lines: sed ['-n', '<start>,<end>p', 'file.txt']
     - 1st to 200th lines: sed ['-n', '1,200p', 'file.txt']
-    - 201st to 400th lines if you need more lines: sed ['-n', '201,400p', 'file.txt']
+    - 201st to 400th lines: sed ['-n', '201,400p', 'file.txt']
+    - Read more lines if needed.
 
 Other command examples:
 - Get current date time: date ['+%Y-%m-%d %H:%M:%S']
