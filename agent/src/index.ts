@@ -202,13 +202,11 @@ Memory Bank Format:
 
 ## (How) Plan
 
-<Steps you are going to follow to achieve the goal.>
-<Include the files with specific paths you are going to work on.>
+<Steps to achieve the task, how you are going to solve the problem, etc.>
 
 ## Current Status
 
 <What you have done so far, what is the current status, what is pending, etc.>
-<Describe the intermediate output.>
 
 ## Conclusion
 
@@ -226,7 +224,7 @@ Memory Bank Format:
 `.trim();
 
 const createModel = () => {
-  switch (process.env.MODEL || "o3-mini-medium") {
+  switch (process.env.MODEL || "gpt-4o-mini") {
     case "gpt-4o-mini":
       return {
         model: new ChatOpenAI({
