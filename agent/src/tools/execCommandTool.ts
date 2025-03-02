@@ -10,9 +10,6 @@ const OUTPUT_MAX_LENGTH = 10_000;
 export const execCommandTool = tool(
   async (input) => {
     const { command, args } = input;
-    if (["cat", "head", "tail"].includes(command)) {
-      throw new Error("use sed instead of head or tail");
-    }
     return new Promise((resolve, reject) => {
       execFile(command, args, { timeout: 20 * 1000 }, (err, stdout, stderr) => {
         if (
