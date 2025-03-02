@@ -45,9 +45,9 @@ You are a problem solver.
 # User Interactions
 
 - Users specify file paths relative to the current directory.
-- When user ends the conversation by saying "bye", "exit", "quit":
-  - Kill tmux session agent-${sessionId} if it's running.
-  - Save memory bank.
+- When user ends the conversation by saying "bye", "exit", or "quit":
+  - Kill the tmux session named agent-${sessionId} if it is running.
+  - Save the memory bank.
 
 # Tools
 
@@ -94,7 +94,7 @@ File and directory command examples:
   - Check the number of lines: wc ['-l', 'file.txt']
   - Get the specific lines: sed ['-n', '<start>,<end>p', 'file.txt']
     - 1st to 200th lines: sed ['-n', '1,200p', 'file.txt']
-    - 201st to 400th lines: sed ['-n', '201,400p', 'file.txt']
+    - 201st to 400th lines if you need more lines: sed ['-n', '201,400p', 'file.txt']
 
 Other command examples:
 - Get current date time: date ['+%Y-%m-%d %H:%M:%S']
@@ -165,7 +165,7 @@ Usecase:
 
 Path: ${process.cwd()}/.agent/memory/${sessionId}--<snake-case-title>.md
 - Create a concise and clear title that represents the content.
-- Create the directories if they do not exist. 
+- Ensure that the directories exists, creating them if necessary.
 
 Memory Bank Format:
 \`\`\`markdown
