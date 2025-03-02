@@ -20,7 +20,7 @@ export const execCommandTool = tool(
         ) {
           return reject(
             new Error(
-              `Output too large. Here is the head:\n${stdout.slice(0, 1000)}`,
+              `Output too large. Here is the head:\n${stdout.slice(0, 400)}`,
             ),
           );
         }
