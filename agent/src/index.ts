@@ -325,20 +325,7 @@ const config = {
   callbacks,
 };
 
-// Start CLI
-const cli = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-  prompt:
-    styleText(
-      ["white", "bgGray"],
-      `\nSession: ${sessionId}, Model: ${modelName}, Commands: "resume work", "save memory", "bye"`,
-    ) + "\n> ",
-});
-
-cli.prompt();
-
-cli.on("line", async (input) => {
+const handleUserInput = async (input: string) => {
   const state = await agent.getState(config);
   const hasPendingToolCalls = (s: typeof state) => s.next.includes("tools");
 
@@ -414,10 +401,7 @@ cli.on("line", async (input) => {
       break;
     }
   }
-
-  cli.prompt();
-  cli.resume();
-});
+};
 
 const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
   for await (const value of values) {
@@ -508,3 +492,22 @@ type AgentUpdatesStream = IterableReadableStream<
       };
     }
 >;
+
+// Start CLI
+const cli = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  prompt:
+    styleText(
+      ["white", "bgGray"],
+      `\nSession: ${sessionId}, Model: ${modelName}, Commands: "resume work", "save memory", "bye"`,
+    ) + "\n> ",
+});
+
+cli.prompt();
+
+cli.on("line", async (input) => {
+  await handleUserInput(input);
+  cli.prompt();
+  cli.resume();
+});

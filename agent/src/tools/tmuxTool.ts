@@ -40,7 +40,7 @@ export const tmuxTool = tool(
           const errMessageOmitted = err.message.slice(0, OUTPUT_MAX_LENGTH);
           const isErrMessageOmitted = err.message.length > OUTPUT_MAX_LENGTH;
           result.push(
-            `\n<error>\n${err.name}: ${errMessageOmitted}${isErrMessageOmitted ? "... (Message omitted)" : ""}\n</error>`,
+            `\n<error>\n${err.name}: ${errMessageOmitted}${isErrMessageOmitted ? "... (Message omitted)" : ""}</error>`,
           );
           return reject(new Error(result.join("\n")));
         }
@@ -95,7 +95,7 @@ export const tmuxTool = tool(
           const capturedOmitted = captured.slice(-OUTPUT_MAX_LENGTH);
           const isCapturedOmitted = captured.length > OUTPUT_MAX_LENGTH;
           result.push(
-            `\n<tmux:capture-pane target="${target}"">\n${isCapturedOmitted ? "(Output omitted) ..." : ""}${capturedOmitted}</tmux:capture-pane>`,
+            `\n<tmux:capture-pane target="${target}"">\n${isCapturedOmitted ? "(Output omitted) ..." : ""}${capturedOmitted}\n</tmux:capture-pane>`,
           );
         }
 
@@ -114,8 +114,8 @@ export const tmuxTool = tool(
 
 export const tmuxToolOutputUserPrinter = (output: string) => {
   return output
-    .replace(/(<stdout>|<\/stdout>)/g, styleText("blue", "$1"))
-    .replace(/(<stderr>|<\/stderr>)/g, styleText("yellow", "$1"))
-    .replace(/(<error>|<\/error>)/g, styleText("red", "$1"))
-    .replace(/(<tmux.*?>|<\/tmux:.*?>)/g, styleText("green", "$1"));
+    .replace(/(^<stdout>|<\/stdout>$)/gm, styleText("blue", "$1"))
+    .replace(/(^<stderr>|<\/stderr>$)/gm, styleText("yellow", "$1"))
+    .replace(/(^<error>|<\/error>$)/gm, styleText("red", "$1"))
+    .replace(/(^<tmux.*?>|<\/tmux:.*?>$)/gm, styleText("green", "$1"));
 };

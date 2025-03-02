@@ -72,7 +72,7 @@ export const execCommandToolOutputUserPrinter = (output: string) => {
     ? "<stdout>(Output omitted)</stdout>"
     : output;
   return omittedOutput
-    .replace(/(<stdout>|<\/stdout>)/g, styleText("blue", "$1"))
-    .replace(/(<stderr>|<\/stderr>)/g, styleText("yellow", "$1"))
-    .replace(/(<error>|<\/error>)/g, styleText("red", "$1"));
+    .replace(/(^<stdout>|<\/stdout>$)/gm, styleText("blue", "$1"))
+    .replace(/(^<stderr>|<\/stderr>$)/gm, styleText("yellow", "$1"))
+    .replace(/(^<error>|<\/error>$)/gm, styleText("red", "$1"));
 };
