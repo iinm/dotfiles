@@ -7,6 +7,7 @@ import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
 import { AIMessage, HumanMessage, ToolMessage } from "@langchain/core/messages";
 import { ToolCall } from "@langchain/core/messages/tool";
 import { IterableReadableStream } from "@langchain/core/utils/stream";
+import { ChatVertexAI } from "@langchain/google-vertexai";
 import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
@@ -256,6 +257,14 @@ const createModel = () => {
           temperature: 0,
         }),
         modelName: "claude-3-7-sonnet",
+      };
+    case "gemini-2.0-flash":
+      return {
+        model: new ChatVertexAI({
+          model: "gemini-2.0-flash-001",
+          temperature: 0,
+        }),
+        modelName: "gemini-2.0-flash",
       };
     default:
       throw new Error(`Invalid MODEL: ${process.env.MODEL}`);
