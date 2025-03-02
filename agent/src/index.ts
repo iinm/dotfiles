@@ -104,6 +104,7 @@ File and directory command examples:
 - Read lines from a file:
   - Check the number of lines: wc ['-l', 'file.txt']
   - Get the specific lines: sed ['-n', '<start>,<end>p', 'file.txt']
+    - It is recommended to read 200 lines at a time.
     - 1st to 200th lines: sed ['-n', '1,200p', 'file.txt']
     - 201st to 400th lines: sed ['-n', '201,400p', 'file.txt']
     - Read more lines if needed.
