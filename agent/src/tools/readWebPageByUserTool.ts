@@ -48,11 +48,7 @@ export const readWebPageByBrowserTool = tool(
   },
   {
     name: "read_web_page_by_browser",
-    description: `Fetches main content from a given URL using a user browser.
-Usecase:
-- Fetching content from websites that require JavaScript execution.
-- Fetching content from websites requiring login.
-`,
+    description: `Fetches main content from a given URL using a user browser.`,
     schema: z.object({
       url: z.string().describe("The URL to fetch content from."),
     }),

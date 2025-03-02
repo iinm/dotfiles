@@ -165,6 +165,18 @@ Usecase: Browser automation (Experimental)
   send-keys ['-t', 'agent-${sessionId}:<window>, 'let page = await browser.newPage({ viewport: { width: 1280, height: 960 } })', 'Enter']
   send-keys ['-t', 'agent-${sessionId}:<window>, 'let page.goto("http://example.com")', 'Enter']
 
+## read web page
+
+read_web_page is used to read the content of a given web page URL.
+
+## read web page by browser
+
+read_web_page_by_browser is used to read the content of a given web page URL using a browser.
+
+Usecase:
+- Fetching content from websites that require JavaScript execution.
+- Fetching content from websites requiring login.
+
 # Memory Bank
 
 Save the important information in the memory bank to resume the work later.
