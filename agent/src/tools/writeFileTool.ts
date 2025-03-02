@@ -25,3 +25,9 @@ export const writeFileTool = tool(
     }),
   },
 );
+
+export const writeFileToolArgsUserPrinter = (
+  args: z.infer<typeof writeFileTool.schema>,
+) => {
+  return [`path: ${args.path}`, `content:\n${args.content}`].join("\n");
+};

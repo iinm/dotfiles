@@ -16,13 +16,24 @@ import { z } from "zod";
 
 import {
   execCommandTool,
+  execCommandToolArgsUserPrinter,
   execCommandToolOutputUserPrinter,
 } from "./tools/execCommandTool";
-import { patchFileTool } from "./tools/patchFileTool";
+import {
+  patchFileTool,
+  patchFileToolArgsUserPrinter,
+} from "./tools/patchFileTool";
 import { readWebPageByBrowserTool } from "./tools/readWebPageByUserTool";
 import { readWebPageTool } from "./tools/readWebPageTool";
-import { tmuxTool, tmuxToolOutputUserPrinter } from "./tools/tmuxTool";
-import { writeFileTool } from "./tools/writeFileTool";
+import {
+  tmuxTool,
+  tmuxToolArgsUserPrinter,
+  tmuxToolOutputUserPrinter,
+} from "./tools/tmuxTool";
+import {
+  writeFileTool,
+  writeFileToolArgsUserPrinter,
+} from "./tools/writeFileTool";
 
 const startTime = new Date();
 
@@ -412,18 +423,30 @@ const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
         for (const toolCall of message.tool_calls || []) {
           console.log(styleText("bold", "\nTool call:"));
           console.log(`${toolCall.name}`);
-          if (toolCall.name === writeFileTool.name) {
-            const typedArgs = toolCall.args as z.infer<
-              typeof writeFileTool.schema
-            >;
-            console.log(`path: ${typedArgs.path}`);
-            console.log(`content:\n${typedArgs.content}`);
+          if (toolCall.name === execCommandTool.name) {
+            console.log(
+              execCommandToolArgsUserPrinter(
+                toolCall.args as z.infer<typeof execCommandTool.schema>,
+              ),
+            );
+          } else if (toolCall.name === tmuxTool.name) {
+            console.log(
+              tmuxToolArgsUserPrinter(
+                toolCall.args as z.infer<typeof tmuxTool.schema>,
+              ),
+            );
+          } else if (toolCall.name === writeFileTool.name) {
+            console.log(
+              writeFileToolArgsUserPrinter(
+                toolCall.args as z.infer<typeof writeFileTool.schema>,
+              ),
+            );
           } else if (toolCall.name === patchFileTool.name) {
-            const typedArgs = toolCall.args as z.infer<
-              typeof patchFileTool.schema
-            >;
-            console.log(`path: ${typedArgs.path}`);
-            console.log(`diff:\n${typedArgs.diff}`);
+            console.log(
+              patchFileToolArgsUserPrinter(
+                toolCall.args as z.infer<typeof patchFileTool.schema>,
+              ),
+            );
           } else {
             console.log(JSON.stringify(toolCall.args, null, 2));
           }

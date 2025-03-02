@@ -119,3 +119,9 @@ export const tmuxToolOutputUserPrinter = (output: string) => {
     .replace(/(^<error>|<\/error>$)/gm, styleText("red", "$1"))
     .replace(/(^<tmux.*?>|<\/tmux:.*?>$)/gm, styleText("green", "$1"));
 };
+
+export const tmuxToolArgsUserPrinter = (
+  args: z.infer<typeof tmuxTool.schema>,
+) => {
+  return JSON.stringify(args.command);
+};

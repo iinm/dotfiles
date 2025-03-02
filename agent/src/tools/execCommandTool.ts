@@ -76,3 +76,12 @@ export const execCommandToolOutputUserPrinter = (output: string) => {
     .replace(/(^<stderr>|<\/stderr>$)/gm, styleText("magenta", "$1"))
     .replace(/(^<error>|<\/error>$)/gm, styleText("red", "$1"));
 };
+
+export const execCommandToolArgsUserPrinter = (
+  args: z.infer<typeof execCommandTool.schema>,
+) => {
+  return [
+    `command: ${args.command}`,
+    `args: ${JSON.stringify(args.args || [])}`,
+  ].join("\n");
+};

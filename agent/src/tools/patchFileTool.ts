@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { styleText } from "node:util";
 
 import { tool } from "@langchain/core/tools";
 
@@ -68,3 +69,21 @@ Note:
     }),
   },
 );
+
+export const patchFileToolArgsUserPrinter = (
+  args: z.infer<typeof patchFileTool.schema>,
+) => {
+  const highlightedDiff = args.diff.replace(
+    /<<<<<<< SEARCH\n(.*?)\n?=======\n(.*?)\n?>>>>>>> REPLACE/gs,
+    (_match, search, replace) => {
+      return [
+        "<<<<<<< SEARCH",
+        styleText("red", search),
+        "=======",
+        styleText("green", replace),
+        ">>>>>>> REPLACE",
+      ].join("\n");
+    },
+  );
+  return [`path: ${args.path}`, `diff:\n${highlightedDiff}`].join("\n");
+};
