@@ -115,7 +115,7 @@ export const tmuxTool = tool(
 export const tmuxToolOutputUserPrinter = (output: string) => {
   return output
     .replace(/(^<stdout>|<\/stdout>$)/gm, styleText("blue", "$1"))
-    .replace(/(^<stderr>|<\/stderr>$)/gm, styleText("yellow", "$1"))
+    .replace(/(^<stderr>|<\/stderr>$)/gm, styleText("magenta", "$1"))
     .replace(/(^<error>|<\/error>$)/gm, styleText("red", "$1"))
     .replace(/(^<tmux.*?>|<\/tmux:.*?>$)/gm, styleText("green", "$1"));
 };
