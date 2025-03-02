@@ -66,26 +66,35 @@ Use tmux to run daemon processes and interactive processes.
 - Do not read a file content at once. Use head, tail, sed, rg to read a required part of the file.
 
 File and directory command examples:
-- Find files or directories: fd ['<pattern>', 'path/to/directory', '--hidden', '--max-depth', '2']
-  - Find file by name: fd ['file.txt', './', '--type', 'f', '--hidden']
-  - List directories: fd ['.', 'path/to/directory/', '--max-depth', '2', '--type', 'd', '--hidden']
-    - '.' means "match all"
-  - List files: fd ['.', '<path/to/directory>', '--max-depth', '2', '--type', 'f', '--hidden']
+- List files: ls ['-alh', 'path/to/directory']
+- Find files: fd ['<regex>', 'path/to/directory']
+  - Options:
+    - --type <type>: f for file, d for directory
+    - --max-depth <N>
+    - --hidden: include hidden files
+    - --no-ignore: include ignored files by .gitignore
+  - List directories to get project structure: fd ['.', 'path/to/directory/', '--max-depth', '3', '--type', 'd', '--hidden']
+    '.' means "match all"
 - Search for a string in files: rg ['-n', '<regex>', './']
   - Directory or file must be specified.
   - Note that special characters like $, ^, *, [, ], (, ), etc. in regex must be escaped with a backslash.
   - Options:
+    - -n: Show line number
     - -i: Ignore case.
     - -w: Match whole words.
     - -g: Glob pattern. e.g. '*.js', '!*.test.ts'
     - -A <N>: Show lines after the match.
-- Get a file content:
-  - Check the number of lines: wc ['-l', 'file.txt']
-  - Get the specific lines: sed ['-n', '<start>,<end>p', 'file.txt']
-    - e.g., Get 1st to 200th lines: sed ['-n', '1,200p', 'file.txt']
-- Get outline of a file: rg ['-n', '<patterns according to file type>', 'file']
+    - -B <N>: Show lines before the match.
+    - --hidden: include hidden files
+    - --no-ignore: include ignored files by .gitignore
+- Extract the outline of a file (headings, function definitions, etc.): rg ['-n', '<patterns according to file type>', 'file.txt']
   - markdown: rg ['-n', '^#+', 'file.md']
   - typescript: rg ['-n', '^(export|const|function|class|interface|type|enum)', 'file.ts']
+- Read lines from a file:
+  - Check the number of lines: wc ['-l', 'file.txt']
+  - Get the specific lines: sed ['-n', '<start>,<end>p', 'file.txt']
+    - 1st to 200th lines: sed ['-n', '1,200p', 'file.txt']
+    - 201st to 400th lines: sed ['-n', '201,400p', 'file.txt']
 
 Other command examples:
 - Get current date time: date ['+%Y-%m-%d %H:%M:%S']
@@ -147,7 +156,7 @@ Usecase: Browser automation (Experimental)
 # Memory Bank
 
 Save the important information in the memory bank to resume the work later.
-The content in the memory should include all the necessary information to resume work even if you forget the details.
+The content should include all the necessary information to resume the work even if you forget the details.
 
 Usecase:
 - User requests to save the memory bank by saying "save memory bank", "save memory".
