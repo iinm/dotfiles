@@ -17,11 +17,11 @@ describe("execCommandTool", () => {
       `
 <command>echo</command>
 
-<stdout truncated="false">
+<stdout>
 Hello World
 </stdout>
 
-<stderr truncated="false"></stderr>
+<stderr></stderr>
 `.trim(),
     );
   });
@@ -39,9 +39,9 @@ Hello World
       `
 <command>node</command>
 
-<stdout truncated="false"></stdout>
+<stdout></stdout>
 
-<stderr truncated="false">
+<stderr>
 Hello from stderr</stderr>
 `.trim(),
     );
@@ -60,11 +60,11 @@ Hello from stderr</stderr>
       message: `
 <command>node</command>
 
-<stdout truncated="false"></stdout>
+<stdout></stdout>
 
-<stderr truncated="false"></stderr>
+<stderr></stderr>
 
-<error truncated="false">
+<error>
 Error: Command failed: node -e process.exit(1)
 </error>
 `.trim(),

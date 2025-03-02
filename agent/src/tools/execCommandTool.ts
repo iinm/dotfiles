@@ -20,27 +20,33 @@ export const execCommandTool = tool(
         ) {
           return reject(
             new Error(
-              `Output too large. Here is the head:\n${stdout.slice(0, 400)}`,
+              `Output too large. Here is the head of the output:\n\n${stdout.slice(0, 300)}... (Output omitted)`,
             ),
           );
         }
 
-        const stdoutTruncated = stdout.slice(0, OUTPUT_MAX_LENGTH);
-        const isStdoutTruncated = stdout.length > OUTPUT_MAX_LENGTH;
-        const stderrTruncated = stderr.slice(0, OUTPUT_MAX_LENGTH);
-        const isStderrTruncated = stderr.length > OUTPUT_MAX_LENGTH;
+        // stdout / stderr が長過ぎる場合は末尾を表示
+        const stdoutOmitted = stdout.slice(-OUTPUT_MAX_LENGTH);
+        const isStdoutOmitted = stdout.length > OUTPUT_MAX_LENGTH;
+        const stderrOmitted = stderr.slice(-OUTPUT_MAX_LENGTH);
+        const isStderrOmitted = stderr.length > OUTPUT_MAX_LENGTH;
         const result = [
           `<command>${command}</command>`,
           "",
-          `<stdout truncated="${isStdoutTruncated}">${stdoutTruncated ? "\n" : ""}${stdoutTruncated}</stdout>`,
+          stdoutOmitted
+            ? `<stdout>\n${isStdoutOmitted ? "(Output omitted) ..." : ""}${stdoutOmitted}</stdout>`
+            : `<stdout></stdout>`,
           "",
-          `<stderr truncated="${isStderrTruncated}">${stderrTruncated ? "\n" : ""}${stderrTruncated}</stderr>`,
+          stderrOmitted
+            ? `<stderr>\n${isStderrOmitted ? "(Output omitted) ..." : ""}${stderrOmitted}</stderr>`
+            : `<stderr></stderr>`,
         ];
         if (err) {
-          const errMessageTruncated = err.message.slice(0, OUTPUT_MAX_LENGTH);
-          const isErrMessageTruncated = err.message.length > OUTPUT_MAX_LENGTH;
+          // err.message が長過ぎる場合は先頭を表示
+          const errMessageOmitted = err.message.slice(0, OUTPUT_MAX_LENGTH);
+          const isErrMessageOmitted = err.message.length > OUTPUT_MAX_LENGTH;
           result.push(
-            `\n<error truncated="${isErrMessageTruncated}">\n${err.name}: ${errMessageTruncated}</error>`,
+            `\n<error>\n${err.name}: ${errMessageOmitted}${isErrMessageOmitted ? "... (Message omitted)" : ""}</error>`,
           );
           return reject(new Error(result.join("\n")));
         }
@@ -66,7 +72,7 @@ export const execCommandToolOutputUserPrinter = (output: string) => {
     ? "<stdout>(Output omitted)</stdout>"
     : output;
   return omittedOutput
-    .replace(/(<stdout.*?>|<\/stdout>)/g, styleText("blue", "$1"))
-    .replace(/(<stderr.*?>|<\/stderr>)/g, styleText("yellow", "$1"))
-    .replace(/(<error.*?>|<\/error>)/g, styleText("red", "$1"));
+    .replace(/(<stdout>|<\/stdout>)/g, styleText("blue", "$1"))
+    .replace(/(<stderr>|<\/stderr>)/g, styleText("yellow", "$1"))
+    .replace(/(<error>|<\/error>)/g, styleText("red", "$1"));
 };

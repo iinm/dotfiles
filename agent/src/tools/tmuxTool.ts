@@ -23,24 +23,24 @@ export const tmuxTool = tool(
     return new Promise((resolve, reject) => {
       execFile("tmux", command, async (err, stdout, stderr) => {
         // capture-pane の結果に空白の行が含まれることがあるためtrim する
-        const stdoutTruncated = stdout.slice(0, OUTPUT_MAX_LENGTH).trim();
-        const isStdoutTruncated = stdout.length > OUTPUT_MAX_LENGTH;
-        const stderrTruncated = stderr.slice(0, OUTPUT_MAX_LENGTH).trim();
-        const isStderrTruncated = stderr.length > OUTPUT_MAX_LENGTH;
+        const stdoutOmitted = stdout.trim().slice(-OUTPUT_MAX_LENGTH);
+        const isStdoutOmitted = stdout.trim().length > OUTPUT_MAX_LENGTH;
+        const stderrOmitted = stderr.trim().slice(-OUTPUT_MAX_LENGTH);
+        const isStderrOmitted = stderr.trim().length > OUTPUT_MAX_LENGTH;
         const result = [
-          stdoutTruncated
-            ? `<stdout truncated="${isStdoutTruncated}">\n${stdoutTruncated}\n</stdout>`
-            : `<stdout truncated="false"></stdout>`,
+          stdoutOmitted
+            ? `<stdout>\n${isStdoutOmitted ? "(Output omitted) ..." : ""}${stdoutOmitted}\n</stdout>`
+            : `<stdout></stdout>`,
           "",
-          stderrTruncated
-            ? `<stderr truncated="${isStderrTruncated}">\n${stderrTruncated}\n</stderr>`
-            : `<stderr truncated="false"></stderr>`,
+          stderrOmitted
+            ? `<stderr>\n${isStderrOmitted ? "(Output omitted) ..." : ""}${stderrOmitted}\n</stderr>`
+            : `<stderr></stderr>`,
         ];
         if (err) {
-          const errMessageTruncated = err.message.slice(0, OUTPUT_MAX_LENGTH);
-          const isErrMessageTruncated = err.message.length > OUTPUT_MAX_LENGTH;
+          const errMessageOmitted = err.message.slice(0, OUTPUT_MAX_LENGTH);
+          const isErrMessageOmitted = err.message.length > OUTPUT_MAX_LENGTH;
           result.push(
-            `\n<error truncated="${isErrMessageTruncated}">\n${err.name}: ${errMessageTruncated}</error>`,
+            `\n<error>\n${err.name}: ${errMessageOmitted}${isErrMessageOmitted ? "... (Message omitted)" : ""}\n</error>`,
           );
           return reject(new Error(result.join("\n")));
         }
@@ -92,10 +92,10 @@ export const tmuxTool = tool(
               },
             );
           });
-          const capturedTruncated = captured.slice(-OUTPUT_MAX_LENGTH);
-          const isCapturedTruncated = captured.length > OUTPUT_MAX_LENGTH;
+          const capturedOmitted = captured.slice(-OUTPUT_MAX_LENGTH);
+          const isCapturedOmitted = captured.length > OUTPUT_MAX_LENGTH;
           result.push(
-            `\n<tmux:capture-pane target="${target}" trucated="${isCapturedTruncated}">\n${capturedTruncated}</tmux:capture-pane>`,
+            `\n<tmux:capture-pane target="${target}"">\n${isCapturedOmitted ? "(Output omitted) ..." : ""}${capturedOmitted}</tmux:capture-pane>`,
           );
         }
 
@@ -114,8 +114,8 @@ export const tmuxTool = tool(
 
 export const tmuxToolOutputUserPrinter = (output: string) => {
   return output
-    .replace(/(<stdout.*?>|<\/stdout>)/g, styleText("blue", "$1"))
-    .replace(/(<stderr.*?>|<\/stderr>)/g, styleText("yellow", "$1"))
-    .replace(/(<error.*?>|<\/error>)/g, styleText("red", "$1"))
+    .replace(/(<stdout>|<\/stdout>)/g, styleText("blue", "$1"))
+    .replace(/(<stderr>|<\/stderr>)/g, styleText("yellow", "$1"))
+    .replace(/(<error>|<\/error>)/g, styleText("red", "$1"))
     .replace(/(<tmux.*?>|<\/tmux:.*?>)/g, styleText("green", "$1"));
 };
