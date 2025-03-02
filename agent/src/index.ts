@@ -51,6 +51,7 @@ You are a problem solver.
 
 # Tools
 
+Rules:
 - Call one tool at a time.
 - When a tool's output is not as expected, review it carefully and consider your next steps.
 - If repeated attempts to call a tool fail, ask the user for feedback.
