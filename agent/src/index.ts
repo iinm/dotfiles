@@ -56,7 +56,8 @@ You are a problem solver.
 # User Interactions
 
 - Respond to users in the same language they use.
-- Users specify file paths relative to the current directory.
+- Users specify file paths relative to the current working directory.
+  - Crrent working directory: ${process.cwd()}
 - When user ends the conversation by saying "bye", "exit", or "quit", do the following steps one by one:
   - Kill the tmux session named agent-${sessionId} if it is running.
   - Save the memory bank.
@@ -99,11 +100,11 @@ File and directory command examples:
     - -B <N>: Show lines before the match.
     - --hidden: include hidden files
     - --no-ignore: include ignored files by .gitignore
-- Extract the outline of a file (headings, function definitions, etc.): rg ['-n', '<patterns according to file type>', 'file.txt']
+- Extract the outline of a file, including line numbers for headings, function definitions, etc.: rg ['-n', '<patterns according to file type>', 'file.txt']
   - markdown: rg ['-n', '^#+', 'file.md']
   - typescript: rg ['-n', '^(export|const|function|class|interface|type|enum)', 'file.ts']
 - Read lines from a file:
-  - Use rg to find the number of line containing a specific string.
+  - Use rg to either extract the outline or get the line numbers of lines containing a specific pattern.
   - Get the specific lines: sed ['-n', '<start>,<end>p', 'file.txt']
     - It is recommended to read 200 lines at a time.
     - 1st to 200th lines: sed ['-n', '1,200p', 'file.txt']
