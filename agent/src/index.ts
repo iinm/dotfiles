@@ -103,7 +103,7 @@ File and directory command examples:
   - markdown: rg ['-n', '^#+', 'file.md']
   - typescript: rg ['-n', '^(export|const|function|class|interface|type|enum)', 'file.ts']
 - Read lines from a file:
-  - Check the number of lines: wc ['-l', 'file.txt']
+  - Use rg to find the number of line containing a specific string.
   - Get the specific lines: sed ['-n', '<start>,<end>p', 'file.txt']
     - It is recommended to read 200 lines at a time.
     - 1st to 200th lines: sed ['-n', '1,200p', 'file.txt']
@@ -119,6 +119,7 @@ Other command examples:
 patch_file is used to modify a file by replacing specific content with new content.
 
 Format:
+\`\`\`
 <<<<<<< SEARCH
 (content to be removed)
 =======
@@ -132,11 +133,16 @@ Format:
 >>>>>>> REPLACE
 
 ...
+\`\`\`
 
-Note:
 - <<<<<<< SEARCH (7 < characters + SEARCH) is the start of the search content.
 - ======= (7 = characters) is the separator between the search and replace content.
 - >>>>>>> REPLACE (7 > characters + REPLACE) is the end of the replace content.
+
+Rules:
+- Content is searched as an exact match including indentation and line breaks.
+- The first match found will be replaced if there are multiple matches.
+- Use multiple SEARCH/REPLACE blocks to replace multiple contents.
 
 ## tmux
 
@@ -170,6 +176,7 @@ Usecase: Browser automation (Experimental)
 ## read web page
 
 read_web_page is used to read the content of a given web page URL.
+Do not use this tool for local files. Use exec_command/sed for local files.
 
 ## read web page by browser
 

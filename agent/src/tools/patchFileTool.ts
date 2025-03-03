@@ -33,7 +33,6 @@ Expected format:
 
 ...
 
-Note:
 - <<<<<<< SEARCH (7 < characters + SEARCH) is the start of the search content.
 - ======= (7 = characters) is the separator between the search and replace content.
 - >>>>>>> REPLACE (7 > characters + REPLACE) is the end of the replace content.
