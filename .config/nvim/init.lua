@@ -114,6 +114,7 @@ local setup_options = function()
     vim.opt.grepprg = 'rg --vimgrep --hidden --glob "!.git" --glob "!node_modules"'
   end
   vim.opt.maxmempattern = 10000
+  vim.opt.cmdheight = 2
   vim.opt.shortmess:append('s') -- don't show "search hit BOTTOM, ..."
 
   vim.g.markdown_fenced_languages = { 'sh', 'mermaid' }
