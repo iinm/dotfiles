@@ -21,4 +21,7 @@ export default [
       ],
     },
   },
+  {
+    ignores: ["dist/**/*"],
+  },
 ];

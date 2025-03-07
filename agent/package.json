@@ -5,6 +5,7 @@
   },
   "scripts": {
     "start": "./env.sh tsx src/index.ts",
+    "build": "ncc build src/index.ts --out dist --minify --source-map",
     "format": "prettier --cache --write .",
     "check": "prettier --check . && eslint --cache . && tsc --noEmit && tsx --test",
     "test": "tsx --test",
@@ -19,6 +20,7 @@
     "@langchain/openai": "^0.4.4",
     "@mozilla/readability": "^0.5.0",
     "@playwright/test": "^1.50.1",
+    "@vercel/ncc": "^0.38.3",
     "jsdom": "^26.0.0",
     "langfuse-langchain": "^3.35.3",
     "zod": "^3.24.2"
