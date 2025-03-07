@@ -301,8 +301,21 @@ local setup_commands = function()
     { 'CloseTerms',           function() window_utils.close_terms() end,                {} },
     { 'ToggleHighlightColor', function() require("nvim-highlight-colors").toggle() end, {} },
     { 'Diagnostics',          function() vim.diagnostic.setloclist() end,               {} },
-    { 'CopyRelativePath',     function() vim.fn.setreg('+', vim.fn.expand('%')) end,    {} },
-    { 'CopyAbsolutePath',     function() vim.fn.setreg('+', vim.fn.expand('%:p')) end,  {} }
+    { 'CopyPath',             function() vim.fn.setreg('+', vim.fn.expand('%')) end,    {} },
+    { 'CopyPathLine', function()
+      vim.fn.setreg('+', vim.fn.expand('%') .. ':' .. vim.fn.line('.'))
+    end, {} },
+    { 'CopyPathRange', function()
+      vim.fn.setreg(
+        '+',
+        vim.fn.expand('%') ..
+        ':' ..
+        vim.api.nvim_buf_get_mark(0, "<")[1] ..
+        '-' ..
+        vim.api.nvim_buf_get_mark(0, ">")[1]
+      )
+    end, { range = true } },
+    { 'CopyAbsolutePath', function() vim.fn.setreg('+', vim.fn.expand('%:p')) end, {} },
   }
 
   for _, command in ipairs(commands) do
