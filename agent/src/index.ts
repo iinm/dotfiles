@@ -234,7 +234,7 @@ Memory Bank Format:
 `.trim();
 
 const createModel = () => {
-  switch (process.env.MODEL || "o3-mini-medium") {
+  switch (process.env.MODEL || "o3-mini-high") {
     case "gpt-4o-mini":
       return {
         model: new ChatOpenAI({
