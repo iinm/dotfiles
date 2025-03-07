@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import readline from "node:readline";
 import { styleText } from "node:util";
 
@@ -556,7 +557,19 @@ const cli = readline.createInterface({
     ) + "\n> ",
 });
 
-cli.prompt();
+if (process.argv.length > 2) {
+  console.log(`Reading file: ${process.argv[2]}`);
+  handleUserInput(fs.readFileSync(process.argv[2], "utf8"))
+    .then(() => {
+      cli.prompt();
+    })
+    .catch((err) => {
+      console.error(`Error reading file ${process.argv[2]}:`, err);
+      process.exit(1);
+    });
+} else {
+  cli.prompt();
+}
 
 cli.on("line", async (input) => {
   await handleUserInput(input);
