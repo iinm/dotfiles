@@ -20,6 +20,7 @@ export NODE_ENV=${NODE_ENV:-production}
 
 # Run the agent
 if test "$NODE_ENV" = "development"; then
+  echo "Running in development mode" >&2
   exec "$app_root/env.sh" node "$app_root/node_modules/.bin/tsx" "$app_root/src/index.ts" "$@"
 fi
 exec "$app_root/env.sh" node --enable-source-maps "$app_root/dist/index.js" "$@"

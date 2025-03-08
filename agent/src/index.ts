@@ -116,6 +116,14 @@ Other command examples:
 - Get current date time: date ['+%Y-%m-%d %H:%M:%S']
 - Show git status (branch, modified files, etc.): git ['status']
 
+## write file
+
+write_file is used to write content to a file.
+
+When using write_file:
+- Be careful not to overwrite files that are unrelated to the requested changes.
+- Verify the file path before writing to ensure you're modifying the correct file.
+
 ## patch file
 
 patch_file is used to modify a file by replacing specific content with new content.
@@ -142,6 +150,7 @@ Format:
 - >>>>>>> REPLACE (7 > characters + REPLACE) is the end of the replace content.
 
 Rules:
+- Read the file content before patching it.
 - Content is searched as an exact match including indentation and line breaks.
 - The first match found will be replaced if there are multiple matches.
 - Use multiple SEARCH/REPLACE blocks to replace multiple contents.
@@ -208,23 +217,33 @@ Memory Bank Format:
 
 ## (Why/What) Task Description
 
-<Purpose of the task, what you are trying to achieve, what you are trying to solve, etc.>
+<placeholder>
+Purpose of the task, what you are trying to achieve, what you are trying to solve, etc.
+</placeholder>
 
 ## (How) Plan
 
-<Steps to achieve the task, how you are going to solve the problem, etc.>
+<placeholder>
+Steps to achieve the task, how you are going to solve the problem, etc.
+</placeholder>
 
 ## Current Status
 
-<What you have done so far, what is the current status, what is pending, etc.>
+<placeholder>
+What you have done so far, what is the current status, what is pending, etc.
+</placeholder>
 
 ## Conclusion
 
-<Describe the final output you made.>
+<placeholder>
+Describe the final full output you made.
+</placeholder>
 
 ## Notes for Future
 
-<What you have learned, what you have tried, what you have found, etc.>
+<placeholder>
+What you have learned, what you have tried, what you have found, etc.
+</placeholder>
 
 ## System Information
 
