@@ -523,7 +523,33 @@ const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
     if ("agent" in value) {
       for (const message of value.agent.messages) {
         console.log(styleText("bold", "\nAgent:"));
-        console.log(message.content);
+
+        if (typeof message.lc_kwargs.content === "string") {
+          // OpenAI
+          console.log(message.lc_kwargs.content);
+        } else if (Array.isArray(message.lc_kwargs.content)) {
+          // Claude
+          for (const part of message.lc_kwargs.content) {
+            if (typeof part["thinking"] === "string") {
+              console.log(
+                [
+                  styleText("blue", "<thinking>"),
+                  part["thinking"],
+                  styleText("blue", "</thinking>"),
+                ].join("\n"),
+              );
+            } else if (typeof part["text"] === "string") {
+              console.log(part["text"]);
+            } else {
+              // unknown message type
+              console.log(JSON.stringify(part, null, 2));
+            }
+          }
+        } else {
+          // unknown message format
+          console.log(JSON.stringify(message, null, 2));
+        }
+
         for (const toolCall of message.tool_calls || []) {
           console.log(styleText("bold", "\nTool call:"));
           console.log(`${toolCall.name}`);
@@ -607,10 +633,10 @@ const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
               "\n",
               usageMetadata.join(", "),
               "\n",
-              "(input details) ",
+              "(input) ",
               usageMetadateInputTokenDetails.join(", "),
-              " ",
-              "(output details) ",
+              " / ",
+              "(output) ",
               usageMetadateOutputTokenDetails.join(", "),
             ].join(""),
           ),
