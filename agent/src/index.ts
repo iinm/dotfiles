@@ -5,7 +5,15 @@ import { styleText } from "node:util";
 import { ChatAnthropic } from "@langchain/anthropic";
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
 import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
-import { AIMessage, HumanMessage, ToolMessage } from "@langchain/core/messages";
+import {
+  AIMessage,
+  HumanMessage,
+  InputTokenDetails,
+  OutputTokenDetails,
+  SystemMessage,
+  ToolMessage,
+  UsageMetadata,
+} from "@langchain/core/messages";
 import { ToolCall } from "@langchain/core/messages/tool";
 import { IterableReadableStream } from "@langchain/core/utils/stream";
 import { ChatVertexAI } from "@langchain/google-vertexai";
@@ -283,9 +291,34 @@ const createModel = () => {
         model: new ChatAnthropic({
           model: "claude-3-7-sonnet-20250219",
           temperature: 0,
+          clientOptions: {
+            defaultHeaders: {
+              // https://js.langchain.com/docs/integrations/chat/anthropic/#prompt-caching
+              "anthropic-beta": "prompt-caching-2024-07-31",
+            },
+          },
         }),
         modelName: "claude-3-7-sonnet",
       };
+    case "claude-3-7-sonnet-thinking":
+      return {
+        model: new ChatAnthropic({
+          model: "claude-3-7-sonnet-20250219",
+          maxTokens: 8_000,
+          thinking: {
+            type: "enabled",
+            budget_tokens: 1_000,
+          },
+          clientOptions: {
+            defaultHeaders: {
+              // https://js.langchain.com/docs/integrations/chat/anthropic/#prompt-caching
+              "anthropic-beta": "prompt-caching-2024-07-31",
+            },
+          },
+        }),
+        modelName: "claude-3-7-sonnet",
+      };
+
     case "gemini-2.0-flash":
       return {
         model: new ChatVertexAI({
@@ -378,7 +411,19 @@ const agent = createReactAgent({
   tools,
   checkpointSaver: checkpointSaver,
   interruptBefore: ["tools"],
-  prompt: PROMPT,
+  prompt: new SystemMessage({
+    content: [
+      {
+        type: "text",
+        text: PROMPT,
+        ...(modelName.startsWith("claude")
+          ? {
+              cache_control: { type: "ephemeral" },
+            }
+          : {}),
+      },
+    ],
+  }),
 });
 
 const callbacks: BaseCallbackHandler[] = [];
@@ -509,19 +554,69 @@ const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
             console.log(JSON.stringify(toolCall.args, null, 2));
           }
         }
+
+        const usageMetadata: string[] = [];
+        if (typeof message.usage_metadata === "object") {
+          for (const prop of Object.keys(message.usage_metadata)) {
+            const value = message.usage_metadata[prop as keyof UsageMetadata];
+            if (typeof value === "number") {
+              usageMetadata.push(`${prop}: ${value.toLocaleString()}`);
+            }
+          }
+        }
+
+        const usageMetadateInputTokenDetails: string[] = [];
+        if (message.usage_metadata?.input_token_details) {
+          for (const prop of Object.keys(
+            message.usage_metadata.input_token_details,
+          )) {
+            const value =
+              message.usage_metadata.input_token_details[
+                prop as keyof InputTokenDetails
+              ];
+            if (typeof value === "number") {
+              usageMetadateInputTokenDetails.push(
+                `${prop}: ${value.toLocaleString()}`,
+              );
+            }
+          }
+        }
+
+        const usageMetadateOutputTokenDetails: string[] = [];
+        if (message.usage_metadata?.output_token_details) {
+          for (const prop of Object.keys(
+            message.usage_metadata.output_token_details,
+          )) {
+            const value =
+              message.usage_metadata.output_token_details[
+                prop as keyof OutputTokenDetails
+              ];
+            if (typeof value === "number") {
+              usageMetadateOutputTokenDetails.push(
+                `${prop}: ${value.toLocaleString()}`,
+              );
+            }
+          }
+        }
+
         console.log(
           styleText(
             "gray",
             [
               "\n",
-              `total: ${message.usage_metadata.total_tokens.toLocaleString()}, `,
-              `input: ${message.usage_metadata.input_tokens.toLocaleString()}, `,
-              `ouput: ${message.usage_metadata.output_tokens.toLocaleString()}`,
+              usageMetadata.join(", "),
+              "\n",
+              "(input details) ",
+              usageMetadateInputTokenDetails.join(", "),
+              " ",
+              "(output details) ",
+              usageMetadateOutputTokenDetails.join(", "),
             ].join(""),
           ),
         );
       }
     }
+
     if ("tools" in value) {
       for (const message of value.tools.messages) {
         console.log(styleText("bold", "\nTool Result:"));
@@ -558,13 +653,7 @@ const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
 type AgentUpdatesStream = IterableReadableStream<
   | {
       agent: {
-        messages: (AIMessage & {
-          usage_metadata: {
-            output_tokens: number;
-            input_tokens: number;
-            total_tokens: number;
-          };
-        })[];
+        messages: AIMessage[];
       };
     }
   | {
