@@ -261,14 +261,15 @@ What you have learned, what you have tried, what you have found, etc.
 `.trim();
 
 const createModel = () => {
-  switch (process.env.MODEL || "o3-mini-medium") {
+  const modelName = process.env.MODEL || "o3-mini-medium";
+  switch (modelName) {
     case "gpt-4o-mini":
       return {
         model: new ChatOpenAI({
           model: "gpt-4o-mini",
           temperature: 0,
         }),
-        modelName: "gpt-4o-mini",
+        modelName,
       };
     case "o3-mini-medium":
       return {
@@ -276,7 +277,7 @@ const createModel = () => {
           model: "o3-mini",
           reasoningEffort: "medium",
         }),
-        modelName: "o3-mini-medium",
+        modelName,
       };
     case "o3-mini-high":
       return {
@@ -284,7 +285,7 @@ const createModel = () => {
           model: "o3-mini",
           reasoningEffort: "high",
         }),
-        modelName: "o3-mini-high",
+        modelName,
       };
     case "claude-3-7-sonnet":
       return {
@@ -298,16 +299,16 @@ const createModel = () => {
             },
           },
         }),
-        modelName: "claude-3-7-sonnet",
+        modelName,
       };
     case "claude-3-7-sonnet-thinking":
       return {
         model: new ChatAnthropic({
           model: "claude-3-7-sonnet-20250219",
-          maxTokens: 8_000,
+          maxTokens: 1_024 * 8,
           thinking: {
             type: "enabled",
-            budget_tokens: 1_000,
+            budget_tokens: 1_024,
           },
           clientOptions: {
             defaultHeaders: {
@@ -316,7 +317,7 @@ const createModel = () => {
             },
           },
         }),
-        modelName: "claude-3-7-sonnet",
+        modelName,
       };
 
     case "gemini-2.0-flash":
@@ -325,7 +326,7 @@ const createModel = () => {
           model: "gemini-2.0-flash-001",
           temperature: 0,
         }),
-        modelName: "gemini-2.0-flash",
+        modelName,
       };
     default:
       throw new Error(`Invalid MODEL: ${process.env.MODEL}`);
