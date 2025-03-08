@@ -18,7 +18,9 @@ export const patchFileTool = tool(
       throw new Error(
         `
 No matches found in diff.
+
 Expected format:
+\`\`\`
 <<<<<<< SEARCH
 (content to be removed)
 =======
@@ -32,10 +34,16 @@ Expected format:
 >>>>>>> REPLACE
 
 ...
+\`\`\`
 
 - <<<<<<< SEARCH (7 < characters + SEARCH) is the start of the search content.
 - ======= (7 = characters) is the separator between the search and replace content.
 - >>>>>>> REPLACE (7 > characters + REPLACE) is the end of the replace content.
+
+Rules:
+- Content is searched as an exact match including indentation and line breaks.
+- The first match found will be replaced if there are multiple matches.
+- Use multiple SEARCH/REPLACE blocks to replace multiple contents.
 `.trim(),
       );
     }
