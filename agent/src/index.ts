@@ -302,9 +302,18 @@ const isAutoApprovableToolCall = (toolCall: ToolCall) => {
   if (toolCall.name === execCommandTool.name) {
     const args = toolCall.args as z.infer<typeof execCommandTool.schema>;
     if (
-      ["ls", "wc", "cat", "head", "tail", "find", "fd", "rg", "date"].includes(
-        args.command,
-      )
+      [
+        "ls",
+        "wc",
+        "cat",
+        "head",
+        "tail",
+        "fd",
+        "rg",
+        "find",
+        "grep",
+        "date",
+      ].includes(args.command)
     ) {
       return true;
     }

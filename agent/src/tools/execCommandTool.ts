@@ -13,9 +13,17 @@ export const execCommandTool = tool(
     return new Promise((resolve, reject) => {
       execFile(command, args, { timeout: 20 * 1000 }, (err, stdout, stderr) => {
         if (
-          ["ls", "cat", "head", "tail", "sed", "find", "fd", "rg"].includes(
-            command,
-          ) &&
+          [
+            "ls",
+            "cat",
+            "head",
+            "tail",
+            "sed",
+            "fd",
+            "rg",
+            "find",
+            "grep",
+          ].includes(command) &&
           stdout.length > OUTPUT_MAX_LENGTH
         ) {
           return reject(
@@ -48,7 +56,6 @@ export const execCommandTool = tool(
           result.push(
             `\n<error>\n${err.name}: ${errMessageOmitted}${isErrMessageOmitted ? "... (Message omitted)" : ""}</error>`,
           );
-          return reject(new Error(result.join("\n")));
         }
         return resolve(result.join("\n"));
       });
