@@ -49,15 +49,15 @@ Hello from stderr</stderr>
 
   it("captures error", async () => {
     // when:
-    const result = execCommandTool.invoke({
+    const result = await execCommandTool.invoke({
       command: "node",
       args: ["-e", "process.exit(1)"],
     });
 
     // then:
-    await assert.rejects(result, {
-      name: "Error",
-      message: `
+    assert.equal(
+      result,
+      `
 <command>node</command>
 
 <stdout></stdout>
@@ -68,6 +68,6 @@ Hello from stderr</stderr>
 Error: Command failed: node -e process.exit(1)
 </error>
 `.trim(),
-    });
+    );
   });
 });
