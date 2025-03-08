@@ -9,7 +9,7 @@
     "format": "prettier --cache --write .",
     "check": "prettier --check . && eslint --cache . && tsc --noEmit && tsx --test",
     "test": "tsx --test",
-    "setup-browser": "tsx src/tools/readWebPageByUserToolSetup.ts"
+    "setup-browser": "tsx src/tools/readWebPageByUserBrowserToolSetup.ts"
   },
   "dependencies": {
     "@langchain/anthropic": "^0.3.15",

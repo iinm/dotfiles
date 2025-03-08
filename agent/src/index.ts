@@ -25,7 +25,7 @@ import {
   patchFileTool,
   patchFileToolArgsUserPrinter,
 } from "./tools/patchFileTool";
-import { readWebPageByBrowserTool } from "./tools/readWebPageByUserTool";
+import { readWebPageByBrowserTool } from "./tools/readWebPageByUserBrowserTool";
 import { readWebPageTool } from "./tools/readWebPageTool";
 import {
   tmuxTool,
