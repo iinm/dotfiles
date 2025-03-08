@@ -5,8 +5,27 @@ set -eu -o pipefail
 this_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 app_root="$(cd "$this_dir/.." && pwd)"
 
-# Install dependencies
+# Check if build is required
+build_required=false
 if ! test -f "$app_root/dist/index.js"; then
+  build_required=true
+else
+  # Detect system type and use appropriate stat command
+  if test "$(uname)" = "Darwin"; then
+    # macOS
+    latest_src=$(find "$app_root/src" -type f -print0 | xargs -0 stat -f "%m" | sort -n | tail -1)
+    dist_ts=$(stat -f "%m" "$app_root/dist/index.js")
+  else
+    # Linux
+    latest_src=$(find "$app_root/src" -type f -print0 | xargs -0 stat --format "%Y" | sort -n | tail -1)
+    dist_ts=$(stat --format "%Y" "$app_root/dist/index.js")
+  fi
+  if test "$latest_src" -gt "$dist_ts"; then
+    build_required=true
+  fi
+fi
+
+if test "$build_required" = true; then
   (
     set -e
     cd "$app_root"
