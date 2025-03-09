@@ -191,7 +191,7 @@ Usecase: Browser automation (Experimental)
   send-keys ['-t', 'agent-${sessionId}:<window>, 'const { chromium } = require("playwright")', 'Enter']
   send-keys ['-t', 'agent-${sessionId}:<window>, 'const browser = await chromium.launch({ headless: false })', 'Enter']
   send-keys ['-t', 'agent-${sessionId}:<window>, 'let page = await browser.newPage({ viewport: { width: 1280, height: 960 } })', 'Enter']
-  send-keys ['-t', 'agent-${sessionId}:<window>, 'let page.goto("http://example.com")', 'Enter']
+  send-keys ['-t', 'agent-${sessionId}:<window>, 'await page.goto("http://example.com")', 'Enter']
 
 ## read web page
 
@@ -490,7 +490,7 @@ const handleUserInput = async ({
       // Rejected
       const lastMessage: AIMessage =
         state.values.messages[state.values.messages.length - 1];
-      const cancelMessages = lastMessage.tool_calls?.map((toolCall) => {
+      const cancelMessages = (lastMessage.tool_calls || []).map((toolCall) => {
         return new ToolMessage({
           status: "error",
           content: "Cancelled by user.",
@@ -499,7 +499,7 @@ const handleUserInput = async ({
       });
       await agent.updateState(
         config,
-        { messages: cancelMessages },
+        { messages: [...cancelMessages, new HumanMessage(input)] },
         "tools", // -> agent
       );
     }
