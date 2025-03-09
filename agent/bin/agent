@@ -5,44 +5,56 @@ set -eu -o pipefail
 this_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 app_root="$(cd "$this_dir/.." && pwd)"
 
-
 export NODE_ENV=${NODE_ENV:-production}
 
-# Check if build is required
-if test "$NODE_ENV" = "production"; then
-  build_required=false
+need_build() {
   if ! test -f "$app_root/dist/index.js"; then
-    build_required=true
-  else
-    # Detect system type and use appropriate stat command
-    if test "$(uname)" = "Darwin"; then
-      # macOS
-      latest_src=$(find "$app_root/src" -type f -print0 | xargs -0 stat -f "%m" | sort -n | tail -1)
-      dist_ts=$(stat -f "%m" "$app_root/dist/index.js")
-    else
-      # Linux
-      latest_src=$(find "$app_root/src" -type f -print0 | xargs -0 stat --format "%Y" | sort -n | tail -1)
-      dist_ts=$(stat --format "%Y" "$app_root/dist/index.js")
-    fi
-    if test "$latest_src" -gt "$dist_ts"; then
-      build_required=true
-    fi
+    return 0 # true
   fi
+  
+  if test "$(uname)" = "Darwin"; then
+    # macOS
+    latest_source_timestamp=$(find "$app_root/src" -type f -print0 | xargs -0 stat -f "%m" | sort -n | tail -1)
+    dist_timestamp=$(stat -f "%m" "$app_root/dist/index.js")
+  else
+    # Linux
+    latest_source_timestamp=$(find "$app_root/src" -type f -print0 | xargs -0 stat --format "%Y" | sort -n | tail -1)
+    dist_timestamp=$(stat --format "%Y" "$app_root/dist/index.js")
+  fi
+  
+  if test "$latest_source_timestamp" -gt "$dist_timestamp"; then
+    return 0 # true
+  fi
+  
+  return 1  # false
+}
 
-  if test "$build_required" = true; then
+# 本番環境の場合、必要に応じてビルドを実行
+if test "$NODE_ENV" = "production"; then
+  if need_build; then
+    echo "Source code changes detected. Building..." >&2
     (
       set -e
       cd "$app_root"
       npm install
+      rm -rf dist
       npm run build
-    )
+    ) || {
+      echo "Build failed. Please check the errors above." >&2
+      exit 1
+    }
+    echo "Build completed successfully." >&2
   fi
 fi
 
-# Run the agent
 export NODE_OPTIONS="--disable-warning=DEP0040"
+
 if test "$NODE_ENV" = "development"; then
   echo "Running in development mode" >&2
   exec "$app_root/env.sh" node "$app_root/node_modules/.bin/tsx" "$app_root/src/index.ts" "$@"
+elif test "$NODE_ENV" = "production"; then
+  exec "$app_root/env.sh" node --enable-source-maps "$app_root/dist/index.js" "$@"
+else
+  echo "Error: Unknown NODE_ENV value: $NODE_ENV. Expected 'development' or 'production'." >&2
+  exit 1
 fi
-exec "$app_root/env.sh" node --enable-source-maps "$app_root/dist/index.js" "$@"

@@ -7,6 +7,7 @@ import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
 import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
 import {
   AIMessage,
+  BaseMessage,
   HumanMessage,
   InputTokenDetails,
   OutputTokenDetails,
@@ -115,9 +116,9 @@ File and directory command examples:
 - Read lines from a file:
   - Use rg to either extract the outline or get the line numbers of lines containing a specific pattern.
   - Get the specific lines: sed ['-n', '<start>,<end>p', 'file.txt']
-    - It is recommended to read 200 lines at a time.
-    - 1st to 200th lines: sed ['-n', '1,200p', 'file.txt']
-    - 201st to 400th lines: sed ['-n', '201,400p', 'file.txt']
+    - It is recommended to read 300 lines at a time.
+    - 1st to 300th lines: sed ['-n', '1,300p', 'file.txt']
+    - 301st to 600th lines: sed ['-n', '301,600p', 'file.txt']
     - Read more lines if needed.
 
 Other command examples:
@@ -260,94 +261,6 @@ What you have learned, what you have tried, what you have found, etc.
 \`\`\`
 `.trim();
 
-const createModel = () => {
-  const modelName = process.env.MODEL || "o3-mini-medium";
-  switch (modelName) {
-    case "gpt-4o-mini":
-      return {
-        model: new ChatOpenAI({
-          model: "gpt-4o-mini",
-          temperature: 0,
-        }),
-        modelName,
-      };
-    case "o3-mini-medium":
-      return {
-        model: new ChatOpenAI({
-          model: "o3-mini",
-          reasoningEffort: "medium",
-        }),
-        modelName,
-      };
-    case "o3-mini-high":
-      return {
-        model: new ChatOpenAI({
-          model: "o3-mini",
-          reasoningEffort: "high",
-        }),
-        modelName,
-      };
-    case "claude-3-7-sonnet":
-      return {
-        model: new ChatAnthropic({
-          model: "claude-3-7-sonnet-20250219",
-          temperature: 0,
-          clientOptions: {
-            defaultHeaders: {
-              // https://js.langchain.com/docs/integrations/chat/anthropic/#prompt-caching
-              "anthropic-beta": "prompt-caching-2024-07-31",
-            },
-          },
-        }),
-        modelName,
-      };
-    case "claude-3-7-sonnet-thinking":
-      return {
-        model: new ChatAnthropic({
-          model: "claude-3-7-sonnet-20250219",
-          maxTokens: 1_024 * 8,
-          thinking: {
-            type: "enabled",
-            budget_tokens: 1_024,
-          },
-          clientOptions: {
-            defaultHeaders: {
-              // https://js.langchain.com/docs/integrations/chat/anthropic/#prompt-caching
-              "anthropic-beta": "prompt-caching-2024-07-31",
-            },
-          },
-        }),
-        modelName,
-      };
-
-    case "gemini-2.0-flash":
-      return {
-        model: new ChatVertexAI({
-          model: "gemini-2.0-flash-001",
-          temperature: 0,
-        }),
-        modelName,
-      };
-    default:
-      throw new Error(`Invalid MODEL: ${process.env.MODEL}`);
-  }
-};
-
-const { model, modelName } = createModel();
-
-const tavilySearchResultsTool = new TavilySearchResults({ maxResults: 5 });
-const tools = [
-  execCommandTool,
-  tmuxTool,
-  writeFileTool,
-  patchFileTool,
-  tavilySearchResultsTool,
-  readWebPageTool,
-  readWebPageByBrowserTool,
-];
-
-model.bindTools(tools, { parallel_tool_calls: false });
-
 const isAutoApprovableToolCall = (toolCall: ToolCall) => {
   if (toolCall.name === tavilySearchResultsTool.name) {
     return true;
@@ -405,19 +318,95 @@ const isAutoApprovableToolCall = (toolCall: ToolCall) => {
   return false;
 };
 
+const createModel = () => {
+  const modelName = process.env.MODEL || "gpt-4o-mini";
+  switch (modelName) {
+    case "gpt-4o-mini":
+      return {
+        model: new ChatOpenAI({
+          model: "gpt-4o-mini",
+          temperature: 0,
+        }),
+        modelName,
+      };
+    case "o3-mini-medium":
+      return {
+        model: new ChatOpenAI({
+          model: "o3-mini",
+          reasoningEffort: "medium",
+        }),
+        modelName,
+      };
+    case "o3-mini-high":
+      return {
+        model: new ChatOpenAI({
+          model: "o3-mini",
+          reasoningEffort: "high",
+        }),
+        modelName,
+      };
+    case "claude-3-7-sonnet":
+      return {
+        model: new ChatAnthropic({
+          model: "claude-3-7-sonnet-20250219",
+          temperature: 0,
+        }),
+        modelName,
+      };
+    case "claude-3-7-sonnet-thinking":
+      return {
+        model: new ChatAnthropic({
+          model: "claude-3-7-sonnet-20250219",
+          maxTokens: 1024 * 8,
+          thinking: {
+            type: "enabled",
+            budget_tokens: 1024,
+          },
+        }),
+        modelName,
+      };
+
+    case "gemini-2.0-flash":
+      return {
+        model: new ChatVertexAI({
+          model: "gemini-2.0-flash-001",
+          temperature: 0,
+        }),
+        modelName,
+      };
+    default:
+      throw new Error(`Invalid MODEL: ${process.env.MODEL}`);
+  }
+};
+
+const { model, modelName } = createModel();
+
+const tavilySearchResultsTool = new TavilySearchResults({ maxResults: 5 });
+const tools = [
+  execCommandTool,
+  tmuxTool,
+  writeFileTool,
+  patchFileTool,
+  tavilySearchResultsTool,
+  readWebPageTool,
+  readWebPageByBrowserTool,
+];
+
+model.bindTools(tools, { parallel_tool_calls: false });
+
 const checkpointSaver = new MemorySaver();
 
 const agent = createReactAgent({
   llm: model,
   tools,
   checkpointSaver: checkpointSaver,
-  interruptBefore: ["tools"],
+  interruptBefore: "*",
   prompt: new SystemMessage({
     content: [
       {
         type: "text",
         text: PROMPT,
-        ...(modelName.startsWith("claude")
+        ...(model.model.startsWith("claude")
           ? {
               cache_control: { type: "ephemeral" },
             }
@@ -442,16 +431,9 @@ const config = {
 
 const handleUserInput = async (input: string) => {
   const state = await agent.getState(config);
-  const hasPendingToolCalls = (s: typeof state) => s.next.includes("tools");
-
-  if (hasPendingToolCalls(state)) {
+  if (state.next.includes("tools")) {
     if (/^(y|yes|ｙ)$/.test(input.trim())) {
       // Approved
-      const updates: AgentUpdatesStream = await agent.stream(null, {
-        ...config,
-        streamMode: "updates",
-      });
-      await printAgentUpdatesStream(updates);
     } else {
       // Rejected
       const lastMessage: AIMessage =
@@ -463,36 +445,43 @@ const handleUserInput = async (input: string) => {
           tool_call_id: toolCall.id as string,
         });
       });
-      await agent.updateState(config, { messages: cancelMessages });
-      const updates: AgentUpdatesStream = await agent.stream(
-        {
-          messages: [new HumanMessage(input)],
-        },
-        {
-          ...config,
-          streamMode: "updates",
-        },
-      );
-      await printAgentUpdatesStream(updates);
+      await agent.updateState(config, { messages: cancelMessages }, "tools");
     }
   } else {
     // No pending tool calls
-    const updates: AgentUpdatesStream = await agent.stream(
-      {
-        messages: [new HumanMessage(input)],
-      },
-      {
-        ...config,
-        streamMode: "updates",
-      },
+    await agent.updateState(
+      config,
+      { messages: [new HumanMessage(input)] },
+      "tools",
     );
-    await printAgentUpdatesStream(updates);
   }
 
-  // Auto-approve tool calls
+  await enableClaudePromptCaching();
+  const updates: AgentUpdatesStream = await agent.stream(null, {
+    ...config,
+    streamMode: "updates",
+  });
+  await printAgentUpdatesStream(updates);
+
   while (true) {
     const updatedState = await agent.getState(config);
-    if (hasPendingToolCalls(updatedState)) {
+
+    if (updatedState.next.length === 0) {
+      break;
+    }
+
+    if (updatedState.next.includes("agent")) {
+      await enableClaudePromptCaching();
+      const values: AgentUpdatesStream = await agent.stream(null, {
+        ...config,
+        streamMode: "updates",
+      });
+      await printAgentUpdatesStream(values);
+      continue;
+    }
+
+    // Auto-approve tool calls
+    if (updatedState.next.includes("tools")) {
       const lastMessage: AIMessage =
         updatedState.values.messages[updatedState.values.messages.length - 1];
       const isEveryToolCallApproved = lastMessage.tool_calls?.every(
@@ -500,6 +489,7 @@ const handleUserInput = async (input: string) => {
       );
       if (isEveryToolCallApproved) {
         console.log(styleText("green", "Tool calls auto-approved."));
+        await enableClaudePromptCaching();
         const values: AgentUpdatesStream = await agent.stream(null, {
           ...config,
           streamMode: "updates",
@@ -511,12 +501,66 @@ const handleUserInput = async (input: string) => {
         console.log(styleText("yellow", "Approve tool calls? (y or feedback)"));
         break;
       }
-    } else {
-      // No pending tool calls
-      break;
     }
+
+    break;
   }
 };
+
+const enableClaudePromptCaching = async () => {
+  const state = await agent.getState(config);
+  const messages: BaseMessage[] = state.values.messages;
+  const asNode =
+    messages[messages.length - 1].getType() === "ai" ? "tools" : "agent";
+  if (model.model.startsWith("claude") && messages.length % 5 === 0) {
+    const cacheTargetIndices = [
+      Math.floor(messages.length / 5) * 5,
+      (Math.floor(messages.length / 5) - 1) * 5,
+    ];
+    const updatedMessage = messages.map((msg, index) => {
+      if (cacheTargetIndices.includes(index)) {
+        msg.content = Array.isArray(msg.content)
+          ? msg.content.map((part) => ({
+              ...part,
+              cache_control: { type: "ephemeral" },
+            }))
+          : [
+              {
+                type: "text",
+                text: msg.content,
+                cache_control: { type: "ephemeral" },
+              },
+            ];
+        return msg;
+      }
+      if (Array.isArray(msg.content)) {
+        msg.content = msg.content.map((part) => {
+          if (typeof part === "object" && "cache_control" in part) {
+            delete part.cache_control;
+          }
+          return part;
+        });
+        return msg;
+      }
+      return msg;
+    });
+
+    await agent.updateState(config, { messages: updatedMessage }, asNode);
+  }
+};
+
+type AgentUpdatesStream = IterableReadableStream<
+  | {
+      agent: {
+        messages: AIMessage[];
+      };
+    }
+  | {
+      tools: {
+        messages: ToolMessage[];
+      };
+    }
+>;
 
 const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
   for await (const value of values) {
@@ -540,6 +584,8 @@ const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
               );
             } else if (typeof part["text"] === "string") {
               console.log(part["text"]);
+            } else if (part.type === "tool_use") {
+              // no-op
             } else {
               // unknown message type
               console.log(JSON.stringify(part, null, 2));
@@ -676,19 +722,6 @@ const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
     }
   }
 };
-
-type AgentUpdatesStream = IterableReadableStream<
-  | {
-      agent: {
-        messages: AIMessage[];
-      };
-    }
-  | {
-      tools: {
-        messages: ToolMessage[];
-      };
-    }
->;
 
 // Start CLI
 const cli = readline.createInterface({
