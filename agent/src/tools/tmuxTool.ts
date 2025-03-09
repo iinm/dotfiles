@@ -5,7 +5,7 @@ import { tool } from "@langchain/core/tools";
 
 import z from "zod";
 
-const OUTPUT_MAX_LENGTH = 10_000;
+const OUTPUT_MAX_LENGTH = 1024 * 16;
 
 export const tmuxTool = tool(
   async (input) => {
@@ -20,7 +20,7 @@ export const tmuxTool = tool(
         }
       }
     }
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       execFile("tmux", command, async (err, stdout, stderr) => {
         // capture-pane の結果に空白の行が含まれることがあるためtrim する
         const stdoutOmitted = stdout.trim().slice(-OUTPUT_MAX_LENGTH);
@@ -42,7 +42,6 @@ export const tmuxTool = tool(
           result.push(
             `\n<error>\n${err.name}: ${errMessageOmitted}${isErrMessageOmitted ? "... (Message omitted)" : ""}</error>`,
           );
-          return reject(new Error(result.join("\n")));
         }
 
         if (
