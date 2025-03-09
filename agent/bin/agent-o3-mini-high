@@ -4,5 +4,5 @@ set -eu -o pipefail
 
 this_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-export MODEL="o3-mini-high"
+export AGENT_MODEL="o3-mini-high"
 exec "$this_dir/agent" "$@"

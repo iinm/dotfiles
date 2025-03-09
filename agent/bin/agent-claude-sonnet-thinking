@@ -4,5 +4,5 @@ set -eu -o pipefail
 
 this_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-export MODEL="claude-3-7-sonnet"
+export AGENT_MODEL="claude-3-7-sonnet-thinking"
 exec "$this_dir/agent" "$@"
