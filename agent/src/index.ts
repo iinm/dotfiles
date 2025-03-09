@@ -416,6 +416,8 @@ const agent = createReactAgent({
   }),
 });
 
+type Agent = typeof agent;
+
 const callbacks: BaseCallbackHandler[] = [];
 if (process.env.LANGFUSE_BASEURL) {
   const langfuseHandler = new CallbackHandler();
@@ -429,7 +431,57 @@ const config = {
   callbacks,
 };
 
-const handleUserInput = async (input: string) => {
+// Start CLI
+const cli = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  prompt:
+    styleText(
+      ["white", "bgGray"],
+      `\nSession: ${sessionId}, Model: ${modelName}, Commands: "resume work", "save memory", "bye"`,
+    ) + "\n> ",
+});
+
+if (process.argv.length > 2) {
+  console.log(`Reading file: ${process.argv[2]}`);
+  Promise.resolve()
+    .then(() =>
+      handleUserInput({
+        agent,
+        config,
+        input: fs.readFileSync(process.argv[2], "utf8"),
+      }),
+    )
+    .then(() => {
+      cli.prompt();
+    })
+    .catch((err) => {
+      console.error(`Error reading file ${process.argv[2]}:`, err);
+      process.exit(1);
+    });
+} else {
+  cli.prompt();
+}
+
+cli.on("line", async (input) => {
+  await handleUserInput({
+    agent,
+    config,
+    input,
+  });
+  cli.prompt();
+  cli.resume();
+});
+
+const handleUserInput = async ({
+  agent,
+  config,
+  input,
+}: {
+  agent: Agent;
+  config: Record<string, unknown>;
+  input: string;
+}) => {
   const state = await agent.getState(config);
   if (state.next.includes("tools")) {
     if (/^(y|yes|ｙ)$/.test(input.trim())) {
@@ -445,18 +497,22 @@ const handleUserInput = async (input: string) => {
           tool_call_id: toolCall.id as string,
         });
       });
-      await agent.updateState(config, { messages: cancelMessages }, "tools");
+      await agent.updateState(
+        config,
+        { messages: cancelMessages },
+        "tools", // -> agent
+      );
     }
   } else {
     // No pending tool calls
     await agent.updateState(
       config,
       { messages: [new HumanMessage(input)] },
-      "tools",
+      "tools", // -> agent
     );
   }
 
-  await enableClaudePromptCaching();
+  await enableClaudePromptCaching({ agent, config });
   const updates: AgentUpdatesStream = await agent.stream(null, {
     ...config,
     streamMode: "updates",
@@ -471,7 +527,7 @@ const handleUserInput = async (input: string) => {
     }
 
     if (updatedState.next.includes("agent")) {
-      await enableClaudePromptCaching();
+      await enableClaudePromptCaching({ agent, config });
       const values: AgentUpdatesStream = await agent.stream(null, {
         ...config,
         streamMode: "updates",
@@ -489,7 +545,7 @@ const handleUserInput = async (input: string) => {
       );
       if (isEveryToolCallApproved) {
         console.log(styleText("green", "Tool calls auto-approved."));
-        await enableClaudePromptCaching();
+        await enableClaudePromptCaching({ agent, config });
         const values: AgentUpdatesStream = await agent.stream(null, {
           ...config,
           streamMode: "updates",
@@ -507,22 +563,38 @@ const handleUserInput = async (input: string) => {
   }
 };
 
-const enableClaudePromptCaching = async () => {
+const enableClaudePromptCaching = async ({
+  agent,
+  config,
+}: {
+  agent: Agent;
+  config: Record<string, unknown>;
+}) => {
   const state = await agent.getState(config);
   const messages: BaseMessage[] = state.values.messages;
-  const asNode =
-    messages[messages.length - 1].getType() === "ai" ? "tools" : "agent";
-  if (model.model.startsWith("claude") && messages.length % 5 === 0) {
+  const asNode = state.next.includes("tools") ? "agent" : "tools";
+  const cacheInterval = 4;
+  if (
+    model.model.startsWith("claude") &&
+    messages.length % cacheInterval === 0
+  ) {
+    // Example: cacheInterval = 4
+    //   3 message -> -1, -5
+    //   4 messages -> 3, -1
+    //   7 messages -> 3, -1
+    //   8 messages -> 7,  3
     const cacheTargetIndices = [
-      Math.floor(messages.length / 5) * 5,
-      (Math.floor(messages.length / 5) - 1) * 5,
+      Math.floor(messages.length / cacheInterval) * cacheInterval - 1,
+      (Math.floor(messages.length / cacheInterval) - 1) * cacheInterval - 1,
     ];
-    const updatedMessage = messages.map((msg, index) => {
-      if (cacheTargetIndices.includes(index)) {
+    const updatedMessage = messages.map((msg, msgIndex) => {
+      if (cacheTargetIndices.includes(msgIndex)) {
         msg.content = Array.isArray(msg.content)
-          ? msg.content.map((part) => ({
+          ? msg.content.map((part, partIndex) => ({
               ...part,
-              cache_control: { type: "ephemeral" },
+              ...(partIndex === msg.content.length - 1
+                ? { cache_control: { type: "ephemeral" } }
+                : {}),
             }))
           : [
               {
@@ -535,7 +607,7 @@ const enableClaudePromptCaching = async () => {
       }
       if (Array.isArray(msg.content)) {
         msg.content = msg.content.map((part) => {
-          if (typeof part === "object" && "cache_control" in part) {
+          if ("cache_control" in part) {
             delete part.cache_control;
           }
           return part;
@@ -722,34 +794,3 @@ const printAgentUpdatesStream = async (values: AgentUpdatesStream) => {
     }
   }
 };
-
-// Start CLI
-const cli = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-  prompt:
-    styleText(
-      ["white", "bgGray"],
-      `\nSession: ${sessionId}, Model: ${modelName}, Commands: "resume work", "save memory", "bye"`,
-    ) + "\n> ",
-});
-
-if (process.argv.length > 2) {
-  console.log(`Reading file: ${process.argv[2]}`);
-  handleUserInput(fs.readFileSync(process.argv[2], "utf8"))
-    .then(() => {
-      cli.prompt();
-    })
-    .catch((err) => {
-      console.error(`Error reading file ${process.argv[2]}:`, err);
-      process.exit(1);
-    });
-} else {
-  cli.prompt();
-}
-
-cli.on("line", async (input) => {
-  await handleUserInput(input);
-  cli.prompt();
-  cli.resume();
-});
