@@ -61,11 +61,6 @@ export async function startCLI({
         {
           type: "text",
           text: prompt,
-          ...(model.model.startsWith("claude")
-            ? {
-                cache_control: { type: "ephemeral" },
-              }
-            : {}),
         },
       ],
     }),
@@ -196,7 +191,7 @@ async function onAgentStream({
     for (const [taskName, update] of Object.entries<BaseMessage | Interrupt[]>(
       step,
     )) {
-      if ("id" in update && update.id) {
+      if (update instanceof BaseMessage && update.id) {
         if (alreadyHandledMessageIds.has(update.id)) {
           continue;
         } else {

@@ -1,6 +1,8 @@
-import { BaseMessageLike } from "@langchain/core/messages";
-
-import { styleText } from "util";
+import {
+  BaseMessage,
+  BaseMessageLike,
+  isSystemMessage,
+} from "@langchain/core/messages";
 
 import { Model } from "./model";
 
@@ -24,13 +26,31 @@ export function enableClaudePromptCaching({
       (Math.floor(messages.length / cacheInterval) - 1) * cacheInterval - 1,
     ];
     const modifiedMessages = messages.map((msg, msgIndex) => {
-      if (msgIndex === 0) {
-        // system message
+      if (
+        msgIndex === 0 &&
+        msg instanceof BaseMessage &&
+        isSystemMessage(msg)
+      ) {
+        // cache prompt message
+        msg.content = Array.isArray(msg.content)
+          ? msg.content.map((part, partIndex) => ({
+              ...part,
+              ...(partIndex === msg.content.length - 1
+                ? { cache_control: { type: "ephemeral" } }
+                : {}),
+            }))
+          : [
+              {
+                type: "text",
+                text: msg.content,
+                cache_control: { type: "ephemeral" },
+              },
+            ];
         return msg;
       }
       if (cacheTargetIndices.includes(msgIndex)) {
         // set cache_control
-        if (typeof msg === "object" && "content" in msg) {
+        if (msg instanceof BaseMessage) {
           msg.content = Array.isArray(msg.content)
             ? msg.content.map((part, partIndex) => ({
                 ...part,
@@ -49,7 +69,7 @@ export function enableClaudePromptCaching({
         }
       } else {
         // clear cache_control
-        if (typeof msg === "object" && "content" in msg) {
+        if (msg instanceof BaseMessage) {
           msg.content = Array.isArray(msg.content)
             ? msg.content.map((part) => {
                 if ("cache_control" in part) {
