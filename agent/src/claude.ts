@@ -1,6 +1,7 @@
 import {
   BaseMessage,
   BaseMessageLike,
+  isBaseMessage,
   isSystemMessage,
 } from "@langchain/core/messages";
 
@@ -26,11 +27,7 @@ export function enableClaudePromptCaching({
       (Math.floor(messages.length / cacheInterval) - 1) * cacheInterval - 1,
     ];
     const modifiedMessages = messages.map((msg, msgIndex) => {
-      if (
-        msgIndex === 0 &&
-        msg instanceof BaseMessage &&
-        isSystemMessage(msg)
-      ) {
+      if (msgIndex === 0 && isBaseMessage(msg) && isSystemMessage(msg)) {
         // cache prompt message
         msg.content = Array.isArray(msg.content)
           ? msg.content.map((part, partIndex) => ({
@@ -50,7 +47,7 @@ export function enableClaudePromptCaching({
       }
       if (cacheTargetIndices.includes(msgIndex)) {
         // set cache_control
-        if (msg instanceof BaseMessage) {
+        if (isBaseMessage(msg)) {
           msg.content = Array.isArray(msg.content)
             ? msg.content.map((part, partIndex) => ({
                 ...part,
@@ -69,7 +66,7 @@ export function enableClaudePromptCaching({
         }
       } else {
         // clear cache_control
-        if (msg instanceof BaseMessage) {
+        if (isBaseMessage(msg)) {
           msg.content = Array.isArray(msg.content)
             ? msg.content.map((part) => {
                 if ("cache_control" in part) {

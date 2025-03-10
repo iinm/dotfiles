@@ -1,8 +1,9 @@
+import path from "node:path";
+
 import { tool } from "@langchain/core/tools";
 import { Readability } from "@mozilla/readability";
 
 import { JSDOM } from "jsdom";
-import * as path from "path";
 import { chromium } from "playwright";
 import z from "zod";
 

@@ -1,4 +1,9 @@
-import { BaseMessageLike, ToolMessage } from "@langchain/core/messages";
+import {
+  BaseMessageLike,
+  ToolMessage,
+  isBaseMessage,
+  isToolMessage,
+} from "@langchain/core/messages";
 import { ToolCall } from "@langchain/core/messages/tool";
 import { Tool } from "@langchain/core/tools";
 import {
@@ -324,7 +329,7 @@ export function createAgent({ model, tools }: { model: Model; tools: Tool[] }) {
 
         for (let i = 0; i < llmResponse.tool_calls.length; i++) {
           const review = reviewToolCall(llmResponse.tool_calls[i]);
-          if (review instanceof ToolMessage) {
+          if (isBaseMessage(review) && isToolMessage(review)) {
             toolResults.push(review);
           } else {
             toolCalls.push(review);

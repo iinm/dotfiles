@@ -7,6 +7,7 @@ import {
   HumanMessage,
   SystemMessage,
   isAIMessage,
+  isBaseMessage,
   isToolMessage,
 } from "@langchain/core/messages";
 import { ToolCall } from "@langchain/core/messages/tool";
@@ -191,16 +192,18 @@ async function onAgentStream({
     for (const [taskName, update] of Object.entries<BaseMessage | Interrupt[]>(
       step,
     )) {
-      if ("id" in update && update.id) {
+      if (isBaseMessage(update) && update.id) {
         if (alreadyHandledMessageIds.has(update.id)) {
           continue;
         } else {
           alreadyHandledMessageIds.add(update.id);
         }
       }
-      if (["callModel", "callTool"].includes(taskName)) {
-        const message = update as BaseMessage;
-        printMessage(message);
+      if (
+        ["callModel", "callTool"].includes(taskName) &&
+        isBaseMessage(update)
+      ) {
+        printMessage(update);
       } else if (taskName === "__interrupt__") {
         const interrupts = update as Interrupt[];
         if (interrupts.at(0)?.value.tool_call) {
