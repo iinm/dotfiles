@@ -29,7 +29,7 @@ export const readWebPageByBrowserTool = tool(
       const dom = new JSDOM(html, { url });
       const reader = new Readability(dom.window.document);
       const article = reader.parse();
-      const content = article?.textContent.trim() || "";
+      const content = article?.textContent?.trim() || "";
 
       // truncate content if too long
       if (content.length > MAX_CONTENT_LENGTH) {
