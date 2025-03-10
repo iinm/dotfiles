@@ -269,7 +269,9 @@ async function printMessage(message: BaseMessage) {
         }
       }
     }
-    console.log(styleText("gray", `\n${usageMetadata.join(", ")}`));
+    if (usageMetadata.length) {
+      console.log(styleText("gray", `\n${usageMetadata.join(", ")}`));
+    }
 
     const usageMetadateInputTokenDetails: string[] = [];
     if (usageMetadataRaw?.input_token_details) {
@@ -318,10 +320,10 @@ async function printMessage(message: BaseMessage) {
           : "";
     if (message.name === execCommandTool.name) {
       const formattedOutput = execCommandToolOutputUserPrinter(toolOutput);
-      console.log(`\n${formattedOutput}`);
+      console.log(`${formattedOutput}`);
     } else if (message.name === tmuxTool.name) {
       const formattedOutput = tmuxToolOutputUserPrinter(toolOutput);
-      console.log(`\n${formattedOutput}`);
+      console.log(`${formattedOutput}`);
     } else {
       const contentString =
         typeof message.content === "string"
@@ -330,9 +332,9 @@ async function printMessage(message: BaseMessage) {
 
       const maxContentLength = 1024;
       if (contentString.length > maxContentLength) {
-        console.log(`\n${contentString.slice(0, maxContentLength)}...`);
+        console.log(`${contentString.slice(0, maxContentLength)}...`);
       } else {
-        console.log(`\n${contentString}`);
+        console.log(`${contentString}`);
       }
     }
   } else {
