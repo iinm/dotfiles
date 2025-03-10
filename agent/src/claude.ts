@@ -1,5 +1,4 @@
 import {
-  BaseMessage,
   BaseMessageLike,
   isBaseMessage,
   isSystemMessage,

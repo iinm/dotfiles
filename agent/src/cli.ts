@@ -19,7 +19,7 @@ import z from "zod";
 
 import { Agent } from "./agent";
 import { Model } from "./model";
-import { isAutoApprovableToolCall } from "./tool";
+import { useToolCallAutoApprove } from "./tool";
 import {
   execCommandTool,
   execCommandToolArgsUserPrinter,
@@ -70,7 +70,11 @@ export async function startCLI({
   // state
   let isInitialMessagesSent = false;
   let interruptedToolCall: ToolCall | undefined;
+
   const alreadyHandledMessageIds = new Set<string>();
+  const { isAutoApprovableToolCall } = useToolCallAutoApprove({
+    maxAutoApproveCount: 20,
+  });
 
   const onUserInput = async (input: string) => {
     const messages: BaseMessageLike[] = [];

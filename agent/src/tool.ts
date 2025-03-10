@@ -5,65 +5,91 @@ import z from "zod";
 import { execCommandTool } from "./tools/execCommandTool";
 import { tmuxTool } from "./tools/tmuxTool";
 
-export function isAutoApprovableToolCall({
-  toolCall,
-  threadId,
+export function useToolCallAutoApprove({
+  maxAutoApproveCount,
 }: {
-  toolCall: ToolCall;
-  threadId: string;
+  maxAutoApproveCount: number;
 }) {
-  if (toolCall.name === "tavily_search_results_json") {
+  let autoApproveCount = 0;
+
+  const approve = () => {
+    autoApproveCount += 1;
+    if (autoApproveCount <= maxAutoApproveCount) {
+      return true;
+    }
+
+    autoApproveCount = 0;
+    return false;
+  };
+
+  const requestApproval = () => {
     return true;
-  }
-  if (toolCall.name === execCommandTool.name) {
-    const args = toolCall.args as z.infer<typeof execCommandTool.schema>;
-    if (
-      [
-        "ls",
-        "wc",
-        "cat",
-        "head",
-        "tail",
-        "fd",
-        "rg",
-        "find",
-        "grep",
-        "date",
-      ].includes(args.command)
-    ) {
-      return true;
+  };
+
+  const isAutoApprovableToolCall = ({
+    toolCall,
+    threadId,
+  }: {
+    toolCall: ToolCall;
+    threadId: string;
+  }) => {
+    if (toolCall.name === "tavily_search_results_json") {
+      return approve();
     }
-    if (
-      args.command === "sed" &&
-      (args.args?.at(0) || "") === "-n" &&
-      (args.args?.at(1) || "").match(/^.+p$/)
-    ) {
-      return true;
+    if (toolCall.name === execCommandTool.name) {
+      const args = toolCall.args as z.infer<typeof execCommandTool.schema>;
+      if (
+        [
+          "ls",
+          "wc",
+          "cat",
+          "head",
+          "tail",
+          "fd",
+          "rg",
+          "find",
+          "grep",
+          "date",
+        ].includes(args.command)
+      ) {
+        return approve();
+      }
+      if (
+        args.command === "sed" &&
+        (args.args?.at(0) || "") === "-n" &&
+        (args.args?.at(1) || "").match(/^.+p$/)
+      ) {
+        return approve();
+      }
+      if (
+        args.command === "git" &&
+        ["status", "diff", "log"].includes(args.args?.at(0) || "")
+      ) {
+        return approve();
+      }
     }
-    if (
-      args.command === "git" &&
-      ["status", "diff", "log"].includes(args.args?.at(0) || "")
-    ) {
-      return true;
+    if (toolCall.name === tmuxTool.name) {
+      const args = toolCall.args as z.infer<typeof tmuxTool.schema>;
+      if (
+        ["list-sessions", "list-windows", "capture-pane"].includes(
+          args.command.at(0) || "",
+        )
+      ) {
+        return approve();
+      }
+      if (
+        ["new-session", "new"].includes(args.command.at(0) || "") &&
+        args.command.at(1) === "-d" &&
+        args.command.at(2) === "-s" &&
+        args.command.at(3) === `agent-${threadId}`
+      ) {
+        return approve();
+      }
     }
-  }
-  if (toolCall.name === tmuxTool.name) {
-    const args = toolCall.args as z.infer<typeof tmuxTool.schema>;
-    if (
-      ["list-sessions", "list-windows", "capture-pane"].includes(
-        args.command.at(0) || "",
-      )
-    ) {
-      return true;
-    }
-    if (
-      ["new-session", "new"].includes(args.command.at(0) || "") &&
-      args.command.at(1) === "-d" &&
-      args.command.at(2) === "-s" &&
-      args.command.at(3) === `agent-${threadId}`
-    ) {
-      return true;
-    }
-  }
-  return false;
+    return requestApproval();
+  };
+
+  return {
+    isAutoApprovableToolCall,
+  };
 }
