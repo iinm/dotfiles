@@ -49,7 +49,7 @@ export const readWebPageByBrowserTool = tool(
     }
   },
   {
-    name: "read_web_page_by_browser",
+    name: "read_web_page_by_user_browser",
     description: `Fetches main content from a given URL using a user browser.`,
     schema: z.object({
       url: z.string().describe("The URL to fetch content from."),
