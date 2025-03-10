@@ -83,9 +83,9 @@ File and directory command examples:
 - Read lines from a file:
   - Use rg to either extract the outline or get the line numbers of lines containing a specific pattern.
   - Get the specific lines: sed ['-n', '<start>,<end>p', 'file.txt']
-    - It is recommended to read 300 lines at a time.
-    - 1st to 300th lines: sed ['-n', '1,300p', 'file.txt']
-    - 301st to 600th lines: sed ['-n', '301,600p', 'file.txt']
+    - It is recommended to read 200 lines at a time.
+    - 1st to 200th lines: sed ['-n', '1,200p', 'file.txt']
+    - 301st to 400th lines: sed ['-n', '201,400p', 'file.txt']
     - Read more lines if needed.
 
 Other command examples:

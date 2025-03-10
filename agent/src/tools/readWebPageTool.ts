@@ -4,7 +4,7 @@ import { Readability } from "@mozilla/readability";
 import { JSDOM } from "jsdom";
 import z from "zod";
 
-const MAX_CONTENT_LENGTH = 10000;
+const MAX_CONTENT_LENGTH = 1024 * 8;
 
 export const readWebPageTool = tool(
   async ({ url }: { url: string }) => {

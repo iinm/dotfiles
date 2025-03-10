@@ -10,7 +10,8 @@ export const USER_DATA_DIR = path.join(
   __dirname,
   "../../.agent/chrome-profile",
 );
-const MAX_CONTENT_LENGTH = 10000;
+
+const MAX_CONTENT_LENGTH = 1024 * 8;
 
 export const readWebPageByBrowserTool = tool(
   async ({ url }: { url: string }) => {

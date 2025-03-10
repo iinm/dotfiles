@@ -4,7 +4,7 @@ import { tool } from "@langchain/core/tools";
 
 import z from "zod";
 
-const OUTPUT_MAX_LENGTH = 10_000;
+const OUTPUT_MAX_LENGTH = 1024 * 8;
 
 /**
  * コマンドの安全性チェックが難しいので使わない
@@ -12,7 +12,7 @@ const OUTPUT_MAX_LENGTH = 10_000;
 export const shellCommandTool = tool(
   async (input) => {
     const { command } = input;
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       exec(command, { timeout: 20 * 1000 }, (err, stdout, stderr) => {
         // stdout / stderr が長過ぎる場合は末尾を表示
         const stdoutOmitted = stdout.slice(-OUTPUT_MAX_LENGTH);
@@ -37,7 +37,6 @@ export const shellCommandTool = tool(
           result.push(
             `\n<error>\n${err.name}: ${errMessageOmitted}${isErrMessageOmitted ? "... (Message omitted)" : ""}</error>`,
           );
-          return reject(new Error(result.join("\n")));
         }
         return resolve(result.join("\n"));
       });

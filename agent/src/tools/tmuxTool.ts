@@ -5,7 +5,7 @@ import { tool } from "@langchain/core/tools";
 
 import z from "zod";
 
-const OUTPUT_MAX_LENGTH = 1024 * 16;
+const OUTPUT_MAX_LENGTH = 1024 * 8;
 
 export const tmuxTool = tool(
   async (input) => {
