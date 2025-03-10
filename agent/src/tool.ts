@@ -23,7 +23,7 @@ export function useToolCallAutoApprove({
   };
 
   const requestApproval = () => {
-    return true;
+    return false;
   };
 
   const isAutoApprovableToolCall = ({
