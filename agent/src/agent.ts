@@ -20,11 +20,11 @@ import { Model } from "./model";
 
 export function createPrompt({
   threadId,
-  cwd,
+  workingDir,
   agentDir,
 }: {
   threadId: string;
-  cwd: string;
+  workingDir: string;
   agentDir: string;
 }) {
   return `
@@ -39,7 +39,7 @@ You are a problem solver.
 
 - Respond to users in the same language they use.
 - Users specify file paths relative to the current working directory.
-  - Crrent working directory: ${cwd}
+  - Crrent working directory: ${workingDir}
 - When user ends the conversation by saying "bye", "exit", or "quit", do the following steps one by one:
   - Kill the tmux session named agent-${threadId} if it is running.
   - Save the memory bank.
@@ -56,7 +56,7 @@ Rules:
 exec_command is used to run a one-shot command.
 Use tmux to run daemon processes and interactive processes.
 
-- Current working directory is ${cwd}.
+- Current working directory is ${workingDir}.
 - Use relative paths to refer to files and directories.
 - Do not read a file content at once. Use head, tail, sed, rg to read a required part of the file.
 
@@ -144,7 +144,7 @@ Use exec_command to run one-shot commands.
 Rules:
 - Use the given sessionId ( agent-${threadId} ) to run the command.
 - If it's not available, create a new session with the given sessionId.
-- Current working directory is ${cwd}.
+- Current working directory is ${workingDir}.
 - Use relative paths to refer to files and directories.
 
 Basic commands:
@@ -188,7 +188,7 @@ Usecase:
 - User asks you to resume the work by saying "resume work".
   - Show the memory files and ask user to choose the memory file to resume the work.
 
-Path: ${cwd}/.agent/memory/${threadId}--<snake-case-title>.md
+Path: ${workingDir}/.agent/memory/${threadId}--<snake-case-title>.md
 - Create a concise and clear title that represents the content.
 - Ensure that the directories exists, creating them if necessary.
 

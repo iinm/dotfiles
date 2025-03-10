@@ -44,11 +44,13 @@ export async function startCLI({
   agent,
   threadId,
   prompt,
+  workingDir,
 }: {
   model: Model;
   agent: Agent;
   threadId: string;
   prompt: string;
+  workingDir: string;
 }) {
   const config = {
     configurable: {
@@ -120,7 +122,11 @@ export async function startCLI({
     while (true) {
       if (interruptedToolCall) {
         if (
-          isAutoApprovableToolCall({ toolCall: interruptedToolCall, threadId })
+          isAutoApprovableToolCall({
+            toolCall: interruptedToolCall,
+            threadId,
+            workingDir,
+          })
         ) {
           console.log(styleText("green", "\nTool call auto-approved."));
           interruptedToolCall = undefined;

@@ -29,9 +29,11 @@ export function useToolCallAutoApprove({
   const isAutoApprovableToolCall = ({
     toolCall,
     threadId,
+    workingDir: _workingDir,
   }: {
     toolCall: ToolCall;
     threadId: string;
+    workingDir: string;
   }) => {
     if (toolCall.name === "tavily_search_results_json") {
       return approve();

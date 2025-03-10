@@ -41,11 +41,11 @@ const AGENT_MODEL = process.env.AGENT_MODEL || "gpt-4o-mini";
 
   const prompt = createPrompt({
     threadId,
-    cwd: process.cwd(),
+    workingDir: process.cwd(),
     agentDir: __dirname,
   });
 
-  await startCLI({ model, agent, threadId, prompt });
+  await startCLI({ model, agent, threadId, prompt, workingDir: process.cwd() });
 })().catch((err) => {
   console.error(styleText("red", err.stack));
   process.exit(1);
