@@ -191,7 +191,7 @@ async function onAgentStream({
     for (const [taskName, update] of Object.entries<BaseMessage | Interrupt[]>(
       step,
     )) {
-      if (update instanceof BaseMessage && update.id) {
+      if ("id" in update && update.id) {
         if (alreadyHandledMessageIds.has(update.id)) {
           continue;
         } else {
