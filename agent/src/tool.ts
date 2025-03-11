@@ -69,6 +69,20 @@ export function useToolCallAutoApprove({
       ) {
         return approve();
       }
+      if (
+        args.command === "git" &&
+        args.args?.at(0) === "branch" &&
+        args.args?.at(1) === "--show-current"
+      ) {
+        return approve();
+      }
+      if (
+        args.command === "mkdir" &&
+        args.args?.at(0) === "-p" &&
+        args.args?.at(1) === `.agent/memory`
+      ) {
+        return approve();
+      }
     }
     if (toolCall.name === tmuxTool.name) {
       const args = toolCall.args as z.infer<typeof tmuxTool.schema>;
