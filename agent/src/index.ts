@@ -13,7 +13,7 @@ import { readWebPageTool } from "./tools/readWebPageTool";
 import { tmuxTool } from "./tools/tmuxTool";
 import { writeFileTool } from "./tools/writeFileTool";
 
-const AGENT_MODEL = process.env.AGENT_MODEL || "claude-3-5-haiku";
+const AGENT_MODEL = process.env.AGENT_MODEL || "gpt-4o-mini";
 
 (async () => {
   const model = await createModel(AGENT_MODEL);
