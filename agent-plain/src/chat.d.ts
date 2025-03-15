@@ -1,3 +1,5 @@
+export type CallModel = (input: ModelInput) => Promise<ChatMessage | Error>;
+
 export type ModelInput = {
   messages: ChatMessage[];
   tools?: Tool[];

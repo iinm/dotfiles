@@ -1,5 +1,5 @@
 /**
- * @import { UserEventEmitter, AgentEventEmitter } from "./events"
+ * @import { UserEventEmitter, AgentEventEmitter } from "./agent"
  */
 
 import readline from "node:readline";

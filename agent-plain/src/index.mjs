@@ -1,49 +1,19 @@
 /**
- * @import {ChatMessage} from "./chat"
- * @import {UserEventEmitter, AgentEventEmitter} from "./events"
+ * @import {CallModel} from "./chat"
  */
 
-import { EventEmitter } from "node:events";
 import { startCLI } from "./cli.mjs";
 import { callAnthropicModel } from "./provider/anthropic.mjs";
 import { callOpenAIModel } from "./provider/openai.mjs";
+import { createAgent } from "./agent.mjs";
+
+const AGENT_MODEL = process.env.AGENT_MODEL || "gpt-4o-mini";
 
 (async () => {
-  /** @type {UserEventEmitter} */
-  const userEventEmitter = new EventEmitter();
-
-  /** @type {AgentEventEmitter} */
-  const agentEventEmitter = new EventEmitter();
-
-  /** @type {ChatMessage[]} */
-  const messages = [];
-
-  userEventEmitter.on("userInput", async (input) => {
-    messages.push({ role: "user", content: [{ type: "text", text: input }] });
-
-    const modelMessage = await callOpenAIModel(
-      {
-        model: "gpt-4o-mini",
-        temperature: 0,
-      },
-      { messages, tools: [] },
-    );
-
-    // const modelMessage = await callAnthropicModel(
-    //   {
-    //     model: "claude-3-5-haiku-latest",
-    //     max_tokens: 1024,
-    //     temperature: 0,
-    //   },
-    //   { messages, tools: [] },
-    // );
-
-    if (modelMessage instanceof Error) {
-      throw modelMessage;
-    }
-
-    messages.push(modelMessage);
-    agentEventEmitter.emit("message", modelMessage);
+  const callModel = createModelCaller(AGENT_MODEL);
+  const { userEventEmitter, agentEventEmitter } = createAgent({
+    callModel,
+    tools: [],
   });
 
   startCLI(userEventEmitter, agentEventEmitter);
@@ -51,3 +21,74 @@ import { callOpenAIModel } from "./provider/openai.mjs";
   console.error(err);
   process.exit(1);
 });
+
+/**
+ * @param {string} modelName
+ * @returns {CallModel}
+ */
+function createModelCaller(modelName) {
+  switch (modelName) {
+    case "gpt-4o-mini":
+      return (input) =>
+        callOpenAIModel(
+          {
+            model: "gpt-4o-mini",
+            temperature: 0,
+          },
+          input,
+        );
+    case "o3-mini-medium":
+      return (input) =>
+        callOpenAIModel(
+          {
+            model: "o3-mini",
+            reasoningEffort: "medium",
+          },
+          input,
+        );
+    case "o3-mini-high":
+      return (input) =>
+        callOpenAIModel(
+          {
+            model: "o3-mini",
+            reasoningEffort: "high",
+          },
+          input,
+        );
+    case "claude-3-5-haiku":
+      return (input) =>
+        callAnthropicModel(
+          {
+            model: "claude-3-5-haiku-latest",
+            max_tokens: 1024,
+            temperature: 0,
+          },
+          input,
+        );
+    case "claude-3-7-sonnet":
+      return (input) =>
+        callAnthropicModel(
+          {
+            model: "claude-3-7-sonnet-latest",
+            max_tokens: 1024 * 8,
+            temperature: 0,
+          },
+          input,
+        );
+    case "claude-3-7-sonnet-thinking":
+      return (input) =>
+        callAnthropicModel(
+          {
+            model: "claude-3-7-sonnet-latest",
+            max_tokens: 1024 * 8,
+            thinking: {
+              type: "enabled",
+              budget_tokens: 1024,
+            },
+          },
+          input,
+        );
+    default:
+      throw new Error(`Invalid model: ${modelName}`);
+  }
+}

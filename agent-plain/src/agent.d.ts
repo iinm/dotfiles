@@ -1,5 +1,5 @@
 import type { EventEmitter } from "node:events";
-import type { ChatMessage } from "./chat";
+import type { CallModel, ChatMessage, Tool } from "./chat";
 
 type UserEventMap = {
   userInput: [string];
@@ -12,3 +12,8 @@ type AgentEventMap = {
 };
 
 export type AgentEventEmitter = EventEmitter<AgentEventMap>;
+
+export type AgentConfig = {
+  callModel: CallModel;
+  tools: Tool[];
+};
