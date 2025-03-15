@@ -22,7 +22,7 @@ local tools = {
       },
     },
     biome = {
-      formatCommand = 'npx --no-install biome format --stdin-file-path ${INPUT}',
+      formatCommand = 'npx --no-install @biomejs/biome format --stdin-file-path ${INPUT}',
       formatStdin = true,
       rootMarkers = {
         'biome.json',
