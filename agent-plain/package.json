@@ -1,1 +1,12 @@
-{}
+{
+  "private": true,
+  "scripts": {
+    "start": "./env.sh node ./src/index.mjs",
+    "check": "npx @biomejs/biome check"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2"
+  }
+}

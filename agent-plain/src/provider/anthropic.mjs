@@ -1,0 +1,97 @@
+/**
+ * @import { ModelInput, ChatMessage, ChatMessageContent } from "../chat";
+ * @import { AnthropicChatCompletion, AnthropicChatMessage, AnthropicChatMessageContent, AnthropicChatTool, AnthropicModelConfig } from "./anthropic";
+ */
+
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+
+/**
+ * @param {AnthropicModelConfig} config
+ * @param {ModelInput} input
+ * @returns {Promise<ChatMessage | Error>}
+ */
+export async function callAnthropicModel(config, input) {
+  // Convert generic message format to Anthropic format
+  /** @type {AnthropicChatMessage[]} */
+  const messages = [];
+  for (const genericMessage of input.messages) {
+    /** @type {AnthropicChatMessageContent[]} */
+    const content = [];
+    for (const part of genericMessage.content) {
+      if (part.type === "text") {
+        content.push({ type: "text", text: part.text });
+      } else if (part.type === "tool_use") {
+        content.push({
+          type: "tool_use",
+          id: part.toolUseId,
+          name: part.toolName,
+          input: part.args,
+        });
+      }
+    }
+    messages.push({
+      role: genericMessage.role,
+      content: content,
+    });
+  }
+
+  // Convert generic tool format to Anthropic format
+  /** @type {AnthropicChatTool[]} */
+  const tools = [];
+  if (input.tools) {
+    for (const tool of input.tools) {
+      tools.push({
+        name: tool.name,
+        description: tool.description,
+        input_schema: tool.inputSchema,
+      });
+    }
+  }
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": `${ANTHROPIC_API_KEY}`,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      ...config,
+      messages,
+      tools: tools.length ? tools : undefined,
+    }),
+  });
+
+  if (response.status !== 200) {
+    return new Error(
+      `Failed to call Anthropic model: status=${response.status}, body=${await response.text()}`,
+    );
+  }
+
+  /** @type {AnthropicChatCompletion} */
+  const body = await response.json();
+
+  // Convert Anthropic format to generic message format
+  /** @type {ChatMessageContent[]} */
+  const content = [];
+  for (const part of body.content) {
+    if (part.type === "text") {
+      content.push({ type: "text", text: part.text });
+    } else if (part.type === "tool_use") {
+      content.push({
+        type: "tool_use",
+        toolUseId: part.id,
+        toolName: part.name,
+        args: part.input,
+      });
+    }
+  }
+
+  /** @type {ChatMessage} */
+  const message = {
+    role: "assistant",
+    content: content,
+  };
+
+  return message;
+}
