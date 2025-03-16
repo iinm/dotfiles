@@ -1,6 +1,6 @@
 import type { EventEmitter } from "node:events";
 import type { CallModel, Message } from "./model";
-import type { Tool } from "./tool";
+import type { Tool, ToolUseApprover } from "./tool";
 
 type UserEventMap = {
   userInput: [string];
@@ -19,4 +19,5 @@ export type AgentEventEmitter = EventEmitter<AgentEventMap>;
 export type AgentConfig = {
   callModel: CallModel;
   tools: Tool[];
+  toolUseApprover: ToolUseApprover;
 };

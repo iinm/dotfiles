@@ -9,7 +9,7 @@ import { EventEmitter } from "node:events";
 /**
  * @param {AgentConfig} config
  */
-export function createAgent({ callModel, tools }) {
+export function createAgent({ callModel, tools, toolUseApprover }) {
   /** @type {UserEventEmitter} */
   const userEventEmitter = new EventEmitter();
   /** @type {AgentEventEmitter} */
@@ -63,53 +63,40 @@ export function createAgent({ callModel, tools }) {
       messages.push({ role: "user", content: [{ type: "text", text: input }] });
     }
 
-    const modelMessage = await callModel({
-      messages,
-      tools: toolDefs,
-    });
-    if (modelMessage instanceof Error) {
-      // TODO: recover from error
-      throw modelMessage;
-    }
-
-    messages.push(modelMessage);
-    agentEventEmitter.emit("message", messages[messages.length - 1]);
-
-    // Tool use
     while (true) {
-      const lastMessage = messages[messages.length - 1];
+      const assistantMessage = await callModel({
+        messages,
+        tools: toolDefs,
+      });
+      if (assistantMessage instanceof Error) {
+        // TODO: recover from error
+        throw assistantMessage;
+      }
+
+      messages.push(assistantMessage);
+      agentEventEmitter.emit("message", assistantMessage);
+
+      // Approve tool use
       /** @type {MessageContentToolUse[]} */
-      const toolUseParts = lastMessage.content.filter(
+      const toolUseParts = assistantMessage.content.filter(
         (part) => part.type === "tool_use",
       );
       if (toolUseParts.length === 0) {
         break;
       }
 
-      agentEventEmitter.emit("toolUseRequest");
-      break;
+      const isAllToolUseApproved = toolUseParts.every(toolUseApprover);
+      if (!isAllToolUseApproved) {
+        agentEventEmitter.emit("toolUseRequest");
+        break;
+      }
 
-      // TODO: auto approve
-      // /** @type {MessageContentToolResult[]} */
-      // const toolResults = [];
-      // for (const toolUse of toolUseParts) {
-      //   const toolResult = await callTool(toolUse, toolByName);
-      //   toolResults.push(toolResult);
-      // }
-      //
-      // messages.push({ role: "user", content: toolResults });
-      // agentEventEmitter.emit("message", messages[messages.length - 1]);
-      //
-      // const modelMessage = await callModel({
-      //   messages,
-      //   tools: toolDefs,
-      // });
-      // if (modelMessage instanceof Error) {
-      //   throw modelMessage;
-      // }
-      //
-      // messages.push(modelMessage);
-      // agentEventEmitter.emit("message", messages[messages.length - 1]);
+      const toolResults = await Promise.all(
+        toolUseParts.map((toolUse) => callTool(toolUse, toolByName)),
+      );
+
+      messages.push({ role: "user", content: toolResults });
+      agentEventEmitter.emit("message", messages[messages.length - 1]);
     }
 
     agentEventEmitter.emit("turnEnd");

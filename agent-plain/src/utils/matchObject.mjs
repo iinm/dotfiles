@@ -57,7 +57,8 @@ export function matchObject(object, pattern) {
         ) {
           if (typeof elementValue !== "object" || elementValue === null) {
             return false;
-          } else if (
+          }
+          if (
             !matchObject(
               /** @type {Record<string,unknown>} */ (elementValue),
               elementPattern,
