@@ -1,6 +1,6 @@
 /**
  * @import { AgentConfig, AgentEventEmitter, UserEventEmitter } from "./agent"
- * @import { ChatMessage, ChatMessageToolResult, ChatMessageToolUse } from "./model"
+ * @import { Message, MessageContentToolResult, MessageContentToolUse } from "./model"
  * @import { Tool, ToolDefinition } from "./tool"
  */
 
@@ -24,7 +24,7 @@ export function createAgent({ callModel, tools }) {
   /** @type {ToolDefinition[]} */
   const toolDefs = tools.map(({ def }) => def);
 
-  /** @type {ChatMessage[]} */
+  /** @type {Message[]} */
   const messages = [];
 
   userEventEmitter.on("userInput", async (input) => {
@@ -45,7 +45,7 @@ export function createAgent({ callModel, tools }) {
     // TODO: approval flow
     while (true) {
       const lastMessage = messages[messages.length - 1];
-      /** @type {ChatMessageToolUse[]} */
+      /** @type {MessageContentToolUse[]} */
       const toolUseParts = [];
       for (const part of lastMessage.content) {
         if (part.type === "tool_use") {
@@ -57,11 +57,10 @@ export function createAgent({ callModel, tools }) {
         break;
       }
 
-      /** @type {ChatMessageToolResult[]} */
+      /** @type {MessageContentToolResult[]} */
       const toolResults = [];
       for (const toolUse of toolUseParts) {
         const tool = toolByName.get(toolUse.toolName);
-        /** @type {ChatMessageToolResult} */
         if (!tool) {
           toolResults.push({
             type: "tool_result",

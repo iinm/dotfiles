@@ -1,6 +1,6 @@
 /**
- * @import { ModelInput, ChatMessage, ChatMessageContent } from "../model";
- * @import { AnthropicChatCompletion, AnthropicChatMessage, AnthropicChatMessageContent, AnthropicChatTool, AnthropicModelConfig } from "./anthropic";
+ * @import { ModelInput, Message, MessageContent } from "../model";
+ * @import { AnthropicChatCompletion, AnthropicChatMessage, AnthropicMessageContent, AnthropicToolDefinition, AnthropicModelConfig } from "./anthropic";
  */
 
 import { noThrow } from "../utils/noThrow.mjs";
@@ -10,7 +10,7 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 /**
  * @param {AnthropicModelConfig} config
  * @param {ModelInput} input
- * @returns {Promise<ChatMessage | Error>}
+ * @returns {Promise<Message | Error>}
  */
 export async function callAnthropicModel(config, input) {
   return await noThrow(async () => {
@@ -18,7 +18,7 @@ export async function callAnthropicModel(config, input) {
     /** @type {AnthropicChatMessage[]} */
     const messages = [];
     for (const genericMessage of input.messages) {
-      /** @type {AnthropicChatMessageContent[]} */
+      /** @type {AnthropicMessageContent[]} */
       const content = [];
       for (const part of genericMessage.content) {
         if (part.type === "text") {
@@ -45,7 +45,7 @@ export async function callAnthropicModel(config, input) {
     }
 
     // Convert generic tool format to Anthropic format
-    /** @type {AnthropicChatTool[]} */
+    /** @type {AnthropicToolDefinition[]} */
     const tools = [];
     if (input.tools) {
       for (const tool of input.tools) {
@@ -81,7 +81,7 @@ export async function callAnthropicModel(config, input) {
     const body = await response.json();
 
     // Convert Anthropic format to generic message format
-    /** @type {ChatMessageContent[]} */
+    /** @type {MessageContent[]} */
     const content = [];
     for (const part of body.content) {
       if (part.type === "text") {
@@ -96,7 +96,7 @@ export async function callAnthropicModel(config, input) {
       }
     }
 
-    /** @type {ChatMessage} */
+    /** @type {Message} */
     const message = {
       role: "assistant",
       content: content,

@@ -15,51 +15,51 @@ export type OpenAIChatCompletion = {
 
 type OpenIAChatCompletionChoice = {
   index: number;
-  message: OpenAIChatMessage;
+  message: OpenAIMessage;
   finish_reason: string;
 };
 
-type OpenAIChatMessageStrict =
+type OpenAIMessageStrict =
   | {
       role: "system";
-      content: OpenAIChatMessageText[];
+      content: OpenAIMessageContentText[];
     }
   | {
       role: "user";
-      content: OpenAIChatMessageText[];
+      content: OpenAIMessageContentText[];
     }
   | {
       role: "assistant";
-      content?: OpenAIChatMessageText[];
-      tool_calls?: OpenAIChatToolCall[];
+      content?: OpenAIMessageContentText[];
+      tool_calls?: OpenAIMessageToolCall[];
     }
   | {
       role: "tool";
-      content: string | OpenAIChatMessageText[];
+      content: string | OpenAIMessageContentText[];
       tool_call_id: string;
     };
 
-type OpenAIChatMessage = {
+type OpenAIMessage = {
   role: "system" | "user" | "assistant" | "tool";
-  content?: string | OpenAIChatMessageContent[];
-  tool_calls?: OpenAIChatToolCall[];
+  content?: string | OpenAIMessageContent[];
+  tool_calls?: OpenAIMessageToolCall[];
   tool_call_id?: string;
 };
 
-type OpenAIChatMessageContent = OpenAIChatMessageText;
+type OpenAIMessageContent = OpenAIMessageContentText;
 
-type OpenAIChatMessageText = {
+type OpenAIMessageContentText = {
   type: "text";
   text: string;
 };
 
-type OpenAIChatToolCall = {
+type OpenAIMessageToolCall = {
   id: string;
   type: "function";
-  function: OpenAIChatToolCallFunction;
+  function: OpenAIToolCallFunction;
 };
 
-type OpenAIChatToolCallFunction = {
+type OpenAIToolCallFunction = {
   name: string;
   arguments: string;
 };
@@ -72,7 +72,7 @@ type OpenAIChatCompletionUsage = {
   completion_tokens_details: Record<string, number>;
 };
 
-type OpenAIChatTool = {
+type OpenAIToolDefinition = {
   type: "function";
   function: {
     name: string;

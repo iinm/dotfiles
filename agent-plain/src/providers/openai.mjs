@@ -1,6 +1,6 @@
 /**
- * @import { ModelInput, ChatMessage, ChatMessageContent } from "../model"
- * @import { OpenAIChatCompletion, OpenAIChatMessage, OpenAIChatMessageContent, OpenAIChatTool, OpenAIChatToolCall, OpenAIModelConfig } from "./openai"
+ * @import { ModelInput, Message, MessageContent } from "../model"
+ * @import { OpenAIChatCompletion, OpenAIMessage, OpenAIMessageContent, OpenAIMessageToolCall, OpenAIModelConfig, OpenAIToolDefinition } from "./openai"
  */
 
 import { noThrow } from "../utils/noThrow.mjs";
@@ -10,17 +10,17 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 /**
  * @param {OpenAIModelConfig} config
  * @param {ModelInput} input
- * @returns {Promise<ChatMessage | Error>}
+ * @returns {Promise<Message | Error>}
  */
 export async function callOpenAIModel(config, input) {
   return await noThrow(async () => {
     // Convert generic message format to OpenAI format
-    /** @type {OpenAIChatMessage[]} */
+    /** @type {OpenAIMessage[]} */
     const messages = [];
     for (const genericMessage of input.messages) {
-      /** @type {OpenAIChatMessageContent[]} */
+      /** @type {OpenAIMessageContent[]} */
       const content = [];
-      /** @type {OpenAIChatToolCall[]} */
+      /** @type {OpenAIMessageToolCall[]} */
       const toolCalls = [];
       for (const part of genericMessage.content) {
         if (part.type === "text") {
@@ -52,7 +52,7 @@ export async function callOpenAIModel(config, input) {
     }
 
     // Convert generic tool format to OpenAI format
-    /** @type {OpenAIChatTool[]} */
+    /** @type {OpenAIToolDefinition[]} */
     const tools = [];
     if (input.tools) {
       for (const tool of input.tools) {
@@ -91,7 +91,7 @@ export async function callOpenAIModel(config, input) {
     const rawMessage = body.choices[0].message;
 
     // Convert OpenAI format to generic message format
-    /** @type {ChatMessageContent[]} */
+    /** @type {MessageContent[]} */
     const content = [];
     if (typeof rawMessage.content === "string") {
       content.push({ type: "text", text: rawMessage.content });
@@ -124,7 +124,7 @@ export async function callOpenAIModel(config, input) {
       }
     }
 
-    /** @type {ChatMessage} */
+    /** @type {Message} */
     const message = {
       role: "assistant",
       content: content,

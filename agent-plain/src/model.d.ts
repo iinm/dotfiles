@@ -1,49 +1,49 @@
 import type { ToolDefinition } from "./tool";
 
-export type CallModel = (input: ModelInput) => Promise<ChatMessage | Error>;
+export type CallModel = (input: ModelInput) => Promise<Message | Error>;
 
 export type ModelInput = {
-  messages: ChatMessage[];
+  messages: Message[];
   tools?: ToolDefinition[];
 };
 
-export type ChatMessageStrict =
+export type MessageStrict =
   | {
       role: "system";
-      content: ChatMessageText[];
+      content: MessageContentText[];
     }
   | {
       role: "user";
-      content: (ChatMessageText | ChatMessageToolResult)[];
+      content: (MessageContentText | MessageContentToolResult)[];
     }
   | {
       role: "assistant";
-      content: (ChatMessageText | ChatMessageToolUse)[];
+      content: (MessageContentText | MessageContentToolUse)[];
     };
 
-export type ChatMessage = {
+export type Message = {
   role: "system" | "user" | "assistant";
-  content: ChatMessageContent[];
+  content: MessageContent[];
 };
 
-export type ChatMessageContent =
-  | ChatMessageText
-  | ChatMessageToolUse
-  | ChatMessageToolResult;
+export type MessageContent =
+  | MessageContentText
+  | MessageContentToolUse
+  | MessageContentToolResult;
 
-type ChatMessageText = {
+type MessageContentText = {
   type: "text";
   text: string;
 };
 
-type ChatMessageToolUse = {
+type MessageContentToolUse = {
   type: "tool_use";
   toolUseId: string;
   toolName: string;
   args: Record<string, unknown>;
 };
 
-type ChatMessageToolResult = {
+type MessageContentToolResult = {
   type: "tool_result";
   toolUseId: string;
   content: string;

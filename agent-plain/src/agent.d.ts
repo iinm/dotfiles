@@ -1,5 +1,5 @@
 import type { EventEmitter } from "node:events";
-import type { CallModel, ChatMessage } from "./model";
+import type { CallModel, Message } from "./model";
 import type { Tool } from "./tool";
 
 type UserEventMap = {
@@ -9,7 +9,7 @@ type UserEventMap = {
 export type UserEventEmitter = EventEmitter<UserEventMap>;
 
 type AgentEventMap = {
-  message: [ChatMessage];
+  message: [Message];
 };
 
 export type AgentEventEmitter = EventEmitter<AgentEventMap>;

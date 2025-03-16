@@ -16,51 +16,57 @@ export type AnthropicChatCompletion = {
   type: "message";
   role: "assistant";
   model: string;
-  content: (AnthropicChatMessageText | AnthropicChatToolCall)[];
+  content: (AnthropicMessageContentText | AnthropicMessageContentToolCall)[];
   stop_reason: string;
   usage: AnthropicChatCompletionUsage;
 };
 
-export type AnthropicChatMessageStrict =
+export type AnthropicMessageStrict =
   | {
       role: "system";
-      content: AnthropicChatMessageText[];
+      content: AnthropicMessageContentText[];
     }
   | {
       role: "user";
-      content: (AnthropicChatMessageText | AnthropicChatToolResult)[];
+      content: (
+        | AnthropicMessageContentText
+        | AnthropicMessageContentToolResult
+      )[];
     }
   | {
       role: "assistant";
-      content: (AnthropicChatMessageText | AnthropicChatToolCall)[];
+      content: (
+        | AnthropicMessageContentText
+        | AnthropicMessageContentToolCall
+      )[];
     };
 
 export type AnthropicChatMessage = {
   role: "system" | "user" | "assistant";
-  content: AnthropicChatMessageContent[];
+  content: AnthropicMessageContent[];
 };
 
-export type AnthropicChatMessageContent =
-  | AnthropicChatMessageText
-  | AnthropicChatToolCall
-  | AnthropicChatToolResult;
+export type AnthropicMessageContent =
+  | AnthropicMessageContentText
+  | AnthropicMessageContentToolCall
+  | AnthropicMessageContentToolResult;
 
-export type AnthropicChatMessageText = {
+export type AnthropicMessageContentText = {
   type: "text";
   text: string;
 };
 
-export type AnthropicChatToolCall = {
+export type AnthropicMessageContentToolCall = {
   type: "tool_use";
   id: string;
   name: string;
   input: Record<string, unknown>;
 };
 
-export type AnthropicChatToolResult = {
+export type AnthropicMessageContentToolResult = {
   type: "tool_result";
   tool_use_id: string;
-  content: string | AnthropicChatMessageText[];
+  content: string | AnthropicMessageContentText[];
   is_error?: boolean;
 };
 
@@ -71,7 +77,7 @@ export type AnthropicChatCompletionUsage = {
   output_tokens: number;
 };
 
-export type AnthropicChatTool = {
+export type AnthropicToolDefinition = {
   name: string;
   description: string;
   input_schema: Record<string, unknown>;
