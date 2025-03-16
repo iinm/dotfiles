@@ -19,12 +19,25 @@ export function startCLI({ userEventEmitter, agentEventEmitter }) {
   });
 
   cli.on("line", async (input) => {
-    userEventEmitter.emit("userInput", input);
+    const inputTrimmed = input.trim();
+    if (inputTrimmed.length === 0) {
+      cli.prompt();
+      return;
+    }
+
+    userEventEmitter.emit("userInput", inputTrimmed);
     cli.pause();
   });
 
   agentEventEmitter.on("message", (message) => {
     console.log(JSON.stringify(message, null, 2));
+  });
+
+  agentEventEmitter.on("toolUseRequest", () => {
+    console.log("Tool use requested:");
+  });
+
+  agentEventEmitter.on("turnEnd", () => {
     cli.resume();
     cli.prompt();
   });
