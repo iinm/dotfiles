@@ -8,13 +8,18 @@ import { styleText } from "node:util";
 /**
  * @param {CliOptions} options
  */
-export function startCLI({ userEventEmitter, agentEventEmitter }) {
+export function startCLI({
+  userEventEmitter,
+  agentEventEmitter,
+  threadId,
+  modelName,
+}) {
   const cli = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
     prompt: `${styleText(
       ["white", "bgGray"],
-      `\nThread: FIXME, Model: FIXME, Commands: "resume work", "save memory", "bye"`,
+      `\nThread: ${threadId}, Model: ${modelName}, Commands: "resume work", "save memory", "bye"`,
     )}\n> `,
   });
 

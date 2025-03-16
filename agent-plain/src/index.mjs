@@ -11,14 +11,26 @@ import { tavilySearchTool } from "./tools/tavilySearch.mjs";
 const AGENT_MODEL = process.env.AGENT_MODEL || "gpt-4o-mini";
 
 (async () => {
+  const startTime = new Date();
+  // e.g. 2025-12-31-2359
+  const threadId =
+    startTime.toISOString().slice(0, 10) +
+    "-" +
+    ("0" + startTime.getHours()).slice(-2) +
+    ("0" + startTime.getMinutes()).slice(-2);
+
   const callModel = createModelCaller(AGENT_MODEL);
-  // TODO: emitする側と受け取る側を明確にしたい
   const { userEventEmitter, agentEventEmitter } = createAgent({
     callModel,
     tools: [tavilySearchTool],
   });
 
-  startCLI({ userEventEmitter, agentEventEmitter });
+  startCLI({
+    userEventEmitter,
+    agentEventEmitter,
+    threadId,
+    modelName: AGENT_MODEL,
+  });
 })().catch((err) => {
   console.error(err);
   process.exit(1);
