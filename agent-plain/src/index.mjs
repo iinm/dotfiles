@@ -4,19 +4,21 @@
 
 import { createAgent } from "./agent.mjs";
 import { startCLI } from "./cli.mjs";
-import { callAnthropicModel } from "./provider/anthropic.mjs";
-import { callOpenAIModel } from "./provider/openai.mjs";
+import { callAnthropicModel } from "./providers/anthropic.mjs";
+import { callOpenAIModel } from "./providers/openai.mjs";
+import { tavilySearchTool } from "./tools/tavilySearch.mjs";
 
 const AGENT_MODEL = process.env.AGENT_MODEL || "gpt-4o-mini";
 
 (async () => {
   const callModel = createModelCaller(AGENT_MODEL);
+  // TODO: emitする側と受け取る側を明確にしたい
   const { userEventEmitter, agentEventEmitter } = createAgent({
     callModel,
-    tools: [],
+    tools: [tavilySearchTool],
   });
 
-  startCLI(userEventEmitter, agentEventEmitter);
+  startCLI({ userEventEmitter, agentEventEmitter });
 })().catch((err) => {
   console.error(err);
   process.exit(1);
@@ -55,7 +57,7 @@ function createModelCaller(modelName) {
           },
           input,
         );
-    case "claude-3-5-haiku":
+    case "claude-haiku":
       return (input) =>
         callAnthropicModel(
           {
@@ -65,7 +67,7 @@ function createModelCaller(modelName) {
           },
           input,
         );
-    case "claude-3-7-sonnet":
+    case "claude-sonnet":
       return (input) =>
         callAnthropicModel(
           {
@@ -75,7 +77,7 @@ function createModelCaller(modelName) {
           },
           input,
         );
-    case "claude-3-7-sonnet-thinking":
+    case "claude-sonnet-thinking":
       return (input) =>
         callAnthropicModel(
           {

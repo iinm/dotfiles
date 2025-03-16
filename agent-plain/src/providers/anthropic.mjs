@@ -27,6 +27,12 @@ export async function callAnthropicModel(config, input) {
           name: part.toolName,
           input: part.args,
         });
+      } else if (part.type === "tool_result") {
+        content.push({
+          type: "tool_result",
+          tool_use_id: part.toolUseId,
+          content: part.content,
+        });
       }
     }
     messages.push({

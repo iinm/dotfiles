@@ -31,13 +31,21 @@ export async function callOpenAIModel(config, input) {
             arguments: JSON.stringify(part.args),
           },
         });
+      } else if (part.type === "tool_result") {
+        messages.push({
+          role: "tool",
+          tool_call_id: part.toolUseId,
+          content: part.content,
+        });
       }
     }
-    messages.push({
-      role: genericMessage.role,
-      content: content.length ? content : undefined,
-      tool_calls: toolCalls.length ? toolCalls : undefined,
-    });
+    if (content.length || toolCalls.length) {
+      messages.push({
+        role: genericMessage.role,
+        content: content.length ? content : undefined,
+        tool_calls: toolCalls.length ? toolCalls : undefined,
+      });
+    }
   }
 
   // Convert generic tool format to OpenAI format

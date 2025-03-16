@@ -28,7 +28,8 @@ export type AnthropicChatMessage = {
 
 export type AnthropicChatMessageContent =
   | AnthropicChatMessageText
-  | AnthropicChatToolCall;
+  | AnthropicChatToolCall
+  | AnthropicChatToolResult;
 
 export type AnthropicChatMessageText = {
   type: "text";
@@ -40,6 +41,13 @@ export type AnthropicChatToolCall = {
   id: string;
   name: string;
   input: Record<string, unknown>;
+};
+
+export type AnthropicChatToolResult = {
+  type: "tool_result";
+  tool_use_id: string;
+  content: string | AnthropicChatMessageText[];
+  is_error?: boolean;
 };
 
 export type AnthropicChatCompletionUsage = {

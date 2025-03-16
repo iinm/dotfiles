@@ -1,15 +1,14 @@
 /**
- * @import { UserEventEmitter, AgentEventEmitter } from "./agent"
+ * @import { CliOptions } from "./cli"
  */
 
 import readline from "node:readline";
 import { styleText } from "node:util";
 
 /**
- * @param {UserEventEmitter} userEventEmitter
- * @param {AgentEventEmitter} agentEventEmitter
+ * @param {CliOptions} options
  */
-export function startCLI(userEventEmitter, agentEventEmitter) {
+export function startCLI({ userEventEmitter, agentEventEmitter }) {
   const cli = readline.createInterface({
     input: process.stdin,
     output: process.stdout,

@@ -20,9 +20,10 @@ type OpenIAChatCompletionChoice = {
 };
 
 type OpenAIChatMessage = {
-  role: "system" | "user" | "assistant";
+  role: "system" | "user" | "assistant" | "tool";
   content?: string | OpenAIChatMessageContent[];
   tool_calls?: OpenAIChatToolCall[];
+  tool_call_id?: string;
 };
 
 type OpenAIChatMessageContent = OpenAIChatMessageText;

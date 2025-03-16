@@ -1,10 +1,13 @@
+import type { ToolDefinition } from "./tool";
+
 export type CallModel = (input: ModelInput) => Promise<ChatMessage | Error>;
 
 export type ModelInput = {
   messages: ChatMessage[];
-  tools?: Tool[];
+  tools?: ToolDefinition[];
 };
 
+// TODO: token usage
 export type ChatMessage = {
   role: "system" | "user" | "assistant";
   content: ChatMessageContent[];
@@ -31,16 +34,5 @@ type ChatMessageToolResult = {
   type: "tool_result";
   toolUseId: string;
   content: string;
-  isError: boolean;
-};
-
-type Tool = {
-  name: string;
-  description: string;
-  inputSchema: Record<string, unknown>;
-};
-
-type ToolResult = {
-  toolUseId: string;
-  result: string;
+  isError?: boolean;
 };
