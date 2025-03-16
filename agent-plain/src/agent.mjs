@@ -30,10 +30,7 @@ export function createAgent({ callModel, tools }) {
   userEventEmitter.on("userInput", async (input) => {
     const lastMessage = messages.at(-1);
 
-    if (
-      lastMessage &&
-      lastMessage.content.some((part) => part.type === "tool_use")
-    ) {
+    if (lastMessage?.content.some((part) => part.type === "tool_use")) {
       /** @type {MessageContentToolUse[]} */
       const toolUseParts = lastMessage.content.filter(
         (part) => part.type === "tool_use",
