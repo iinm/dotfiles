@@ -1,5 +1,5 @@
 /**
- * @import {CallModel} from "./model"
+ * @import { CallModel } from "./model"
  */
 
 import { createAgent } from "./agent.mjs";
