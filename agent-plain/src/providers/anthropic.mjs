@@ -1,6 +1,7 @@
 /**
- * @import { ModelInput, Message, MessageContent } from "../model";
- * @import { AnthropicChatCompletion, AnthropicChatMessage, AnthropicMessageContent, AnthropicToolDefinition, AnthropicModelConfig } from "./anthropic";
+ * @import { ModelInput, Message, AssistantMessage } from "../model";
+ * @import { AnthropicChatCompletion, AnthropicMessage, AnthropicToolDefinition, AnthropicModelConfig, AnthropicAssistantMessage } from "./anthropic";
+ * @import { ToolDefinition } from "../tool";
  */
 
 import { noThrow } from "../utils/noThrow.mjs";
@@ -14,48 +15,10 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
  */
 export async function callAnthropicModel(config, input) {
   return await noThrow(async () => {
-    // Convert generic message format to Anthropic format
-    /** @type {AnthropicChatMessage[]} */
-    const messages = [];
-    for (const genericMessage of input.messages) {
-      /** @type {AnthropicMessageContent[]} */
-      const content = [];
-      for (const part of genericMessage.content) {
-        if (part.type === "text") {
-          content.push({ type: "text", text: part.text });
-        } else if (part.type === "tool_use") {
-          content.push({
-            type: "tool_use",
-            id: part.toolUseId,
-            name: part.toolName,
-            input: part.args,
-          });
-        } else if (part.type === "tool_result") {
-          content.push({
-            type: "tool_result",
-            tool_use_id: part.toolUseId,
-            content: part.content,
-          });
-        }
-      }
-      messages.push({
-        role: genericMessage.role,
-        content: content,
-      });
-    }
-
-    // Convert generic tool format to Anthropic format
-    /** @type {AnthropicToolDefinition[]} */
-    const tools = [];
-    if (input.tools) {
-      for (const tool of input.tools) {
-        tools.push({
-          name: tool.name,
-          description: tool.description,
-          input_schema: tool.inputSchema,
-        });
-      }
-    }
+    const messages = convertGenericMessageToAnthropicFormat(input.messages);
+    const tools = convertGenericToolDefinitionToAnthropicFormat(
+      input.tools || [],
+    );
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -80,28 +43,116 @@ export async function callAnthropicModel(config, input) {
     /** @type {AnthropicChatCompletion} */
     const body = await response.json();
 
-    // Convert Anthropic format to generic message format
-    /** @type {MessageContent[]} */
-    const content = [];
-    for (const part of body.content) {
-      if (part.type === "text") {
-        content.push({ type: "text", text: part.text });
-      } else if (part.type === "tool_use") {
-        content.push({
-          type: "tool_use",
-          toolUseId: part.id,
-          toolName: part.name,
-          args: part.input,
+    return convertAnthropicAssistantMessageToGenericFormat(body);
+  });
+}
+
+/**
+ * @param {Message[]} genericMessages
+ * @returns {AnthropicMessage[]}
+ */
+function convertGenericMessageToAnthropicFormat(genericMessages) {
+  /** @type {AnthropicMessage[]} */
+  const anthropicMessages = [];
+  for (const genericMessage of genericMessages) {
+    switch (genericMessage.role) {
+      case "system": {
+        anthropicMessages.push({
+          role: "system",
+          content: genericMessage.content.map((part) => ({
+            type: "text",
+            text: part.text,
+          })),
         });
+        break;
+      }
+      case "user": {
+        anthropicMessages.push({
+          role: "user",
+          content: genericMessage.content.map((part) => {
+            if (part.type === "text") {
+              return { type: "text", text: part.text };
+            }
+            if (part.type === "tool_result") {
+              return {
+                type: "tool_result",
+                tool_use_id: part.toolUseId,
+                content: part.content,
+                is_error: part.isError,
+              };
+            }
+            throw new Error(`Unknown message part type: ${part}`);
+          }),
+        });
+        break;
+      }
+      case "assistant": {
+        anthropicMessages.push({
+          role: "assistant",
+          content: genericMessage.content.map((part) => {
+            if (part.type === "text") {
+              return { type: "text", text: part.text };
+            }
+            if (part.type === "tool_use") {
+              return {
+                type: "tool_use",
+                id: part.toolUseId,
+                name: part.toolName,
+                input: part.args,
+              };
+            }
+            throw new Error(`Unknown message part type: ${part}`);
+          }),
+        });
+        break;
       }
     }
+  }
 
-    /** @type {Message} */
-    const message = {
-      role: "assistant",
-      content: content,
-    };
+  return anthropicMessages;
+}
 
-    return message;
-  });
+/**
+ * @param {AnthropicAssistantMessage} anthropicAssistantMessage
+ * @returns {AssistantMessage}
+ */
+function convertAnthropicAssistantMessageToGenericFormat(
+  anthropicAssistantMessage,
+) {
+  /** @type {AssistantMessage["content"]} */
+  const content = [];
+  for (const part of anthropicAssistantMessage.content) {
+    if (part.type === "text") {
+      content.push({ type: "text", text: part.text });
+    } else if (part.type === "tool_use") {
+      content.push({
+        type: "tool_use",
+        toolUseId: part.id,
+        toolName: part.name,
+        args: part.input,
+      });
+    }
+  }
+
+  return {
+    role: "assistant",
+    content,
+  };
+}
+
+/**
+ * @param {ToolDefinition[]} genericToolDefs
+ * @returns {AnthropicToolDefinition[]}
+ */
+function convertGenericToolDefinitionToAnthropicFormat(genericToolDefs) {
+  /** @type {AnthropicToolDefinition[]} */
+  const anthropicToolDefs = [];
+  for (const tool of genericToolDefs) {
+    anthropicToolDefs.push({
+      name: tool.name,
+      description: tool.description,
+      input_schema: tool.inputSchema,
+    });
+  }
+  return anthropicToolDefs;
 }

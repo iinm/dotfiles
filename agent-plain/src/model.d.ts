@@ -7,23 +7,21 @@ export type ModelInput = {
   tools?: ToolDefinition[];
 };
 
-export type MessageStrict =
-  | {
-      role: "system";
-      content: MessageContentText[];
-    }
-  | {
-      role: "user";
-      content: (MessageContentText | MessageContentToolResult)[];
-    }
-  | {
-      role: "assistant";
-      content: (MessageContentText | MessageContentToolUse)[];
-    };
+export type Message = SystemMessage | UserMessage | AssistantMessage;
 
-export type Message = {
-  role: "system" | "user" | "assistant";
-  content: MessageContent[];
+export type SystemMessage = {
+  role: "system";
+  content: MessageContentText[];
+};
+
+export type UserMessage = {
+  role: "user";
+  content: (MessageContentText | MessageContentToolResult)[];
+};
+
+export type AssistantMessage = {
+  role: "assistant";
+  content: (MessageContentText | MessageContentToolUse)[];
 };
 
 export type MessageContent =
@@ -31,19 +29,19 @@ export type MessageContent =
   | MessageContentToolUse
   | MessageContentToolResult;
 
-type MessageContentText = {
+export type MessageContentText = {
   type: "text";
   text: string;
 };
 
-type MessageContentToolUse = {
+export type MessageContentToolUse = {
   type: "tool_use";
   toolUseId: string;
   toolName: string;
   args: Record<string, unknown>;
 };
 
-type MessageContentToolResult = {
+export type MessageContentToolResult = {
   type: "tool_result";
   toolUseId: string;
   content: string;

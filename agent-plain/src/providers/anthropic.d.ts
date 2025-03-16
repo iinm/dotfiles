@@ -16,34 +16,29 @@ export type AnthropicChatCompletion = {
   type: "message";
   role: "assistant";
   model: string;
-  content: (AnthropicMessageContentText | AnthropicMessageContentToolCall)[];
+  content: AnthropicAssistantMessage["content"];
   stop_reason: string;
   usage: AnthropicChatCompletionUsage;
 };
 
-export type AnthropicMessageStrict =
-  | {
-      role: "system";
-      content: AnthropicMessageContentText[];
-    }
-  | {
-      role: "user";
-      content: (
-        | AnthropicMessageContentText
-        | AnthropicMessageContentToolResult
-      )[];
-    }
-  | {
-      role: "assistant";
-      content: (
-        | AnthropicMessageContentText
-        | AnthropicMessageContentToolCall
-      )[];
-    };
+export type AnthropicMessage =
+  | AnthropicSystemMessage
+  | AnthropicUserMessage
+  | AnthropicAssistantMessage;
 
-export type AnthropicChatMessage = {
-  role: "system" | "user" | "assistant";
-  content: AnthropicMessageContent[];
+export type AnthropicSystemMessage = {
+  role: "system";
+  content: AnthropicMessageContentText[];
+};
+
+export type AnthropicUserMessage = {
+  role: "user";
+  content: (AnthropicMessageContentText | AnthropicMessageContentToolResult)[];
+};
+
+export type AnthropicAssistantMessage = {
+  role: "assistant";
+  content: (AnthropicMessageContentText | AnthropicMessageContentToolCall)[];
 };
 
 export type AnthropicMessageContent =

@@ -13,58 +13,57 @@ export type OpenAIChatCompletion = {
   usage: OpenAIChatCompletionUsage;
 };
 
-type OpenIAChatCompletionChoice = {
+export type OpenIAChatCompletionChoice = {
   index: number;
-  message: OpenAIMessage;
+  message: OpenAIAssistantMessage;
   finish_reason: string;
 };
 
-type OpenAIMessageStrict =
-  | {
-      role: "system";
-      content: OpenAIMessageContentText[];
-    }
-  | {
-      role: "user";
-      content: OpenAIMessageContentText[];
-    }
-  | {
-      role: "assistant";
-      content?: OpenAIMessageContentText[];
-      tool_calls?: OpenAIMessageToolCall[];
-    }
-  | {
-      role: "tool";
-      content: string | OpenAIMessageContentText[];
-      tool_call_id: string;
-    };
+export type OpenAIMessage =
+  | OpenAISystemMessage
+  | OpenAIUserMessage
+  | OpenAIAssistantMessage
+  | OpenAIToolMessage;
 
-type OpenAIMessage = {
-  role: "system" | "user" | "assistant" | "tool";
-  content?: string | OpenAIMessageContent[];
-  tool_calls?: OpenAIMessageToolCall[];
-  tool_call_id?: string;
+export type OpenAISystemMessage = {
+  role: "system";
+  content: OpenAIMessageContentText[];
 };
 
-type OpenAIMessageContent = OpenAIMessageContentText;
+export type OpenAIUserMessage = {
+  role: "user";
+  content: OpenAIMessageContentText[];
+};
 
-type OpenAIMessageContentText = {
+export type OpenAIAssistantMessage = {
+  role: "assistant";
+  content?: string;
+  tool_calls?: OpenAIMessageToolCall[];
+};
+
+export type OpenAIToolMessage = {
+  role: "tool";
+  content: string;
+  tool_call_id: string;
+};
+
+export type OpenAIMessageContentText = {
   type: "text";
   text: string;
 };
 
-type OpenAIMessageToolCall = {
+export type OpenAIMessageToolCall = {
   id: string;
   type: "function";
   function: OpenAIToolCallFunction;
 };
 
-type OpenAIToolCallFunction = {
+export type OpenAIToolCallFunction = {
   name: string;
   arguments: string;
 };
 
-type OpenAIChatCompletionUsage = {
+export type OpenAIChatCompletionUsage = {
   prompt_tokens: number;
   completion_tokens: number;
   total_tokens: number;
@@ -72,7 +71,7 @@ type OpenAIChatCompletionUsage = {
   completion_tokens_details: Record<string, number>;
 };
 
-type OpenAIToolDefinition = {
+export type OpenAIToolDefinition = {
   type: "function";
   function: {
     name: string;
