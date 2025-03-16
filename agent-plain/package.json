@@ -2,7 +2,10 @@
   "private": true,
   "scripts": {
     "start": "./env.sh node ./src/index.mjs",
-    "check": "npx @biomejs/biome check"
+    "check": "npm run lint && npm run typecheck",
+    "lint": "npx @biomejs/biome check",
+    "fix": "npx @biomejs/biome check --fix",
+    "typecheck": "tsc"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",

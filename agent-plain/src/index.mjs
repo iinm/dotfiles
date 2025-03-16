@@ -2,10 +2,10 @@
  * @import {CallModel} from "./chat"
  */
 
+import { createAgent } from "./agent.mjs";
 import { startCLI } from "./cli.mjs";
 import { callAnthropicModel } from "./provider/anthropic.mjs";
 import { callOpenAIModel } from "./provider/openai.mjs";
-import { createAgent } from "./agent.mjs";
 
 const AGENT_MODEL = process.env.AGENT_MODEL || "gpt-4o-mini";
 
