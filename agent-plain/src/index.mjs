@@ -18,6 +18,7 @@ const AGENT_MODEL = process.env.AGENT_MODEL || "gpt-4o-mini";
     ],
   });
 
+  // TODO: set prompt
   const { userEventEmitter, agentEventEmitter } = createAgent({
     callModel: createModelCaller(AGENT_MODEL),
     tools: [tavilySearchTool],

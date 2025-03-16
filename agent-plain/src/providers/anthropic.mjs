@@ -15,6 +15,7 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
  */
 export async function callAnthropicModel(config, input) {
   return await noThrow(async () => {
+    // TODO: enable context caching
     const messages = convertGenericMessageToAnthropicFormat(input.messages);
     const tools = convertGenericToolDefinitionToAnthropicFormat(
       input.tools || [],
