@@ -9,4 +9,5 @@ export type ToolDefinition = {
   inputSchema: Record<string, unknown>;
 };
 
+// biome-ignore lint/suspicious/noExplicitAny:
 export type ToolImplementation = (input: any) => Promise<string | Error>;

@@ -7,7 +7,20 @@ export type ModelInput = {
   tools?: ToolDefinition[];
 };
 
-// TODO: token usage
+export type ChatMessageStrict =
+  | {
+      role: "system";
+      content: ChatMessageText[];
+    }
+  | {
+      role: "user";
+      content: (ChatMessageText | ChatMessageToolResult)[];
+    }
+  | {
+      role: "assistant";
+      content: (ChatMessageText | ChatMessageToolUse)[];
+    };
+
 export type ChatMessage = {
   role: "system" | "user" | "assistant";
   content: ChatMessageContent[];

@@ -1,6 +1,6 @@
+import assert from "node:assert";
 import test, { describe } from "node:test";
 import { noThrow } from "./noThrow.mjs";
-import assert from "node:assert";
 
 describe("noThrow", () => {
   test("should return the result of the function", async () => {

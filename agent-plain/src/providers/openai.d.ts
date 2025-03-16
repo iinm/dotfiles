@@ -19,6 +19,26 @@ type OpenIAChatCompletionChoice = {
   finish_reason: string;
 };
 
+type OpenAIChatMessageStrict =
+  | {
+      role: "system";
+      content: OpenAIChatMessageText[];
+    }
+  | {
+      role: "user";
+      content: OpenAIChatMessageText[];
+    }
+  | {
+      role: "assistant";
+      content?: OpenAIChatMessageText[];
+      tool_calls?: OpenAIChatToolCall[];
+    }
+  | {
+      role: "tool";
+      content: string | OpenAIChatMessageText[];
+      tool_call_id: string;
+    };
+
 type OpenAIChatMessage = {
   role: "system" | "user" | "assistant" | "tool";
   content?: string | OpenAIChatMessageContent[];

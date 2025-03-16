@@ -16,10 +16,24 @@ export type AnthropicChatCompletion = {
   type: "message";
   role: "assistant";
   model: string;
-  content: AnthropicChatMessageContent[];
+  content: (AnthropicChatMessageText | AnthropicChatToolCall)[];
   stop_reason: string;
   usage: AnthropicChatCompletionUsage;
 };
+
+export type AnthropicChatMessageStrict =
+  | {
+      role: "system";
+      content: AnthropicChatMessageText[];
+    }
+  | {
+      role: "user";
+      content: (AnthropicChatMessageText | AnthropicChatToolResult)[];
+    }
+  | {
+      role: "assistant";
+      content: (AnthropicChatMessageText | AnthropicChatToolCall)[];
+    };
 
 export type AnthropicChatMessage = {
   role: "system" | "user" | "assistant";
