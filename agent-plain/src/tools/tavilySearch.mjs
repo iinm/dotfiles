@@ -33,7 +33,10 @@ export const tavilySearchTool = {
           Authorization: `Bearer ${process.env.TAVILY_API_KEY}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(input),
+        body: JSON.stringify({
+          ...input,
+          max_results: 5,
+        }),
       });
 
       if (!response.ok) {

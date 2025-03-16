@@ -1,5 +1,5 @@
 /**
- * @import { ModelInput, ChatMessage, ChatMessageContent } from "../chat"
+ * @import { ModelInput, ChatMessage, ChatMessageContent } from "../model"
  * @import { OpenAIChatCompletion, OpenAIChatMessage, OpenAIChatMessageContent, OpenAIChatTool, OpenAIChatToolCall, OpenAIModelConfig } from "./openai"
  */
 

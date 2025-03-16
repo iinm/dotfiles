@@ -1,6 +1,6 @@
 /**
  * @import { AgentConfig, AgentEventEmitter, UserEventEmitter } from "./agent"
- * @import { ChatMessage, ChatMessageToolResult, ChatMessageToolUse } from "./chat"
+ * @import { ChatMessage, ChatMessageToolResult, ChatMessageToolUse } from "./model"
  * @import { Tool, ToolDefinition } from "./tool"
  */
 

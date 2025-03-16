@@ -1,5 +1,5 @@
 /**
- * @import { ModelInput, ChatMessage, ChatMessageContent } from "../chat";
+ * @import { ModelInput, ChatMessage, ChatMessageContent } from "../model";
  * @import { AnthropicChatCompletion, AnthropicChatMessage, AnthropicChatMessageContent, AnthropicChatTool, AnthropicModelConfig } from "./anthropic";
  */
 
