@@ -10,4 +10,3 @@ export type ToolDefinition = {
 };
 
 export type ToolImplementation = (input: any) => Promise<string | Error>;
-

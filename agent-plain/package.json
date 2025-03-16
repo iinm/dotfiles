@@ -2,7 +2,8 @@
   "private": true,
   "scripts": {
     "start": "./env.sh node ./src/index.mjs",
-    "check": "npm run lint && npm run typecheck",
+    "check": "npm run lint && npm run typecheck && npm run test",
+    "test": "node --test",
     "lint": "npx @biomejs/biome check",
     "fix": "npx @biomejs/biome check --fix",
     "typecheck": "tsc"
