@@ -30,25 +30,19 @@ export function createAllowedToolUsePatterns({ sessionId }) {
     },
     {
       toolName: execCommandTool.def.name,
-      input: { command: "sed", input: { args: ["-n", /^.+p$/] } },
+      input: { command: "sed", args: ["-n", /^.+p$/] },
     },
     {
       toolName: execCommandTool.def.name,
-      input: { command: "git", input: { args: [/^(status|diff|log)$/] } },
+      input: { command: "git", args: [/^(status|diff|log)$/] },
     },
     {
       toolName: execCommandTool.def.name,
-      input: {
-        command: "git",
-        input: { args: ["branch", "--show-current"] },
-      },
+      input: { command: "git", args: ["branch", "--show-current"] },
     },
     {
       toolName: execCommandTool.def.name,
-      input: {
-        command: "mkdir",
-        input: { args: ["-p", ".agent/memory"] },
-      },
+      input: { command: "mkdir", args: ["-p", ".agent/memory"] },
     },
 
     // Tmux command

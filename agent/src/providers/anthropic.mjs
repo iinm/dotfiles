@@ -104,6 +104,16 @@ function convertGenericMessageToAnthropicFormat(genericMessages) {
         anthropicMessages.push({
           role: "assistant",
           content: genericMessage.content.map((part) => {
+            if (part.type === "thinking") {
+              const signature = /** @type {string} */ (
+                part.providerMetadata?.signature || ""
+              );
+              return {
+                type: "thinking",
+                thinking: part.thinking,
+                signature,
+              };
+            }
             if (part.type === "text") {
               return { type: "text", text: part.text };
             }
@@ -136,7 +146,13 @@ function convertAnthropicAssistantMessageToGenericFormat(
   /** @type {AssistantMessage["content"]} */
   const content = [];
   for (const part of anthropicAssistantMessage.content) {
-    if (part.type === "text") {
+    if (part.type === "thinking") {
+      content.push({
+        type: "thinking",
+        thinking: part.thinking,
+        providerMetadata: { signature: part.signature },
+      });
+    } else if (part.type === "text") {
       content.push({ type: "text", text: part.text });
     } else if (part.type === "tool_use") {
       content.push({

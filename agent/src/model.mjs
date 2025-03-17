@@ -25,7 +25,7 @@ export function createModelCaller(modelName) {
         callOpenAIModel(
           {
             model: "o3-mini",
-            reasoningEffort: "medium",
+            reasoning_effort: "medium",
           },
           input,
         );
@@ -34,7 +34,7 @@ export function createModelCaller(modelName) {
         callOpenAIModel(
           {
             model: "o3-mini",
-            reasoningEffort: "high",
+            reasoning_effort: "high",
           },
           input,
         );

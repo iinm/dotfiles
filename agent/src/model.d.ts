@@ -30,13 +30,18 @@ export type UserMessage = {
 
 export type AssistantMessage = {
   role: "assistant";
-  content: (MessageContentText | MessageContentToolUse)[];
+  content: (
+    | MessageContentThinking
+    | MessageContentText
+    | MessageContentToolUse
+  )[];
 };
 
-export type MessageContent =
-  | MessageContentText
-  | MessageContentToolUse
-  | MessageContentToolResult;
+export type MessageContentThinking = {
+  type: "thinking";
+  thinking: string;
+  providerMetadata?: Record<string, unknown>;
+};
 
 export type MessageContentText = {
   type: "text";

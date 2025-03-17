@@ -38,13 +38,19 @@ export type AnthropicUserMessage = {
 
 export type AnthropicAssistantMessage = {
   role: "assistant";
-  content: (AnthropicMessageContentText | AnthropicMessageContentToolCall)[];
+  content: (
+    | AnthropicMessageContentThinking
+    | AnthropicMessageContentText
+    | AnthropicMessageContentToolCall
+  )[];
 };
 
-export type AnthropicMessageContent =
-  | AnthropicMessageContentText
-  | AnthropicMessageContentToolCall
-  | AnthropicMessageContentToolResult;
+export type AnthropicMessageContentThinking = {
+  type: "thinking";
+  thinking: string;
+  signature: string;
+  cache_control?: { type: "ephemeral" };
+};
 
 export type AnthropicMessageContentText = {
   type: "text";

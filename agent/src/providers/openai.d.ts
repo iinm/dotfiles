@@ -1,7 +1,7 @@
 export type OpenAIModelConfig = {
   model: "gpt-4o-mini" | "o3-mini";
   temperature?: number;
-  reasoningEffort?: "low" | "medium" | "high";
+  reasoning_effort?: "low" | "medium" | "high";
 };
 
 export type OpenAIChatCompletion = {
