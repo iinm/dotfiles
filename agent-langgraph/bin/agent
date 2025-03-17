@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+this_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+app_root="$(cd "$this_dir/.." && pwd)"
+
+export NODE_ENV=${NODE_ENV:-"production"}
+export NODE_OPTIONS="--disable-warning=DEP0040"
+
+if test "$NODE_ENV" = "development"; then
+  echo "Running in development mode" >&2
+  exec "$app_root/env.sh" node "$app_root/node_modules/.bin/tsx" "$app_root/src/index.ts" "$@"
+fi
+
+exec "$app_root/env.sh" node --enable-source-maps "$app_root/dist/index.js" "$@"
