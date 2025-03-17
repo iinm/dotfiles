@@ -10,14 +10,17 @@ export type UserEventEmitter = EventEmitter<UserEventMap>;
 
 type AgentEventMap = {
   message: [Message];
+  error: [Error];
   toolUseRequest: [];
   turnEnd: [];
+  providerTokenUsage: [Record<string, number | Record<string, number>>];
 };
 
 export type AgentEventEmitter = EventEmitter<AgentEventMap>;
 
 export type AgentConfig = {
   callModel: CallModel;
+  prompt: string;
   tools: Tool[];
   toolUseApprover: ToolUseApprover;
 };

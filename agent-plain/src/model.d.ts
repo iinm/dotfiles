@@ -1,6 +1,15 @@
 import type { ToolDefinition } from "./tool";
 
-export type CallModel = (input: ModelInput) => Promise<Message | Error>;
+export type CallModel = (input: ModelInput) => Promise<ModelOutput | Error>;
+
+export type ModelOutput = {
+  message: Message;
+  providerTokenUsage: ProviderTokenUsage;
+};
+export type ProviderTokenUsage = Record<
+  string,
+  number | Record<string, number>
+>;
 
 export type ModelInput = {
   messages: Message[];
@@ -38,12 +47,13 @@ export type MessageContentToolUse = {
   type: "tool_use";
   toolUseId: string;
   toolName: string;
-  args: Record<string, unknown>;
+  input: Record<string, unknown>;
 };
 
 export type MessageContentToolResult = {
   type: "tool_result";
   toolUseId: string;
+  toolName: string;
   content: string;
   isError?: boolean;
 };

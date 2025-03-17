@@ -1,5 +1,5 @@
 /**
- * @import { ModelInput, Message, AssistantMessage } from "../model";
+ * @import { ModelInput, Message, AssistantMessage, ModelOutput } from "../model";
  * @import { AnthropicChatCompletion, AnthropicMessage, AnthropicToolDefinition, AnthropicModelConfig, AnthropicAssistantMessage } from "./anthropic";
  * @import { ToolDefinition } from "../tool";
  */
@@ -11,12 +11,12 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 /**
  * @param {AnthropicModelConfig} config
  * @param {ModelInput} input
- * @returns {Promise<Message | Error>}
+ * @returns {Promise<ModelOutput | Error>}
  */
 export async function callAnthropicModel(config, input) {
   return await noThrow(async () => {
-    // TODO: enable context caching
     const messages = convertGenericMessageToAnthropicFormat(input.messages);
+    const cacheEnabledMessages = enableContextCaching(messages);
     const tools = convertGenericToolDefinitionToAnthropicFormat(
       input.tools || [],
     );
@@ -30,7 +30,10 @@ export async function callAnthropicModel(config, input) {
       },
       body: JSON.stringify({
         ...config,
-        messages,
+        system: messages
+          .filter((m) => m.role === "system")
+          .flatMap((m) => m.content),
+        messages: cacheEnabledMessages.filter((m) => m.role !== "system"),
         tools: tools.length ? tools : undefined,
       }),
     });
@@ -44,7 +47,10 @@ export async function callAnthropicModel(config, input) {
     /** @type {AnthropicChatCompletion} */
     const body = await response.json();
 
-    return convertAnthropicAssistantMessageToGenericFormat(body);
+    return {
+      message: convertAnthropicAssistantMessageToGenericFormat(body),
+      providerTokenUsage: body.usage,
+    };
   });
 }
 
@@ -60,10 +66,12 @@ function convertGenericMessageToAnthropicFormat(genericMessages) {
       case "system": {
         anthropicMessages.push({
           role: "system",
-          content: genericMessage.content.map((part) => ({
-            type: "text",
-            text: part.text,
-          })),
+          content: genericMessage.content.map((part) => {
+            if (part.type === "text") {
+              return { type: "text", text: part.text };
+            }
+            throw new Error(`Unknown message part type: ${part}`);
+          }),
         });
         break;
       }
@@ -78,7 +86,12 @@ function convertGenericMessageToAnthropicFormat(genericMessages) {
               return {
                 type: "tool_result",
                 tool_use_id: part.toolUseId,
-                content: part.content,
+                content: [
+                  {
+                    type: "text",
+                    text: part.content,
+                  },
+                ],
                 is_error: part.isError,
               };
             }
@@ -99,7 +112,7 @@ function convertGenericMessageToAnthropicFormat(genericMessages) {
                 type: "tool_use",
                 id: part.toolUseId,
                 name: part.toolName,
-                input: part.args,
+                input: part.input,
               };
             }
             throw new Error(`Unknown message part type: ${part}`);
@@ -130,7 +143,7 @@ function convertAnthropicAssistantMessageToGenericFormat(
         type: "tool_use",
         toolUseId: part.id,
         toolName: part.name,
-        args: part.input,
+        input: part.input,
       });
     }
   }
@@ -156,4 +169,43 @@ function convertGenericToolDefinitionToAnthropicFormat(genericToolDefs) {
     });
   }
   return anthropicToolDefs;
+}
+
+/**
+ * @param {AnthropicMessage[]} messages
+ * @returns {AnthropicMessage[]}
+ */
+function enableContextCaching(messages) {
+  /** @type {number[]} */
+  const userMessageIndices = [];
+  for (let i = 0; i < messages.length; i++) {
+    if (messages[i].role === "user") {
+      userMessageIndices.push(i);
+    }
+  }
+  const cacheTargetIndices = [
+    // last user message
+    userMessageIndices.at(-1),
+    // second last user message
+    userMessageIndices.at(-2),
+  ].filter((index) => index !== undefined);
+
+  const contextCachingEnabledMessages = messages.map((message, index) => {
+    if (
+      (index === 0 && message.role === "system") ||
+      cacheTargetIndices.includes(index)
+    ) {
+      return {
+        ...message,
+        content: message.content.map((part, partIndex) =>
+          partIndex === message.content.length - 1
+            ? { ...part, cache_control: { type: "ephemeral" } }
+            : part,
+        ),
+      };
+    }
+    return message;
+  });
+
+  return /** @type {AnthropicMessage[]} */ (contextCachingEnabledMessages);
 }

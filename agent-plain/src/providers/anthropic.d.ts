@@ -49,6 +49,7 @@ export type AnthropicMessageContent =
 export type AnthropicMessageContentText = {
   type: "text";
   text: string;
+  cache_control?: { type: "ephemeral" };
 };
 
 export type AnthropicMessageContentToolCall = {
@@ -56,13 +57,15 @@ export type AnthropicMessageContentToolCall = {
   id: string;
   name: string;
   input: Record<string, unknown>;
+  cache_control?: { type: "ephemeral" };
 };
 
 export type AnthropicMessageContentToolResult = {
   type: "tool_result";
   tool_use_id: string;
-  content: string | AnthropicMessageContentText[];
+  content: AnthropicMessageContentText[];
   is_error?: boolean;
+  cache_control?: { type: "ephemeral" };
 };
 
 export type AnthropicChatCompletionUsage = {

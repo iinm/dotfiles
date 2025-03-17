@@ -22,5 +22,5 @@ export type ToolUseApprover = (toolUse: MessageContentToolUse) => boolean;
 
 export type ToolUsePattern = {
   toolName: string;
-  args: ObjectPattern;
+  input: ObjectPattern;
 };

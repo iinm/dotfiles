@@ -1,6 +1,6 @@
 /**
- * @import { ModelInput, Message,  MessageContentToolResult, MessageContentText, AssistantMessage } from "../model"
- * @import { OpenAIAssistantMessage, OpenAIChatCompletion, OpenAIMessage, OpenAIModelConfig, OpenAIToolDefinition } from "./openai"
+ * @import { ModelInput, Message,  MessageContentToolResult, MessageContentText, AssistantMessage, MessageContentToolUse, ModelOutput } from "../model"
+ * @import { OpenAIAssistantMessage, OpenAIChatCompletion, OpenAIMessage, OpenAIMessageToolCall, OpenAIModelConfig, OpenAIToolDefinition } from "./openai"
  * @import { ToolDefinition } from "../tool"
  */
 
@@ -11,7 +11,7 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 /**
  * @param {OpenAIModelConfig} config
  * @param {ModelInput} input
- * @returns {Promise<Message | Error>}
+ * @returns {Promise<ModelOutput | Error>}
  */
 export async function callOpenAIModel(config, input) {
   return await noThrow(async () => {
@@ -43,7 +43,12 @@ export async function callOpenAIModel(config, input) {
     const body = await response.json();
     const openAIAssistantMessage = body.choices[0].message;
 
-    return convertOpenAIAssistantMessageToGenericFormat(openAIAssistantMessage);
+    return {
+      message: convertOpenAIAssistantMessageToGenericFormat(
+        openAIAssistantMessage,
+      ),
+      providerTokenUsage: body.usage,
+    };
   });
 }
 
@@ -97,28 +102,37 @@ function convertGenericMessageToOpenAIFormat(genericMessages) {
         break;
       }
       case "assistant": {
-        for (const part of genericMessage.content) {
-          if (part.type === "text") {
-            openAIMessages.push({
-              role: "assistant",
-              content: part.text,
-            });
-          } else if (part.type === "tool_use") {
-            openAIMessages.push({
-              role: "assistant",
-              tool_calls: [
-                {
-                  id: part.toolUseId,
-                  type: "function",
-                  function: {
-                    name: part.toolName,
-                    arguments: JSON.stringify(part.args),
-                  },
-                },
-              ],
-            });
-          }
+        /** @type {MessageContentText[]} */
+        const textParts = genericMessage.content.filter(
+          (part) => part.type === "text",
+        );
+        if (textParts.length > 1) {
+          console.error(
+            `OpenAI Unsupported message format: ${JSON.stringify(genericMessage)}`,
+          );
         }
+        const text = textParts.map((part) => part.text).join("\n");
+
+        /** @type {MessageContentToolUse[]} */
+        const toolUseParts = genericMessage.content.filter(
+          (part) => part.type === "tool_use",
+        );
+
+        /** @type {OpenAIMessageToolCall[]} */
+        const toolCalls = toolUseParts.map((part) => ({
+          id: part.toolUseId,
+          type: "function",
+          function: {
+            name: part.toolName,
+            arguments: JSON.stringify(part.input),
+          },
+        }));
+
+        openAIMessages.push({
+          role: "assistant",
+          content: text ? text : undefined,
+          tool_calls: toolCalls.length ? toolCalls : undefined,
+        });
       }
     }
   }
@@ -144,7 +158,7 @@ function convertOpenAIAssistantMessageToGenericFormat(openAIAsistantMessage) {
           type: "tool_use",
           toolUseId: toolCall.id,
           toolName: toolCall.function.name,
-          args: JSON.parse(toolCall.function.arguments),
+          input: JSON.parse(toolCall.function.arguments),
         });
       } else {
         throw new Error(

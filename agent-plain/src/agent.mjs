@@ -9,7 +9,7 @@ import { EventEmitter } from "node:events";
 /**
  * @param {AgentConfig} config
  */
-export function createAgent({ callModel, tools, toolUseApprover }) {
+export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
   /** @type {UserEventEmitter} */
   const userEventEmitter = new EventEmitter();
   /** @type {AgentEventEmitter} */
@@ -25,7 +25,12 @@ export function createAgent({ callModel, tools, toolUseApprover }) {
   const toolDefs = tools.map(({ def }) => def);
 
   /** @type {Message[]} */
-  const messages = [];
+  const messages = [
+    {
+      role: "system",
+      content: [{ type: "text", text: prompt }],
+    },
+  ];
 
   userEventEmitter.on("userInput", async (input) => {
     const lastMessage = messages.at(-1);
@@ -49,6 +54,7 @@ export function createAgent({ callModel, tools, toolUseApprover }) {
         const toolResults = toolUseParts.map((toolUse) => ({
           type: "tool_result",
           toolUseId: toolUse.toolUseId,
+          toolName: toolUse.toolName,
           content: "Tool call rejected",
           isError: true,
         }));
@@ -64,17 +70,20 @@ export function createAgent({ callModel, tools, toolUseApprover }) {
     }
 
     while (true) {
-      const assistantMessage = await callModel({
+      const modelOutput = await callModel({
         messages,
         tools: toolDefs,
       });
-      if (assistantMessage instanceof Error) {
-        // TODO: recover from error
-        throw assistantMessage;
+
+      if (modelOutput instanceof Error) {
+        agentEventEmitter.emit("error", modelOutput);
+        break;
       }
 
+      const { message: assistantMessage, providerTokenUsage } = modelOutput;
       messages.push(assistantMessage);
       agentEventEmitter.emit("message", assistantMessage);
+      agentEventEmitter.emit("providerTokenUsage", providerTokenUsage);
 
       // Approve tool use
       /** @type {MessageContentToolUse[]} */
@@ -119,16 +128,18 @@ async function callTool(toolUse, toolByName) {
     return {
       type: "tool_result",
       toolUseId: toolUse.toolUseId,
+      toolName: toolUse.toolName,
       content: `Tool not found: ${toolUse.toolName}`,
       isError: true,
     };
   }
 
-  const result = await tool.impl(toolUse.args);
+  const result = await tool.impl(toolUse.input);
   if (result instanceof Error) {
     return {
       type: "tool_result",
       toolUseId: toolUse.toolUseId,
+      toolName: toolUse.toolName,
       content: result.message,
       isError: true,
     };
@@ -137,6 +148,7 @@ async function callTool(toolUse, toolByName) {
   return {
     type: "tool_result",
     toolUseId: toolUse.toolUseId,
+    toolName: toolUse.toolName,
     content: result,
   };
 }
