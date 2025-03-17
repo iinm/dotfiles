@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-set -eu -o pipefail
-
-this_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-export AGENT_MODEL="o3-mini-medium"
-exec "$this_dir/agent" "$@"
