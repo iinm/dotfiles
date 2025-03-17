@@ -279,7 +279,9 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>gl', ':<C-u>Git log %<CR>')
 
   -- dap
+  vim.keymap.set('n', '<leader>dt', ':<C-u>ToggleDebugger<CR>')
   vim.keymap.set('n', '<leader>db', ':<C-u>DapToggleBreakpoint<CR>')
+  vim.keymap.set('n', '<leader>dc', ':<C-u>DapContinue<CR>')
   vim.keymap.set({ 'n', 'v' }, '<leader>de', '<Cmd>lua require("dapui").eval()<CR>')
 
   -- luasnip

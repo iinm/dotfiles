@@ -334,6 +334,9 @@ if string.find(cwd, '/path/to/project', 0, true) then
   -- return vim.tbl_deep_extend('force', default, {
   --   efm_settings = {
   --     languages = {
+  --       javascript = {
+  --         efm_tools.formatters.biome,
+  --       },
   --       typescript = {
   --         efm_tools.formatters.biome,
   --       },
