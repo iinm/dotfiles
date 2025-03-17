@@ -78,6 +78,15 @@ function printMessage(message) {
       console.log(styleText("bold", "\nAgent:"));
       for (const part of message.content) {
         switch (part.type) {
+          case "thinking":
+            console.log(
+              [
+                styleText("blue", "<thinking>"),
+                part.thinking,
+                styleText("blue", "</thinking>\n"),
+              ].join("\n"),
+            );
+            break;
           case "text":
             console.log(part.text);
             break;
