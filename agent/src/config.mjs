@@ -6,7 +6,7 @@ import { execCommandTool } from "./tools/execCommand.mjs";
 import { tavilySearchTool } from "./tools/tavilySearch.mjs";
 import { tmuxCommandTool } from "./tools/tmuxCommand.mjs";
 
-export const AGENT_MODEL = process.env.AGENT_MODEL || "gpt-4o-mini";
+export const AGENT_MODEL = process.env.AGENT_MODEL || "claude-haiku";
 
 /**
  * @typedef {object} CreateAllowedToolUsePatternsInput
