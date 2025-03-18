@@ -1,5 +1,8 @@
 {
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "./env.sh node ./src/index.mjs",
     "check": "npm run lint && npm run typecheck && npm run test",
