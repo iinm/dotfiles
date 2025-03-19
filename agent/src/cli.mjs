@@ -50,7 +50,9 @@ export function startCLI({
   });
 
   agentEventEmitter.on("message", (message) => {
-    printMessage(message);
+    // TODO: OpenAIのstreamingに対応したら分岐を削除
+    const skipThinkingAndText = modelName.includes("claude");
+    printMessage(message, skipThinkingAndText);
   });
 
   agentEventEmitter.on("toolUseRequest", () => {
@@ -80,26 +82,34 @@ export function startCLI({
 
 /**
  * @param {Message} message
+ * @param {boolean} skipThinkingAndText
  */
-function printMessage(message) {
+function printMessage(message, skipThinkingAndText) {
   switch (message.role) {
     case "assistant": {
-      // console.log(styleText("bold", "\nAgent:"));
+      if (!skipThinkingAndText) {
+        console.log(styleText("bold", "\nAgent:"));
+      }
       for (const part of message.content) {
         switch (part.type) {
-          // Streamで出力するためスキップ
-          // case "thinking":
-          //   console.log(
-          //     [
-          //       styleText("blue", "<thinking>"),
-          //       part.thinking,
-          //       styleText("blue", "</thinking>\n"),
-          //     ].join("\n"),
-          //   );
-          //   break;
-          // case "text":
-          //   console.log(part.text);
-          //   break;
+          case "thinking":
+            if (skipThinkingAndText) {
+              break;
+            }
+            console.log(
+              [
+                styleText("blue", "<thinking>"),
+                part.thinking,
+                styleText("blue", "</thinking>\n"),
+              ].join("\n"),
+            );
+            break;
+          case "text":
+            if (skipThinkingAndText) {
+              break;
+            }
+            console.log(part.text);
+            break;
           case "tool_use":
             console.log(styleText("bold", "\nTool call:"));
             console.log(formatToolUse(part));
