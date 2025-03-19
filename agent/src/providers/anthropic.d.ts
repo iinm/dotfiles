@@ -16,7 +16,7 @@ export type AnthropicChatCompletion = {
   type: "message";
   role: "assistant";
   model: string;
-  content: AnthropicAssistantMessage["content"];
+  content: AnthropicAssistantMessageContent[];
   stop_reason: string;
   usage: AnthropicChatCompletionUsage;
 };
@@ -44,6 +44,11 @@ export type AnthropicAssistantMessage = {
     | AnthropicMessageContentToolCall
   )[];
 };
+
+export type AnthropicAssistantMessageContent =
+  | AnthropicMessageContentThinking
+  | AnthropicMessageContentText
+  | AnthropicMessageContentToolCall;
 
 export type AnthropicMessageContentThinking = {
   type: "thinking";
@@ -85,4 +90,120 @@ export type AnthropicToolDefinition = {
   name: string;
   description: string;
   input_schema: Record<string, unknown>;
+};
+
+/* Streaming Event */
+export type AnthropicStreamEvent =
+  | AnthropicStreamEventMessageStart
+  | AnthropicStreamEventContentBlockStart
+  | AnthropicStreamEventPing
+  | AnthropicStreamEventContentBlockDelta
+  | AnthropicStreamEventContentBlockStop
+  | AnthropicStreamEventMessageDelta
+  | AnthropicStreamEventMessageStop;
+
+export type AnthropicStreamEventMessageStart = {
+  type: "message_start";
+  message: AnthropicStreamEventMessage;
+};
+
+export type AnthropicStreamEventMessage = {
+  id: string;
+  type: "message";
+  role: "assistant";
+  content: unknown[];
+  model: string;
+  stop_reason: string | null;
+  stop_sequence: string | null;
+  usage: AnthropicStreamEventUsage;
+};
+
+// TODO: cacheの情報も入る？
+export type AnthropicStreamEventUsage = {
+  input_tokens: number;
+  output_tokens: number;
+};
+
+export type AnthropicStreamEventContentBlockStart = {
+  type: "content_block_start";
+  index: number;
+  content_block: AnthropicStreamEventContentBlock;
+};
+
+export type AnthropicStreamEventContentBlock =
+  | AnthropicStreamEventContentBlockText
+  | AnthropicStreamEventContentBlockToolUse
+  | AnthropicStreamEventContentBlockThinking;
+
+export type AnthropicStreamEventContentBlockText = {
+  type: "text";
+  text: string;
+};
+
+export type AnthropicStreamEventContentBlockToolUse = {
+  type: "tool_use";
+  id: string;
+  name: string;
+  input: Record<string, unknown>;
+};
+
+export type AnthropicStreamEventContentBlockThinking = {
+  type: "thinking";
+  thinking: string;
+};
+
+export type AnthropicStreamEventPing = {
+  type: "ping";
+};
+
+export type AnthropicStreamEventContentBlockDelta = {
+  type: "content_block_delta";
+  index: number;
+  delta: AnthropicStreamEventDelta;
+};
+
+export type AnthropicStreamEventDelta =
+  | AnthropicStreamEventDeltaText
+  | AnthropicStreamEventDeltaInputJson
+  | AnthropicStreamEventDeltaThinking
+  | AnthropicStreamEventDeltaSignature;
+
+export type AnthropicStreamEventDeltaText = {
+  type: "text_delta";
+  text: string;
+};
+
+export type AnthropicStreamEventDeltaInputJson = {
+  type: "input_json_delta";
+  partial_json: string;
+};
+
+export type AnthropicStreamEventDeltaThinking = {
+  type: "thinking_delta";
+  thinking: string;
+};
+
+export type AnthropicStreamEventDeltaSignature = {
+  type: "signature_delta";
+  signature: string;
+};
+
+export type AnthropicStreamEventContentBlockStop = {
+  type: "content_block_stop";
+  index: number;
+};
+
+export type AnthropicStreamEventMessageDelta = {
+  type: "message_delta";
+  delta: {
+    stop_reason: string | null;
+    stop_sequence: string | null;
+  };
+  usage?: {
+    output_tokens: number;
+  };
+};
+
+export type AnthropicStreamEventMessageStop = {
+  type: "message_stop";
 };

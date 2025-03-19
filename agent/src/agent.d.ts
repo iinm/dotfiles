@@ -10,6 +10,7 @@ export type UserEventEmitter = EventEmitter<UserEventMap>;
 
 type AgentEventMap = {
   message: [Message];
+  stream: [string];
   error: [Error];
   toolUseRequest: [];
   turnEnd: [];
