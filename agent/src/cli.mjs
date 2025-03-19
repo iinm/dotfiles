@@ -41,7 +41,7 @@ export function startCLI({
   });
 
   agentEventEmitter.on("stream", (partialMessage) => {
-    const isStartOfContent = partialMessage.match(/^---/);
+    const isStartOfContent = partialMessage.match(/^--- \w+$/);
     if (isStartOfContent) {
       console.log(styleText("gray", `\n${partialMessage}`));
       return;

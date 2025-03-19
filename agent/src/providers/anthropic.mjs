@@ -94,7 +94,7 @@ function convertAnthropicStreamEventToAgentStreamEvent(event) {
           return event.delta.partial_json;
       }
     case "content_block_stop":
-      return "---";
+      return "--- end";
   }
 }
 
