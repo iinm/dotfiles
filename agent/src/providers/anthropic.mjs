@@ -1,6 +1,6 @@
 /**
  * @import { ModelInput, Message, AssistantMessage, ModelOutput } from "../model";
- * @import { AnthropicChatCompletion, AnthropicMessage, AnthropicToolDefinition, AnthropicModelConfig, AnthropicAssistantMessage } from "./anthropic";
+ * @import { AnthropicChatCompletion, AnthropicMessage, AnthropicToolDefinition, AnthropicModelConfig, AnthropicAssistantMessage, AnthropicStreamEvent, AnthropicAssistantMessageContent, AnthropicChatCompletionUsage } from "./anthropic";
  * @import { ToolDefinition } from "../tool";
  */
 
@@ -35,6 +35,7 @@ export async function callAnthropicModel(config, input) {
           .flatMap((m) => m.content),
         messages: cacheEnabledMessages.filter((m) => m.role !== "system"),
         tools: tools.length ? tools : undefined,
+        stream: true,
       }),
     });
 
@@ -44,14 +45,169 @@ export async function callAnthropicModel(config, input) {
       );
     }
 
+    if (!response.body) {
+      throw new Error("Response body is empty");
+    }
+
+    const reader = response.body.getReader();
+
+    /** @type {AnthropicStreamEvent[]} */
+    const events = [];
+    for await (const event of readAnthropicStreamEvents(reader)) {
+      events.push(event);
+      const agentStreamEvent =
+        convertAnthropicStreamEventToAgentStreamEvent(event);
+      if (input.onStreamEvent && agentStreamEvent) {
+        input.onStreamEvent(agentStreamEvent);
+      }
+    }
+
     /** @type {AnthropicChatCompletion} */
-    const body = await response.json();
+    const chatCompletion = convertAnthropicStreamEventsToChatCompletion(events);
 
     return {
-      message: convertAnthropicAssistantMessageToGenericFormat(body),
-      providerTokenUsage: body.usage,
+      message: convertAnthropicAssistantMessageToGenericFormat(chatCompletion),
+      providerTokenUsage: chatCompletion.usage,
     };
   });
+}
+
+/**
+ * @param {AnthropicStreamEvent} event
+ * @returns {string | undefined}
+ */
+function convertAnthropicStreamEventToAgentStreamEvent(event) {
+  switch (event.type) {
+    case "content_block_start":
+      const currentContentBlockType = event.content_block.type;
+      if (event.content_block.type === "tool_use") {
+        return `--- ${currentContentBlockType}:${event.content_block.name}`;
+      }
+      return `--- ${currentContentBlockType}`;
+    case "content_block_delta":
+      switch (event.delta.type) {
+        case "text_delta":
+          return event.delta.text;
+        case "thinking_delta":
+          return event.delta.thinking;
+        case "input_json_delta":
+          return event.delta.partial_json;
+      }
+    case "content_block_stop":
+      return "---";
+  }
+}
+
+/**
+ * @param {AnthropicStreamEvent[]} events
+ * @returns {AnthropicChatCompletion}
+ */
+function convertAnthropicStreamEventsToChatCompletion(events) {
+  /** @type {Partial<AnthropicChatCompletion>} */
+  let chatCompletion = {};
+  /** @type {string[]} */
+  const toolUseInputJsonBuffer = [];
+  for (const event of events) {
+    if (event.type === "message_start") {
+      chatCompletion = Object.assign(chatCompletion, event.message);
+    } else if (event.type === "message_delta") {
+      Object.assign(chatCompletion, event.delta);
+      if (event.usage) {
+        const usage = /** @type {AnthropicChatCompletionUsage} */ (
+          chatCompletion.usage || {}
+        );
+        Object.assign(usage, event.usage);
+        chatCompletion.usage = usage;
+      }
+    } else if (event.type === "content_block_start") {
+      chatCompletion.content = chatCompletion.content || [];
+      chatCompletion.content.push(
+        /** @type {AnthropicAssistantMessageContent} */ (event.content_block),
+      );
+    } else if (event.type === "content_block_delta") {
+      const lastContentPart = chatCompletion.content?.at(-1);
+      if (lastContentPart) {
+        switch (event.delta.type) {
+          case "text_delta": {
+            if (lastContentPart.type === "text") {
+              lastContentPart.text = lastContentPart.text + event.delta.text;
+            }
+            break;
+          }
+          case "thinking_delta": {
+            if (lastContentPart.type === "thinking") {
+              lastContentPart.thinking =
+                lastContentPart.thinking + event.delta.thinking;
+            }
+            break;
+          }
+          case "signature_delta": {
+            if (lastContentPart.type === "thinking") {
+              lastContentPart.signature = event.delta.signature;
+            }
+            break;
+          }
+          case "input_json_delta": {
+            if (lastContentPart.type === "tool_use") {
+              toolUseInputJsonBuffer.push(event.delta.partial_json);
+            }
+            break;
+          }
+        }
+      } else {
+        // TODO: Handle error
+      }
+    } else if (event.type === "content_block_stop") {
+      const lastContentPart = chatCompletion.content?.at(-1);
+      if (lastContentPart?.type === "tool_use") {
+        lastContentPart.input = JSON.parse(toolUseInputJsonBuffer.join(""));
+        toolUseInputJsonBuffer.length = 0;
+      }
+    }
+  }
+
+  return /** @type {AnthropicChatCompletion} */ (chatCompletion);
+}
+
+/**
+ * @param {ReadableStreamDefaultReader<Uint8Array>} reader
+ */
+async function* readAnthropicStreamEvents(reader) {
+  let buffer = new Uint8Array();
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
+
+    buffer = new Uint8Array([...buffer, ...value]);
+
+    const lineFeed = "\n".charCodeAt(0);
+    const eventEndIndices = [];
+    for (let i = 0; i < buffer.length - 1; i++) {
+      if (buffer[i] === lineFeed && buffer[i + 1] === lineFeed) {
+        eventEndIndices.push(i);
+      }
+    }
+
+    for (let i = 0; i < eventEndIndices.length; i++) {
+      const eventStartIndex = i === 0 ? 0 : eventEndIndices[i - 1] + 2;
+      const eventEndIndex = eventEndIndices[i];
+      const event = buffer.slice(eventStartIndex, eventEndIndex);
+      const decodedEvent = new TextDecoder().decode(event);
+      const data = decodedEvent.split("\n").at(-1);
+      if (data?.startsWith("data: ")) {
+        /** @type {AnthropicStreamEvent} */
+        const parsedData = JSON.parse(data.slice("data: ".length));
+        yield parsedData;
+      }
+    }
+
+    if (eventEndIndices.length) {
+      buffer = buffer.slice(eventEndIndices[eventEndIndices.length - 1] + 2);
+    }
+  }
 }
 
 /**

@@ -73,6 +73,9 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
       const modelOutput = await callModel({
         messages,
         tools: toolDefs,
+        onStreamEvent: (event) => {
+          agentEventEmitter.emit("stream", event);
+        },
       });
 
       if (modelOutput instanceof Error) {

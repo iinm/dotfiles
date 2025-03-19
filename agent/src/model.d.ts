@@ -14,6 +14,7 @@ export type ProviderTokenUsage = Record<
 export type ModelInput = {
   messages: Message[];
   tools?: ToolDefinition[];
+  onStreamEvent?: (event: string) => void;
 };
 
 export type Message = SystemMessage | UserMessage | AssistantMessage;

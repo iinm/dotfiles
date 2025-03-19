@@ -40,6 +40,15 @@ export function startCLI({
     cli.pause();
   });
 
+  agentEventEmitter.on("stream", (partialMessage) => {
+    const isStartOfContent = partialMessage.match(/^---/);
+    if (isStartOfContent) {
+      console.log(styleText("gray", `\n${partialMessage}`));
+      return;
+    }
+    process.stdout.write(partialMessage);
+  });
+
   agentEventEmitter.on("message", (message) => {
     printMessage(message);
   });
@@ -75,21 +84,22 @@ export function startCLI({
 function printMessage(message) {
   switch (message.role) {
     case "assistant": {
-      console.log(styleText("bold", "\nAgent:"));
+      // console.log(styleText("bold", "\nAgent:"));
       for (const part of message.content) {
         switch (part.type) {
-          case "thinking":
-            console.log(
-              [
-                styleText("blue", "<thinking>"),
-                part.thinking,
-                styleText("blue", "</thinking>\n"),
-              ].join("\n"),
-            );
-            break;
-          case "text":
-            console.log(part.text);
-            break;
+          // Streamで出力するためスキップ
+          // case "thinking":
+          //   console.log(
+          //     [
+          //       styleText("blue", "<thinking>"),
+          //       part.thinking,
+          //       styleText("blue", "</thinking>\n"),
+          //     ].join("\n"),
+          //   );
+          //   break;
+          // case "text":
+          //   console.log(part.text);
+          //   break;
           case "tool_use":
             console.log(styleText("bold", "\nTool call:"));
             console.log(formatToolUse(part));
