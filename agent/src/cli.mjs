@@ -40,13 +40,20 @@ export function startCLI({
     cli.pause();
   });
 
-  agentEventEmitter.on("stream", (partialMessage) => {
-    const isContentSeparator = partialMessage.match(/^--- \w+$/);
-    if (isContentSeparator) {
-      console.log(styleText("gray", `\n${partialMessage}`));
-      return;
+  agentEventEmitter.on("partialMessageContent", (partialContent) => {
+    if (partialContent.position === "start") {
+      console.log(styleText("gray", `\n<${partialContent.type}>`));
     }
-    process.stdout.write(partialMessage);
+    if (partialContent.content) {
+      if (partialContent.type === "tool_use") {
+        process.stdout.write(styleText("gray", partialContent.content));
+      } else {
+        process.stdout.write(partialContent.content);
+      }
+    }
+    if (partialContent.position === "stop") {
+      console.log(styleText("gray", `\n</${partialContent.type}>`));
+    }
   });
 
   agentEventEmitter.on("message", (message) => {
@@ -240,7 +247,7 @@ function formatToolResult(toolResult) {
       .replace(/(^<tmux.*?>|<\/tmux:.*?>$)/gm, styleText("green", "$1"));
   }
 
-  const maxLength = 1024 * 2;
+  const maxLength = 1024;
   if (content.length > maxLength) {
     return `${content.slice(0, maxLength)}... (Content omitted)`;
   }

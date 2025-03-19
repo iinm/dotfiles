@@ -14,7 +14,13 @@ export type ProviderTokenUsage = Record<
 export type ModelInput = {
   messages: Message[];
   tools?: ToolDefinition[];
-  onStreamEvent?: (event: string) => void;
+  onPartialMessageContent?: (partialContent: PartialMessageContent) => void;
+};
+
+export type PartialMessageContent = {
+  type: string;
+  position: "start" | "stop" | "delta";
+  content?: string;
 };
 
 export type Message = SystemMessage | UserMessage | AssistantMessage;

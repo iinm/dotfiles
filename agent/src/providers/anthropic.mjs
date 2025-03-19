@@ -1,5 +1,5 @@
 /**
- * @import { ModelInput, Message, AssistantMessage, ModelOutput } from "../model";
+ * @import { ModelInput, Message, AssistantMessage, ModelOutput, PartialMessageContent } from "../model";
  * @import { AnthropicChatCompletion, AnthropicMessage, AnthropicToolDefinition, AnthropicModelConfig, AnthropicAssistantMessage, AnthropicStreamEvent, AnthropicAssistantMessageContent, AnthropicChatCompletionUsage } from "./anthropic";
  * @import { ToolDefinition } from "../tool";
  */
@@ -53,14 +53,18 @@ export async function callAnthropicModel(config, input) {
 
     /** @type {AnthropicStreamEvent[]} */
     const events = [];
+    /** @type {PartialMessageContent | undefined} */
+    let partialContent = undefined;
     for await (const event of readAnthropicStreamEvents(reader)) {
       events.push(event);
-      const agentStreamEvent =
-        convertAnthropicStreamEventToAgentStreamEvent(event);
-      if (input.onStreamEvent && agentStreamEvent?.length) {
-        for (const part of agentStreamEvent) {
-          input.onStreamEvent(part);
-        }
+
+      partialContent = convertAnthropicStreamEventToAgentPartialContent(
+        event,
+        partialContent,
+      );
+
+      if (input.onPartialMessageContent && partialContent) {
+        input.onPartialMessageContent(partialContent);
       }
     }
 
@@ -76,30 +80,46 @@ export async function callAnthropicModel(config, input) {
 
 /**
  * @param {AnthropicStreamEvent} event
- * @returns {string[] | undefined}
+ * @param {PartialMessageContent | undefined} previousPartialContent
+ * @returns {PartialMessageContent | undefined}
  */
-function convertAnthropicStreamEventToAgentStreamEvent(event) {
+function convertAnthropicStreamEventToAgentPartialContent(
+  event,
+  previousPartialContent,
+) {
   switch (event.type) {
     case "content_block_start":
-      const currentContentBlockType = event.content_block.type;
-      if (event.content_block.type === "tool_use") {
-        return [
-          `--- ${currentContentBlockType}`,
-          `${event.content_block.name}: `,
-        ];
-      }
-      return [`--- ${currentContentBlockType}`];
+      return {
+        type: event.content_block.type,
+        position: "start",
+      };
     case "content_block_delta":
       switch (event.delta.type) {
         case "text_delta":
-          return [event.delta.text];
+          return {
+            type: "text",
+            content: event.delta.text,
+            position: "delta",
+          };
         case "thinking_delta":
-          return [event.delta.thinking];
+          return {
+            type: "thinking",
+            content: event.delta.thinking,
+            position: "delta",
+          };
         case "input_json_delta":
-          return [event.delta.partial_json];
+          return {
+            type: "tool_use",
+            content: event.delta.partial_json,
+            position: "delta",
+          };
       }
+      break;
     case "content_block_stop":
-      return ["--- end"];
+      return {
+        type: previousPartialContent?.type || "unknown",
+        position: "stop",
+      };
   }
 }
 
@@ -160,7 +180,9 @@ function convertAnthropicStreamEventsToChatCompletion(events) {
           }
         }
       } else {
-        // TODO: Handle error
+        console.warn(
+          `Received content block delta without a content block: ${JSON.stringify(event)}`,
+        );
       }
     } else if (event.type === "content_block_stop") {
       const lastContentPart = chatCompletion.content?.at(-1);

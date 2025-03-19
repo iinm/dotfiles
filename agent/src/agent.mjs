@@ -1,6 +1,6 @@
 /**
  * @import { AgentConfig, AgentEventEmitter, UserEventEmitter } from "./agent"
- * @import { Message, MessageContentToolResult, MessageContentToolUse } from "./model"
+ * @import { Message, MessageContentToolResult, MessageContentToolUse, PartialMessageContent } from "./model"
  * @import { Tool, ToolDefinition } from "./tool"
  */
 
@@ -73,8 +73,11 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
       const modelOutput = await callModel({
         messages,
         tools: toolDefs,
-        onStreamEvent: (event) => {
-          agentEventEmitter.emit("stream", event);
+        /**
+         * @param {PartialMessageContent} partialContent
+         */
+        onPartialMessageContent: (partialContent) => {
+          agentEventEmitter.emit("partialMessageContent", partialContent);
         },
       });
 

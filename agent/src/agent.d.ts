@@ -1,5 +1,5 @@
 import type { EventEmitter } from "node:events";
-import type { CallModel, Message } from "./model";
+import type { CallModel, Message, PartialMessageContent } from "./model";
 import type { Tool, ToolUseApprover } from "./tool";
 
 type UserEventMap = {
@@ -10,7 +10,7 @@ export type UserEventEmitter = EventEmitter<UserEventMap>;
 
 type AgentEventMap = {
   message: [Message];
-  stream: [string];
+  partialMessageContent: [PartialMessageContent];
   error: [Error];
   toolUseRequest: [];
   turnEnd: [];
