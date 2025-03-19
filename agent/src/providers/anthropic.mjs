@@ -141,7 +141,14 @@ function convertAnthropicStreamEventsToChatCompletion(events) {
         const usage = /** @type {AnthropicChatCompletionUsage} */ (
           chatCompletion.usage || {}
         );
-        Object.assign(usage, event.usage);
+        for (const [key, value] of Object.entries(event.usage)) {
+          /** @type {number} */
+          const currentValue =
+            usage[/** @type {keyof AnthropicChatCompletionUsage} */ (key)] || 0;
+          const updatedValue = currentValue + value;
+          usage[/** @type {keyof AnthropicChatCompletionUsage} */ (key)] =
+            updatedValue;
+        }
         chatCompletion.usage = usage;
       }
     } else if (event.type === "content_block_start") {
