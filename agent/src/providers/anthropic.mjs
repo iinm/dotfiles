@@ -57,8 +57,10 @@ export async function callAnthropicModel(config, input) {
       events.push(event);
       const agentStreamEvent =
         convertAnthropicStreamEventToAgentStreamEvent(event);
-      if (input.onStreamEvent && agentStreamEvent) {
-        input.onStreamEvent(agentStreamEvent);
+      if (input.onStreamEvent && agentStreamEvent?.length) {
+        for (const part of agentStreamEvent) {
+          input.onStreamEvent(part);
+        }
       }
     }
 
@@ -74,27 +76,30 @@ export async function callAnthropicModel(config, input) {
 
 /**
  * @param {AnthropicStreamEvent} event
- * @returns {string | undefined}
+ * @returns {string[] | undefined}
  */
 function convertAnthropicStreamEventToAgentStreamEvent(event) {
   switch (event.type) {
     case "content_block_start":
       const currentContentBlockType = event.content_block.type;
       if (event.content_block.type === "tool_use") {
-        return `--- ${currentContentBlockType}:${event.content_block.name}`;
+        return [
+          `--- ${currentContentBlockType}`,
+          `${event.content_block.name}: `,
+        ];
       }
-      return `--- ${currentContentBlockType}`;
+      return [`--- ${currentContentBlockType}`];
     case "content_block_delta":
       switch (event.delta.type) {
         case "text_delta":
-          return event.delta.text;
+          return [event.delta.text];
         case "thinking_delta":
-          return event.delta.thinking;
+          return [event.delta.thinking];
         case "input_json_delta":
-          return event.delta.partial_json;
+          return [event.delta.partial_json];
       }
     case "content_block_stop":
-      return "--- end";
+      return ["--- end"];
   }
 }
 
