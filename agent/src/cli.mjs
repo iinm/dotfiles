@@ -8,6 +8,7 @@
  * @import { TavilySearchInput } from "./tools/tavilySearch"
  */
 
+import fs from "node:fs";
 import readline from "node:readline";
 import { styleText } from "node:util";
 
@@ -31,8 +32,21 @@ export function startCLI({
 
   cli.on("line", async (input) => {
     const inputTrimmed = input.trim();
+
     if (inputTrimmed.length === 0) {
       cli.prompt();
+      return;
+    }
+
+    if (inputTrimmed.startsWith("@")) {
+      const filePath = inputTrimmed.slice(1);
+      if (!fs.existsSync(filePath)) {
+        console.error(styleText("red", `\nFile not found: ${filePath}`));
+        cli.prompt();
+        return;
+      }
+      const fileContent = fs.readFileSync(filePath, "utf-8");
+      userEventEmitter.emit("userInput", fileContent);
       return;
     }
 
@@ -271,8 +285,12 @@ function formatProviderTokenUsage(usage) {
       );
     }
   }
-  return styleText(
-    "gray",
-    [`\n${header.join(", ")}`, lines.join(" / ")].join("\n"),
-  );
+
+  const outputLines = [`\n${header.join(", ")}`];
+
+  if (lines.length) {
+    outputLines.push(lines.join(" / "));
+  }
+
+  return styleText("gray", outputLines.join("\n"));
 }
