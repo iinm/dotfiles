@@ -141,7 +141,7 @@ function convertOpenAIStreamDataToChatCompletion(dataList) {
   }
 
   /** @type {Partial<OpenAIChatCompletion>} */
-  let chatCompletion = {
+  const chatCompletion = {
     ...firstData,
     choices: [
       {

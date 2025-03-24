@@ -4,4 +4,3 @@ export type ValuePattern =
   | ((value: unknown) => boolean)
   | ValuePattern[]
   | { [key: string]: ValuePattern };
-
