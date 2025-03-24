@@ -2,7 +2,7 @@
  * @import { ToolUseApprover, ToolUseApproverConfig } from './tool'
  */
 
-import { matchObject } from "./utils/matchObject.mjs";
+import { matchValue } from "./utils/matchValue.mjs";
 
 /**
  * @param {ToolUseApproverConfig} config
@@ -24,7 +24,7 @@ export function createToolUseApprover({ allowedToolUses, maxApproveCount }) {
   /** @type {ToolUseApprover} */
   const approver = (toolUse) => {
     for (const pattern of allowedToolUses) {
-      if (matchObject(toolUse, pattern)) {
+      if (matchValue(toolUse, pattern)) {
         return approve();
       }
     }
