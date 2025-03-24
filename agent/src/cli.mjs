@@ -37,7 +37,6 @@ export function startCLI({
     }
 
     userEventEmitter.emit("userInput", inputTrimmed);
-    cli.pause();
   });
 
   agentEventEmitter.on("partialMessageContent", (partialContent) => {
@@ -78,7 +77,6 @@ export function startCLI({
   });
 
   agentEventEmitter.on("turnEnd", () => {
-    cli.resume();
     cli.prompt();
   });
 
