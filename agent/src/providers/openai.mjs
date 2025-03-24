@@ -1,6 +1,6 @@
 /**
- * @import { ModelInput, Message,  MessageContentToolResult, MessageContentText, AssistantMessage, MessageContentToolUse, ModelOutput } from "../model"
- * @import { OpenAIAssistantMessage, OpenAIChatCompletion, OpenAIMessage, OpenAIMessageToolCall, OpenAIModelConfig, OpenAIToolDefinition } from "./openai"
+ * @import { ModelInput, Message,  MessageContentToolResult, MessageContentText, AssistantMessage, MessageContentToolUse, ModelOutput, PartialMessageContent } from "../model"
+ * @import { OpenAIAssistantMessage, OpenAIMessage, OpenAIMessageToolCall, OpenAIModelConfig, OpenAIToolDefinition, OpenAIStreamData, OpenAIChatCompletion } from "./openai"
  * @import { ToolDefinition } from "../tool"
  */
 
@@ -30,6 +30,10 @@ export async function callOpenAIModel(config, input) {
         ...config,
         messages,
         tools: tools.length ? tools : undefined,
+        stream: true,
+        stream_options: {
+          include_usage: true,
+        },
       }),
     });
 
@@ -39,17 +43,193 @@ export async function callOpenAIModel(config, input) {
       );
     }
 
+    if (!response.body) {
+      throw new Error("Response body is empty");
+    }
+
+    const reader = response.body.getReader();
+
+    /** @type {OpenAIStreamData[]} */
+    const dataList = [];
+    /** @type {PartialMessageContent | undefined} */
+    let partialContent = undefined;
+    for await (const data of readOpenAIStreamData(reader)) {
+      dataList.push(data);
+
+      partialContent = convertOpenAIStreamDataToAgentPartialContent(
+        data,
+        partialContent,
+      );
+
+      if (input.onPartialMessageContent && partialContent) {
+        input.onPartialMessageContent(partialContent);
+      }
+    }
+
     /** @type {OpenAIChatCompletion} */
-    const body = await response.json();
-    const openAIAssistantMessage = body.choices[0].message;
+    const chatCompletion = convertOpenAIStreamDataToChatCompletion(dataList);
+    const openAIAssistantMessage = chatCompletion.choices[0].message;
 
     return {
       message: convertOpenAIAssistantMessageToGenericFormat(
         openAIAssistantMessage,
       ),
-      providerTokenUsage: body.usage,
+      providerTokenUsage: chatCompletion.usage,
     };
   });
+}
+
+/**
+ * @param {OpenAIStreamData} data
+ * @param {PartialMessageContent | undefined} partialContent
+ * @returns {PartialMessageContent | undefined}
+ */
+function convertOpenAIStreamDataToAgentPartialContent(data, partialContent) {
+  const firstChoice = data.choices.at(0);
+  const isStart = Boolean(firstChoice?.delta.role);
+  if (isStart && firstChoice?.delta.content === "") {
+    return {
+      type: "text",
+      position: "start",
+    };
+  }
+  if (!isStart && firstChoice?.delta.content) {
+    return {
+      type: "text",
+      content: firstChoice?.delta.content,
+      position: "delta",
+    };
+  }
+  if (isStart && firstChoice?.delta.tool_calls) {
+    return {
+      type: "tool_use",
+      content: [
+        firstChoice.delta.tool_calls.at(0)?.function?.name,
+        firstChoice.delta.tool_calls.at(0)?.function?.arguments,
+      ].join(" "),
+      position: "start",
+    };
+  }
+  if (!isStart && firstChoice?.delta.tool_calls) {
+    return {
+      type: "tool_use",
+      content: firstChoice.delta.tool_calls.at(0)?.function?.arguments,
+      position: "delta",
+    };
+  }
+  if (firstChoice?.finish_reason) {
+    return {
+      type: partialContent?.type || "unknown",
+      position: "stop",
+    };
+  }
+}
+
+/**
+ * @param {OpenAIStreamData[]} dataList
+ * @returns {OpenAIChatCompletion}
+ */
+function convertOpenAIStreamDataToChatCompletion(dataList) {
+  const firstData = dataList.at(0);
+  if (!firstData) {
+    throw new Error("No data found in the stream");
+  }
+
+  const fistChoice = firstData.choices.at(0);
+  if (!fistChoice) {
+    throw new Error("No choice found in the first data");
+  }
+
+  /** @type {Partial<OpenAIChatCompletion>} */
+  let chatCompletion = {
+    ...firstData,
+    choices: [
+      {
+        index: fistChoice.index,
+        message: /** @type {OpenAIAssistantMessage} */ (fistChoice.delta),
+        finish_reason: /** @type {string} */ (fistChoice.finish_reason),
+      },
+    ],
+  };
+  for (let i = 1; i < dataList.length; i++) {
+    const data = dataList[i];
+    const firstChoice = data?.choices.at(0);
+    if (firstChoice) {
+      const delta = firstChoice.delta;
+      if (
+        "content" in delta &&
+        delta.content &&
+        chatCompletion.choices?.[0].message
+      ) {
+        chatCompletion.choices[0].message.content += delta.content;
+      }
+
+      if ("tool_calls" in delta && delta.tool_calls) {
+        for (const toolCallDelta of delta.tool_calls) {
+          const toolCall =
+            chatCompletion.choices?.[0].message.tool_calls?.[
+              toolCallDelta.index
+            ];
+          if (toolCall && toolCallDelta.function) {
+            toolCall.function.arguments += toolCallDelta.function.arguments;
+          }
+        }
+      }
+
+      if (firstChoice.finish_reason && chatCompletion.choices) {
+        chatCompletion.choices[0].finish_reason = firstChoice.finish_reason;
+      }
+    }
+
+    if (data.usage) {
+      chatCompletion.usage = data.usage;
+    }
+  }
+
+  return /** @type {OpenAIChatCompletion} */ (chatCompletion);
+}
+
+/**
+ * @param {ReadableStreamDefaultReader<Uint8Array>} reader
+ */
+async function* readOpenAIStreamData(reader) {
+  let buffer = new Uint8Array();
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
+
+    buffer = new Uint8Array([...buffer, ...value]);
+
+    const lineFeed = "\n".charCodeAt(0);
+    const dataEndIndices = [];
+    for (let i = 0; i < buffer.length - 1; i++) {
+      if (buffer[i] === lineFeed && buffer[i + 1] === lineFeed) {
+        dataEndIndices.push(i);
+      }
+    }
+
+    for (let i = 0; i < dataEndIndices.length; i++) {
+      const dataStartIndex = i === 0 ? 0 : dataEndIndices[i - 1] + 2;
+      const dataEndIndex = dataEndIndices[i];
+      const data = buffer.slice(dataStartIndex, dataEndIndex);
+      const decodedData = new TextDecoder().decode(data);
+      if (decodedData === "data: [DONE]") {
+        break;
+      }
+      if (decodedData.startsWith("data: ")) {
+        /** @type {OpenAIStreamData} */
+        const parsedData = JSON.parse(decodedData.slice("data: ".length));
+        yield parsedData;
+      }
+    }
+
+    if (dataEndIndices.length) {
+      buffer = buffer.slice(dataEndIndices[dataEndIndices.length - 1] + 2);
+    }
+  }
 }
 
 /**

@@ -79,3 +79,38 @@ export type OpenAIToolDefinition = {
     parameters: Record<string, unknown>;
   };
 };
+
+/* Streaming Data */
+export type OpenAIStreamData = {
+  id: string;
+  object: string;
+  created: number;
+  model: string;
+  service_tier?: string;
+  system_fingerprint?: string;
+  choices: OpenAIStreamDataChoice[];
+  usage?: OpenAIChatCompletionUsage;
+};
+
+export type OpenAIStreamDataChoice = {
+  index: number;
+  delta: OpenAIStreamDataDelta;
+  finish_reason: string;
+};
+
+export type OpenAIStreamDataDelta = {
+  role?: "assistant";
+  content?: string;
+  refusal?: any;
+  tool_calls?: OpenAIStreamDataToolCall[];
+};
+
+export type OpenAIStreamDataToolCall = {
+  index: number;
+  id?: string;
+  type?: string;
+  function?: {
+    name?: string;
+    arguments: string;
+  };
+};

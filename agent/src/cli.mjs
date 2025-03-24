@@ -57,9 +57,7 @@ export function startCLI({
   });
 
   agentEventEmitter.on("message", (message) => {
-    // TODO: OpenAIのstreamingに対応したら分岐を削除
-    const skipThinkingAndText = modelName.includes("claude");
-    printMessage(message, skipThinkingAndText);
+    printMessage(message);
   });
 
   agentEventEmitter.on("toolUseRequest", () => {
@@ -89,34 +87,26 @@ export function startCLI({
 
 /**
  * @param {Message} message
- * @param {boolean} skipThinkingAndText
  */
-function printMessage(message, skipThinkingAndText) {
+function printMessage(message) {
   switch (message.role) {
     case "assistant": {
-      if (!skipThinkingAndText) {
-        console.log(styleText("bold", "\nAgent:"));
-      }
+      // console.log(styleText("bold", "\nAgent:"));
       for (const part of message.content) {
         switch (part.type) {
-          case "thinking":
-            if (skipThinkingAndText) {
-              break;
-            }
-            console.log(
-              [
-                styleText("blue", "<thinking>"),
-                part.thinking,
-                styleText("blue", "</thinking>\n"),
-              ].join("\n"),
-            );
-            break;
-          case "text":
-            if (skipThinkingAndText) {
-              break;
-            }
-            console.log(part.text);
-            break;
+          // Note: Streamで表示するためここでは表示しない
+          // case "thinking":
+          //   console.log(
+          //     [
+          //       styleText("blue", "<thinking>"),
+          //       part.thinking,
+          //       styleText("blue", "</thinking>\n"),
+          //     ].join("\n"),
+          //   );
+          //   break;
+          // case "text":
+          //   console.log(part.text);
+          //   break;
           case "tool_use":
             console.log(styleText("bold", "\nTool call:"));
             console.log(formatToolUse(part));
@@ -269,10 +259,22 @@ function formatProviderTokenUsage(usage) {
     } else {
       lines.push(
         `(${key}) ${Object.entries(value)
+          .filter(
+            ([k]) =>
+              ![
+                // OpenAI
+                "audio_tokens",
+                "accepted_prediction_tokens",
+                "rejected_prediction_tokens",
+              ].includes(k),
+          )
           .map(([k, v]) => `${k}: ${v}`)
           .join(", ")}`,
       );
     }
   }
-  return styleText("gray", [`\n${header.join(", ")}`, ...lines].join("\n"));
+  return styleText(
+    "gray",
+    [`\n${header.join(", ")}`, lines.join(" / ")].join("\n"),
+  );
 }

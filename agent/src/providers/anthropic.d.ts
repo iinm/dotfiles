@@ -81,9 +81,9 @@ export type AnthropicMessageContentToolResult = {
 
 export type AnthropicChatCompletionUsage = {
   input_tokens: number;
-  cache_creation_input_tokens: number;
-  cache_read_input_tokens: number;
   output_tokens: number;
+  cache_creation_input_tokens?: number;
+  cache_read_input_tokens?: number;
 };
 
 export type AnthropicToolDefinition = {
@@ -118,10 +118,11 @@ export type AnthropicStreamEventMessage = {
   usage: AnthropicStreamEventUsage;
 };
 
-// TODO: cacheの情報も入る？
 export type AnthropicStreamEventUsage = {
   input_tokens: number;
   output_tokens: number;
+  cache_creation_input_tokens?: number;
+  cache_read_input_tokens?: number;
 };
 
 export type AnthropicStreamEventContentBlockStart = {
