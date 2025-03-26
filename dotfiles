@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-NVIM_VERSION=0.10.4
+NVIM_VERSION=0.11.0
 EFM_LS_VERSION=0.0.54
 
 # Debian only
