@@ -2,10 +2,18 @@
 
 A lightweight CLI-based coding agent that helps you with your development tasks.
 
+## Requirements
+
+- Node.js 22 or later
+- Anthropic API key or OpenAI API key
+- Tavily API key
+
 ## Setup
 
 ```sh
-npm install
+echo "$ANTHROPIC_API_KEY" > .secrets/anthropic-api-key.txt
+echo "$OPENAI_API_KEY" > .secrets/openai-api-key.txt
+echo "$TAVILY_API_KEY" > .secrets/tavily-api-key.txt
 ```
 
 ## Run
@@ -20,6 +28,9 @@ npm install
 ## Development
 
 ```sh
+# Install dev dependencies
+npm install
+
 # Run lint, typecheck, and test
 npm run check
 
