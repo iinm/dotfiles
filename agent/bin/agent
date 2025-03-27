@@ -5,5 +5,4 @@ set -eu -o pipefail
 this_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 app_root="$(cd "$this_dir/.." && pwd)"
 
-export NODE_ENV=${NODE_ENV:-"production"}
 exec "$app_root/env.sh" node "$app_root/src/index.mjs" "$@"
