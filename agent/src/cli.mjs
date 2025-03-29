@@ -40,11 +40,11 @@ export function startCLI({
         [
           "",
           "Session Commands:",
-          "  - resume",
-          "  - bye",
+          "  resume",
+          "  bye",
           "Memory Commands:",
-          "  - save memory",
-          "  - resume work",
+          "  save memory",
+          "  resume work",
         ].join("\n"),
       );
       cli.prompt();
