@@ -41,7 +41,11 @@ export const execCommandTool = {
         execFile(
           command,
           args,
-          { timeout: 120 * 1000 },
+          {
+            shell: false,
+            env: {},
+            timeout: 120 * 1000,
+          },
           (err, stdout, stderr) => {
             if (
               [

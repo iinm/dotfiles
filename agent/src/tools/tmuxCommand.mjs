@@ -85,6 +85,10 @@ export const tmuxCommandTool = {
               execFile(
                 "tmux",
                 ["list-windows", "-t", target],
+                {
+                  shell: false,
+                  env: {},
+                },
                 (err, stdout, _stderr) => {
                   if (err) {
                     console.error(
