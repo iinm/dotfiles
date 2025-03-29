@@ -43,7 +43,10 @@ export const execCommandTool = {
           args,
           {
             shell: false,
-            env: {},
+            env: {
+              PWD: process.env.PWD,
+              PATH: process.env.PATH,
+            },
             timeout: 120 * 1000,
           },
           (err, stdout, stderr) => {
