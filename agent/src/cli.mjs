@@ -24,16 +24,29 @@ export function startCLI({
   const cli = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-    prompt: `${styleText(
-      ["white", "bgGray"],
-      `\nSession: ${sessionId}, Model: ${modelName}, Commands: "resume work", "save memory", "bye"`,
-    )}\n> `,
+    prompt: `${styleText(["white", "bgGray"], `\nSession: ${sessionId}, Model: ${modelName}`)}\n> `,
   });
 
   cli.on("line", async (input) => {
     const inputTrimmed = input.trim();
 
     if (inputTrimmed.length === 0) {
+      cli.prompt();
+      return;
+    }
+
+    if (inputTrimmed.toLowerCase() === "help") {
+      console.log(
+        [
+          "",
+          "Session Commands:",
+          "  - resume",
+          "  - bye",
+          "Memory Commands:",
+          "  - save memory",
+          "  - resume work",
+        ].join("\n"),
+      );
       cli.prompt();
       return;
     }
