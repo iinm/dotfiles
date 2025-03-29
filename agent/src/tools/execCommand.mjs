@@ -12,7 +12,11 @@ const OUTPUT_MAX_LENGTH = 1024 * 8;
 export const execCommandTool = {
   def: {
     name: "exec_command",
-    description: "Execute a command",
+    description: `Run a command without shell interpretation.
+Examples:
+  { command: "ls", args: ["-l"] }
+  { command: "bash", args: ["-c", "find . -name '*.mjs' | xargs wc"] }
+      `.trim(),
     inputSchema: {
       type: "object",
       properties: {
