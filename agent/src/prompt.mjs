@@ -148,6 +148,10 @@ Include all necessary details to continue work even if you forget specifics.
   - The conversation is ending (user says "bye", "exit", or "quit")
   - A significant task milestone is completed
   - Before switching to a new subtask
+- You should read project memory when:
+  - When working on tasks that require project-wide knowledge
+  - Before making significant architectural decisions
+  - When encountering unfamiliar parts of the codebase
 
 ## Memory Files
 
