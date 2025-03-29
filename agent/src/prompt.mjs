@@ -22,7 +22,7 @@ You are a problem solver.
   - Crrent working directory: ${workingDir}
 - When user ends the conversation by saying "bye", "exit", or "quit", do the following steps one by one:
   - Kill the tmux session named agent-${sessionId} if it is running.
-  - Save the memory.
+  - Save task / project memory.
 
 # Tools
 
