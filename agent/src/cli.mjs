@@ -1,6 +1,6 @@
 /**
- * @import { CliOptions } from "./cli"
  * @import { Message, MessageContentToolResult, MessageContentToolUse, ProviderTokenUsage } from "./model"
+ * @import { UserEventEmitter, AgentEventEmitter } from "./agent"
  * @import { ExecCommandInput } from "./tools/execCommand"
  * @import { PatchFileInput } from "./tools/patchFile"
  * @import { WriteFileInput } from "./tools/writeFile"
@@ -11,6 +11,14 @@
 import fs from "node:fs";
 import readline from "node:readline";
 import { styleText } from "node:util";
+
+/**
+ * @typedef {object} CliOptions
+ * @property {UserEventEmitter} userEventEmitter
+ * @property {AgentEventEmitter} agentEventEmitter
+ * @property {string} sessionId
+ * @property {string} modelName
+ */
 
 /**
  * @param {CliOptions} options

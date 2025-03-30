@@ -6,6 +6,7 @@ export type ModelOutput = {
   message: Message;
   providerTokenUsage: ProviderTokenUsage;
 };
+
 export type ProviderTokenUsage = Record<
   string,
   number | Record<string, number>
