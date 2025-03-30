@@ -3,6 +3,7 @@
  */
 
 import { callAnthropicModel } from "./providers/anthropic.mjs";
+import { callGeminiModel } from "./providers/gemini.mjs";
 import { callOpenAIModel } from "./providers/openai.mjs";
 
 /**
@@ -68,6 +69,14 @@ export function createModelCaller(modelName) {
               type: "enabled",
               budget_tokens: 1024,
             },
+          },
+          input,
+        );
+    case "gemini-pro":
+      return (input) =>
+        callGeminiModel(
+          {
+            model: "gemini-2.5-pro-exp-03-25",
           },
           input,
         );

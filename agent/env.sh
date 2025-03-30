@@ -14,6 +14,11 @@ if test -f "$this_dir/.secrets/anthropic-api-key.txt"; then
   export ANTHROPIC_API_KEY
 fi
 
+if test -f "$this_dir/.secrets/google-ai-studio-api-key.txt"; then
+  GOOGLE_AI_STUDIO_API_KEY="$(cat "$this_dir/.secrets/google-ai-studio-api-key.txt")"
+  export GOOGLE_AI_STUDIO_API_KEY
+fi
+
 if test -f "$this_dir/.secrets/tavily-api-key.txt"; then
   TAVILY_API_KEY="$(cat "$this_dir/.secrets/tavily-api-key.txt")"
   export TAVILY_API_KEY
