@@ -2,6 +2,12 @@ import type { ToolDefinition } from "./tool";
 
 export type CallModel = (input: ModelInput) => Promise<ModelOutput | Error>;
 
+export type ModelInput = {
+  messages: Message[];
+  tools?: ToolDefinition[];
+  onPartialMessageContent?: (partialContent: PartialMessageContent) => void;
+};
+
 export type ModelOutput = {
   message: Message;
   providerTokenUsage: ProviderTokenUsage;
@@ -11,12 +17,6 @@ export type ProviderTokenUsage = Record<
   string,
   number | Record<string, number>
 >;
-
-export type ModelInput = {
-  messages: Message[];
-  tools?: ToolDefinition[];
-  onPartialMessageContent?: (partialContent: PartialMessageContent) => void;
-};
 
 export type PartialMessageContent = {
   type: string;

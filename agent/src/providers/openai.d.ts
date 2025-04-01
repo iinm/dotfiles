@@ -1,9 +1,11 @@
+/* Model */
 export type OpenAIModelConfig = {
   model: "gpt-4o-mini" | "o3-mini";
   temperature?: number;
   reasoning_effort?: "low" | "medium" | "high";
 };
 
+/* Output */
 export type OpenAIChatCompletion = {
   id: string;
   object: string;
@@ -19,6 +21,7 @@ export type OpenIAChatCompletionChoice = {
   finish_reason: string;
 };
 
+/* Message */
 export type OpenAIMessage =
   | OpenAISystemMessage
   | OpenAIUserMessage
@@ -63,6 +66,7 @@ export type OpenAIToolCallFunction = {
   arguments: string;
 };
 
+/* Usage */
 export type OpenAIChatCompletionUsage = {
   prompt_tokens: number;
   completion_tokens: number;
@@ -71,6 +75,7 @@ export type OpenAIChatCompletionUsage = {
   completion_tokens_details: Record<string, number>;
 };
 
+/* Tool */
 export type OpenAIToolDefinition = {
   type: "function";
   function: {

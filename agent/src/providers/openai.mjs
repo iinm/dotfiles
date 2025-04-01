@@ -80,6 +80,94 @@ export async function callOpenAIModel(config, input) {
 }
 
 /**
+ * @param {Message[]} genericMessages
+ * @returns {OpenAIMessage[]}
+ */
+function convertGenericMessageToOpenAIFormat(genericMessages) {
+  /** @type {OpenAIMessage[]} */
+  const openAIMessages = [];
+  for (const genericMessage of genericMessages) {
+    switch (genericMessage.role) {
+      case "system": {
+        openAIMessages.push({
+          role: "system",
+          content: genericMessage.content.map((part) => ({
+            type: "text",
+            text: part.text,
+          })),
+        });
+        break;
+      }
+      case "user": {
+        if (
+          genericMessage.content.some((part) => part.type === "tool_result")
+        ) {
+          /** @type {MessageContentToolResult[]} */
+          const toolResultParts = genericMessage.content.filter(
+            (part) => part.type === "tool_result",
+          );
+          for (const result of toolResultParts) {
+            openAIMessages.push({
+              role: "tool",
+              tool_call_id: result.toolUseId,
+              content: result.content,
+            });
+          }
+        } else {
+          /** @type {MessageContentText[]} */
+          const textParts = genericMessage.content.filter(
+            (part) => part.type === "text",
+          );
+          openAIMessages.push({
+            role: "user",
+            content: textParts.map((part) => ({
+              type: "text",
+              text: part.text,
+            })),
+          });
+        }
+        break;
+      }
+      case "assistant": {
+        /** @type {MessageContentText[]} */
+        const textParts = genericMessage.content.filter(
+          (part) => part.type === "text",
+        );
+        if (textParts.length > 1) {
+          console.error(
+            `OpenAI Unsupported message format: ${JSON.stringify(genericMessage)}`,
+          );
+        }
+        const text = textParts.map((part) => part.text).join("\n");
+
+        /** @type {MessageContentToolUse[]} */
+        const toolUseParts = genericMessage.content.filter(
+          (part) => part.type === "tool_use",
+        );
+
+        /** @type {OpenAIMessageToolCall[]} */
+        const toolCalls = toolUseParts.map((part) => ({
+          id: part.toolUseId,
+          type: "function",
+          function: {
+            name: part.toolName,
+            arguments: JSON.stringify(part.input),
+          },
+        }));
+
+        openAIMessages.push({
+          role: "assistant",
+          content: text ? text : undefined,
+          tool_calls: toolCalls.length ? toolCalls : undefined,
+        });
+      }
+    }
+  }
+
+  return openAIMessages;
+}
+
+/**
  * @param {OpenAIStreamData} data
  * @param {PartialMessageContent | undefined} partialContent
  * @returns {PartialMessageContent | undefined}
@@ -230,94 +318,6 @@ async function* readOpenAIStreamData(reader) {
       buffer = buffer.slice(dataEndIndices[dataEndIndices.length - 1] + 2);
     }
   }
-}
-
-/**
- * @param {Message[]} genericMessages
- * @returns {OpenAIMessage[]}
- */
-function convertGenericMessageToOpenAIFormat(genericMessages) {
-  /** @type {OpenAIMessage[]} */
-  const openAIMessages = [];
-  for (const genericMessage of genericMessages) {
-    switch (genericMessage.role) {
-      case "system": {
-        openAIMessages.push({
-          role: "system",
-          content: genericMessage.content.map((part) => ({
-            type: "text",
-            text: part.text,
-          })),
-        });
-        break;
-      }
-      case "user": {
-        if (
-          genericMessage.content.some((part) => part.type === "tool_result")
-        ) {
-          /** @type {MessageContentToolResult[]} */
-          const toolResultParts = genericMessage.content.filter(
-            (part) => part.type === "tool_result",
-          );
-          for (const result of toolResultParts) {
-            openAIMessages.push({
-              role: "tool",
-              tool_call_id: result.toolUseId,
-              content: result.content,
-            });
-          }
-        } else {
-          /** @type {MessageContentText[]} */
-          const textParts = genericMessage.content.filter(
-            (part) => part.type === "text",
-          );
-          openAIMessages.push({
-            role: "user",
-            content: textParts.map((part) => ({
-              type: "text",
-              text: part.text,
-            })),
-          });
-        }
-        break;
-      }
-      case "assistant": {
-        /** @type {MessageContentText[]} */
-        const textParts = genericMessage.content.filter(
-          (part) => part.type === "text",
-        );
-        if (textParts.length > 1) {
-          console.error(
-            `OpenAI Unsupported message format: ${JSON.stringify(genericMessage)}`,
-          );
-        }
-        const text = textParts.map((part) => part.text).join("\n");
-
-        /** @type {MessageContentToolUse[]} */
-        const toolUseParts = genericMessage.content.filter(
-          (part) => part.type === "tool_use",
-        );
-
-        /** @type {OpenAIMessageToolCall[]} */
-        const toolCalls = toolUseParts.map((part) => ({
-          id: part.toolUseId,
-          type: "function",
-          function: {
-            name: part.toolName,
-            arguments: JSON.stringify(part.input),
-          },
-        }));
-
-        openAIMessages.push({
-          role: "assistant",
-          content: text ? text : undefined,
-          tool_calls: toolCalls.length ? toolCalls : undefined,
-        });
-      }
-    }
-  }
-
-  return openAIMessages;
 }
 
 /**

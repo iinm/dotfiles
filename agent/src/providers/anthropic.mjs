@@ -79,6 +79,88 @@ export async function callAnthropicModel(config, input) {
 }
 
 /**
+ * @param {Message[]} genericMessages
+ * @returns {AnthropicMessage[]}
+ */
+function convertGenericMessageToAnthropicFormat(genericMessages) {
+  /** @type {AnthropicMessage[]} */
+  const anthropicMessages = [];
+  for (const genericMessage of genericMessages) {
+    switch (genericMessage.role) {
+      case "system": {
+        anthropicMessages.push({
+          role: "system",
+          content: genericMessage.content.map((part) => {
+            if (part.type === "text") {
+              return { type: "text", text: part.text };
+            }
+            throw new Error(`Unknown message part type: ${part}`);
+          }),
+        });
+        break;
+      }
+      case "user": {
+        anthropicMessages.push({
+          role: "user",
+          content: genericMessage.content.map((part) => {
+            if (part.type === "text") {
+              return { type: "text", text: part.text };
+            }
+            if (part.type === "tool_result") {
+              return {
+                type: "tool_result",
+                tool_use_id: part.toolUseId,
+                content: [
+                  {
+                    type: "text",
+                    text: part.content,
+                  },
+                ],
+                is_error: part.isError,
+              };
+            }
+            throw new Error(`Unknown message part type: ${part}`);
+          }),
+        });
+        break;
+      }
+      case "assistant": {
+        anthropicMessages.push({
+          role: "assistant",
+          content: genericMessage.content.map((part) => {
+            if (part.type === "thinking") {
+              const signature = /** @type {string} */ (
+                part.providerMetadata?.signature || ""
+              );
+              return {
+                type: "thinking",
+                thinking: part.thinking,
+                signature,
+              };
+            }
+            if (part.type === "text") {
+              return { type: "text", text: part.text };
+            }
+            if (part.type === "tool_use") {
+              return {
+                type: "tool_use",
+                id: part.toolUseId,
+                name: part.toolName,
+                input: part.input,
+              };
+            }
+            throw new Error(`Unknown message part type: ${part}`);
+          }),
+        });
+        break;
+      }
+    }
+  }
+
+  return anthropicMessages;
+}
+
+/**
  * @param {AnthropicStreamEvent} event
  * @param {PartialMessageContent | undefined} previousPartialContent
  * @returns {PartialMessageContent | undefined}
@@ -242,88 +324,6 @@ async function* readAnthropicStreamEvents(reader) {
       buffer = buffer.slice(eventEndIndices[eventEndIndices.length - 1] + 2);
     }
   }
-}
-
-/**
- * @param {Message[]} genericMessages
- * @returns {AnthropicMessage[]}
- */
-function convertGenericMessageToAnthropicFormat(genericMessages) {
-  /** @type {AnthropicMessage[]} */
-  const anthropicMessages = [];
-  for (const genericMessage of genericMessages) {
-    switch (genericMessage.role) {
-      case "system": {
-        anthropicMessages.push({
-          role: "system",
-          content: genericMessage.content.map((part) => {
-            if (part.type === "text") {
-              return { type: "text", text: part.text };
-            }
-            throw new Error(`Unknown message part type: ${part}`);
-          }),
-        });
-        break;
-      }
-      case "user": {
-        anthropicMessages.push({
-          role: "user",
-          content: genericMessage.content.map((part) => {
-            if (part.type === "text") {
-              return { type: "text", text: part.text };
-            }
-            if (part.type === "tool_result") {
-              return {
-                type: "tool_result",
-                tool_use_id: part.toolUseId,
-                content: [
-                  {
-                    type: "text",
-                    text: part.content,
-                  },
-                ],
-                is_error: part.isError,
-              };
-            }
-            throw new Error(`Unknown message part type: ${part}`);
-          }),
-        });
-        break;
-      }
-      case "assistant": {
-        anthropicMessages.push({
-          role: "assistant",
-          content: genericMessage.content.map((part) => {
-            if (part.type === "thinking") {
-              const signature = /** @type {string} */ (
-                part.providerMetadata?.signature || ""
-              );
-              return {
-                type: "thinking",
-                thinking: part.thinking,
-                signature,
-              };
-            }
-            if (part.type === "text") {
-              return { type: "text", text: part.text };
-            }
-            if (part.type === "tool_use") {
-              return {
-                type: "tool_use",
-                id: part.toolUseId,
-                name: part.toolName,
-                input: part.input,
-              };
-            }
-            throw new Error(`Unknown message part type: ${part}`);
-          }),
-        });
-        break;
-      }
-    }
-  }
-
-  return anthropicMessages;
 }
 
 /**

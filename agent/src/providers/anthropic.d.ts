@@ -1,3 +1,4 @@
+/* Model */
 export type AnthropicModelConfig = {
   model: "claude-3-5-haiku-latest" | "claude-3-7-sonnet-latest";
   max_tokens: number;
@@ -11,6 +12,7 @@ export type AnthropicModelConfig = {
   };
 };
 
+/* Output */
 export type AnthropicChatCompletion = {
   id: string;
   type: "message";
@@ -21,6 +23,7 @@ export type AnthropicChatCompletion = {
   usage: AnthropicChatCompletionUsage;
 };
 
+/* Message */
 export type AnthropicMessage =
   | AnthropicSystemMessage
   | AnthropicUserMessage
@@ -45,6 +48,7 @@ export type AnthropicAssistantMessage = {
   )[];
 };
 
+/* Message Content */
 export type AnthropicAssistantMessageContent =
   | AnthropicMessageContentThinking
   | AnthropicMessageContentText
@@ -79,6 +83,7 @@ export type AnthropicMessageContentToolResult = {
   cache_control?: { type: "ephemeral" };
 };
 
+/* Usage */
 export type AnthropicChatCompletionUsage = {
   input_tokens: number;
   output_tokens: number;
@@ -86,6 +91,7 @@ export type AnthropicChatCompletionUsage = {
   cache_read_input_tokens?: number;
 };
 
+/* Tool */
 export type AnthropicToolDefinition = {
   name: string;
   description: string;
