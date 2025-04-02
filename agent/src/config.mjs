@@ -34,7 +34,7 @@ export function createAllowedToolUsePatterns({ sessionId }) {
     },
     {
       toolName: execCommandTool.def.name,
-      input: { command: "git", args: [/^(status|diff|log)$/] },
+      input: { command: "git", args: [/^(status|diff|log|show)$/] },
     },
     {
       toolName: execCommandTool.def.name,
