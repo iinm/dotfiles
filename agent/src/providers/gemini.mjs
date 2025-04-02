@@ -359,7 +359,7 @@ function convertGeminiStreamContentsToContent(events) {
 function convertGeminiAssistantMessageToGenericFormat(content) {
   const candidate = content.candidates?.at(0);
   if (!candidate) {
-    throw new Error("No candidates found");
+    throw new Error(`No candidates found: content=${JSON.stringify(content)}`);
   }
 
   /** @type {AssistantMessage["content"]} */
