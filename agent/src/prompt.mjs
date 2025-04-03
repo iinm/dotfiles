@@ -75,6 +75,9 @@ File and directory command examples:
 Other command examples:
 - Get current date time: date ["+%Y-%m-%d %H:%M:%S"]
 - Show git status (branch, modified files, etc.): git ["status"]
+- Open URL in default browser:
+  - On Mac: open ["<url>"]
+  - On Linux: xdg-open ["<url>"]
 
 ## write file
 
