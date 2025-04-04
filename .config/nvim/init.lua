@@ -519,12 +519,7 @@ local setup_plugins = function()
       'phaazon/hop.nvim',
       branch = 'v2'
     },
-    {
-      'numToStr/Comment.nvim',
-      lazy = false
-    },
     'nvim-treesitter/nvim-treesitter',
-    'JoosepAlviste/nvim-ts-context-commentstring',
     'Almo7aya/openingh.nvim',
     'previm/previm',
     'tyru/open-browser.vim',
@@ -826,16 +821,6 @@ local setup_treesitter = function()
   })
 end
 
-local setup_comment = function()
-  -- https://github.com/JoosepAlviste/nvim-ts-context-commentstring/wiki/Integrations
-  require('ts_context_commentstring').setup {
-    enable_autocmd = false,
-  }
-  require('Comment').setup({
-    pre_hook = require('ts_context_commentstring.integrations.comment_nvim').create_pre_hook(),
-  })
-end
-
 local setup_others = function()
   vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
   vim.g.copilot_filetypes = {
@@ -869,7 +854,6 @@ setup_cmp()
 setup_dap()
 setup_oil()
 setup_treesitter()
-setup_comment()
 setup_others()
 
 setup_appearance()
