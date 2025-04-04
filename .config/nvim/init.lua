@@ -203,7 +203,7 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>z', ':<C-u>setl foldlevel=')
   vim.keymap.set('n', '<leader>q', window_utils.toggle_quickfix)
   -- vim.keymap.set('v', '//', [[y/\V<C-r>=escape(@",'/\')<CR><CR>]]) -- -> use * or # instead
-  vim.keymap.set('n', 's', ':<C-u>HopChar2<CR>')
+  vim.keymap.set('n', 's', '<Plug>(easymotion-overwin-f2)')
   -- vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>:file<CR>')
   -- vim.keymap.set('n', '-', ':<C-u>e %:h<CR>')
   vim.keymap.set('n', '-', '<Cmd>Oil<CR>')
@@ -501,40 +501,38 @@ local setup_plugins = function()
   vim.opt.rtp:prepend(lazypath)
 
   require('lazy').setup({
+    -- syntax
+    'nvim-treesitter/nvim-treesitter',
+
     -- ui
     'sainnhe/everforest',
     'stevearc/dressing.nvim',
 
-    -- utilities
+    -- fuzzy finder
     'junegunn/fzf',
     'junegunn/fzf.vim',
-    'tpope/vim-sleuth',
-    'tpope/vim-fugitive',
+
+    -- file explorer
     'stevearc/oil.nvim',
+
+    -- terminal
     'akinsho/toggleterm.nvim',
-    'windwp/nvim-autopairs',
-    'brenoprata10/nvim-highlight-colors',
-    'kylechui/nvim-surround',
-    {
-      'phaazon/hop.nvim',
-      branch = 'v2'
-    },
-    'nvim-treesitter/nvim-treesitter',
-    'Almo7aya/openingh.nvim',
+
+    -- markdown preview
     'previm/previm',
     'tyru/open-browser.vim',
-    'bullets-vim/bullets.vim',
-    'MattesGroeger/vim-bookmarks',
+
+    -- utilities
+    'tpope/vim-sleuth',
+    'tpope/vim-fugitive',
+    'easymotion/vim-easymotion',
+    'kylechui/nvim-surround',
+    'windwp/nvim-autopairs',
+    'Almo7aya/openingh.nvim',
+    'brenoprata10/nvim-highlight-colors',
 
     -- lsp
     'neovim/nvim-lspconfig',
-
-    -- debugger
-    'mfussenegger/nvim-dap',
-    {
-      'rcarriga/nvim-dap-ui',
-      dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
-    },
 
     -- completion
     'hrsh7th/cmp-buffer',
@@ -542,11 +540,8 @@ local setup_plugins = function()
     'hrsh7th/cmp-path',
     'hrsh7th/cmp-cmdline',
     'hrsh7th/nvim-cmp',
+
     'github/copilot.vim',
-    {
-      'CopilotC-Nvim/CopilotChat.nvim',
-      build = 'make tiktoken',
-    },
 
     -- snippets
     {
@@ -555,6 +550,13 @@ local setup_plugins = function()
       dependencies = { "rafamadriz/friendly-snippets" },
     },
     'saadparwaiz1/cmp_luasnip',
+
+    -- debugger
+    'mfussenegger/nvim-dap',
+    {
+      'rcarriga/nvim-dap-ui',
+      dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
+    },
 
     -- languages
     {
@@ -826,22 +828,9 @@ local setup_others = function()
   vim.g.copilot_filetypes = {
     gitcommit = true,
   }
-  require('hop').setup()
   require('nvim-autopairs').setup()
   require("nvim-surround").setup()
   require('dressing').setup()
-  require("CopilotChat").setup({
-    debug = false,
-    mappings = {
-      complete = {
-        insert = '<S-Tab>',
-      },
-      reset = {
-        normal = '',
-        insert = '',
-      },
-    },
-  })
 end
 
 setup_options()
