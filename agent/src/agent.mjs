@@ -42,6 +42,13 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
       );
       // Pending tool call
       if (input.toLowerCase().match(/^(yes|y)$/i)) {
+        if (input.match(/^(YES|Y)$/)) {
+          // Allow tool use
+          for (const toolUse of toolUseParts) {
+            toolUseApprover.allowToolUse(toolUse);
+          }
+        }
+
         // Approved
         const toolResults = await Promise.all(
           toolUseParts.map((toolUse) => callTool(toolUse, toolByName)),
@@ -102,7 +109,9 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
         break;
       }
 
-      const isAllToolUseApproved = toolUseParts.every(toolUseApprover);
+      const isAllToolUseApproved = toolUseParts.every(
+        toolUseApprover.isAllowedToolUse,
+      );
       if (!isAllToolUseApproved) {
         agentEventEmitter.emit("toolUseRequest");
         break;

@@ -102,7 +102,12 @@ Memory:
   });
 
   agentEventEmitter.on("toolUseRequest", () => {
-    console.log(styleText("yellow", "\nApprove tool calls? (y or feedback)"));
+    console.log(
+      styleText(
+        "yellow",
+        "\nApprove tool calls? (y = allow once, Y = allow in this session, or feedback)",
+      ),
+    );
   });
 
   agentEventEmitter.on("providerTokenUsage", (usage) => {

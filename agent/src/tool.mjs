@@ -1,5 +1,6 @@
 /**
- * @import { ToolUseApprover, ToolUseApproverConfig } from './tool'
+ * @import { ToolUseApprover, ToolUseApproverConfig, ToolUsePattern } from './tool'
+ * @import { MessageContentToolUse } from './model'
  */
 
 import { matchValue } from "./utils/matchValue.mjs";
@@ -21,9 +22,14 @@ export function createToolUseApprover({ allowedToolUses, maxApproveCount }) {
     return false;
   };
 
-  /** @type {ToolUseApprover} */
-  const approver = (toolUse) => {
-    for (const pattern of allowedToolUses) {
+  /** @type {ToolUsePattern[]} */
+  const allowedToolUseInSession = [];
+
+  /**
+   * @param {MessageContentToolUse} toolUse
+   */
+  const isAllowedToolUse = (toolUse) => {
+    for (const pattern of [...allowedToolUses, ...allowedToolUseInSession]) {
       if (matchValue(toolUse, pattern)) {
         return approve();
       }
@@ -31,5 +37,18 @@ export function createToolUseApprover({ allowedToolUses, maxApproveCount }) {
     return false;
   };
 
-  return approver;
+  /**
+   * @param {MessageContentToolUse} toolUse
+   */
+  const allowToolUse = (toolUse) => {
+    allowedToolUseInSession.push({
+      toolName: toolUse.toolName,
+      input: toolUse.input,
+    });
+  };
+
+  return {
+    isAllowedToolUse,
+    allowToolUse,
+  };
 }

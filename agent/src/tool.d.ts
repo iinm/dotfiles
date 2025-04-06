@@ -18,7 +18,10 @@ export type ToolUseApproverConfig = {
   maxApproveCount: number;
 };
 
-export type ToolUseApprover = (toolUse: MessageContentToolUse) => boolean;
+export type ToolUseApprover = {
+  isAllowedToolUse: (toolUse: MessageContentToolUse) => boolean;
+  allowToolUse: (toolUse: MessageContentToolUse) => void;
+};
 
 export type ToolUsePattern = {
   toolName: string;
