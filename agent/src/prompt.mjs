@@ -37,7 +37,7 @@ Use tmux to run daemon processes and interactive processes.
 
 - Current working directory is ${workingDir}.
 - Use relative paths to refer to files and directories.
-- Do not read a file content at once. Use head, tail, sed, rg to read a required part of the file.
+- Use head, tail, sed, rg to read a required part of the file instead of reading the entire file.
 
 File and directory command examples:
 - List files: ls ["-alh", "path/to/directory"]
@@ -146,7 +146,7 @@ Usage:
 - Users request to save memory by typing "save memory".
 - Users resume work by typing "resume work".
   - When resuming, you should display available memory files and prompt users to select one.
-  - Do not read the content of the memory file before the user selects it.
+  - Read the content of the selected memory file after the user selects it.
 - You should automatically save memory when:
   - The conversation is ending (user says "bye", "exit", or "quit")
   - A significant task milestone is completed
