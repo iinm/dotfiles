@@ -4,8 +4,8 @@ set -eu -o pipefail
 
 this_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-: "${AGENT_PROJECT_WORKDIR:=.agent}"
-export AGENT_PROJECT_WORKDIR
+: "${AGENT_PROJECT_METADATA_DIR:=.agent}"
+export AGENT_PROJECT_METADATA_DIR
 
 if test -f "$this_dir/.secrets/openai-api-key.txt"; then
   OPENAI_API_KEY="$(cat "$this_dir/.secrets/openai-api-key.txt")"
