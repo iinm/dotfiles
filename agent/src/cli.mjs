@@ -44,17 +44,22 @@ export function startCLI({
     }
 
     if (inputTrimmed.toLowerCase() === "help") {
-      console.log(
-        [
-          "",
-          "Session Commands:",
-          "  resume",
-          "  bye",
-          "Memory Commands:",
-          "  save memory",
-          "  resume work",
-        ].join("\n"),
-      );
+      console.log(`
+Request:
+  read request
+
+Workflow:
+  use workflow
+  save workflow
+
+Session:
+  resume
+  bye
+
+Memory:
+  save memory
+  resume work
+      `.trim());
       cli.prompt();
       return;
     }

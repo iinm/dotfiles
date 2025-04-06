@@ -5,4 +5,8 @@ set -eu -o pipefail
 this_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 app_root="$(cd "$this_dir/.." && pwd)"
 
+AGENT_WORKDIR="${AGENT_WORKDIR:-".agent"}"
+mkdir -vp "$AGENT_WORKDIR/memory"
+mkdir -vp "$AGENT_WORKDIR/workflows"
+
 exec "$app_root/env.sh" node "$app_root/src/index.mjs" "$@"
