@@ -44,7 +44,8 @@ export function startCLI({
     }
 
     if (inputTrimmed.toLowerCase() === "help") {
-      console.log(`
+      console.log(
+        `
 Request:
   read request
 
@@ -59,7 +60,8 @@ Session:
 Memory:
   save memory
   resume work
-      `.trim());
+      `.trim(),
+      );
       cli.prompt();
       return;
     }
