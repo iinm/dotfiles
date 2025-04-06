@@ -2,6 +2,7 @@ import { createAgent } from "./agent.mjs";
 import { startCLI } from "./cli.mjs";
 import {
   AGENT_MODEL,
+  AGENT_PROJECT_METADATA_DIR,
   createAllowedToolUsePatterns,
   loadLocalConfig,
 } from "./config.mjs";
@@ -36,6 +37,7 @@ import { writeFileTool } from "./tools/writeFile.mjs";
   const prompt = createPrompt({
     sessionId,
     workingDir: process.cwd(),
+    projectMetadataDir: AGENT_PROJECT_METADATA_DIR,
   });
 
   const { userEventEmitter, agentEventEmitter } = createAgent({

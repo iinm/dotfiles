@@ -9,7 +9,7 @@
  * @param {PromptConfig} config
  * @returns {string}
  */
-export function createPrompt({ sessionId, workingDir, projectMeatadataDir }) {
+export function createPrompt({ sessionId, workingDir, projectMetadataDir }) {
   return `
 You are a problem solver.
 
@@ -23,15 +23,15 @@ You are a problem solver.
 - Respond to users in the same language they use.
 - Users specify file paths relative to the current working directory.
   - Current working directory: ${workingDir}
-- When users say "read request", read request.txt or request.md in ${projectMeatadataDir}.
+- When users say "read request", read request.txt or request.md in ${projectMetadataDir}.
 
 # Workflows
 
 A workflow is a series of steps to solve a specific type of problem.
-Users can define reusable workflows in the ${projectMeatadataDir}/workflows directory.
+Users can define reusable workflows in the ${projectMetadataDir}/workflows directory.
 
 Usage:
-- When planning a task, check for relevant workflows in the ${projectMeatadataDir}/workflows directory.
+- When planning a task, check for relevant workflows in the ${projectMetadataDir}/workflows directory.
 - Apply a workflow if it matches the current task requirements.
 - When users say "use workflow", list all available workflows, ask which one to use, and then f
 ollow the selected workflow.
@@ -184,11 +184,11 @@ Usage:
   - When encountering unfamiliar parts of the codebase
 
 Memory Files:
-- Task memory: ${projectMeatadataDir}/memory/${sessionId}--<snake-case-title>.md
+- Task memory: ${projectMetadataDir}/memory/${sessionId}--<snake-case-title>.md
   - Create a concise, clear title (3-5 words) that represents the core task
   - Use lowercase letters with hyphens between words (e.g., "refactor-authentication-system")
   - Ensure that the directories exist, creating them if necessary
-- Project memory: ${projectMeatadataDir}/memory/project.md
+- Project memory: ${projectMetadataDir}/memory/project.md
   - This file contains persistent project-wide knowledge
   - Update this file when you learn important project-level information
 
