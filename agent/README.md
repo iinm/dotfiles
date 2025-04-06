@@ -1,6 +1,6 @@
 # Agent
 
-A lightweight CLI-based coding agent that helps you with your development tasks.
+A lightweight CLI-based coding agent designed to assist with your development tasks.
 
 ## Requirements
 
@@ -13,16 +13,50 @@ A lightweight CLI-based coding agent that helps you with your development tasks.
 ```sh
 echo "$ANTHROPIC_API_KEY" > .secrets/anthropic-api-key.txt
 echo "$OPENAI_API_KEY" > .secrets/openai-api-key.txt
+echo "$GOOGLE_AI_STUDIO_API_KEY" > .secrets/google-ai-studio-api-key.txt
 echo "$TAVILY_API_KEY" > .secrets/tavily-api-key.txt
 ```
 
-## Run
+## Getting Started
 
 ```sh
+# Set up a metadata directory for storing memory, workflow files, and other resources.
+./bin/agent-init --metadata-dir ~/agent-metadata/<project-name>
+```
+
+```sh
+# Run agent
 ./bin/agent
 
 # or
 ./bin/agent-<model>
+```
+
+## Metadata Directory Structure
+
+```
+<project-root>
+  .agent/ --> (link to metadata directory)
+    request.md
+    memory/
+      project.md
+      <yyyy-mm-dd-hhmm>--<task-title>.md
+    workflows/
+```
+
+## Project Configuration
+
+Configuration Example:
+```js
+// .agent/config.mjs
+export default {
+  allowedToolUsePatterns: [
+    {
+      toolName: "exec_command",
+      input: { command: "npm", args: ["run", /(check|fix)/] },
+    },
+  ],
+}
 ```
 
 ## Development
