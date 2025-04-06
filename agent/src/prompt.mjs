@@ -1,14 +1,15 @@
 /**
  * @typedef {object} PromptConfig
  * @property {string} sessionId
- * @property {string} workingDir
+ * @property {string} workingDir - The current working directory.
+ * @property {string} projectMetadataDir - The directory where memory and workflow files are stored.
  */
 
 /**
  * @param {PromptConfig} config
  * @returns {string}
  */
-export function createPrompt({ sessionId, workingDir }) {
+export function createPrompt({ sessionId, workingDir, projectMeatadataDir }) {
   return `
 You are a problem solver.
 
@@ -22,15 +23,15 @@ You are a problem solver.
 - Respond to users in the same language they use.
 - Users specify file paths relative to the current working directory.
   - Current working directory: ${workingDir}
-- When users say "read request", read .agent/request.txt or .agent/request.md.
+- When users say "read request", read request.txt or request.md in ${projectMeatadataDir}.
 
 # Workflows
 
 A workflow is a series of steps to solve a specific type of problem.
-Users can define reusable workflows in the .agent/workflows directory.
+Users can define reusable workflows in the ${projectMeatadataDir}/workflows directory.
 
 Usage:
-- When planning a task, check for relevant workflows in the .agent/workflows directory.
+- When planning a task, check for relevant workflows in the ${projectMeatadataDir}/workflows directory.
 - Apply a workflow if it matches the current task requirements.
 - When users say "use workflow", list all available workflows, ask which one to use, and then f
 ollow the selected workflow.
@@ -183,11 +184,11 @@ Usage:
   - When encountering unfamiliar parts of the codebase
 
 Memory Files:
-- Task memory: ${workingDir}/.agent/memory/${sessionId}--<snake-case-title>.md
+- Task memory: ${projectMeatadataDir}/memory/${sessionId}--<snake-case-title>.md
   - Create a concise, clear title (3-5 words) that represents the core task
   - Use lowercase letters with hyphens between words (e.g., "refactor-authentication-system")
   - Ensure that the directories exist, creating them if necessary
-- Project memory: ${workingDir}/.agent/memory/project.md
+- Project memory: ${projectMeatadataDir}/memory/project.md
   - This file contains persistent project-wide knowledge
   - Update this file when you learn important project-level information
 

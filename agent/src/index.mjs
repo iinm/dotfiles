@@ -1,6 +1,10 @@
 import { createAgent } from "./agent.mjs";
 import { startCLI } from "./cli.mjs";
-import { AGENT_MODEL, createAllowedToolUsePatterns } from "./config.mjs";
+import {
+  AGENT_MODEL,
+  createAllowedToolUsePatterns,
+  loadLocalConfig,
+} from "./config.mjs";
 import { createModelCaller } from "./model.mjs";
 import { createPrompt } from "./prompt.mjs";
 import { createToolUseApprover } from "./tool.mjs";
@@ -11,6 +15,7 @@ import { tmuxCommandTool } from "./tools/tmuxCommand.mjs";
 import { writeFileTool } from "./tools/writeFile.mjs";
 
 (async () => {
+  // Generate a session ID
   // e.g. 2025-12-31-2359
   const startTime = new Date();
   const sessionId = [
@@ -19,9 +24,13 @@ import { writeFileTool } from "./tools/writeFile.mjs";
       `0${startTime.getMinutes()}`.slice(-2),
   ].join("-");
 
+  const localConfig = await loadLocalConfig();
   const toolUseApprover = createToolUseApprover({
     maxApproveCount: 20,
-    allowedToolUses: createAllowedToolUsePatterns({ sessionId }),
+    allowedToolUses: [
+      ...createAllowedToolUsePatterns({ sessionId }),
+      ...(localConfig.allowedToolUsePatterns || []),
+    ],
   });
 
   const prompt = createPrompt({

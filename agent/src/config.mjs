@@ -2,10 +2,13 @@
  * @import { ToolUsePattern } from "./tool";
  */
 
+import path from "node:path";
 import { execCommandTool } from "./tools/execCommand.mjs";
 import { tavilySearchTool } from "./tools/tavilySearch.mjs";
 import { tmuxCommandTool } from "./tools/tmuxCommand.mjs";
 
+export const AGENT_PROJECT_METADATA_DIR =
+  process.env.AGENT_PROJECT_METADATA_DIR || ".agent";
 export const AGENT_MODEL = process.env.AGENT_MODEL || "claude-haiku";
 
 /**
@@ -60,4 +63,30 @@ export function createAllowedToolUsePatterns({ sessionId }) {
       },
     },
   ];
+}
+
+/**
+ * @typedef {object} LocalConfig
+ * @property {ToolUsePattern[]} [allowedToolUsePatterns]
+ */
+
+/**
+ * Local project local configuration.
+ * @returns {Promise<LocalConfig>}
+ */
+export async function loadLocalConfig() {
+  const configPath = path.resolve(`${AGENT_PROJECT_METADATA_DIR}/config.mjs`);
+  try {
+    const { default: config } = await import(configPath);
+    return config;
+  } catch (err) {
+    if (
+      err instanceof Error &&
+      "code" in err &&
+      err.code === "ERR_MODULE_NOT_FOUND"
+    ) {
+      return {};
+    }
+    throw err;
+  }
 }
