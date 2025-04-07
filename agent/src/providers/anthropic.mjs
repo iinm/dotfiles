@@ -276,7 +276,9 @@ function convertAnthropicStreamEventsToChatCompletion(events) {
     } else if (event.type === "content_block_stop") {
       const lastContentPart = chatCompletion.content?.at(-1);
       if (lastContentPart?.type === "tool_use") {
-        lastContentPart.input = JSON.parse(toolUseInputJsonBuffer.join(""));
+        lastContentPart.input = JSON.parse(
+          toolUseInputJsonBuffer.join("") || "{}",
+        );
         toolUseInputJsonBuffer.length = 0;
       }
     }
