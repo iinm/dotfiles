@@ -62,7 +62,9 @@ export default {
     },
   ],
 
-  // WARNING: experimental feature
+  // WARNING:
+  // - This is an experimental feature.
+  // - Only works with Anthropic API.
   mcpServers: {
     fetch: {
       command: "docker",
