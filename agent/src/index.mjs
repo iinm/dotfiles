@@ -1,3 +1,7 @@
+/**
+ * @import { Tool } from "./tool";
+ */
+
 import { createAgent } from "./agent.mjs";
 import { startCLI } from "./cli.mjs";
 import {
@@ -6,6 +10,7 @@ import {
   createAllowedToolUsePatterns,
   loadLocalConfig,
 } from "./config.mjs";
+import { createMCPClient, createMCPTools } from "./mcp.mjs";
 import { createModelCaller } from "./model.mjs";
 import { createPrompt } from "./prompt.mjs";
 import { createToolUseApprover } from "./tool.mjs";
@@ -26,6 +31,7 @@ import { writeFileTool } from "./tools/writeFile.mjs";
   ].join("-");
 
   const localConfig = await loadLocalConfig();
+
   const toolUseApprover = createToolUseApprover({
     maxApproveCount: 20,
     allowedToolUses: [
@@ -33,6 +39,19 @@ import { writeFileTool } from "./tools/writeFile.mjs";
       ...(localConfig.allowedToolUsePatterns || []),
     ],
   });
+
+  /** @type {Tool[]} */
+  const mcpTools = [];
+  if (localConfig.mcpServers) {
+    for (const [name, params] of Object.entries(localConfig.mcpServers)) {
+      const mcpClient = await createMCPClient({
+        name,
+        params,
+      });
+      const tools = await createMCPTools(mcpClient);
+      mcpTools.push(...tools);
+    }
+  }
 
   const prompt = createPrompt({
     sessionId,
@@ -49,6 +68,7 @@ import { writeFileTool } from "./tools/writeFile.mjs";
       patchFileTool,
       tmuxCommandTool,
       tavilySearchTool,
+      ...mcpTools,
     ],
     toolUseApprover,
   });

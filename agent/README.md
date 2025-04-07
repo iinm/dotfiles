@@ -17,6 +17,11 @@ echo "$GOOGLE_AI_STUDIO_API_KEY" > .secrets/google-ai-studio-api-key.txt
 echo "$TAVILY_API_KEY" > .secrets/tavily-api-key.txt
 ```
 
+```sh
+# Install dependencies
+npm install
+```
+
 ## Getting Started
 
 ```sh
@@ -56,15 +61,26 @@ export default {
       input: { command: "npm", args: ["run", /(check|fix)/] },
     },
   ],
+
+  // WARNING: experimental feature
+  mcpServers: {
+    fetch: {
+      command: "docker",
+      args: ["run", "-i", "--rm", "mcp/fetch"],
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    }
+  },
 };
 ```
 
 ## Development
 
 ```sh
-# Install dev dependencies
-npm install
-
 # Run lint, typecheck, and test
 npm run check
 

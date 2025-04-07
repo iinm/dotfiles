@@ -68,6 +68,13 @@ export function createAllowedToolUsePatterns({ sessionId }) {
 /**
  * @typedef {object} LocalConfig
  * @property {ToolUsePattern[]} [allowedToolUsePatterns]
+ * @property {Record<string,MCPServerConfig>} [mcpServers]
+ */
+
+/**
+ * @typedef {object} MCPServerConfig
+ * @property {string} command - The command to run the server.
+ * @property {string[]} args - The arguments to pass to the command.
  */
 
 /**
