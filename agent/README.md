@@ -56,7 +56,7 @@ export default {
       input: { command: "npm", args: ["run", /(check|fix)/] },
     },
   ],
-}
+};
 ```
 
 ## Development
