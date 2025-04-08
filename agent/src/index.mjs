@@ -44,6 +44,7 @@ import { writeFileTool } from "./tools/writeFile.mjs";
   const mcpTools = [];
   if (localConfig.mcpServers) {
     for (const [name, params] of Object.entries(localConfig.mcpServers)) {
+      console.log(`Connecting to MCP server: ${name}`);
       const mcpClient = await createMCPClient({
         name,
         params,

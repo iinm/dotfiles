@@ -47,6 +47,7 @@ npm install
       project.md
       <yyyy-mm-dd-hhmm>--<task-title>.md
     workflows/
+    tmp/
 ```
 
 ## Project Configuration
@@ -59,6 +60,12 @@ export default {
     {
       toolName: "exec_command",
       input: { command: "npm", args: ["run", /(check|fix)/] },
+    },
+    {
+      toolName: "mcp-fetch",
+    },
+    {
+      toolName: /mcp-browser_.+/,
     },
   ],
 

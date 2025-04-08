@@ -40,5 +40,8 @@ fi
 mkdir -pv "$metadata_dir"
 ln -sv "$metadata_dir" "$AGENT_PROJECT_METADATA_DIR"
 
-mkdir -pv $AGENT_PROJECT_METADATA_DIR/{memory,workflows}
-touch $AGENT_PROJECT_METADATA_DIR/request.md
+mkdir -pv "$AGENT_PROJECT_METADATA_DIR"/{memory,workflows}
+touch "$AGENT_PROJECT_METADATA_DIR"/request.md
+
+mkdir -pv "$AGENT_PROJECT_METADATA_DIR"/tmp
+echo -e "*\n!.gitignore" > "$AGENT_PROJECT_METADATA_DIR"/tmp/.gitignore

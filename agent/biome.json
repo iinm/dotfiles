@@ -7,7 +7,8 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": []
+    "ignore": [".agent/**/*"],
+    "include": [".agent/config.mjs"]
   },
   "formatter": {
     "enabled": true,
