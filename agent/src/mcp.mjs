@@ -61,6 +61,22 @@ export async function createMCPTools(client) {
       if ("additionalProperties" in inputSchema) {
         delete inputSchema.additionalProperties;
       }
+      if (typeof inputSchema.properties === "object") {
+        for (const [_, value] of Object.entries(inputSchema.properties)) {
+          if (typeof value === "object" && value && "default" in value) {
+            delete value.default;
+          }
+          if (typeof value === "object" && value && "exclusiveMaximum" in value) {
+            delete value.exclusiveMaximum;
+          }
+          if (typeof value === "object" && value && "exclusiveMinimum" in value) {
+            delete value.exclusiveMinimum;
+          }
+          if (typeof value === "object" && value && "format" in value) {
+            delete value.format;
+          }
+        }
+      }
 
       return {
         def: {
