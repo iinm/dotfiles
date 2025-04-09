@@ -53,6 +53,7 @@ export async function createMCPTools(client) {
       ].includes(tool.name);
     })
     .map((tool) => {
+      // Temporary workaround:
       // Remove properties that are not supported by Gemini
       const inputSchema = { ...tool.inputSchema };
       if ("$schema" in inputSchema) {
@@ -126,7 +127,18 @@ export async function createMCPTools(client) {
             await fs.promises.mkdir(tmpDir, { recursive: true });
             await fs.promises.writeFile(filePath, resultString, "utf8");
 
-            return `Result is saved to ${filePath}. Read it with rg / sed command.`;
+            if (tool.name.startsWith("browser_")) {
+              return `Result is saved to ${filePath}.
+- Get document structure: \`rg "^\\s{0,4}\\S" <file>\`
+- Find specific content: \`rg <regex> <file>\`
+- Read specific lines: \`sed -n '10,20p' <file>\`
+              `.trim();
+            }
+
+            return `Result is saved to ${filePath}. Read it with rg / sed command.
+- Find specific content: \`rg <regex> <file>\`
+- Read specific lines: \`sed -n '10,20p' <file>\`
+            `.trim();
           }),
       };
     });
