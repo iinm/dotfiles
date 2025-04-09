@@ -1,6 +1,12 @@
 /* Model */
 export type GeminiModelConfig = {
-  model: "gemini-2.5-pro-exp-03-25";
+  // https://ai.google.dev/gemini-api/docs/models?hl=ja#gemini-2.5-pro-preview-03-25
+  model:
+  // 有料
+  | "gemini-2.5-pro-exp-03-25"
+  // 試験運用版
+  | "gemini-2.5-pro-preview-03-25"
+  ;
   requestConfig?: {
     generationConfig: GeminiGenerationConfig;
     safetySettings: GeminiSafetySetting[];

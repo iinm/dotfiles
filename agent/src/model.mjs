@@ -76,7 +76,8 @@ export function createModelCaller(modelName) {
       return (input) =>
         callGeminiModel(
           {
-            model: "gemini-2.5-pro-exp-03-25",
+            model: "gemini-2.5-pro-preview-03-25",
+            // model: "gemini-2.5-pro-exp-03-25",
           },
           input,
         );
