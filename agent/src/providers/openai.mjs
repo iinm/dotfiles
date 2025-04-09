@@ -12,9 +12,10 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 /**
  * @param {OpenAIModelConfig} config
  * @param {ModelInput} input
+  * @param {number} retryCount
  * @returns {Promise<ModelOutput | Error>}
  */
-export async function callOpenAIModel(config, input) {
+export async function callOpenAIModel(config, input, retryCount = 0) {
   return await noThrow(async () => {
     const messages = convertGenericMessageToOpenAIFormat(input.messages);
     const tools = convertGenericeToolDefinitionToOpenAIFormat(
@@ -39,9 +40,10 @@ export async function callOpenAIModel(config, input) {
     });
 
     if (response.status === 429) {
-      console.log(styleText("yellow", `OpenAI rate limit exceeded. Retry in 10s...`));
-      await new Promise((resolve) => setTimeout(resolve, 10_000));
-      return callOpenAIModel(config, input);
+      const interval = Math.min(2 * (2 ** retryCount), 16);
+      console.log(styleText("yellow", `OpenAI rate limit exceeded. Retry in ${interval} seconds...`));
+      await new Promise((resolve) => setTimeout(resolve, interval * 1000));
+      return callOpenAIModel(config, input, retryCount + 1);
     }
 
     if (response.status !== 200) {

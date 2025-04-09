@@ -12,9 +12,10 @@ const GOOGLE_AI_STUDIO_API_KEY = process.env.GOOGLE_AI_STUDIO_API_KEY;
 /**
  * @param {GeminiModelConfig} config
  * @param {ModelInput} input
+ * @param {number} retryCount
  * @returns {Promise<ModelOutput | Error>}
  */
-export async function callGeminiModel(config, input) {
+export async function callGeminiModel(config, input, retryCount = 0) {
   return await noThrow(async () => {
     const contents = convertGenericMessageToGeminiFormat(input.messages);
     const tools = convertGenericToolDefinitionToGeminiFormat(input.tools || []);
@@ -55,9 +56,10 @@ export async function callGeminiModel(config, input) {
     });
 
     if (response.status === 429) {
-      console.log(styleText("yellow", "Gemini rate limit exceeded. Retrying in 10 seconds..."));
-      await new Promise((resolve) => setTimeout(resolve, 10_000));
-      return callGeminiModel(config, input);
+      const interval = Math.min(2 * (2 ** retryCount), 16);
+      console.log(styleText("yellow", `Gemini rate limit exceeded. Retrying in ${interval} seconds...`));
+      await new Promise((resolve) => setTimeout(resolve, interval * 1000));
+      return callGeminiModel(config, input, retryCount + 1);
     }
 
     if (response.status !== 200) {
@@ -112,12 +114,13 @@ export async function callGeminiModel(config, input) {
 
     const message = convertGeminiAssistantMessageToGenericFormat(content);
     if (message instanceof GeminiNoCandidateError) {
-      console.log(styleText("yellow", "No candidates found in Gemini response. Retrying in 3 seconds..."));
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      const interval = Math.min(2 * (2 ** retryCount), 16);
+      console.log(styleText("yellow", `No candidates found in Gemini response. Retrying in ${interval} seconds...`));
+      await new Promise((resolve) => setTimeout(resolve, interval * 1000));
       return callGeminiModel(config, {
         ...input,
         messages: [...input.messages, { role: "user", content: [{ type: "text", text: "continue" }] }],
-      });
+      }, retryCount + 1);
     }
 
     return {

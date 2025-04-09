@@ -12,9 +12,10 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 /**
  * @param {AnthropicModelConfig} config
  * @param {ModelInput} input
+ * @param {number} [retryCount]
  * @returns {Promise<ModelOutput | Error>}
  */
-export async function callAnthropicModel(config, input) {
+export async function callAnthropicModel(config, input, retryCount = 0) {
   return await noThrow(async () => {
     const messages = convertGenericMessageToAnthropicFormat(input.messages);
     const cacheEnabledMessages = enableContextCaching(messages);
@@ -41,9 +42,10 @@ export async function callAnthropicModel(config, input) {
     });
 
     if (response.status === 429) {
-      console.log(styleText("yellow", "Anthropic rate limit exceeded. Retry in 10 seconds..."));
-      await new Promise((resolve) => setTimeout(resolve, 10_000));
-      return callAnthropicModel(config, input);
+      const interval = Math.min(2 * (2 ** retryCount), 16);
+      console.log(styleText("yellow", `Anthropic rate limit exceeded. Retry in ${interval} seconds...`));
+      await new Promise((resolve) => setTimeout(resolve, interval * 1000));
+      return callAnthropicModel(config, input, retryCount + 1);
     }
 
     if (response.status !== 200) {
