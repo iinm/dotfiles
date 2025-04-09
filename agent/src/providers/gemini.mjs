@@ -54,6 +54,12 @@ export async function callGeminiModel(config, input) {
       body: JSON.stringify(request),
     });
 
+    if (response.status === 429) {
+      console.log(styleText("yellow", "Gemini rate limit exceeded. Retrying in 10 seconds..."));
+      await new Promise((resolve) => setTimeout(resolve, 10_000));
+      return callGeminiModel(config, input);
+    }
+
     if (response.status !== 200) {
       return new Error(
         `Failed to call Gemini model: status=${response.status}, body=${await response.text()}`,
@@ -106,7 +112,7 @@ export async function callGeminiModel(config, input) {
 
     const message = convertGeminiAssistantMessageToGenericFormat(content);
     if (message instanceof GeminiNoCandidateError) {
-      console.log(styleText("yellow", "No candidates found for Gemini model, retrying after 3 seconds"));
+      console.log(styleText("yellow", "No candidates found in Gemini response. Retrying in 3 seconds..."));
       await new Promise((resolve) => setTimeout(resolve, 3000));
       return callGeminiModel(config, {
         ...input,

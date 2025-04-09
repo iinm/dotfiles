@@ -4,6 +4,7 @@
  * @import { ToolDefinition } from "../tool";
  */
 
+import { styleText } from "node:util";
 import { noThrow } from "../utils/noThrow.mjs";
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
@@ -38,6 +39,12 @@ export async function callAnthropicModel(config, input) {
         stream: true,
       }),
     });
+
+    if (response.status === 429) {
+      console.log(styleText("yellow", "Anthropic rate limit exceeded. Retry in 10 seconds..."));
+      await new Promise((resolve) => setTimeout(resolve, 10_000));
+      return callAnthropicModel(config, input);
+    }
 
     if (response.status !== 200) {
       return new Error(
@@ -236,7 +243,7 @@ function convertAnthropicStreamEventsToChatCompletion(events) {
     } else if (event.type === "content_block_start") {
       chatCompletion.content = chatCompletion.content || [];
       chatCompletion.content.push(
-        /** @type {AnthropicAssistantMessageContent} */ (event.content_block),
+        /** @type {AnthropicAssistantMessageContent} */(event.content_block),
       );
     } else if (event.type === "content_block_delta") {
       const lastContentPart = chatCompletion.content?.at(-1);

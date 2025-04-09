@@ -4,6 +4,7 @@
  * @import { ToolDefinition } from "../tool"
  */
 
+import { styleText } from "node:util";
 import { noThrow } from "../utils/noThrow.mjs";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -36,6 +37,12 @@ export async function callOpenAIModel(config, input) {
         },
       }),
     });
+
+    if (response.status === 429) {
+      console.log(styleText("yellow", `OpenAI rate limit exceeded. Retry in 10s...`));
+      await new Promise((resolve) => setTimeout(resolve, 10_000));
+      return callOpenAIModel(config, input);
+    }
 
     if (response.status !== 200) {
       throw new Error(
@@ -256,7 +263,7 @@ function convertOpenAIStreamDataToChatCompletion(dataList) {
         for (const toolCallDelta of delta.tool_calls) {
           const toolCall =
             chatCompletion.choices?.[0].message.tool_calls?.[
-              toolCallDelta.index
+            toolCallDelta.index
             ];
           if (toolCall && toolCallDelta.function) {
             toolCall.function.arguments += toolCallDelta.function.arguments;
