@@ -4,6 +4,7 @@
  * @import { ToolDefinition } from "../tool";
  */
 
+import { styleText } from "node:util";
 import { noThrow } from "../utils/noThrow.mjs";
 
 const GOOGLE_AI_STUDIO_API_KEY = process.env.GOOGLE_AI_STUDIO_API_KEY;
@@ -103,8 +104,18 @@ export async function callGeminiModel(config, input) {
       total: content.usageMetadata.totalTokenCount,
     };
 
+    const message = convertGeminiAssistantMessageToGenericFormat(content);
+    if (message instanceof GeminiNoCandidateError) {
+      console.log(styleText("yellow", "No candidates found for Gemini model, retrying after 3 seconds"));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      return callGeminiModel(config, {
+        ...input,
+        messages: [...input.messages, { role: "user", content: [{ type: "text", text: "continue" }] }],
+      });
+    }
+
     return {
-      message: convertGeminiAssistantMessageToGenericFormat(content),
+      message,
       providerTokenUsage: tokenUsage,
     };
   });
@@ -352,14 +363,24 @@ function convertGeminiStreamContentsToContent(events) {
   return mergedContent;
 }
 
+class GeminiNoCandidateError extends Error {
+  /**
+    * @param {string} message
+    */
+  constructor(message) {
+    super(message);
+    this.name = "GeminiNoCandidateError";
+  }
+}
+
 /**
  * @param {GeminiGeneratedContent} content
- * @returns {AssistantMessage}
+ * @returns {AssistantMessage | GeminiNoCandidateError}
  */
 function convertGeminiAssistantMessageToGenericFormat(content) {
   const candidate = content.candidates?.at(0);
   if (!candidate) {
-    throw new Error(`No candidates found: content=${JSON.stringify(content)}`);
+    return new GeminiNoCandidateError(`No candidates found: content=${JSON.stringify(content)}`);
   }
 
   /** @type {AssistantMessage["content"]} */
