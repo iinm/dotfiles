@@ -1,11 +1,12 @@
 /**
  * @import { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
  * @import { Tool, ToolImplementation } from "./tool";
- * @import { Client } from "@modelcontextprotocol/sdk/client/index.js";
  */
 
 import fs from "node:fs";
 import path from "node:path";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { AGENT_PROJECT_METADATA_DIR } from "./config.mjs";
 import { noThrow } from "./utils/noThrow.mjs";
 
@@ -20,17 +21,11 @@ import { noThrow } from "./utils/noThrow.mjs";
  * @returns {Promise<Client>} - The MCP client.
  */
 export async function createMCPClient(options) {
-  const mcpClientModule = await import(
-    "@modelcontextprotocol/sdk/client/index.js"
-  );
-  const mcpClientStdioModule = await import(
-    "@modelcontextprotocol/sdk/client/stdio.js"
-  );
-  const client = new mcpClientModule.Client({
+  const client = new Client({
     name: "undefined",
     version: "undefined",
   });
-  const transport = new mcpClientStdioModule.StdioClientTransport(
+  const transport = new StdioClientTransport(
     options.params,
   );
   await client.connect(transport);
