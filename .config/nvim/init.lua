@@ -207,7 +207,6 @@ local setup_keymap = function()
   -- vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>:file<CR>')
   -- vim.keymap.set('n', '-', ':<C-u>e %:h<CR>')
   vim.keymap.set('n', '-', '<Cmd>Oil<CR>')
-  vim.keymap.set({ 'n', 'v' }, '<leader>c', ':<C-u>CopilotChat<space>')
 
   -- window
   vim.keymap.set('n', '<C-w>z', window_utils.toggle_maximize)
@@ -253,11 +252,6 @@ local setup_keymap = function()
   vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('UserLspKeymapConfig', {}),
     callback = function(ev)
-      -- avoid conflict
-      if vim.bo.filetype == 'copilot-chat' then
-        return
-      end
-
       local opts = { buffer = ev.buf }
       vim.keymap.set({ 'n', 'v' }, '<leader>a', vim.lsp.buf.code_action, opts)
       vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
@@ -541,8 +535,6 @@ local setup_plugins = function()
     'hrsh7th/cmp-cmdline',
     'hrsh7th/nvim-cmp',
 
-    'github/copilot.vim',
-
     -- snippets
     {
       "L3MON4D3/LuaSnip",
@@ -825,9 +817,6 @@ end
 
 local setup_others = function()
   vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
-  vim.g.copilot_filetypes = {
-    gitcommit = true,
-  }
   require('nvim-autopairs').setup()
   require("nvim-surround").setup()
   require('dressing').setup()
