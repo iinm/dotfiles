@@ -28,7 +28,7 @@ local k = require("luasnip.nodes.key_indexer").new_key
 
 ls.add_snippets("javascript", {
   s(
-    "err.custom",
+    "err-custom",
     fmt(
       [[
         export class <name> extends Error {
@@ -45,4 +45,66 @@ ls.add_snippets("javascript", {
       { delimiters = "<>", repeat_duplicates = true }
     )
   ),
+  s(
+    "cl-json-stringify",
+    fmt("console.log(JSON.stringify(<>, null, 2));",
+      { i(1, "obj") },
+      { delimiters = "<>", repeat_duplicates = true }
+    )
+  ),
+  s(
+    "type-doc",
+    fmt("/** @type {<>} */",
+      { i(1, "type") },
+      { delimiters = "<>", repeat_duplicates = true }
+    )
+  ),
+  s(
+    "typedef-obj-doc",
+    fmt(
+      [[
+        /**
+         * @typedef {Object} <>
+         * @property {<>} <>
+         */
+      ]],
+      { i(1, "TypeName"), i(2, "propType"), i(3, "propName") },
+      { delimiters = "<>", repeat_duplicates = true }
+    )
+  ),
+  s(
+    "fn-doc",
+    fmt(
+      [[
+        /**
+         * @param {<>} <>
+         * @returns {<>}
+         */
+      ]],
+      { i(1, "paramType"), i(2, "paramNmae"), i(3, "returnType") },
+      { delimiters = "<>", repeat_duplicates = true }
+    )
+  ),
+  s(
+    "import-doc",
+    fmt(
+      [[
+        /**
+         * @import { <> } "<>";
+         */
+      ]],
+      { i(1, "prop"), i(2, "path") },
+      { delimiters = "<>", repeat_duplicates = true }
+    )
+  ),
+  s(
+    "import-add-doc",
+    fmt(
+      [[
+        @import { <> } "<>";
+      ]],
+      { i(1, "prop"), i(2, "path") },
+      { delimiters = "<>", repeat_duplicates = true }
+    )
+  )
 })
