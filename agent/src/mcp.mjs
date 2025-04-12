@@ -1,14 +1,22 @@
 /**
+ * @import { Client } from "@modelcontextprotocol/sdk/client/index.js";
  * @import { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
  * @import { Tool, ToolImplementation } from "./tool";
  */
 
 import fs from "node:fs";
 import path from "node:path";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { AGENT_PROJECT_METADATA_DIR } from "./config.mjs";
 import { noThrow } from "./utils/noThrow.mjs";
+
+async function lazyImport() {
+  const mcpClient = await import("@modelcontextprotocol/sdk/client/index.js");
+  const mcpClientStdio = await import(
+    "@modelcontextprotocol/sdk/client/stdio.js"
+  );
+
+  return { mcpClient, mcpClientStdio };
+}
 
 /**
  * @typedef {Object} MCPClientOptions
@@ -21,12 +29,13 @@ import { noThrow } from "./utils/noThrow.mjs";
  * @returns {Promise<Client>} - The MCP client.
  */
 export async function createMCPClient(options) {
-  const client = new Client({
+  const { mcpClient, mcpClientStdio } = await lazyImport();
+  const client = new mcpClient.Client({
     name: "undefined",
     version: "undefined",
   });
 
-  const transport = new StdioClientTransport({
+  const transport = new mcpClientStdio.StdioClientTransport({
     ...options.params,
   });
   await client.connect(transport);
