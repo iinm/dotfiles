@@ -42,8 +42,13 @@ export async function callAnthropicModel(config, input, retryCount = 0) {
     });
 
     if (response.status === 429) {
-      const interval = Math.min(2 * (2 ** retryCount), 16);
-      console.log(styleText("yellow", `Anthropic rate limit exceeded. Retry in ${interval} seconds...`));
+      const interval = Math.min(2 * 2 ** retryCount, 16);
+      console.log(
+        styleText(
+          "yellow",
+          `Anthropic rate limit exceeded. Retry in ${interval} seconds...`,
+        ),
+      );
       await new Promise((resolve) => setTimeout(resolve, interval * 1000));
       return callAnthropicModel(config, input, retryCount + 1);
     }
@@ -245,7 +250,7 @@ function convertAnthropicStreamEventsToChatCompletion(events) {
     } else if (event.type === "content_block_start") {
       chatCompletion.content = chatCompletion.content || [];
       chatCompletion.content.push(
-        /** @type {AnthropicAssistantMessageContent} */(event.content_block),
+        /** @type {AnthropicAssistantMessageContent} */ (event.content_block),
       );
     } else if (event.type === "content_block_delta") {
       const lastContentPart = chatCompletion.content?.at(-1);

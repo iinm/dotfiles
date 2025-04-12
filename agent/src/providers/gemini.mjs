@@ -56,8 +56,13 @@ export async function callGeminiModel(config, input, retryCount = 0) {
     });
 
     if (response.status === 429) {
-      const interval = Math.min(2 * (2 ** retryCount), 16);
-      console.log(styleText("yellow", `Gemini rate limit exceeded. Retrying in ${interval} seconds...`));
+      const interval = Math.min(2 * 2 ** retryCount, 16);
+      console.log(
+        styleText(
+          "yellow",
+          `Gemini rate limit exceeded. Retrying in ${interval} seconds...`,
+        ),
+      );
       await new Promise((resolve) => setTimeout(resolve, interval * 1000));
       return callGeminiModel(config, input, retryCount + 1);
     }
@@ -114,13 +119,25 @@ export async function callGeminiModel(config, input, retryCount = 0) {
 
     const message = convertGeminiAssistantMessageToGenericFormat(content);
     if (message instanceof GeminiNoCandidateError) {
-      const interval = Math.min(2 * (2 ** retryCount), 16);
-      console.log(styleText("yellow", `No candidates found in Gemini response. Retrying in ${interval} seconds...`));
+      const interval = Math.min(2 * 2 ** retryCount, 16);
+      console.log(
+        styleText(
+          "yellow",
+          `No candidates found in Gemini response. Retrying in ${interval} seconds...`,
+        ),
+      );
       await new Promise((resolve) => setTimeout(resolve, interval * 1000));
-      return callGeminiModel(config, {
-        ...input,
-        messages: [...input.messages, { role: "user", content: [{ type: "text", text: "continue" }] }],
-      }, retryCount + 1);
+      return callGeminiModel(
+        config,
+        {
+          ...input,
+          messages: [
+            ...input.messages,
+            { role: "user", content: [{ type: "text", text: "continue" }] },
+          ],
+        },
+        retryCount + 1,
+      );
     }
 
     return {
@@ -374,8 +391,8 @@ function convertGeminiStreamContentsToContent(events) {
 
 class GeminiNoCandidateError extends Error {
   /**
-    * @param {string} message
-    */
+   * @param {string} message
+   */
   constructor(message) {
     super(message);
     this.name = "GeminiNoCandidateError";
@@ -389,7 +406,9 @@ class GeminiNoCandidateError extends Error {
 function convertGeminiAssistantMessageToGenericFormat(content) {
   const candidate = content.candidates?.at(0);
   if (!candidate) {
-    return new GeminiNoCandidateError(`No candidates found: content=${JSON.stringify(content)}`);
+    return new GeminiNoCandidateError(
+      `No candidates found: content=${JSON.stringify(content)}`,
+    );
   }
 
   /** @type {AssistantMessage["content"]} */

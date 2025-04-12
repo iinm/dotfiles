@@ -12,7 +12,7 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 /**
  * @param {OpenAIModelConfig} config
  * @param {ModelInput} input
-  * @param {number} retryCount
+ * @param {number} retryCount
  * @returns {Promise<ModelOutput | Error>}
  */
 export async function callOpenAIModel(config, input, retryCount = 0) {
@@ -40,8 +40,13 @@ export async function callOpenAIModel(config, input, retryCount = 0) {
     });
 
     if (response.status === 429) {
-      const interval = Math.min(2 * (2 ** retryCount), 16);
-      console.log(styleText("yellow", `OpenAI rate limit exceeded. Retry in ${interval} seconds...`));
+      const interval = Math.min(2 * 2 ** retryCount, 16);
+      console.log(
+        styleText(
+          "yellow",
+          `OpenAI rate limit exceeded. Retry in ${interval} seconds...`,
+        ),
+      );
       await new Promise((resolve) => setTimeout(resolve, interval * 1000));
       return callOpenAIModel(config, input, retryCount + 1);
     }
@@ -265,7 +270,7 @@ function convertOpenAIStreamDataToChatCompletion(dataList) {
         for (const toolCallDelta of delta.tool_calls) {
           const toolCall =
             chatCompletion.choices?.[0].message.tool_calls?.[
-            toolCallDelta.index
+              toolCallDelta.index
             ];
           if (toolCall && toolCallDelta.function) {
             toolCall.function.arguments += toolCallDelta.function.arguments;

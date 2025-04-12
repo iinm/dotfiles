@@ -54,24 +54,32 @@ export async function createMCPTools(client) {
       // Remove properties that are not supported by Gemini
       const inputSchema = { ...tool.inputSchema };
       if ("$schema" in inputSchema) {
-        delete inputSchema.$schema;
+        inputSchema.$schema = undefined;
       }
       if ("additionalProperties" in inputSchema) {
-        delete inputSchema.additionalProperties;
+        inputSchema.additionalProperties = undefined;
       }
       if (typeof inputSchema.properties === "object") {
         for (const [_, value] of Object.entries(inputSchema.properties)) {
           if (typeof value === "object" && value && "default" in value) {
-            delete value.default;
+            value.default = undefined;
           }
-          if (typeof value === "object" && value && "exclusiveMaximum" in value) {
-            delete value.exclusiveMaximum;
+          if (
+            typeof value === "object" &&
+            value &&
+            "exclusiveMaximum" in value
+          ) {
+            value.exclusiveMaximum = undefined;
           }
-          if (typeof value === "object" && value && "exclusiveMinimum" in value) {
-            delete value.exclusiveMinimum;
+          if (
+            typeof value === "object" &&
+            value &&
+            "exclusiveMinimum" in value
+          ) {
+            value.exclusiveMinimum = undefined;
           }
           if (typeof value === "object" && value && "format" in value) {
-            delete value.format;
+            value.format = undefined;
           }
         }
       }

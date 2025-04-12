@@ -52,7 +52,7 @@ export function startCLI({
       await onStop();
       process.exit(0);
     }
-  })
+  });
 
   cli.on("line", async (input) => {
     const inputTrimmed = input.trim();
