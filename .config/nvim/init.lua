@@ -202,11 +202,17 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>x', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
   vim.keymap.set('n', '<leader>z', ':<C-u>setl foldlevel=')
   vim.keymap.set('n', '<leader>q', window_utils.toggle_quickfix)
-  -- vim.keymap.set('v', '//', [[y/\V<C-r>=escape(@",'/\')<CR><CR>]]) -- -> use * or # instead
   vim.keymap.set('n', 's', '<Plug>(easymotion-overwin-f2)')
+  vim.keymap.set('n', '-', '<Cmd>Oil<CR>')
   -- vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>:file<CR>')
   -- vim.keymap.set('n', '-', ':<C-u>e %:h<CR>')
-  vim.keymap.set('n', '-', '<Cmd>Oil<CR>')
+  -- vim.keymap.set('v', '//', [[y/\V<C-r>=escape(@",'/\')<CR><CR>]]) -- -> use * or # instead
+
+  -- copy
+  vim.keymap.set('n', '<leader>cp', ':<C-u>CopyPath<CR>')
+  vim.keymap.set('n', '<leader>cl', ':<C-u>CopyPathLine<CR>')
+  vim.keymap.set('n', '<leader>cr', ':<C-u>CopyPathRange<CR>')
+  vim.keymap.set('n', '<leader>cP', ':<C-u>CopyAbsolutePath<CR>')
 
   -- window
   vim.keymap.set('n', '<C-w>z', window_utils.toggle_maximize)
@@ -430,16 +436,19 @@ local setup_auto_commands = function()
   })
 
   -- indent
-  vim.api.nvim_create_autocmd({ 'FileType' }, {
-    pattern = 'go',
-    group = vim.api.nvim_create_augroup('UserIndentConfig', {}),
-    command = 'setlocal tabstop=4 noexpandtab softtabstop=4 shiftwidth=4'
-  })
-  vim.api.nvim_create_autocmd({ 'FileType' }, {
-    pattern = 'xml',
-    group = vim.api.nvim_create_augroup('UserIndentConfig', {}),
-    command = 'setlocal tabstop=4'
-  })
+  local indent_config = {
+    { 'go',       'setlocal tabstop=4 noexpandtab softtabstop=4 shiftwidth=4' },
+    { 'xml',      'setlocal tabstop=4' },
+    { 'markdown', 'setlocal tabstop=2 expandtab softtabstop=2 shiftwidth=2' },
+  }
+
+  for _, config in ipairs(indent_config) do
+    vim.api.nvim_create_autocmd({ 'FileType' }, {
+      pattern = config[1],
+      group = vim.api.nvim_create_augroup('UserIndentConfig', {}),
+      command = config[2],
+    })
+  end
 
   -- disable spell check
   vim.api.nvim_create_autocmd({ 'FileType' }, {
@@ -582,7 +591,6 @@ local setup_lsp = function()
     })
   end
 
-  -- npm install -g typescript typescript-language-server
   if vim.fn.executable('tsserver') then
     lspconfig.ts_ls.setup({
       capabilities = capabilities
@@ -631,6 +639,22 @@ local setup_lsp = function()
     filetypes = vim.tbl_keys(efm_settings.languages),
     settings = efm_settings,
   })
+
+  -- npm install -g typescript typescript-language-server
+  -- require("typescript-tools").setup(
+  --   vim.tbl_deep_extend("force",
+  --     { capabilities = capabilities },
+  --     local_config.typescript_tools or {
+  --       -- Example:
+  --       -- settings = {
+  --       --   tsserver_file_preferences = {
+  --       --     -- https://stackoverflow.com/questions/62503006/vscode-add-js-extension-on-import-autocomplete
+  --       --     importModuleSpecifierEnding = "js",
+  --       --   }
+  --       -- }
+  --     }
+  --   )
+  -- )
 
   -- formatter
   local lsp_format_clients = vim.iter({
