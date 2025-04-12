@@ -5,8 +5,8 @@ A lightweight CLI-based coding agent designed to assist with your development ta
 ## Requirements
 
 - Node.js 22 or later
-- Anthropic API key or OpenAI API key
-- Tavily API key
+- Anthropic API key, OpenAI API key, or Google AI Studio API key
+- (Optional) Tavily API key
 
 ## Setup
 
@@ -25,7 +25,7 @@ npm install
 ## Getting Started
 
 ```sh
-# Set up a metadata directory for storing memory, workflow files, and other resources.
+# (Optional) Set up a metadata directory for storing memory, workflow files, and other resources.
 ./bin/agent-init --metadata-dir ~/agent-metadata/<project-name>
 ```
 
@@ -71,7 +71,7 @@ export default {
 
   // WARNING:
   // - This is an experimental feature.
-  // - Only works with Anthropic API.
+  // - Image support is currently unavailable.
   mcpServers: {
     fetch: {
       command: "docker",

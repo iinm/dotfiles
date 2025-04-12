@@ -2,6 +2,7 @@
  * @import { Tool } from "./tool";
  */
 
+import { styleText } from "node:util";
 import { createAgent } from "./agent.mjs";
 import { startCLI } from "./cli.mjs";
 import {
@@ -47,11 +48,14 @@ import { writeFileTool } from "./tools/writeFile.mjs";
   const mcpTools = [];
   if (localConfig.mcpServers) {
     for (const [name, params] of Object.entries(localConfig.mcpServers)) {
-      console.log(`Connecting to MCP server: ${name}`);
+      process.stdout.write(
+        styleText("blue", `Connecting to MCP server: ${name}`),
+      );
       const mcpClient = await createMCPClient({
         name,
         params,
       });
+      process.stdout.write(" ✅\n");
       mcpCleanups.push(() => mcpClient.close());
       const tools = await createMCPTools(mcpClient);
       mcpTools.push(...tools);
@@ -64,17 +68,21 @@ import { writeFileTool } from "./tools/writeFile.mjs";
     projectMetadataDir: AGENT_PROJECT_METADATA_DIR,
   });
 
+  const tools = [
+    execCommandTool,
+    writeFileTool,
+    patchFileTool,
+    tmuxCommandTool,
+  ];
+
+  if (process.env.TAVILY_API_KEY) {
+    tools.push(tavilySearchTool);
+  }
+
   const { userEventEmitter, agentEventEmitter } = createAgent({
     callModel: createModelCaller(AGENT_MODEL),
     prompt,
-    tools: [
-      execCommandTool,
-      writeFileTool,
-      patchFileTool,
-      tmuxCommandTool,
-      tavilySearchTool,
-      ...mcpTools,
-    ],
+    tools: [...tools, ...mcpTools],
     toolUseApprover,
   });
 
