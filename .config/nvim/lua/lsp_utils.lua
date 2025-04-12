@@ -5,8 +5,19 @@ local function lsp_call_hierarchy_recursive(direction, max_depth)
   local lsp = require('vim.lsp')
   local params = lsp.util.make_position_params()
 
-  lsp.buf_request(0, 'textDocument/prepareCallHierarchy', params, function(err, result)
-    if err or not result or vim.tbl_isempty(result) then
+  -- callback argument type: https://github.com/neovim/neovim/blob/master/runtime/lua/vim/lsp/_meta.lua
+  lsp.buf_request_all(0, 'textDocument/prepareCallHierarchy', params, function(results)
+    local first_result = nil
+    for _, result in ipairs(results) do
+      if result.err then
+        vim.notify('Error during prepareCallHierarchy: ' .. vim.inspect(result.err), vim.log.levels.WARN)
+      end
+      if result.result then
+        first_result = result.result
+      end
+    end
+
+    if not first_result then
       vim.notify('No call hierarchy found', vim.log.levels.INFO)
       return
     end
@@ -18,7 +29,7 @@ local function lsp_call_hierarchy_recursive(direction, max_depth)
 
     --- @type ItemTreeNode
     local item_tree_root = {
-      item = result[1],
+      item = first_result[1],
       level = 0,
       children = {},
     }
@@ -36,16 +47,24 @@ local function lsp_call_hierarchy_recursive(direction, max_depth)
       vim.notify(string.format('Tracing %s (Level: %d)', item.name, parent_node.level), vim.log.levels.INFO)
       local method = direction == 'incoming' and 'callHierarchy/incomingCalls' or 'callHierarchy/outgoingCalls'
       pending_requests = pending_requests + 1
-      lsp.buf_request(0, method, { item = item }, function(calls_err, calls_result)
+      lsp.buf_request_all(0, method, { item = item }, function(call_results)
         pending_requests = pending_requests - 1
-        if calls_err then
-          vim.notify('Error while tracing call hierarchy: ' .. calls_err, vim.log.levels.ERROR)
-          -- stop recursion
-        elseif not calls_result then
+
+        local first_call_result = nil
+        for _, call_result in ipairs(call_results) do
+          if call_results.err then
+            vim.notify('Error while tracing call hierarchy: : ', vim.inspect(call_result.err), vim.log.levels.wARN)
+          end
+          if call_result.result then
+            first_call_result = call_result.result
+          end
+        end
+
+        if not first_call_result then
           vim.notify('No call hierarchy found', vim.log.levels.ERROR)
           -- stop recursion
         else
-          for _, call in ipairs(calls_result) do
+          for _, call in ipairs(first_call_result) do
             local call_target = direction == 'incoming' and call.from or call.to
             local item_key = string.format(
               '%s:%d,%d',
