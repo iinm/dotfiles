@@ -318,6 +318,9 @@ local setup_commands = function()
     vim.api.nvim_create_user_command(table.unpack(command))
   end
 
+  vim.api.nvim_create_user_command('EditSnippets', function()
+    require("luasnip.loaders").edit_snippet_files()
+  end, {})
 
   vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('UserLspCommandConfig', {}),
@@ -845,7 +848,7 @@ local setup_others = function()
   require('nvim-autopairs').setup()
   require("nvim-surround").setup()
   require('dressing').setup()
-  require('snippets')
+  require("luasnip.loaders.from_lua").load({ paths = vim.fn.stdpath('config') .. '/snippets' })
 end
 
 setup_options()
