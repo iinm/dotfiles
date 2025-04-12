@@ -18,6 +18,7 @@ import { styleText } from "node:util";
  * @property {AgentEventEmitter} agentEventEmitter
  * @property {string} sessionId
  * @property {string} modelName
+ * @property {() => Promise<void>} onStop
  */
 
 /**
@@ -28,12 +29,30 @@ export function startCLI({
   agentEventEmitter,
   sessionId,
   modelName,
+  onStop,
 }) {
   const cli = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
     prompt: `${styleText(["white", "bgGray"], `\nSession: ${sessionId}, Model: ${modelName}`)}\n> `,
   });
+
+  readline.emitKeypressEvents(process.stdin);
+  if (process.stdin.isTTY) {
+    process.stdin.setRawMode(true);
+  }
+
+  process.stdin.on("keypress", async (_, key) => {
+    if (key.ctrl && key.name === "c") {
+      await onStop();
+      process.exit(1);
+    }
+
+    if (key.ctrl && key.name === "d") {
+      await onStop();
+      process.exit(0);
+    }
+  })
 
   cli.on("line", async (input) => {
     const inputTrimmed = input.trim();

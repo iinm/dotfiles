@@ -25,10 +25,12 @@ export async function createMCPClient(options) {
     name: "undefined",
     version: "undefined",
   });
-  const transport = new StdioClientTransport(
-    options.params,
-  );
+
+  const transport = new StdioClientTransport({
+    ...options.params,
+  });
   await client.connect(transport);
+
   return client;
 }
 
