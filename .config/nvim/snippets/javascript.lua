@@ -62,7 +62,7 @@ return {
     fmt(
       [[
         /**
-         * @import { <> } "<>";
+         * @import { <> } from "<>";
          */
       ]],
       { i(1, "prop"), i(2, "path") },
@@ -73,7 +73,7 @@ return {
     "import-add-doc",
     fmt(
       [[
-        @import { <> } "<>";
+        @import { <> } from "<>";
       ]],
       { i(1, "prop"), i(2, "path") },
       { delimiters = "<>", repeat_duplicates = true }
