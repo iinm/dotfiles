@@ -525,6 +525,7 @@ local setup_plugins = function()
     'easymotion/vim-easymotion',
     'kylechui/nvim-surround',
     'windwp/nvim-autopairs',
+    'bullets-vim/bullets.vim',
     'Almo7aya/openingh.nvim',
     'brenoprata10/nvim-highlight-colors',
 
