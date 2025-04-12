@@ -20,7 +20,7 @@ async function lazyImport() {
 
 /**
  * @typedef {Object} MCPClientOptions
- * @property {string} name - The name of the client.
+ * @property {string} serverName - The name of the MCP server.
  * @property {StdioServerParameters} params - The transport to use for the client.
  */
 
@@ -44,10 +44,11 @@ export async function createMCPClient(options) {
 }
 
 /**
+ * @param {string} serverName
  * @param {Client} client - The MCP client.
  * @returns {Promise<Tool[]>} - The list of tools.
  */
-export async function createMCPTools(client) {
+export async function createMCPTools(serverName, client) {
   const { tools: mcpTools } = await client.listTools();
   /** @type {Tool[]} */
   const tools = mcpTools
@@ -95,7 +96,7 @@ export async function createMCPTools(client) {
 
       return {
         def: {
-          name: `mcp-${tool.name}`,
+          name: `mcp__${serverName}__${tool.name}`,
           description: tool.description || `${tool.name} tool`,
           inputSchema: /** @type {Record<string, unknown>} */ (inputSchema),
         },

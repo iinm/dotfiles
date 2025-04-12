@@ -47,17 +47,17 @@ import { writeFileTool } from "./tools/writeFile.mjs";
   /** @type {Tool[]} */
   const mcpTools = [];
   if (localConfig.mcpServers) {
-    for (const [name, params] of Object.entries(localConfig.mcpServers)) {
+    for (const [serverName, params] of Object.entries(localConfig.mcpServers)) {
       process.stdout.write(
-        styleText("blue", `Connecting to MCP server: ${name}`),
+        styleText("blue", `Connecting to MCP server: ${serverName}`),
       );
       const mcpClient = await createMCPClient({
-        name,
+        serverName,
         params,
       });
       process.stdout.write(" ✅\n");
       mcpCleanups.push(() => mcpClient.close());
-      const tools = await createMCPTools(mcpClient);
+      const tools = await createMCPTools(serverName, mcpClient);
       mcpTools.push(...tools);
     }
   }

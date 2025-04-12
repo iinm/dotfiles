@@ -62,10 +62,11 @@ export default {
       input: { command: "npm", args: ["run", /(check|fix)/] },
     },
     {
-      toolName: "mcp-fetch",
+      // naming: mcp__<serverName>__<toolName>
+      toolName: "mcp__fetch__fetch",
     },
     {
-      toolName: /mcp-browser_.+/,
+      toolName: /mcp__playwright__browser_.+/,
     },
   ],
 
