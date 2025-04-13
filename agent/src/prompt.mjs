@@ -218,10 +218,11 @@ Task Memory Format:
 
 ## (How) Plan
 
-[List 3-7 concrete steps to achieve the task, including:
+[List concrete steps to achieve the task, including:
 - Initial analysis or research steps
-- Implementation approach
-- Testing or verification methods]
+- Specific files to modify and how (e.g., "Modify ./src/auth.js to add JWT validation")
+- File-level implementation details with expected changes]
+- Exact commands for testing and verification (e.g., "Run \`npm test ./tests/auth.test.js\`")
 
 ## Current Status
 
