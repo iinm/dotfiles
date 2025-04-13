@@ -62,7 +62,7 @@ export default {
       input: { command: "npm", args: ["run", /(check|fix)/] },
     },
     {
-      // naming: mcp__<serverName>__<toolName>
+      // Naming: mcp__<serverName>__<toolName>
       toolName: "mcp__fetch__fetch",
     },
     {
@@ -78,9 +78,9 @@ export default {
       command: "docker",
       args: ["run", "-i", "--rm", "mcp/fetch"],
     },
-    "playwright": {
-      "command": "npx",
-      "args": [
+    playwright: {
+      command: "npx",
+      args: [
         "@playwright/mcp@latest"
       ]
     }
