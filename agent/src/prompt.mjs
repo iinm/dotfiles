@@ -191,11 +191,17 @@ Memory Files:
 - Project memory: ${projectMetadataDir}/memory/project.md
   - This file contains persistent project-wide knowledge
   - Update this file when you learn important project-level information
+  - For monorepos, organize by components/packages with clear section headers
+  - Reference existing documentation files rather than duplicating content
 
 Memory Maintenance:
 - Update existing task memory when continuing the same task
 - Create new task memory files for distinct tasks
-- When updating project memory, maintain existing sections and append or modify information as appropriate
+- When updating project memory:
+  - Maintain existing sections and append or modify information as appropriate
+  - For monorepos, ensure each component has its own clearly labeled section
+  - Use references to existing documentation (README files, wikis) when available
+  - Focus on cross-cutting concerns and relationships between components
 - Aim to keep memory concise yet comprehensive
 
 Task Memory Format:
@@ -255,66 +261,60 @@ Project Memory Format:
 ## Project Overview
 
 - Purpose: [Main purpose of the project and problems it solves, 2-3 sentences]
-- Core Tech Stack: [List key languages, frameworks, libraries with version numbers where relevant]
+- Repository Structure: [Monorepo/Single project, high-level organization]
 - Repository URL: [Git repository URL]
-- Related Resources: [Links to documentation, APIs, or other important resources]
+- Key Documentation: [References to important README files, wikis, or documentation sites]
 
-## Project Structure and Architecture
+## Project Components
 
-[Directory Structure - focus on the most important directories and their purposes]
+### [Component/Package/Service Name 1]
+- Purpose: [Brief description of this component's role]
+- Path: [Path to this component in the repository]
+- Tech Stack: [Key technologies used in this component]
+- Documentation: [Path to component-specific documentation if available]
+- Key Files: [Important entry points or configuration files]
 
-[Architecture Overview - describe main components and how they interact]
+### [Component/Package/Service Name 2]
+- Purpose: [Brief description of this component's role]
+- Path: [Path to this component in the repository]
+- Tech Stack: [Key technologies used in this component]
+- Documentation: [Path to component-specific documentation if available]
+- Key Files: [Important entry points or configuration files]
 
-## Environment Setup
+## Cross-Cutting Concerns
 
-[Step-by-step setup instructions, including:
-- Prerequisites
-- Installation commands
-- Configuration steps]
+### Development Environment
+- Setup: [Reference to setup documentation or brief instructions]
+- Common Commands: [Key commands for development workflow]
+- Configuration: [Important environment variables or configuration files]
 
-## Coding Standards and Best Practices
+### Architecture Patterns
+- [List key architectural patterns used across the project]
+- [Note how components interact with each other]
+- [Reference architecture diagrams if available]
 
-[Code Style - note project-specific conventions]
-
-[Recommended Patterns]
-- [List 2-4 commonly used design patterns with brief examples]
-- [Error handling approach with example]
-
-## Build, Test, and Linting
-
-[Build instructions - include specific commands]
-
-[Testing instructions - include test frameworks and commands]
-
-[Linting instructions - include tools and configuration]
-
-[Code formatting instructions - include tools and configuration]
-
-## Documentation
-
-[List important documentation files or external resources]
-
-## Security Measures
-
-[Document authentication and authorization mechanisms]
-
-[Secret management methods]
-
-[Security checklist or best practices specific to this project]
-
-## Performance Considerations
-
-[List 2-3 performance optimization guidelines]
-
-[Document caching strategies if applicable]
-
-[Note resource usage monitoring methods]
+### Shared Resources
+- Libraries: [Common libraries used across components]
+- Utilities: [Shared utility code locations]
+- Assets: [Shared assets or resources]
 
 ## Project-Specific Knowledge
 
-[Document domain-specific terminology and concepts]
+### Domain Concepts
+- [Key domain terminology and concepts]
+- [Business rules that span multiple components]
 
-[Summarize core business logic and rules]
+### Integration Points
+- [External systems and how they connect]
+- [Internal integration patterns between components]
+
+### Known Issues and Limitations
+- [Document any significant technical debt]
+- [List known limitations or challenges]
+
+## References
+- [List paths to detailed documentation rather than duplicating content]
+- [Include links to external resources when relevant]
 \`\`\`
 `.trim();
 }
