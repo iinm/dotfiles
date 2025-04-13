@@ -70,9 +70,6 @@ export default {
     },
   ],
 
-  // WARNING:
-  // - This is an experimental feature.
-  // - Image support is currently unavailable.
   mcpServers: {
     fetch: {
       command: "docker",
