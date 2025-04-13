@@ -11,7 +11,22 @@ export type ToolDefinition = {
   inputSchema: Record<string, unknown>;
 };
 
-export type ToolImplementation = (input: Record) => Promise<string | Error>;
+export type ToolImplementation = (
+  input: Record,
+) => Promise<string | StructuredToolResultContent[] | Error>;
+
+export type StructuredToolResultContent =
+  | {
+      type: "text";
+      text: string;
+    }
+  | {
+      type: "image";
+      // base64 encoded
+      data: string;
+      // e.g., image/jpeg
+      mimeType: string;
+    };
 
 export type ToolUseApproverConfig = {
   allowedToolUses: ToolUsePattern[];

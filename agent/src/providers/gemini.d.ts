@@ -86,8 +86,15 @@ export type GeminiContentPartFunctionResponse = {
     name: string;
     response: {
       name: string;
-      content: unknown;
+      content: (GeminiContentPartText | GeminiContentPartInlineData)[];
     };
+  };
+};
+
+export type GeminiContentPartInlineData = {
+  inline_data: {
+    mime_type: string;
+    data: string;
   };
 };
 

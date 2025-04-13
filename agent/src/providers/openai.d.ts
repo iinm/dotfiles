@@ -35,7 +35,7 @@ export type OpenAISystemMessage = {
 
 export type OpenAIUserMessage = {
   role: "user";
-  content: OpenAIMessageContentText[];
+  content: (OpenAIMessageContentText | OpenAIMessageContentImage)[];
 };
 
 export type OpenAIAssistantMessage = {
@@ -53,6 +53,13 @@ export type OpenAIToolMessage = {
 export type OpenAIMessageContentText = {
   type: "text";
   text: string;
+};
+
+export type OpenAIMessageContentImage = {
+  type: "image_url";
+  image_url: {
+    url: string;
+  };
 };
 
 export type OpenAIMessageToolCall = {

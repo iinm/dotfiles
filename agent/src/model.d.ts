@@ -56,6 +56,16 @@ export type MessageContentText = {
   text: string;
 };
 
+export type MessageContentImage = {
+  type: "image";
+
+  // base64 encoded image data
+  data: string;
+
+  // e.g., image/jpeg
+  mimeType: string;
+};
+
 export type MessageContentToolUse = {
   type: "tool_use";
   toolUseId: string;
@@ -67,6 +77,6 @@ export type MessageContentToolResult = {
   type: "tool_result";
   toolUseId: string;
   toolName: string;
-  content: string;
+  content: (MessageContentText | MessageContentImage)[];
   isError?: boolean;
 };

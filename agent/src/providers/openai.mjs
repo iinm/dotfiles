@@ -1,6 +1,6 @@
 /**
  * @import { ModelInput, Message,  MessageContentToolResult, MessageContentText, AssistantMessage, MessageContentToolUse, ModelOutput, PartialMessageContent } from "../model"
- * @import { OpenAIAssistantMessage, OpenAIMessage, OpenAIMessageToolCall, OpenAIModelConfig, OpenAIToolDefinition, OpenAIStreamData, OpenAIChatCompletion } from "./openai"
+ * @import { OpenAIAssistantMessage, OpenAIMessage, OpenAIMessageToolCall, OpenAIModelConfig, OpenAIToolDefinition, OpenAIStreamData, OpenAIChatCompletion, OpenAIMessageContentImage } from "./openai"
  * @import { ToolDefinition } from "../tool"
  */
 
@@ -117,14 +117,53 @@ function convertGenericMessageToOpenAIFormat(genericMessages) {
           genericMessage.content.some((part) => part.type === "tool_result")
         ) {
           /** @type {MessageContentToolResult[]} */
-          const toolResultParts = genericMessage.content.filter(
+          const toolResults = genericMessage.content.filter(
             (part) => part.type === "tool_result",
           );
-          for (const result of toolResultParts) {
+
+          let imageIndex = 0;
+          for (const result of toolResults) {
+            const toolResultContentString = result.content
+              .map((part) => {
+                switch (part.type) {
+                  case "text":
+                    return part.text;
+                  case "image":
+                    imageIndex += 1;
+                    return `(Image [${imageIndex}] omitted. See next message from user.)`;
+                  default:
+                    throw new Error(
+                      `Unsupported content part: ${JSON.stringify(part)}`,
+                    );
+                }
+              })
+              .join("\n\n");
             openAIMessages.push({
               role: "tool",
               tool_call_id: result.toolUseId,
-              content: result.content,
+              content: toolResultContentString,
+            });
+          }
+
+          /** @type {OpenAIMessageContentImage[]} */
+          const imageParts = [];
+          for (const result of toolResults) {
+            for (const part of result.content) {
+              if (part.type === "image") {
+                imageParts.push({
+                  type: "image_url",
+                  image_url: {
+                    url: `data:${part.mimeType};base64,${part.data}`,
+                  },
+                });
+              }
+            }
+          }
+
+          if (imageParts.length) {
+            openAIMessages.push({
+              role: "user",
+              content: imageParts,
             });
           }
         } else {

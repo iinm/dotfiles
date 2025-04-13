@@ -277,16 +277,36 @@ function formatToolUse(toolUse) {
 function formatToolResult(toolResult) {
   const { content, isError } = toolResult;
 
+  /** @type {string[]} */
+  const contentStringParts = [];
+  for (const part of content) {
+    switch (part.type) {
+      case "text":
+        contentStringParts.push(part.text);
+        break;
+      case "image":
+        contentStringParts.push(
+          `data:${part.mimeType};base64,${part.data.slice(0, 20)}...`,
+        );
+        break;
+      default:
+        console.log(`Unsupported content part: ${JSON.stringify(part)}`);
+        break;
+    }
+  }
+
+  const contentString = contentStringParts.join("\n\n");
+
   if (isError) {
-    return styleText("red", content);
+    return styleText("red", contentString);
   }
 
   if (toolResult.toolName === "exec_command") {
-    const omittedContent = content.match(
+    const omittedContent = contentString.match(
       /<command>(cat|head|tail|sed)<\/command>/,
     )
       ? "<stdout>(Output omitted)</stdout>"
-      : content;
+      : contentString;
     return omittedContent
       .replace(/(^<stdout>|<\/stdout>$)/gm, styleText("blue", "$1"))
       .replace(/(^<stderr>|<\/stderr>$)/gm, styleText("magenta", "$1"))
@@ -294,7 +314,7 @@ function formatToolResult(toolResult) {
   }
 
   if (toolResult.toolName === "tmux_command") {
-    return content
+    return contentString
       .replace(/(^<stdout>|<\/stdout>$)/gm, styleText("blue", "$1"))
       .replace(/(^<stderr>|<\/stderr>$)/gm, styleText("magenta", "$1"))
       .replace(/(^<error>|<\/error>$)/gm, styleText("red", "$1"))
@@ -302,11 +322,11 @@ function formatToolResult(toolResult) {
   }
 
   const maxLength = 1024;
-  if (content.length > maxLength) {
-    return `${content.slice(0, maxLength)}... (Content omitted)`;
+  if (contentString.length > maxLength) {
+    return `${contentString.slice(0, maxLength)}... (Content omitted)`;
   }
 
-  return content;
+  return contentString;
 }
 
 /**

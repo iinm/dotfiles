@@ -1,7 +1,7 @@
 /**
  * @import { Client } from "@modelcontextprotocol/sdk/client/index.js";
  * @import { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
- * @import { Tool, ToolImplementation } from "./tool";
+ * @import { StructuredToolResultContent, Tool, ToolImplementation } from "./tool";
  */
 
 import fs from "node:fs";
@@ -54,10 +54,7 @@ export async function createMCPTools(serverName, client) {
   const tools = mcpTools
     .filter((tool) => {
       // Remove unsupported tools
-      return ![
-        // Playwright
-        "browser_take_screenshot",
-      ].includes(tool.name);
+      return ![""].includes(tool.name);
     })
     .map((tool) => {
       // Temporary workaround:
@@ -111,16 +108,40 @@ export async function createMCPTools(serverName, client) {
 
             const resultStringRaw = JSON.stringify(result, null, 2);
 
+            /** @type {StructuredToolResultContent[]} */
+            const contentParts = [];
             /** @type {string[]} */
             const contentStrings = [];
+            let contentContainsImage = false;
             if (Array.isArray(result.content)) {
               for (const part of result.content) {
                 if ("text" in part && typeof part.text === "string") {
+                  contentParts.push({
+                    type: "text",
+                    text: part.text,
+                  });
                   contentStrings.push(part.text);
+                } else if (
+                  part.type === "image" &&
+                  typeof part.mimeType === "string" &&
+                  typeof part.data === "string"
+                ) {
+                  contentParts.push({
+                    type: "image",
+                    data: part.data,
+                    mimeType: part.mimeType,
+                  });
+                  contentContainsImage = true;
                 } else {
-                  console.warn("Unsupported content part from MCP:", part);
+                  console.log(
+                    `Unsupported content part from MCP: ${JSON.stringify(part)}`,
+                  );
                 }
               }
+            }
+
+            if (contentContainsImage) {
+              return contentParts;
             }
 
             const resultString = contentStrings.join("\n\n") || resultStringRaw;

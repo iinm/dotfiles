@@ -183,7 +183,23 @@ function convertGenericMessageToGeminiFormat(messages) {
                   name: part.toolName,
                   response: {
                     name: part.toolName,
-                    content: part.content,
+                    content: part.content.map((contentPart) => {
+                      switch (contentPart.type) {
+                        case "text":
+                          return { text: contentPart.text };
+                        case "image":
+                          return {
+                            inline_data: {
+                              mime_type: contentPart.mimeType,
+                              data: contentPart.data,
+                            },
+                          };
+                        default:
+                          throw new Error(
+                            `Unsupported content: ${JSON.stringify(contentPart)}`,
+                          );
+                      }
+                    }),
                   },
                 },
               },

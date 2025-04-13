@@ -67,6 +67,15 @@ export type AnthropicMessageContentText = {
   cache_control?: { type: "ephemeral" };
 };
 
+export type AnthropicMessageContentImage = {
+  type: "image";
+  source: {
+    type: "base64";
+    media_type: string;
+    data: string;
+  };
+};
+
 export type AnthropicMessageContentToolCall = {
   type: "tool_use";
   id: string;
@@ -78,7 +87,7 @@ export type AnthropicMessageContentToolCall = {
 export type AnthropicMessageContentToolResult = {
   type: "tool_result";
   tool_use_id: string;
-  content: AnthropicMessageContentText[];
+  content: (AnthropicMessageContentText | AnthropicMessageContentImage)[];
   is_error?: boolean;
   cache_control?: { type: "ephemeral" };
 };

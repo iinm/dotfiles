@@ -62,7 +62,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
           type: "tool_result",
           toolUseId: toolUse.toolUseId,
           toolName: toolUse.toolName,
-          content: "Tool call rejected",
+          content: [{ type: "text", text: "Tool call rejected" }],
           isError: true,
         }));
         messages.push({ role: "user", content: toolResults });
@@ -146,7 +146,7 @@ async function callTool(toolUse, toolByName) {
       type: "tool_result",
       toolUseId: toolUse.toolUseId,
       toolName: toolUse.toolName,
-      content: `Tool not found: ${toolUse.toolName}`,
+      content: [{ type: "text", text: `Tool not found: ${toolUse.toolName}` }],
       isError: true,
     };
   }
@@ -157,8 +157,17 @@ async function callTool(toolUse, toolByName) {
       type: "tool_result",
       toolUseId: toolUse.toolUseId,
       toolName: toolUse.toolName,
-      content: result.message,
+      content: [{ type: "text", text: result.message }],
       isError: true,
+    };
+  }
+
+  if (typeof result === "string") {
+    return {
+      type: "tool_result",
+      toolUseId: toolUse.toolUseId,
+      toolName: toolUse.toolName,
+      content: [{ type: "text", text: result }],
     };
   }
 

@@ -40,7 +40,7 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
   //     {
   //       type: "image",
   //       data: "/9j/4AAQSk...",
-  //       mineType: "image/jpeg"
+  //       mimeType: "image/jpeg"
   //     }
   //   ]
   // }

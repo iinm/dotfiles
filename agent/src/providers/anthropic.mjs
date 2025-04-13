@@ -124,12 +124,23 @@ function convertGenericMessageToAnthropicFormat(genericMessages) {
               return {
                 type: "tool_result",
                 tool_use_id: part.toolUseId,
-                content: [
-                  {
-                    type: "text",
-                    text: part.content,
-                  },
-                ],
+                content: part.content.map((contentPart) => {
+                  switch (contentPart.type) {
+                    case "text":
+                      return { type: "text", text: contentPart.text };
+                    case "image":
+                      return {
+                        type: "image",
+                        source: {
+                          type: "base64",
+                          media_type: contentPart.mimeType,
+                          data: contentPart.data,
+                        },
+                      };
+                    default:
+                      throw new Error(`Unsupported content: ${contentPart}`);
+                  }
+                }),
                 is_error: part.isError,
               };
             }
