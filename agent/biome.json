@@ -6,8 +6,7 @@
     "useIgnoreFile": false
   },
   "files": {
-    "ignoreUnknown": false,
-    "ignore": [".agent/**/*"]
+    "ignoreUnknown": false
   },
   "formatter": {
     "enabled": true,
