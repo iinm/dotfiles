@@ -548,6 +548,8 @@ local setup_plugins = function()
     'hrsh7th/cmp-cmdline',
     'hrsh7th/nvim-cmp',
 
+    'github/copilot.vim',
+
     -- snippets
     {
       "L3MON4D3/LuaSnip",
@@ -859,6 +861,9 @@ end
 
 local setup_others = function()
   vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
+  vim.g.copilot_filetypes = {
+    gitcommit = true,
+  }
   require('nvim-autopairs').setup()
   require("nvim-surround").setup()
   require('dressing').setup()
