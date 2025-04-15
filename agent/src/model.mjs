@@ -12,11 +12,20 @@ import { callOpenAIModel } from "./providers/openai.mjs";
  */
 export function createModelCaller(modelName) {
   switch (modelName) {
-    case "gpt-4o-mini":
+    case "gpt-4.1-mini":
       return (input) =>
         callOpenAIModel(
           {
-            model: "gpt-4o-mini",
+            model: "gpt-4.1-mini",
+            temperature: 0,
+          },
+          input,
+        );
+    case "gpt-4.1":
+      return (input) =>
+        callOpenAIModel(
+          {
+            model: "gpt-4.1",
             temperature: 0,
           },
           input,

@@ -1,6 +1,6 @@
 /* Model */
 export type OpenAIModelConfig = {
-  model: "gpt-4o-mini" | "o3-mini";
+  model: "gpt-4.1-mini" | "gpt-4.1" | "o3-mini";
   temperature?: number;
   reasoning_effort?: "low" | "medium" | "high";
 };
