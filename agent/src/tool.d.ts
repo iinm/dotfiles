@@ -31,6 +31,8 @@ export type StructuredToolResultContent =
 export type ToolUseApproverConfig = {
   allowedToolUses: ToolUsePattern[];
   maxApproveCount: number;
+  // Mask the input when adding a new approve pattern
+  maskAllowedInput: (input: Record<string, unknown>) => Record<string, unknown>;
 };
 
 export type ToolUseApprover = {

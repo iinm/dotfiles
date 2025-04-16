@@ -8,7 +8,7 @@ import { startCLI } from "./cli.mjs";
 import {
   AGENT_MODEL,
   AGENT_PROJECT_METADATA_DIR,
-  createAllowedToolUsePatterns,
+  createDefaultAllowedToolUsePatterns,
   loadLocalConfig,
 } from "./config.mjs";
 import { createMCPClient, createMCPTools } from "./mcp.mjs";
@@ -36,9 +36,24 @@ import { writeFileTool } from "./tools/writeFile.mjs";
   const toolUseApprover = createToolUseApprover({
     maxApproveCount: 20,
     allowedToolUses: [
-      ...createAllowedToolUsePatterns({ sessionId }),
+      ...createDefaultAllowedToolUsePatterns({ sessionId }),
       ...(localConfig.allowedToolUsePatterns || []),
     ],
+    maskAllowedInput: (input) => {
+      if (input.toolName === patchFileTool.def.name) {
+        return {
+          filePath: input.filePath,
+          // ignore diff
+        };
+      }
+      if (input.toolName === writeFileTool.def.name) {
+        return {
+          filePath: input.filePath,
+          // ignore content
+        };
+      }
+      return input;
+    },
   });
 
   /** @type {(() => Promise<void>)[]} */

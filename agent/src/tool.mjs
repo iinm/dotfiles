@@ -9,7 +9,11 @@ import { matchValue } from "./utils/matchValue.mjs";
  * @param {ToolUseApproverConfig} config
  * @returns {ToolUseApprover}
  */
-export function createToolUseApprover({ allowedToolUses, maxApproveCount }) {
+export function createToolUseApprover({
+  allowedToolUses,
+  maxApproveCount,
+  maskAllowedInput,
+}) {
   let approveCount = 0;
 
   const approve = () => {
@@ -43,7 +47,7 @@ export function createToolUseApprover({ allowedToolUses, maxApproveCount }) {
   const allowToolUse = (toolUse) => {
     allowedToolUseInSession.push({
       toolName: toolUse.toolName,
-      input: toolUse.input,
+      input: maskAllowedInput(toolUse.input),
     });
   };
 

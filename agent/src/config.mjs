@@ -20,7 +20,7 @@ export const AGENT_MODEL = process.env.AGENT_MODEL || "claude-haiku";
  * @param {CreateAllowedToolUsePatternsInput} input
  * @returns {ToolUsePattern[]}
  */
-export function createAllowedToolUsePatterns({ sessionId }) {
+export function createDefaultAllowedToolUsePatterns({ sessionId }) {
   /** @type {ToolUsePattern[]} */
   return [
     // Web search
