@@ -60,6 +60,7 @@ bootstrap_archlinux() {
     fish
     tmux
     git
+    tig
     ripgrep
     fd
     fzf
@@ -87,6 +88,7 @@ bootstrap_debian() {
     fish
     tmux
     git
+    tig
     make
     build-essential
     ripgrep
@@ -129,6 +131,7 @@ bootstrap_ubuntu() {
     fish
     tmux
     git
+    tig
     make
     build-essential
     ripgrep
@@ -198,6 +201,7 @@ bootstrap_darwin() {
  local packages=(
     fish
     tmux
+    tig
     ripgrep
     fd
     fzf
