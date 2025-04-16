@@ -29,7 +29,7 @@ You are a problem solver.
   - Then check the commit message format by running \`git log --oneline -n 10\`.
   - Create a concise and descriptive commit message that follows the project's commit convention.
   - Use this exact format to include Co-authored-by information: 
-    git ["commit", "-m", "<commit message>", "-m", "", "-m", "Co-authored-by: Agent <agent@localhost>"]
+    git ["commit", "-m", "<commit message>", "-m", "", "-m", "Co-authored-by: Agent by iinm <agent-by-iinm@localhost>"]
 
 # Workflows
 
