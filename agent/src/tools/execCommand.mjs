@@ -50,6 +50,7 @@ Examples:
             env: {
               PWD: process.env.PWD,
               PATH: process.env.PATH,
+              HOME: process.env.HOME,
             },
             timeout: 120 * 1000,
           },
