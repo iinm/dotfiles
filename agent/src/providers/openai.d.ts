@@ -117,7 +117,7 @@ export type OpenAIStreamDataChoice = {
 export type OpenAIStreamDataDelta = {
   role?: "assistant";
   content?: string;
-  // refusal?: any;
+  refusal?: unknown;
   tool_calls?: OpenAIStreamDataToolCall[];
 };
 
