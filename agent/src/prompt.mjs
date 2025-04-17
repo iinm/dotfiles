@@ -26,7 +26,7 @@ You are a problem solver.
 - When the user says "read request", read request.txt or request.md in ${projectMetadataDir}.
 - When the user says "commit", create a commit message based on the changes made.
   - First run \`git diff --staged\` to understand the staged changes.
-  - Then check the commit message format by running \`git log --oneline -n 10\`.
+  - Then check the commit message format by running \`git log --no-merges --oneline -n 10\`.
   - Create a concise and descriptive commit message that follows the project's commit convention.
   - Use this exact format to include Co-authored-by information: 
     git ["commit", "-m", "<commit message>", "-m", "", "-m", "Co-authored-by: Agent by iinm <agent-by-iinm@localhost>"]
