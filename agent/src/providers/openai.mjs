@@ -1,6 +1,6 @@
 /**
  * @import { ModelInput, Message,  MessageContentToolResult, MessageContentText, AssistantMessage, MessageContentToolUse, ModelOutput, PartialMessageContent } from "../model"
- * @import { OpenAIAssistantMessage, OpenAIMessage, OpenAIMessageToolCall, OpenAIModelConfig, OpenAIToolDefinition, OpenAIStreamData, OpenAIChatCompletion, OpenAIMessageContentImage } from "./openai"
+ * @import { OpenAIAssistantMessage, OpenAIMessage, OpenAIMessageToolCall, OpenAIModelConfig, OpenAIToolDefinition, OpenAIStreamData, OpenAIChatCompletion, OpenAIMessageContentImage, OpenAIChatCompletionRequest } from "./openai"
  * @import { ToolDefinition } from "../tool"
  */
 
@@ -22,21 +22,24 @@ export async function callOpenAIModel(config, input, retryCount = 0) {
       input.tools || [],
     );
 
+    /** @type {OpenAIChatCompletionRequest} */
+    const request = {
+      ...config,
+      messages,
+      tools: tools.length ? tools : undefined,
+      stream: true,
+      stream_options: {
+        include_usage: true,
+      },
+    };
+
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
-      body: JSON.stringify({
-        ...config,
-        messages,
-        tools: tools.length ? tools : undefined,
-        stream: true,
-        stream_options: {
-          include_usage: true,
-        },
-      }),
+      body: JSON.stringify(request),
     });
 
     if (response.status === 429) {

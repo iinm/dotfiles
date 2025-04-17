@@ -9,6 +9,19 @@ export type OpenAIModelConfig =
       reasoning_effort?: "low" | "medium" | "high";
     };
 
+/* Request */
+export type OpenAIChatCompletionRequest = {
+  model: string;
+  messages: OpenAIMessage[];
+  tools?: OpenAIToolDefinition[];
+  stream?: boolean;
+  temperature?: number;
+  reasoning_effort?: "low" | "medium" | "high";
+  stream_options?: {
+    include_usage: boolean;
+  };
+};
+
 /* Output */
 export type OpenAIChatCompletion = {
   id: string;
