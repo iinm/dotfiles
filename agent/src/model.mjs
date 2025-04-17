@@ -30,20 +30,20 @@ export function createModelCaller(modelName) {
           },
           input,
         );
-    case "o3-mini-medium":
+    case "o4-mini-medium":
       return (input) =>
         callOpenAIModel(
           {
-            model: "o3-mini",
+            model: "o4-mini",
             reasoning_effort: "medium",
           },
           input,
         );
-    case "o3-mini-high":
+    case "o4-mini-high":
       return (input) =>
         callOpenAIModel(
           {
-            model: "o3-mini",
+            model: "o4-mini",
             reasoning_effort: "high",
           },
           input,
