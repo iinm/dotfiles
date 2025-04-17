@@ -12,6 +12,21 @@ export type AnthropicModelConfig = {
   };
 };
 
+/* Request */
+export type AnthropicRequestInput = {
+  model: string;
+  max_tokens: number;
+  temperature?: number;
+  thinking?: {
+    type: "enabled";
+    budget_tokens: number;
+  };
+  system: AnthropicMessageContentText[];
+  messages: (AnthropicUserMessage | AnthropicAssistantMessage)[];
+  tools?: AnthropicToolDefinition[];
+  stream: boolean;
+};
+
 /* Output */
 export type AnthropicChatCompletion = {
   id: string;

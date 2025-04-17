@@ -1,6 +1,6 @@
 /**
  * @import { ModelInput, Message, AssistantMessage, ModelOutput, PartialMessageContent } from "../model";
- * @import { AnthropicChatCompletion, AnthropicMessage, AnthropicToolDefinition, AnthropicModelConfig, AnthropicAssistantMessage, AnthropicStreamEvent, AnthropicAssistantMessageContent, AnthropicChatCompletionUsage } from "./anthropic";
+ * @import { AnthropicChatCompletion, AnthropicMessage, AnthropicToolDefinition, AnthropicModelConfig, AnthropicAssistantMessage, AnthropicStreamEvent, AnthropicAssistantMessageContent, AnthropicChatCompletionUsage, AnthropicRequestInput } from "./anthropic";
  * @import { ToolDefinition } from "../tool";
  */
 
@@ -23,6 +23,17 @@ export async function callAnthropicModel(config, input, retryCount = 0) {
       input.tools || [],
     );
 
+    /** @type {AnthropicRequestInput} */
+    const request = {
+      ...config,
+      system: messages
+        .filter((m) => m.role === "system")
+        .flatMap((m) => m.content),
+      messages: cacheEnabledMessages.filter((m) => m.role !== "system"),
+      tools: tools.length ? tools : undefined,
+      stream: true,
+    };
+
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -30,15 +41,7 @@ export async function callAnthropicModel(config, input, retryCount = 0) {
         "x-api-key": `${ANTHROPIC_API_KEY}`,
         "anthropic-version": "2023-06-01",
       },
-      body: JSON.stringify({
-        ...config,
-        system: messages
-          .filter((m) => m.role === "system")
-          .flatMap((m) => m.content),
-        messages: cacheEnabledMessages.filter((m) => m.role !== "system"),
-        tools: tools.length ? tools : undefined,
-        stream: true,
-      }),
+      body: JSON.stringify(request),
     });
 
     if (response.status === 429) {
