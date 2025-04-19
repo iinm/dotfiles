@@ -81,12 +81,19 @@ export function createModelCaller(modelName) {
           },
           input,
         );
+    case "gemini-flash":
+      return (input) =>
+        callGeminiModel(
+          {
+            model: "gemini-2.5-flash-preview-04-17",
+          },
+          input,
+        );
     case "gemini-pro":
       return (input) =>
         callGeminiModel(
           {
             model: "gemini-2.5-pro-preview-03-25",
-            // model: "gemini-2.5-pro-exp-03-25",
           },
           input,
         );
