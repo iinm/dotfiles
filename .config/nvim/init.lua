@@ -548,7 +548,7 @@ local setup_plugins = function()
     'hrsh7th/cmp-cmdline',
     'hrsh7th/nvim-cmp',
 
-    'github/copilot.vim',
+    -- 'github/copilot.vim',
 
     -- snippets
     {
@@ -720,32 +720,32 @@ local setup_cmp = function()
     mapping = cmp.mapping.preset.insert({
       ['<C-p>'] = cmp.mapping.select_prev_item(),
       ['<C-n>'] = cmp.mapping.select_next_item(),
-      ['<CR>'] = cmp.mapping.confirm({ select = false })
+      -- ['<CR>'] = cmp.mapping.confirm({ select = false })
 
       -- https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings#super-tab-like-mapping
-      -- ['<CR>'] = cmp.mapping(function(fallback)
-      --   if cmp.visible() then
-      --     if luasnip.expandable() then
-      --       luasnip.expand()
-      --     else
-      --       cmp.confirm({
-      --         select = true,
-      --       })
-      --     end
-      --   else
-      --     fallback()
-      --   end
-      -- end),
-      --
-      -- ["<Tab>"] = cmp.mapping(function(fallback)
-      --   if cmp.visible() then
-      --     cmp.select_next_item()
-      --   elseif luasnip.locally_jumpable(1) then
-      --     luasnip.jump(1)
-      --   else
-      --     fallback()
-      --   end
-      -- end, { "i", "s" }),
+      ['<CR>'] = cmp.mapping(function(fallback)
+        if cmp.visible() then
+          if luasnip.expandable() then
+            luasnip.expand()
+          else
+            cmp.confirm({
+              select = true,
+            })
+          end
+        else
+          fallback()
+        end
+      end),
+
+      ["<Tab>"] = cmp.mapping(function(fallback)
+        if cmp.visible() then
+          cmp.select_next_item()
+        elseif luasnip.locally_jumpable(1) then
+          luasnip.jump(1)
+        else
+          fallback()
+        end
+      end, { "i", "s" }),
     }),
 
     sources = cmp.config.sources({
@@ -861,9 +861,9 @@ end
 
 local setup_others = function()
   vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
-  vim.g.copilot_filetypes = {
-    gitcommit = true,
-  }
+  -- vim.g.copilot_filetypes = {
+  --   gitcommit = true,
+  -- }
   require('nvim-autopairs').setup()
   require("nvim-surround").setup()
   require('dressing').setup()
