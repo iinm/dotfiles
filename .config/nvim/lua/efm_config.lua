@@ -55,7 +55,7 @@ local default_settings = {
       tools.formatters.prettier,
     },
     go = {
-      tools.formatters.gofmt,
+      tools.formatters.goimports,
     },
     terraform = {
       tools.formatters.terraform_fmt,

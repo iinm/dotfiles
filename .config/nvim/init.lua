@@ -599,6 +599,12 @@ local setup_lsp = function()
     })
   end
 
+  if vim.fn.executable('gopls') then
+    lspconfig.gopls.setup({
+      capabilities = capabilities,
+    })
+  end
+
   -- brew install terraform-ls
   if vim.fn.executable('terraform-ls') then
     lspconfig.terraformls.setup({
