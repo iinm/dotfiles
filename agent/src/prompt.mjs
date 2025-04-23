@@ -106,6 +106,7 @@ File and directory command examples:
 Other command examples:
 - Get current date time: date ["+%Y-%m-%d %H:%M:%S"]
 - Show git status (branch, modified files, etc.): git ["status"]
+- For commands requiring pipes or redirects: bash ["-c", "fd '.+.mjs' | wc -l"]
 - Open URL in default browser:
   - On Mac: open ["<url>"]
   - On Linux: xdg-open ["<url>"]
