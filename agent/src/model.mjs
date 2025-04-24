@@ -3,7 +3,10 @@
  */
 
 import { callAnthropicModel } from "./providers/anthropic.mjs";
-import { callGeminiModel } from "./providers/gemini.mjs";
+import {
+  callGeminiModel,
+  createCacheEnabledGeminiModelCaller,
+} from "./providers/gemini.mjs";
 import { callOpenAIModel } from "./providers/openai.mjs";
 
 /**
@@ -97,6 +100,13 @@ export function createModelCaller(modelName) {
           },
           input,
         );
+    case "gemini-pro-cached": {
+      const model = "gemini-2.5-pro-preview-03-25";
+      const modelCaller = createCacheEnabledGeminiModelCaller({
+        model,
+      });
+      return (input) => modelCaller({ model }, input);
+    }
     default:
       throw new Error(`Invalid model: ${modelName}`);
   }

@@ -35,6 +35,7 @@ export type GeminiGenerateContentInput = {
   system_instruction?: {
     parts: GeminiContentPartText[];
   };
+  cachedContent?: string;
   contents: (GeminiUserContent | GeminiModelContent | GeminiFunctionContent)[];
   tools?: GeminiToolDefinition[];
 };
@@ -62,7 +63,7 @@ export type GeminiUserContent = {
 };
 
 export type GeminiFunctionContent = {
-  role: "function";
+  role: "user";
   parts: GeminiContentPartFunctionResponse[];
 };
 
@@ -139,4 +140,35 @@ export type GeminiUsageMetadata = {
   candidatesTokenCount: number;
   totalTokenCount: number;
   promptTokensDetails: GeminiTokensDetail[];
+};
+
+/* Caching */
+export type GeminiCreateCachedContentInput = {
+  model: string;
+
+  /**
+   * e.g., 600s
+   */
+  ttl: string;
+
+  system_instruction?: {
+    parts: GeminiContentPartText[];
+  };
+  contents: (GeminiUserContent | GeminiModelContent | GeminiFunctionContent)[];
+  tools?: GeminiToolDefinition[];
+};
+
+export type GeminiCachedContents = {
+  contents: unknown[];
+  tools: unknown[];
+  createTime: string;
+  updateTime: string;
+  usageMetadata: GeminiUsageMetadata;
+  expireTime: string;
+  ttl: string;
+  name: string;
+  displayName: string;
+  model: string;
+  systemInstruction: unknown;
+  toolConfig: unknown;
 };

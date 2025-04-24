@@ -340,7 +340,7 @@ function formatProviderTokenUsage(usage) {
   for (const [key, value] of Object.entries(usage)) {
     if (typeof value === "number") {
       header.push(`${key}: ${value}`);
-    } else {
+    } else if (value) {
       lines.push(
         `(${key}) ${Object.entries(value)
           .filter(

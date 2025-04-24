@@ -1,6 +1,6 @@
 /**
  * @import { ModelInput, Message, AssistantMessage, ModelOutput, PartialMessageContent, ProviderTokenUsage } from "../model";
- * @import { GeminiContent, GeminiContentPartFunctionCall, GeminiContentPartText, GeminiGenerateContentInput, GeminiGeneratedContent, GeminiModelConfig, GeminiToolDefinition } from "./gemini";
+ * @import { GeminiCachedContents, GeminiContent, GeminiContentPartFunctionCall, GeminiContentPartText, GeminiCreateCachedContentInput as GeminiCreateCachedContentInput, GeminiGenerateContentInput, GeminiGeneratedContent, GeminiModelConfig, GeminiToolDefinition } from "./gemini";
  * @import { ToolDefinition } from "../tool";
  */
 
@@ -8,6 +8,232 @@ import { styleText } from "node:util";
 import { noThrow } from "../utils/noThrow.mjs";
 
 const GOOGLE_AI_STUDIO_API_KEY = process.env.GOOGLE_AI_STUDIO_API_KEY;
+
+/**
+ * References:
+ * - https://ai.google.dev/gemini-api/docs/caching
+ * - https://ai.google.dev/api/caching
+ * @param {GeminiModelConfig} modelConfig
+ * @returns {typeof callGeminiModel}
+ */
+export function createCacheEnabledGeminiModelCaller(modelConfig) {
+  // configuration
+  const maxNonCachedToken = 4096;
+  const cacheTTL = 300; // seconds
+  // state
+  let nonCachedTokenCount = 0;
+  /** @type {string | undefined} */
+  let cacheName;
+  let cachedContentsLength = 0;
+  /** @type {Date | undefined} */
+  let cacheCreatedAt;
+
+  /** @type {typeof callGeminiModel} */
+  const modelCaller = async (config, input, retryCount = 0) => {
+    return await noThrow(async () => {
+      const contents = convertGenericMessageToGeminiFormat(input.messages);
+      const tools = convertGenericToolDefinitionToGeminiFormat(
+        input.tools || [],
+      );
+      const systemInstruction = contents.find((c) => c.role === "system");
+      const contentsWithoutSystem = contents.filter((c) => c.role !== "system");
+
+      if (nonCachedTokenCount > maxNonCachedToken) {
+        // Create cache
+        const contentsToBeCached = contentsWithoutSystem.slice(0, -1);
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/cachedContents?key=${GOOGLE_AI_STUDIO_API_KEY}`;
+
+        /** @type {GeminiCreateCachedContentInput} */
+        const request = {
+          model: `models/${modelConfig.model}`,
+          ttl: `${cacheTTL}s`,
+          system_instruction: systemInstruction,
+          contents: contentsToBeCached,
+          tools,
+        };
+
+        console.log(
+          styleText(
+            "yellow",
+            "\n(Experimental) Creating Gemini context cache...",
+          ),
+        );
+
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(request),
+        });
+
+        if (response.status !== 200) {
+          console.log(
+            styleText(
+              "yellow",
+              `Failed to create Gemini context cache: status=${response.status}, body=${await response.text()}`,
+            ),
+          );
+          cacheName = undefined;
+          cachedContentsLength = 0;
+        } else {
+          /** @type {GeminiCachedContents} */
+          const cachedContents = await response.json();
+          cacheName = cachedContents.name;
+          cachedContentsLength = contentsToBeCached.length;
+          cacheCreatedAt = new Date();
+        }
+      }
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:streamGenerateContent?alt=sse&key=${GOOGLE_AI_STUDIO_API_KEY}`;
+
+      /** @type {Pick<GeminiGenerateContentInput, "generationConfig" | "safetySettings">} */
+      const baseRequest = {
+        // default
+        generationConfig: {
+          temperature: 0,
+        },
+        safetySettings: [
+          {
+            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            threshold: "BLOCK_NONE",
+          },
+          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+          {
+            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+            threshold: "BLOCK_NONE",
+          },
+        ],
+        ...config.requestConfig,
+      };
+
+      const durationAfterCacheCreated = cacheCreatedAt
+        ? (new Date().getTime() - cacheCreatedAt.getTime()) / 1000
+        : Number.POSITIVE_INFINITY;
+
+      /** @type {GeminiGenerateContentInput} */
+      const request =
+        cacheName && durationAfterCacheCreated < cacheTTL
+          ? {
+              ...baseRequest,
+              cachedContent: cacheName,
+              contents: contentsWithoutSystem.slice(0, cachedContentsLength),
+            }
+          : {
+              ...baseRequest,
+              system_instruction: systemInstruction,
+              contents: contentsWithoutSystem,
+              tools: tools.length ? tools : undefined,
+            };
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(request),
+      });
+
+      if (response.status === 429) {
+        const interval = Math.min(2 * 2 ** retryCount, 16);
+        console.log(
+          styleText(
+            "yellow",
+            `Gemini rate limit exceeded. Retrying in ${interval} seconds...`,
+          ),
+        );
+        await new Promise((resolve) => setTimeout(resolve, interval * 1000));
+        return modelCaller(config, input, retryCount + 1);
+      }
+
+      if (response.status !== 200) {
+        return new Error(
+          `Failed to call Gemini model: status=${response.status}, body=${await response.text()}`,
+        );
+      }
+
+      if (!response.body) {
+        throw new Error("Response body is empty");
+      }
+
+      const reader = response.body.getReader();
+
+      /** @type {GeminiGeneratedContent[]} */
+      const streamContents = [];
+      /** @type {PartialMessageContent | undefined} */
+      let previousPartialContent = undefined;
+
+      for await (const streamContent of readGeminiStreamContents(reader)) {
+        streamContents.push(streamContent);
+
+        const partialContents =
+          convertGeminiStreamContentToAgentPartialContents(
+            streamContent,
+            previousPartialContent,
+          );
+        previousPartialContent = partialContents.at(-1);
+
+        if (input.onPartialMessageContent && partialContents.length) {
+          for (const partialContent of partialContents) {
+            input.onPartialMessageContent(partialContent);
+          }
+        }
+      }
+
+      if (input.onPartialMessageContent && previousPartialContent) {
+        input.onPartialMessageContent({
+          type: previousPartialContent.type,
+          position: "stop",
+        });
+      }
+
+      /** @type {GeminiGeneratedContent} */
+      const content = convertGeminiStreamContentsToContent(streamContents);
+
+      const message = convertGeminiAssistantMessageToGenericFormat(content);
+      if (message instanceof GeminiNoCandidateError) {
+        const interval = Math.min(2 * 2 ** retryCount, 16);
+        console.log(
+          styleText(
+            "yellow",
+            `No candidates found in Gemini response. Retrying in ${interval} seconds...`,
+          ),
+        );
+        await new Promise((resolve) => setTimeout(resolve, interval * 1000));
+        return modelCaller(
+          config,
+          {
+            ...input,
+            messages: [
+              ...input.messages,
+              { role: "user", content: [{ type: "text", text: "continue" }] },
+            ],
+          },
+          retryCount + 1,
+        );
+      }
+
+      /** @type {ProviderTokenUsage} */
+      const tokenUsage = {
+        input: content.usageMetadata.promptTokenCount,
+        output: content.usageMetadata.candidatesTokenCount,
+        total: content.usageMetadata.totalTokenCount,
+      };
+
+      // update state
+      nonCachedTokenCount = content.usageMetadata.promptTokenCount;
+
+      return {
+        message,
+        providerTokenUsage: tokenUsage,
+      };
+    });
+  };
+
+  return modelCaller;
+}
 
 /**
  * @param {GeminiModelConfig} config
@@ -21,8 +247,10 @@ export async function callGeminiModel(config, input, retryCount = 0) {
     const tools = convertGenericToolDefinitionToGeminiFormat(input.tools || []);
 
     const systemInstruction = contents.find((c) => c.role === "system");
+    const contentsWithoutSystem = contents.filter((c) => c.role !== "system");
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:streamGenerateContent?alt=sse&key=${GOOGLE_AI_STUDIO_API_KEY}`;
+
     /** @type {GeminiGenerateContentInput} */
     const request = {
       // default
@@ -43,7 +271,7 @@ export async function callGeminiModel(config, input, retryCount = 0) {
       ],
       ...config.requestConfig,
       system_instruction: systemInstruction,
-      contents: contents.filter((c) => c.role !== "system"),
+      contents: contentsWithoutSystem,
       tools: tools.length ? tools : undefined,
     };
 
@@ -110,13 +338,6 @@ export async function callGeminiModel(config, input, retryCount = 0) {
     /** @type {GeminiGeneratedContent} */
     const content = convertGeminiStreamContentsToContent(streamContents);
 
-    /** @type {ProviderTokenUsage} */
-    const tokenUsage = {
-      input: content.usageMetadata.promptTokenCount,
-      output: content.usageMetadata.candidatesTokenCount,
-      total: content.usageMetadata.totalTokenCount,
-    };
-
     const message = convertGeminiAssistantMessageToGenericFormat(content);
     if (message instanceof GeminiNoCandidateError) {
       const interval = Math.min(2 * 2 ** retryCount, 16);
@@ -139,6 +360,13 @@ export async function callGeminiModel(config, input, retryCount = 0) {
         retryCount + 1,
       );
     }
+
+    /** @type {ProviderTokenUsage} */
+    const tokenUsage = {
+      input: content.usageMetadata.promptTokenCount,
+      output: content.usageMetadata.candidatesTokenCount,
+      total: content.usageMetadata.totalTokenCount,
+    };
 
     return {
       message,
@@ -176,7 +404,7 @@ function convertGenericMessageToGeminiFormat(messages) {
         /** @type {GeminiContent[]} */
         for (const part of toolUseResults) {
           geminiContents.push({
-            role: "function",
+            role: "user",
             parts: [
               {
                 functionResponse: {
