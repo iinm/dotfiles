@@ -47,7 +47,7 @@ export function createToolUseApprover({
   const allowToolUse = (toolUse) => {
     allowedToolUseInSession.push({
       toolName: toolUse.toolName,
-      input: maskAllowedInput(toolUse.input),
+      input: maskAllowedInput(toolUse.toolName, toolUse.input),
     });
   };
 

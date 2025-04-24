@@ -39,14 +39,14 @@ import { writeFileTool } from "./tools/writeFile.mjs";
       ...createDefaultAllowedToolUsePatterns({ sessionId }),
       ...(localConfig.allowedToolUsePatterns || []),
     ],
-    maskAllowedInput: (input) => {
-      if (input.toolName === patchFileTool.def.name) {
+    maskAllowedInput: (toolName, input) => {
+      if (toolName === patchFileTool.def.name) {
         return {
           filePath: input.filePath,
           // ignore diff
         };
       }
-      if (input.toolName === writeFileTool.def.name) {
+      if (toolName === writeFileTool.def.name) {
         return {
           filePath: input.filePath,
           // ignore content
