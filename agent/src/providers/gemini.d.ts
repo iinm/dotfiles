@@ -136,10 +136,12 @@ export type GeminiTokensDetail = {
 };
 
 export type GeminiUsageMetadata = {
-  promptTokenCount: number;
-  candidatesTokenCount: number;
   totalTokenCount: number;
+  promptTokenCount: number;
+  cachedContentTokenCount?: number;
+  candidatesTokenCount?: number;
   promptTokensDetails: GeminiTokensDetail[];
+  cachedTokenDetails?: GeminiTokensDetail[];
 };
 
 /* Caching */

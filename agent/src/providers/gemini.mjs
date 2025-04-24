@@ -18,7 +18,7 @@ const GOOGLE_AI_STUDIO_API_KEY = process.env.GOOGLE_AI_STUDIO_API_KEY;
  */
 export function createCacheEnabledGeminiModelCaller(modelConfig) {
   // configuration
-  const maxNonCachedToken = 4096;
+  const maxNonCachedToken = 4096 * 2;
   const cacheTTL = 300; // seconds
   // state
   let nonCachedTokenCount = 0;
@@ -119,7 +119,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
           ? {
               ...baseRequest,
               cachedContent: cacheName,
-              contents: contentsWithoutSystem.slice(0, cachedContentsLength),
+              contents: contentsWithoutSystem.slice(cachedContentsLength),
             }
           : {
               ...baseRequest,
@@ -192,6 +192,21 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
       /** @type {GeminiGeneratedContent} */
       const content = convertGeminiStreamContentsToContent(streamContents);
 
+      /** @type {ProviderTokenUsage} */
+      const tokenUsage = {
+        input:
+          content.usageMetadata.promptTokenCount -
+          (content.usageMetadata.cachedContentTokenCount ?? 0),
+        cached: content.usageMetadata.cachedContentTokenCount ?? 0,
+        output: content.usageMetadata.candidatesTokenCount ?? 0,
+        total: content.usageMetadata.totalTokenCount,
+      };
+
+      // update state
+      nonCachedTokenCount =
+        content.usageMetadata.promptTokenCount -
+        (content.usageMetadata.cachedContentTokenCount ?? 0);
+
       const message = convertGeminiAssistantMessageToGenericFormat(content);
       if (message instanceof GeminiNoCandidateError) {
         const interval = Math.min(2 * 2 ** retryCount, 16);
@@ -214,16 +229,6 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
           retryCount + 1,
         );
       }
-
-      /** @type {ProviderTokenUsage} */
-      const tokenUsage = {
-        input: content.usageMetadata.promptTokenCount,
-        output: content.usageMetadata.candidatesTokenCount,
-        total: content.usageMetadata.totalTokenCount,
-      };
-
-      // update state
-      nonCachedTokenCount = content.usageMetadata.promptTokenCount;
 
       return {
         message,
@@ -338,6 +343,13 @@ export async function callGeminiModel(config, input, retryCount = 0) {
     /** @type {GeminiGeneratedContent} */
     const content = convertGeminiStreamContentsToContent(streamContents);
 
+    /** @type {ProviderTokenUsage} */
+    const tokenUsage = {
+      input: content.usageMetadata.promptTokenCount,
+      output: content.usageMetadata.candidatesTokenCount ?? 0,
+      total: content.usageMetadata.totalTokenCount,
+    };
+
     const message = convertGeminiAssistantMessageToGenericFormat(content);
     if (message instanceof GeminiNoCandidateError) {
       const interval = Math.min(2 * 2 ** retryCount, 16);
@@ -360,13 +372,6 @@ export async function callGeminiModel(config, input, retryCount = 0) {
         retryCount + 1,
       );
     }
-
-    /** @type {ProviderTokenUsage} */
-    const tokenUsage = {
-      input: content.usageMetadata.promptTokenCount,
-      output: content.usageMetadata.candidatesTokenCount,
-      total: content.usageMetadata.totalTokenCount,
-    };
 
     return {
       message,
