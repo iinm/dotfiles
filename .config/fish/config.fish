@@ -104,7 +104,7 @@ if status is-interactive
 
   if type --quiet gh
     function gh_list_review_requested
-      gh pr list --search "is:open is:pr review-requested:@me" --json url,title,author -q ".[].url + \" - \" + .[].author.login + \": \" + .[].title"
+      gh pr list --search "is:open is:pr review-requested:@me" --json url,title,author --jq '.[] | .url + " - " + .author.login + ": " + .title'
     end
   end
 
