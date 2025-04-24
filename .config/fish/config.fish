@@ -95,15 +95,27 @@ if status is-interactive
     bind \cr fzf_history
   end
 
-  function csvless
-    csvq --format TEXT "select * from `$argv[1]`" | less -S
-  end
-
   if type --quiet colima
     # cores: same as the host
     # memory: half of the host
     # disk: 100GB
     alias colima_start 'colima start --cpu (sysctl -n hw.ncpu) --memory (math (sysctl -n hw.memsize) / 1024^3 / 2) --disk 100 --arch aarch64 --vm-type=vz --vz-rosetta --mount-type virtiofs --dns 8.8.8.8 --dns 1.1.1.1'
+  end
+
+  if type --quiet gh
+    function gh_list_review_requested
+      gh pr list --search "is:open is:pr review-requested:@me" --json url,title,author -q ".[].url + \" - \" + .[].author.login + \": \" + .[].title"
+    end
+  end
+
+  if type --quiet csvq
+    function csvless
+      if test (count $argv) -eq 0
+        csvq --format TEXT "select * from STDIN" | less -S
+      else
+        csvq --format TEXT "select * from `$argv[1]`" | less -S
+      end
+    end
   end
 
   if test -e $HOME/tools/anaconda3

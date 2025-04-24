@@ -213,6 +213,7 @@ bootstrap_darwin() {
     docker-compose
     docker-buildx
     lua-language-server
+    csvq
   )
   local missing_packages=()
   for package in "${packages[@]}"; do
