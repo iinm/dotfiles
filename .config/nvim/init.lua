@@ -726,22 +726,22 @@ local setup_cmp = function()
     mapping = cmp.mapping.preset.insert({
       ['<C-p>'] = cmp.mapping.select_prev_item(),
       ['<C-n>'] = cmp.mapping.select_next_item(),
-      -- ['<CR>'] = cmp.mapping.confirm({ select = false })
+      ['<CR>'] = cmp.mapping.confirm({ select = false }),
 
       -- https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings#super-tab-like-mapping
-      ['<CR>'] = cmp.mapping(function(fallback)
-        if cmp.visible() then
-          if luasnip.expandable() then
-            luasnip.expand()
-          else
-            cmp.confirm({
-              select = true,
-            })
-          end
-        else
-          fallback()
-        end
-      end),
+      -- ['<CR>'] = cmp.mapping(function(fallback)
+      --   if cmp.visible() then
+      --     if luasnip.expandable() then
+      --       luasnip.expand()
+      --     else
+      --       cmp.confirm({
+      --         select = true,
+      --       })
+      --     end
+      --   else
+      --     fallback()
+      --   end
+      -- end),
 
       ["<Tab>"] = cmp.mapping(function(fallback)
         if cmp.visible() then
