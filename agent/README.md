@@ -5,21 +5,26 @@ A lightweight CLI-based coding agent designed to assist with your development ta
 ## Requirements
 
 - Node.js 22 or later
-- Anthropic API key, OpenAI API key, or Google AI Studio API key
+- Anthropic API key, OpenAI API key, or Gemini API key
 - (Optional) Tavily API key
 
 ## Setup
 
 ```sh
-echo "$ANTHROPIC_API_KEY" > .secrets/anthropic-api-key.txt
-echo "$OPENAI_API_KEY" > .secrets/openai-api-key.txt
-echo "$GEMINI_API_KEY" > .secrets/gemini-api-key.txt
-echo "$TAVILY_API_KEY" > .secrets/tavily-api-key.txt
+# Install dependencies
+npm install
 ```
 
 ```sh
-# Install dependencies
-npm install
+# Configure API keys (set at least one of the following)
+echo "$ANTHROPIC_API_KEY" > .secrets/anthropic-api-key.txt
+# OR
+echo "$OPENAI_API_KEY" > .secrets/openai-api-key.txt
+# OR
+echo "$GEMINI_API_KEY" > .secrets/gemini-api-key.txt
+
+# (Optional)
+echo "$TAVILY_API_KEY" > .secrets/tavily-api-key.txt
 ```
 
 ## Getting Started
