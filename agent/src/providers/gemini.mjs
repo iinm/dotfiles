@@ -7,7 +7,7 @@
 import { styleText } from "node:util";
 import { noThrow } from "../utils/noThrow.mjs";
 
-const GOOGLE_AI_STUDIO_API_KEY = process.env.GOOGLE_AI_STUDIO_API_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 /**
  * References:
@@ -42,7 +42,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
         // Create cache
         const contentsToBeCached = contentsWithoutSystem.slice(0, -1);
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/cachedContents?key=${GOOGLE_AI_STUDIO_API_KEY}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/cachedContents?key=${GEMINI_API_KEY}`;
 
         /** @type {GeminiCreateCachedContentInput} */
         const request = {
@@ -86,7 +86,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
         }
       }
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:streamGenerateContent?alt=sse&key=${GOOGLE_AI_STUDIO_API_KEY}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
 
       /** @type {Pick<GeminiGenerateContentInput, "generationConfig" | "safetySettings">} */
       const baseRequest = {
@@ -254,7 +254,7 @@ export async function callGeminiModel(config, input, retryCount = 0) {
     const systemInstruction = contents.find((c) => c.role === "system");
     const contentsWithoutSystem = contents.filter((c) => c.role !== "system");
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:streamGenerateContent?alt=sse&key=${GOOGLE_AI_STUDIO_API_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
 
     /** @type {GeminiGenerateContentInput} */
     const request = {

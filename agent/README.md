@@ -13,7 +13,7 @@ A lightweight CLI-based coding agent designed to assist with your development ta
 ```sh
 echo "$ANTHROPIC_API_KEY" > .secrets/anthropic-api-key.txt
 echo "$OPENAI_API_KEY" > .secrets/openai-api-key.txt
-echo "$GOOGLE_AI_STUDIO_API_KEY" > .secrets/google-ai-studio-api-key.txt
+echo "$GEMINI_API_KEY" > .secrets/gemini-api-key.txt
 echo "$TAVILY_API_KEY" > .secrets/tavily-api-key.txt
 ```
 
