@@ -71,7 +71,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
           content: [{ type: "text", text: input }],
         });
       }
-    } else if (input.toLowerCase().match(/^(resume|continue)$/i)) {
+    } else if (input.toLowerCase().match(/^\/(resume|continue)$/i)) {
       // Resume the conversation stopped by rate limit, etc.
     } else {
       // No pending tool call

@@ -42,6 +42,61 @@ echo "$TAVILY_API_KEY" > .secrets/tavily-api-key.txt
 ./bin/agent-<model>
 ```
 
+## Usage
+
+Once the agent is running, you can interact with it using various commands and keywords.
+
+### Commands
+
+These commands start with a slash (`/`):
+
+- `/help` - Display the help message with available commands
+- `/request` - Read the task request from `.agent/request.md`
+- `/resume` - Resume conversation after an LLM provider error
+
+### Conversation Keywords
+
+These are natural language phrases you can use in conversation:
+
+- `commit` - Create a commit message based on staged changes
+- `bye` or `exit` - End the session and clean up resources (including tmux sessions)
+
+### Memory Management
+
+The agent can save and retrieve information about tasks:
+
+- `save memory` - Save the current task state to memory
+- `resume work` - Load a previously saved task memory
+- `update project memory` - Update the project-wide knowledge base
+
+### Workflow Management
+
+Workflows help automate repetitive tasks:
+
+- `use workflow` - List and apply available workflows
+- `save workflow` - Save current session steps as a reusable workflow
+
+### Example Session
+
+```
+> /request
+<The agent displays the content of your request.md file>
+
+> Can you help me implement this feature?
+<The agent analyzes the request and provides a plan>
+
+> save memory
+<The agent saves the current task state>
+
+...
+
+> commit
+<The agent generates a commit message based on staged changes>
+
+> bye
+<The agent cleans up and exits>
+```
+
 ## Metadata Directory Structure
 
 ```

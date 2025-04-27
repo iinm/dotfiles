@@ -11,6 +11,8 @@
 import fs from "node:fs";
 import readline from "node:readline";
 import { styleText } from "node:util";
+import { AGENT_PROJECT_METADATA_DIR } from "./config.mjs";
+import path from "node:path";
 
 /**
  * @typedef {object} CliOptions
@@ -62,35 +64,45 @@ export function startCLI({
       return;
     }
 
-    if (inputTrimmed.toLowerCase() === "help") {
+    if (["/help", "help"].includes(inputTrimmed.toLowerCase())) {
       console.log(
         `
 Commands:
-  @<filepath> - Load file content as a message
-  resume - Retry after an LLM provider error
+  /help    - Display this help message
+  /request - Read ${AGENT_PROJECT_METADATA_DIR}/request.md
+  /resume  - Resume conversation after an LLM provider error
 
-Conversation Examples:
-  read request - Read request.md file
-  commit - Create a commit message based on staged changes
-  bye - End the session and clean up (kills tmux sessions)
-  save memory - Save the current task state
-  resume work - Load a previously saved task memory
-  use workflow - List and apply available workflows
-  save workflow - Save current session steps as a reusable workflow
+Conversation Keywords:
+  "commit"                - Create a commit message based on staged changes
+  "bye" or "exit"         - End the session and clean up resources (including tmux sessions)
+
+Memory Management:
+  "save memory"           - Save the current task state to memory
+  "resume work"           - Load a previously saved task memory
+  "update project memory" - Update the project-wide knowledge base
+
+Workflow Management:
+  "use workflow"          - List and apply available workflows
+  "save workflow"         - Save current session steps as a reusable workflow
       `.trim(),
       );
       cli.prompt();
       return;
     }
 
-    if (inputTrimmed.startsWith("@")) {
-      const filePath = inputTrimmed.slice(1);
+    if (inputTrimmed.toLowerCase() === "/request") {
+      const filePath = path.join(AGENT_PROJECT_METADATA_DIR, "request.md");
       if (!fs.existsSync(filePath)) {
         console.error(styleText("red", `\nFile not found: ${filePath}`));
         cli.prompt();
         return;
       }
       const fileContent = fs.readFileSync(filePath, "utf-8");
+
+      console.log(styleText("gray", "\n<request>"));
+      console.log(fileContent.trim());
+      console.log(styleText("gray", "</request>"));
+
       userEventEmitter.emit("userInput", fileContent);
       return;
     }
