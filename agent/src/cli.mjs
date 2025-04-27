@@ -21,6 +21,8 @@ const SLASH_COMMANDS = [
   "/resume",
   "/clear",
   "/debug.msg.pop",
+  "/debug.msg.dump",
+  "/debug.msg.load",
 ];
 
 /**
@@ -95,6 +97,8 @@ Commands:
   /resume         - Resume conversation after an LLM provider error
   /clear          - Clear conversation
   /debug.msg.pop  - Remove last message
+  /debug.msg.dump - Save current messages to a JSON file
+  /debug.msg.load - Load messages from a JSON file
 
 Conversation Keywords:
   "commit"                - Create a commit message based on staged changes

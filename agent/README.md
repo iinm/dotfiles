@@ -58,6 +58,8 @@ These commands start with a slash (`/`):
 ### Debug Commands
 
 - `/debug.msg.pop` - Remove the last message from the conversation
+- `/debug.msg.dump` - Save current messages to a JSON file
+- `/debug.msg.load` - Load messages from a JSON file
 
 ### Conversation Keywords
 
