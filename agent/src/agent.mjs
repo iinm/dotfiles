@@ -1,10 +1,12 @@
+import { EventEmitter } from "node:events";
 /**
  * @import { AgentConfig, AgentEventEmitter, UserEventEmitter } from "./agent"
  * @import { Message, MessageContentToolResult, MessageContentToolUse, PartialMessageContent } from "./model"
  * @import { Tool, ToolDefinition } from "./tool"
  */
-
-import { EventEmitter } from "node:events";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { AGENT_PROJECT_METADATA_DIR } from "./config.mjs";
 
 /**
  * @param {AgentConfig} config
@@ -62,7 +64,52 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
     }
 
     if (input === "/debug.msg.pop") {
-      const removedMessage = removeLastMessage();
+      removeLastMessage();
+      agentEventEmitter.emit("turnEnd");
+      return;
+    }
+
+    if (input === "/debug.msg.dump") {
+      const filePath = path.join(AGENT_PROJECT_METADATA_DIR, "messages.json");
+      try {
+        await fs.writeFile(filePath, JSON.stringify(messages, null, 2));
+        console.log(`Messages dumped to ${filePath}`);
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error(`Error dumping messages: ${error.message}`);
+        } else {
+          console.error(
+            "An unknown error occurred while dumping messages:",
+            error,
+          );
+        }
+      }
+      agentEventEmitter.emit("turnEnd");
+      return;
+    }
+
+    if (input === "/debug.msg.load") {
+      const filePath = path.join(AGENT_PROJECT_METADATA_DIR, "messages.json");
+      try {
+        const data = await fs.readFile(filePath, "utf-8");
+        const loadedMessages = JSON.parse(data);
+        if (Array.isArray(loadedMessages)) {
+          // Keep the system message (index 0) and replace the rest
+          messages.splice(1, messages.length - 1, ...loadedMessages.slice(1));
+          console.log(`Messages loaded from ${filePath}`);
+        } else {
+          console.error("Error loading messages: Invalid format in file.");
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error(`Error dumping messages: ${error.message}`);
+        } else {
+          console.error(
+            "An unknown error occurred while dumping messages:",
+            error,
+          );
+        }
+      }
       agentEventEmitter.emit("turnEnd");
       return;
     }
