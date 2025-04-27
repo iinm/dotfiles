@@ -53,6 +53,11 @@ These commands start with a slash (`/`):
 - `/help` - Display the help message with available commands
 - `/request` - Read the task request from `.agent/request.md`
 - `/resume` - Resume conversation after an LLM provider error
+- `/clear` - Clear conversation history (keeping only the system message)
+
+### Debug Commands
+
+- `/debug.msg.pop` - Remove the last message from the conversation
 
 ### Conversation Keywords
 

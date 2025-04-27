@@ -32,7 +32,41 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
     },
   ];
 
+  /**
+   * Clear all messages except the system prompt
+   */
+  function clearMessages() {
+    // Keep only the system message (first message)
+    messages.splice(1);
+  }
+
+  /**
+   * Remove the last message from the conversation
+   * @returns {Message|undefined} The removed message or undefined if no message was removed
+   */
+  function removeLastMessage() {
+    // Don't remove the system message
+    if (messages.length <= 1) {
+      return undefined;
+    }
+    const removedMessage = messages.pop();
+    return removedMessage;
+  }
+
   userEventEmitter.on("userInput", async (input) => {
+    // Handle special commands
+    if (input === "/clear") {
+      clearMessages();
+      agentEventEmitter.emit("turnEnd");
+      return;
+    }
+
+    if (input === "/debug.msg.pop") {
+      const removedMessage = removeLastMessage();
+      agentEventEmitter.emit("turnEnd");
+      return;
+    }
+
     const lastMessage = messages.at(-1);
 
     if (lastMessage?.content.some((part) => part.type === "tool_use")) {

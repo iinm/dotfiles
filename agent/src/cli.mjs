@@ -9,10 +9,10 @@
  */
 
 import fs from "node:fs";
+import path from "node:path";
 import readline from "node:readline";
 import { styleText } from "node:util";
 import { AGENT_PROJECT_METADATA_DIR } from "./config.mjs";
-import path from "node:path";
 
 /**
  * @typedef {object} CliOptions
@@ -71,6 +71,10 @@ Commands:
   /help    - Display this help message
   /request - Read ${AGENT_PROJECT_METADATA_DIR}/request.md
   /resume  - Resume conversation after an LLM provider error
+  /clear   - Clear conversation
+
+Debug:
+  /debug.msg.pop - Remove last message
 
 Conversation Keywords:
   "commit"                - Create a commit message based on staged changes
