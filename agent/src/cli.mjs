@@ -65,20 +65,18 @@ export function startCLI({
     if (inputTrimmed.toLowerCase() === "help") {
       console.log(
         `
-Request:
-  read request
+Commands:
+  @<filepath> - Load file content as a message
+  resume - Retry after an LLM provider error
 
-Workflow:
-  use workflow
-  save workflow
-
-Session:
-  resume
-  bye
-
-Memory:
-  save memory
-  resume work
+Conversation Examples:
+  read request - Read request.md file
+  commit - Create a commit message based on staged changes
+  bye - End the session and clean up (kills tmux sessions)
+  save memory - Save the current task state
+  resume work - Load a previously saved task memory
+  use workflow - List and apply available workflows
+  save workflow - Save current session steps as a reusable workflow
       `.trim(),
       );
       cli.prompt();
