@@ -14,6 +14,15 @@ import readline from "node:readline";
 import { styleText } from "node:util";
 import { AGENT_PROJECT_METADATA_DIR } from "./config.mjs";
 
+// Define available slash commands for tab completion
+const SLASH_COMMANDS = [
+  "/help",
+  "/request",
+  "/resume",
+  "/clear",
+  "/debug.msg.pop",
+];
+
 /**
  * @typedef {object} CliOptions
  * @property {UserEventEmitter} userEventEmitter
@@ -37,10 +46,23 @@ export function startCLI({
     input: process.stdin,
     output: process.stdout,
     prompt: `${styleText(["white", "bgGray"], `\nSession: ${sessionId}, Model: ${modelName}`)}\n> `,
+    /**
+     * @param {string} line
+     */
+    completer: (line) => {
+      if (line.startsWith("/")) {
+        const completions = SLASH_COMMANDS;
+        const hits = completions.filter((c) => c.startsWith(line));
+        const candidates = hits.length ? hits : completions;
+        return [candidates, line];
+      }
+      return [[], line];
+    },
   });
 
   readline.emitKeypressEvents(process.stdin);
   if (process.stdin.isTTY) {
+    // readline should handle raw mode itself
     process.stdin.setRawMode(true);
   }
 
@@ -68,13 +90,11 @@ export function startCLI({
       console.log(
         `
 Commands:
-  /help    - Display this help message
-  /request - Read ${AGENT_PROJECT_METADATA_DIR}/request.md
-  /resume  - Resume conversation after an LLM provider error
-  /clear   - Clear conversation
-
-Debug:
-  /debug.msg.pop - Remove last message
+  /help           - Display this help message
+  /request        - Read ${AGENT_PROJECT_METADATA_DIR}/request.md
+  /resume         - Resume conversation after an LLM provider error
+  /clear          - Clear conversation
+  /debug.msg.pop  - Remove last message
 
 Conversation Keywords:
   "commit"                - Create a commit message based on staged changes
