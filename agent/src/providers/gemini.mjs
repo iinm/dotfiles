@@ -21,6 +21,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
   const maxNonCachedToken = 4096 * 2;
   const cacheTTL = 300; // seconds
   // state
+  let isCreatingCache = false;
   let nonCachedTokenCount = 0;
   /** @type {string | undefined} */
   let cacheName;
@@ -38,8 +39,8 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
       const systemInstruction = contents.find((c) => c.role === "system");
       const contentsWithoutSystem = contents.filter((c) => c.role !== "system");
 
-      if (nonCachedTokenCount > maxNonCachedToken) {
-        // Create cache
+      if (nonCachedTokenCount > maxNonCachedToken && !isCreatingCache) {
+        isCreatingCache = true;
         const contentsToBeCached = contentsWithoutSystem.slice(0, -1);
 
         const url = `https://generativelanguage.googleapis.com/v1beta/cachedContents?key=${GEMINI_API_KEY}`;
@@ -60,30 +61,46 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
           ),
         );
 
-        const response = await fetch(url, {
+        fetch(url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(request),
-        });
-
-        if (response.status !== 200) {
-          console.log(
-            styleText(
-              "yellow",
-              `Failed to create Gemini context cache: status=${response.status}, body=${await response.text()}`,
-            ),
-          );
-          cacheName = undefined;
-          cachedContentsLength = 0;
-        } else {
-          /** @type {GeminiCachedContents} */
-          const cachedContents = await response.json();
-          cacheName = cachedContents.name;
-          cachedContentsLength = contentsToBeCached.length;
-          cacheCreatedAt = new Date();
-        }
+        })
+          .then(async (response) => {
+            if (response.status !== 200) {
+              console.log(
+                styleText(
+                  "yellow",
+                  `Failed to create Gemini context cache: status=${response.status}, body=${await response.text()}`,
+                ),
+              );
+              cacheName = undefined;
+              cachedContentsLength = 0;
+            } else {
+              /** @type {GeminiCachedContents} */
+              const cachedContents = await response.json();
+              cacheName = cachedContents.name;
+              cachedContentsLength = contentsToBeCached.length;
+              cacheCreatedAt = new Date();
+            }
+          })
+          .catch((error) => {
+            console.error(
+              styleText(
+                "red",
+                `Error during background Gemini context cache creation: ${error}`,
+              ),
+            );
+            cacheName = undefined;
+            cachedContentsLength = 0;
+            cacheCreatedAt = undefined;
+          })
+          .finally(() => {
+            // Ensure isCreatingCache is set to false regardless of success or failure
+            isCreatingCache = false;
+          });
       }
 
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
