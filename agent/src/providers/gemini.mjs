@@ -18,7 +18,7 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
  */
 export function createCacheEnabledGeminiModelCaller(modelConfig) {
   const props = {
-    cacheTTL: 300, // seconds
+    cacheTTL: 10 * 60, // seconds
   };
 
   const state = {
