@@ -34,18 +34,20 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
   };
 
   // 初回は4096を超えたら、2回目以降は4096*2を超えたらキャッシュする
-  const maxNonCachedToken = () => 4096 * 2 ** Math.min(state.cacheCount, 1);
+  function maxNonCachedToken() {
+    return 4096 * 2 ** Math.min(state.cacheCount, 1);
+  }
 
-  const resetCacheState = () => {
+  function resetCacheState() {
     state.cacheCount = 0;
     state.lastNonCachedTokenCount = 0;
     state.cacheName = undefined;
     state.cachedContentsLength = 0;
     state.cacheExpireTime = undefined;
-  };
+  }
 
   /** @type {typeof callGeminiModel} */
-  const modelCaller = async (config, input, retryCount = 0) => {
+  async function modelCaller(config, input, retryCount = 0) {
     return await noThrow(async () => {
       const contents = convertGenericMessageToGeminiFormat(input.messages);
       const tools = convertGenericToolDefinitionToGeminiFormat(
@@ -269,7 +271,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
         providerTokenUsage: tokenUsage,
       };
     });
-  };
+  }
 
   return modelCaller;
 }

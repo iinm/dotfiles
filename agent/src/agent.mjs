@@ -13,6 +13,16 @@ import { AGENT_PROJECT_METADATA_DIR } from "./config.mjs";
  * @param {AgentConfig} config
  */
 export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
+  /** @type {{ messages: Message[] }} */
+  const state = {
+    messages: [
+      {
+        role: "system",
+        content: [{ type: "text", text: prompt }],
+      },
+    ],
+  };
+
   /** @type {UserEventEmitter} */
   const userEventEmitter = new EventEmitter();
   /** @type {AgentEventEmitter} */
@@ -26,16 +36,6 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
 
   /** @type {ToolDefinition[]} */
   const toolDefs = tools.map(({ def }) => def);
-
-  /** @type {{ messages: Message[] }} */
-  const state = {
-    messages: [
-      {
-        role: "system",
-        content: [{ type: "text", text: prompt }],
-      },
-    ],
-  };
 
   /**
    * Clear all messages except the system prompt
