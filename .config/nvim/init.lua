@@ -593,6 +593,7 @@ local setup_lsp = function()
     })
   end
 
+  -- npm install -g typescript-language-server typescript
   if vim.fn.executable('tsserver') then
     lspconfig.ts_ls.setup({
       capabilities = capabilities
@@ -647,22 +648,6 @@ local setup_lsp = function()
     filetypes = vim.tbl_keys(efm_settings.languages),
     settings = efm_settings,
   })
-
-  -- npm install -g typescript typescript-language-server
-  -- require("typescript-tools").setup(
-  --   vim.tbl_deep_extend("force",
-  --     { capabilities = capabilities },
-  --     local_config.typescript_tools or {
-  --       -- Example:
-  --       -- settings = {
-  --       --   tsserver_file_preferences = {
-  --       --     -- https://stackoverflow.com/questions/62503006/vscode-add-js-extension-on-import-autocomplete
-  --       --     importModuleSpecifierEnding = "js",
-  --       --   }
-  --       -- }
-  --     }
-  --   )
-  -- )
 
   -- formatter
   local lsp_format_clients = vim.iter({
