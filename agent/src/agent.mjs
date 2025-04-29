@@ -27,20 +27,22 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
   /** @type {ToolDefinition[]} */
   const toolDefs = tools.map(({ def }) => def);
 
-  /** @type {Message[]} */
-  const messages = [
-    {
-      role: "system",
-      content: [{ type: "text", text: prompt }],
-    },
-  ];
+  /** @type {{ messages: Message[] }} */
+  const state = {
+    messages: [
+      {
+        role: "system",
+        content: [{ type: "text", text: prompt }],
+      },
+    ],
+  };
 
   /**
    * Clear all messages except the system prompt
    */
   function clearMessages() {
     // Keep only the system message (first message)
-    messages.splice(1);
+    state.messages.splice(1);
   }
 
   /**
@@ -49,10 +51,10 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
    */
   function removeLastMessage() {
     // Don't remove the system message
-    if (messages.length <= 1) {
+    if (state.messages.length <= 1) {
       return undefined;
     }
-    const removedMessage = messages.pop();
+    const removedMessage = state.messages.pop();
     return removedMessage;
   }
 
@@ -73,7 +75,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
     if (input === "/debug.msg.dump") {
       const filePath = path.join(AGENT_PROJECT_METADATA_DIR, "messages.json");
       try {
-        await fs.writeFile(filePath, JSON.stringify(messages, null, 2));
+        await fs.writeFile(filePath, JSON.stringify(state.messages, null, 2));
         console.error(`Messages dumped to ${filePath}`);
       } catch (error) {
         if (error instanceof Error) {
@@ -96,7 +98,11 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
         const loadedMessages = JSON.parse(data);
         if (Array.isArray(loadedMessages)) {
           // Keep the system message (index 0) and replace the rest
-          messages.splice(1, messages.length - 1, ...loadedMessages.slice(1));
+          state.messages.splice(
+            1,
+            state.messages.length - 1,
+            ...loadedMessages.slice(1),
+          );
           console.error(`Messages loaded from ${filePath}`);
         } else {
           console.error("Error loading messages: Invalid format in file.");
@@ -110,7 +116,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
       return;
     }
 
-    const lastMessage = messages.at(-1);
+    const lastMessage = state.messages.at(-1);
 
     if (lastMessage?.content.some((part) => part.type === "tool_use")) {
       /** @type {MessageContentToolUse[]} */
@@ -130,8 +136,11 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
         const toolResults = await Promise.all(
           toolUseParts.map((toolUse) => callTool(toolUse, toolByName)),
         );
-        messages.push({ role: "user", content: toolResults });
-        agentEventEmitter.emit("message", messages[messages.length - 1]);
+        state.messages.push({ role: "user", content: toolResults });
+        agentEventEmitter.emit(
+          "message",
+          state.messages[state.messages.length - 1],
+        );
       } else {
         // Rejected
         /** @type {MessageContentToolResult[]} */
@@ -142,8 +151,8 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
           content: [{ type: "text", text: "Tool call rejected" }],
           isError: true,
         }));
-        messages.push({ role: "user", content: toolResults });
-        messages.push({
+        state.messages.push({ role: "user", content: toolResults });
+        state.messages.push({
           role: "user",
           content: [{ type: "text", text: input }],
         });
@@ -152,12 +161,15 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
       // Resume the conversation stopped by rate limit, etc.
     } else {
       // No pending tool call
-      messages.push({ role: "user", content: [{ type: "text", text: input }] });
+      state.messages.push({
+        role: "user",
+        content: [{ type: "text", text: input }],
+      });
     }
 
     while (true) {
       const modelOutput = await callModel({
-        messages,
+        messages: state.messages,
         tools: toolDefs,
         /**
          * @param {PartialMessageContent} partialContent
@@ -173,7 +185,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
       }
 
       const { message: assistantMessage, providerTokenUsage } = modelOutput;
-      messages.push(assistantMessage);
+      state.messages.push(assistantMessage);
       agentEventEmitter.emit("message", assistantMessage);
       agentEventEmitter.emit("providerTokenUsage", providerTokenUsage);
 
@@ -198,8 +210,11 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
         toolUseParts.map((toolUse) => callTool(toolUse, toolByName)),
       );
 
-      messages.push({ role: "user", content: toolResults });
-      agentEventEmitter.emit("message", messages[messages.length - 1]);
+      state.messages.push({ role: "user", content: toolResults });
+      agentEventEmitter.emit(
+        "message",
+        state.messages[state.messages.length - 1],
+      );
     }
 
     agentEventEmitter.emit("turnEnd");

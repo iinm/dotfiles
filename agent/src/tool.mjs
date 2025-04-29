@@ -14,26 +14,30 @@ export function createToolUseApprover({
   maxApproveCount,
   maskAllowedInput,
 }) {
-  let approveCount = 0;
+  const state = {
+    approveCount: 0,
+    /** @type {ToolUsePattern[]} */
+    allowedToolUseInSession: [],
+  };
 
   const approve = () => {
-    approveCount += 1;
-    if (approveCount <= maxApproveCount) {
+    state.approveCount += 1;
+    if (state.approveCount <= maxApproveCount) {
       return true;
     }
 
-    approveCount = 0;
+    state.approveCount = 0;
     return false;
   };
-
-  /** @type {ToolUsePattern[]} */
-  const allowedToolUseInSession = [];
 
   /**
    * @param {MessageContentToolUse} toolUse
    */
   const isAllowedToolUse = (toolUse) => {
-    for (const pattern of [...allowedToolUses, ...allowedToolUseInSession]) {
+    for (const pattern of [
+      ...allowedToolUses,
+      ...state.allowedToolUseInSession,
+    ]) {
       if (matchValue(toolUse, pattern)) {
         return approve();
       }
@@ -45,7 +49,7 @@ export function createToolUseApprover({
    * @param {MessageContentToolUse} toolUse
    */
   const allowToolUse = (toolUse) => {
-    allowedToolUseInSession.push({
+    state.allowedToolUseInSession.push({
       toolName: toolUse.toolName,
       input: maskAllowedInput(toolUse.toolName, toolUse.input),
     });
