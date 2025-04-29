@@ -133,7 +133,7 @@ export async function createMCPTools(serverName, client) {
                   });
                   contentContainsImage = true;
                 } else {
-                  console.log(
+                  console.error(
                     `Unsupported content part from MCP: ${JSON.stringify(part)}`,
                   );
                 }

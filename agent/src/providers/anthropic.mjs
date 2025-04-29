@@ -46,7 +46,7 @@ export async function callAnthropicModel(config, input, retryCount = 0) {
 
     if (response.status === 429) {
       const interval = Math.min(2 * 2 ** retryCount, 16);
-      console.log(
+      console.error(
         styleText(
           "yellow",
           `Anthropic rate limit exceeded. Retry in ${interval} seconds...`,
@@ -297,7 +297,7 @@ function convertAnthropicStreamEventsToChatCompletion(events) {
           }
         }
       } else {
-        console.warn(
+        console.error(
           `Received content block delta without a content block: ${JSON.stringify(event)}`,
         );
       }

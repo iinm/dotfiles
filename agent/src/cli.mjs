@@ -121,7 +121,7 @@ Workflow Management:
     if (inputTrimmed.toLowerCase() === "/request") {
       const filePath = path.join(AGENT_PROJECT_METADATA_DIR, "request.md");
       if (!fs.existsSync(filePath)) {
-        console.error(styleText("red", `\nFile not found: ${filePath}`));
+        console.log(styleText("red", `\nFile not found: ${filePath}`));
         cli.prompt();
         return;
       }
@@ -172,7 +172,7 @@ Workflow Management:
   });
 
   agentEventEmitter.on("error", (error) => {
-    console.error(
+    console.log(
       styleText(
         "red",
         `\nError: message=${error.message}, stack=${error.stack}`,

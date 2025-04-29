@@ -104,7 +104,7 @@ export const tmuxCommandTool = {
                   (err, stdout, _stderr) => {
                     if (err) {
                       console.error(
-                        `Failed to list windows: ${err.message}, stack=${err.stack}`,
+                        `Failed to list tmux windows: ${err.message}, stack=${err.stack}`,
                       );
                     }
                     return resolve(stdout);
@@ -130,7 +130,7 @@ export const tmuxCommandTool = {
                   (err, stdout, _stderr) => {
                     if (err) {
                       console.error(
-                        `Failed to capture pane: ${err.message}, stack=${err.stack}`,
+                        `Failed to capture tmux pane: ${err.message}, stack=${err.stack}`,
                       );
                     }
                     return resolve(stdout.trim());

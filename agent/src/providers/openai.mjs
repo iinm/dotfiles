@@ -44,7 +44,7 @@ export async function callOpenAIModel(config, input, retryCount = 0) {
 
     if (response.status === 429) {
       const interval = Math.min(2 * 2 ** retryCount, 16);
-      console.log(
+      console.error(
         styleText(
           "yellow",
           `OpenAI rate limit exceeded. Retry in ${interval} seconds...`,

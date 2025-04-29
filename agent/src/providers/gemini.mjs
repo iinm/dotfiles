@@ -78,8 +78,8 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
           tools,
         };
 
-        console.log(
-          styleText("blue", "\nCreating Gemini context cache in background..."),
+        console.error(
+          styleText("gray", "\nCreating Gemini context cache in background..."),
         );
 
         fetch(url, {
@@ -91,7 +91,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
         })
           .then(async (response) => {
             if (response.status !== 200) {
-              console.log(
+              console.error(
                 styleText(
                   "yellow",
                   `Failed to create Gemini context cache: status=${response.status}, body=${await response.text()}`,
@@ -172,7 +172,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
 
       if (response.status === 429) {
         const interval = Math.min(2 * 2 ** retryCount, 16);
-        console.log(
+        console.error(
           styleText(
             "yellow",
             `Gemini rate limit exceeded. Retrying in ${interval} seconds...`,
@@ -244,7 +244,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
       const message = convertGeminiAssistantMessageToGenericFormat(content);
       if (message instanceof GeminiNoCandidateError) {
         const interval = Math.min(2 * 2 ** retryCount, 16);
-        console.log(
+        console.error(
           styleText(
             "yellow",
             `No candidates found in Gemini response. Retrying in ${interval} seconds...`,
@@ -324,7 +324,7 @@ export async function callGeminiModel(config, input, retryCount = 0) {
 
     if (response.status === 429) {
       const interval = Math.min(2 * 2 ** retryCount, 16);
-      console.log(
+      console.error(
         styleText(
           "yellow",
           `Gemini rate limit exceeded. Retrying in ${interval} seconds...`,
@@ -387,7 +387,7 @@ export async function callGeminiModel(config, input, retryCount = 0) {
     const message = convertGeminiAssistantMessageToGenericFormat(content);
     if (message instanceof GeminiNoCandidateError) {
       const interval = Math.min(2 * 2 ** retryCount, 16);
-      console.log(
+      console.error(
         styleText(
           "yellow",
           `No candidates found in Gemini response. Retrying in ${interval} seconds...`,
