@@ -1,9 +1,10 @@
-import { EventEmitter } from "node:events";
 /**
  * @import { AgentConfig, AgentEventEmitter, UserEventEmitter } from "./agent"
  * @import { Message, MessageContentToolResult, MessageContentToolUse, PartialMessageContent } from "./model"
  * @import { Tool, ToolDefinition } from "./tool"
  */
+
+import { EventEmitter } from "node:events";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { AGENT_PROJECT_METADATA_DIR } from "./config.mjs";
