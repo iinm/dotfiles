@@ -17,28 +17,31 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
  * @returns {typeof callGeminiModel}
  */
 export function createCacheEnabledGeminiModelCaller(modelConfig) {
-  // configuration
-  // 初回は4096を超えたら、2回目以降は4096*2を超えたらキャッシュする
-  const maxNonCachedToken = () => 4096 * 2 ** Math.min(cacheCount, 1);
-  const cacheTTL = 300; // seconds
+  const props = {
+    cacheTTL: 300, // seconds
+  };
 
-  // state
-  let cacheCount = 0;
-  let isCreatingCache = false;
-  let lastContentsLength = 0;
-  let lastNonCachedTokenCount = 0;
-  /** @type {string | undefined} */
-  let cacheName;
-  let cachedContentsLength = 0;
-  /** @type {Date | undefined} */
-  let cacheExpireTime;
+  const state = {
+    cacheCount: 0,
+    isCreatingCache: false,
+    lastContentsLength: 0,
+    lastNonCachedTokenCount: 0,
+    /** @type {string | undefined} */
+    cacheName: undefined,
+    cachedContentsLength: 0,
+    /** @type {Date | undefined} */
+    cacheExpireTime: undefined,
+  };
+
+  // 初回は4096を超えたら、2回目以降は4096*2を超えたらキャッシュする
+  const maxNonCachedToken = () => 4096 * 2 ** Math.min(state.cacheCount, 1);
 
   const resetCacheState = () => {
-    cacheCount = 0;
-    lastNonCachedTokenCount = 0;
-    cacheName = undefined;
-    cachedContentsLength = 0;
-    cacheExpireTime = undefined;
+    state.cacheCount = 0;
+    state.lastNonCachedTokenCount = 0;
+    state.cacheName = undefined;
+    state.cachedContentsLength = 0;
+    state.cacheExpireTime = undefined;
   };
 
   /** @type {typeof callGeminiModel} */
@@ -51,14 +54,17 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
       const systemInstruction = contents.find((c) => c.role === "system");
       const contentsWithoutSystem = contents.filter((c) => c.role !== "system");
 
-      if (contentsWithoutSystem.length < lastContentsLength) {
+      if (contentsWithoutSystem.length < state.lastContentsLength) {
         // messages are cleared -> clear cache
         resetCacheState();
       }
-      lastContentsLength = contentsWithoutSystem.length;
+      state.lastContentsLength = contentsWithoutSystem.length;
 
-      if (maxNonCachedToken() < lastNonCachedTokenCount && !isCreatingCache) {
-        isCreatingCache = true;
+      if (
+        maxNonCachedToken() < state.lastNonCachedTokenCount &&
+        !state.isCreatingCache
+      ) {
+        state.isCreatingCache = true;
         const contentsToBeCached = contentsWithoutSystem.slice(0, -1);
 
         const url = `https://generativelanguage.googleapis.com/v1beta/cachedContents?key=${GEMINI_API_KEY}`;
@@ -66,7 +72,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
         /** @type {GeminiCreateCachedContentInput} */
         const request = {
           model: `models/${modelConfig.model}`,
-          ttl: `${cacheTTL}s`,
+          ttl: `${props.cacheTTL}s`,
           system_instruction: systemInstruction,
           contents: contentsToBeCached,
           tools,
@@ -91,15 +97,15 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
                   `Failed to create Gemini context cache: status=${response.status}, body=${await response.text()}`,
                 ),
               );
-              cacheName = undefined;
-              cachedContentsLength = 0;
+              state.cacheName = undefined;
+              state.cachedContentsLength = 0;
             } else {
               /** @type {GeminiCachedContents} */
               const cachedContents = await response.json();
-              cacheCount += 1;
-              cacheName = cachedContents.name;
-              cachedContentsLength = contentsToBeCached.length;
-              cacheExpireTime = new Date(cachedContents.expireTime);
+              state.cacheCount += 1;
+              state.cacheName = cachedContents.name;
+              state.cachedContentsLength = contentsToBeCached.length;
+              state.cacheExpireTime = new Date(cachedContents.expireTime);
             }
           })
           .catch((error) => {
@@ -112,7 +118,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
           })
           .finally(() => {
             // Ensure isCreatingCache is set to false regardless of success or failure
-            isCreatingCache = false;
+            state.isCreatingCache = false;
           });
       }
 
@@ -141,13 +147,13 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
 
       /** @type {GeminiGenerateContentInput} */
       const request =
-        cacheName &&
-        cacheExpireTime &&
-        new Date().getTime() < cacheExpireTime.getTime()
+        state.cacheName &&
+        state.cacheExpireTime &&
+        new Date().getTime() < state.cacheExpireTime.getTime()
           ? {
               ...baseRequest,
-              cachedContent: cacheName,
-              contents: contentsWithoutSystem.slice(cachedContentsLength),
+              cachedContent: state.cacheName,
+              contents: contentsWithoutSystem.slice(state.cachedContentsLength),
             }
           : {
               ...baseRequest,
@@ -231,7 +237,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
       };
 
       // update state
-      lastNonCachedTokenCount =
+      state.lastNonCachedTokenCount =
         content.usageMetadata.promptTokenCount -
         (content.usageMetadata.cachedContentTokenCount ?? 0);
 
