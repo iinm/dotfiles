@@ -743,15 +743,15 @@ local setup_cmp = function()
       --   end
       -- end),
 
-      -- ["<Tab>"] = cmp.mapping(function(fallback)
-      --   if cmp.visible() then
-      --     cmp.select_next_item()
-      --   elseif luasnip.locally_jumpable(1) then
-      --     luasnip.jump(1)
-      --   else
-      --     fallback()
-      --   end
-      -- end, { "i", "s" }),
+      ["<Tab>"] = cmp.mapping(function(fallback)
+        if cmp.visible() then
+          cmp.select_next_item()
+        elseif luasnip.locally_jumpable(1) then
+          luasnip.jump(1)
+        else
+          fallback()
+        end
+      end, { "i", "s" }),
     }),
 
     sources = cmp.config.sources({
