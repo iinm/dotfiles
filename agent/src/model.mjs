@@ -66,7 +66,7 @@ export function createModelCaller(modelName) {
         callAnthropicModel(
           {
             model: "claude-3-7-sonnet-latest",
-            max_tokens: 1024 * 8,
+            max_tokens: 1024 * 16,
             temperature: 0,
           },
           input,
@@ -76,7 +76,7 @@ export function createModelCaller(modelName) {
         callAnthropicModel(
           {
             model: "claude-3-7-sonnet-latest",
-            max_tokens: 1024 * 8,
+            max_tokens: 1024 * 16,
             thinking: {
               type: "enabled",
               budget_tokens: 1024,
