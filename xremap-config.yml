@@ -1,4 +1,3 @@
-# https://github.com/xremap/xremap
 modmap:
   - name: Global
     remap:
@@ -23,6 +22,15 @@ keymap:
       LeftAlt-k: Up
       LeftAlt-l: Right
 
+      # zoom in/out
+      LeftMeta-Shift-Equal: C-Shift-Equal
+      LeftMeta-Shift-Minus: C-Shift-Minus
+      LeftMeta-0: C-0
+
+  - name: Non-Terminal
+    application:
+      not: [wezterm]
+    remap:
       # Mac-like key bindings
       LeftMeta-c: C-c
       LeftMeta-v: C-v
@@ -35,7 +43,12 @@ keymap:
       # +Shift
       LeftMeta-Shift-t: C-Shift-t
       LeftMeta-Shift-z: C-Shift-z
-      # zoom in/out
-      LeftMeta-Shift-Equal: C-Shift-Equal
-      LeftMeta-Shift-Minus: C-Shift-Minus
-      LeftMeta-0: C-0
+
+  - name: Terminal
+    application:
+      only: [wezterm]
+    remap:
+      LeftMeta-c: C-Shift-c
+      LeftMeta-v: C-Shift-v
+      LeftMeta-t: C-Shift-t
+      LeftMeta-w: C-Shift-w
