@@ -18,10 +18,10 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
  */
 export function createCacheEnabledGeminiModelCaller(modelConfig) {
   const props = {
-    cacheTTL: 10 * 60, // seconds
+    cacheTTL: 5 * 60, // seconds
 
     // https://ai.google.dev/gemini-api/docs/caching#considerations
-    minCachableTokenCount: 4096,
+    minCacheableTokenCount: 4096,
   };
 
   const state = {
@@ -36,10 +36,14 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
     cacheExpireTime: undefined,
   };
 
-  // 初回はキャッシュ可能な最低トークン数を超えたら
-  // 2回目以降は x2 を超えたらキャッシュする
+  // キャッシュのトリガーとする、キャッシュされてないトークン数のしきい値を返す
   function maxNonCachedToken() {
-    return props.minCachableTokenCount * 2 ** Math.min(state.cacheCount, 1);
+    // キャッシュ可能なトークン数を超えたらキャッシュする
+    return props.minCacheableTokenCount;
+
+    // Note: 以前はキャッシュ作成に時間が掛かるため、以下のように回数に応じてしきい値を増加させていた
+    // 初回はキャッシュ可能な最低トークン数を超えたら、2回目以降は最低トークン数x2を超えたらキャッシュする
+    // return props.minCacheableTokenCount * 2 ** Math.min(state.cacheCount, 1);
   }
 
   function resetCacheState() {
