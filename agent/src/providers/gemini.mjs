@@ -18,7 +18,7 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
  */
 export function createCacheEnabledGeminiModelCaller(modelConfig) {
   const props = {
-    cacheTTL: 5 * 60, // seconds
+    cacheTTL: 10 * 60, // seconds
 
     // https://ai.google.dev/gemini-api/docs/caching#considerations
     minCacheableTokenCount: 4096,
@@ -112,6 +112,39 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
             } else {
               /** @type {GeminiCachedContents} */
               const cachedContents = await response.json();
+
+              if (
+                state.cacheName &&
+                state.cacheExpireTime &&
+                new Date().getTime() < state.cacheExpireTime.getTime()
+              ) {
+                // Delete old cache
+                console.error(
+                  styleText(
+                    "gray",
+                    `\nDeleting Gemini old context cache in background: name=${state.cacheName}`,
+                  ),
+                );
+                fetch(
+                  `https://generativelanguage.googleapis.com/v1beta/${state.cacheName}?key=${GEMINI_API_KEY}`,
+                  {
+                    method: "DELETE",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                  },
+                )
+                  .then(async () => { })
+                  .catch((error) => {
+                    console.error(
+                      styleText(
+                        "yellow",
+                        `Failed to delete Gemini context cache: ${error}`,
+                      ),
+                    );
+                  });
+              }
+
               state.cacheCount += 1;
               state.cacheName = cachedContents.name;
               state.cachedContentsLength = contentsToBeCached.length;
@@ -121,8 +154,8 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
           .catch((error) => {
             console.error(
               styleText(
-                "red",
-                `Error during background Gemini context cache creation: ${error}`,
+                "yellow",
+                `Failed to create Gemini context cache: ${error}`,
               ),
             );
           })
@@ -158,19 +191,19 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
       /** @type {GeminiGenerateContentInput} */
       const request =
         state.cacheName &&
-        state.cacheExpireTime &&
-        new Date().getTime() < state.cacheExpireTime.getTime()
+          state.cacheExpireTime &&
+          new Date().getTime() < state.cacheExpireTime.getTime()
           ? {
-              ...baseRequest,
-              cachedContent: state.cacheName,
-              contents: contentsWithoutSystem.slice(state.cachedContentsLength),
-            }
+            ...baseRequest,
+            cachedContent: state.cacheName,
+            contents: contentsWithoutSystem.slice(state.cachedContentsLength),
+          }
           : {
-              ...baseRequest,
-              system_instruction: systemInstruction,
-              contents: contentsWithoutSystem,
-              tools: tools.length ? tools : undefined,
-            };
+            ...baseRequest,
+            system_instruction: systemInstruction,
+            contents: contentsWithoutSystem,
+            tools: tools.length ? tools : undefined,
+          };
 
       const response = await fetch(url, {
         method: "POST",
