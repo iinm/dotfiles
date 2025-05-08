@@ -631,7 +631,7 @@ function convertGeminiStreamContentToAgentPartialContents(
     /** @type {string | undefined} */
     let previousPartType = previousPartialContent?.type;
     for (const part of candiate.content.parts) {
-      const partType = "text" in part ? "text" : "functionCall";
+      const partType = "text" in part ? "text" : "tool_use";
       if (previousPartType && previousPartType !== partType) {
         partialMessageContents.push({
           type: previousPartType,
