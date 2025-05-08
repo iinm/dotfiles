@@ -14,6 +14,11 @@ describe("config", () => {
         path: "dir/subdir/file.txt",
         expected: true,
       },
+      {
+        desc: "file in agent metadata directory",
+        path: ".agent/memory/project.md",
+        expected: true,
+      },
 
       // Unsafe paths
       { desc: "absolute path", path: "/absolute/path", expected: false },

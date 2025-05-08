@@ -150,6 +150,14 @@ export function ensureSafeRelativePath(arg) {
     return false;
   }
 
+  // Always allow access to agent project metadata directory
+  if (
+    arg === AGENT_PROJECT_METADATA_DIR ||
+    arg.startsWith(`${AGENT_PROJECT_METADATA_DIR}/`)
+  ) {
+    return true;
+  }
+
   // Deny git ignored files (which may contain sensitive information or should not be accessed)
   if (fs.existsSync(arg)) {
     try {
