@@ -43,7 +43,7 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
             return false;
           }
           for (const arg of args) {
-            if (!isSafePath(arg)) {
+            if (!ensureSafeRelativePath(arg)) {
               return false;
             }
           }
@@ -55,7 +55,7 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
       toolName: execCommandTool.def.name,
       input: {
         command: "sed",
-        args: ["-n", /^.+p$/, isSafePath],
+        args: ["-n", /^.+p$/, ensureSafeRelativePath],
       },
     },
     {
@@ -91,7 +91,7 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
 /**
  * @param {unknown} arg
  */
-export function isSafePath(arg) {
+export function ensureSafeRelativePath(arg) {
   if (typeof arg !== "string") {
     return false;
   }

@@ -1,9 +1,9 @@
 import assert from "node:assert";
 import { describe, it } from "node:test";
-import { isSafePath } from "./config.mjs";
+import { ensureSafeRelativePath } from "./config.mjs";
 
 describe("config", () => {
-  describe("isSafePath", () => {
+  describe("ensureSafeRelativePath", () => {
     const testCases = [
       // Safe paths
       { desc: "simple file name", path: "file.txt", expected: true },
@@ -45,7 +45,7 @@ describe("config", () => {
 
     for (const { desc, path, expected } of testCases) {
       it(`should return ${expected} for ${desc}: ${path}`, () => {
-        assert.strictEqual(isSafePath(path), expected);
+        assert.strictEqual(ensureSafeRelativePath(path), expected);
       });
     }
   });
