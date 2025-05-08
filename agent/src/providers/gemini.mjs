@@ -19,25 +19,21 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 export function createCacheEnabledGeminiModelCaller(modelConfig) {
   const props = {
     cacheTTL: 10 * 60, // seconds
-
     // https://ai.google.dev/gemini-api/docs/caching#considerations
     minCacheableTokenCount: 4096,
   };
 
-  const state = {
-    isCreatingCache: false,
-    /** @type {string | undefined} */
-    cacheName: undefined,
-    cachedContentsLength: 0,
-    /** @type {Date | undefined} */
-    cacheExpireTime: undefined,
-  };
+  /**
+   * @typedef {Object} CacheState
+   * @property {string} name
+   * @property {number} contentsLength
+   * @property {Date} expireTime
+   */
 
-  function resetCacheState() {
-    state.cacheName = undefined;
-    state.cachedContentsLength = 0;
-    state.cacheExpireTime = undefined;
-  }
+  const state = {
+    /** @type {CacheState=} */
+    cache: undefined,
+  };
 
   /** @type {typeof callGeminiModel} */
   async function modelCaller(config, input, retryCount = 0) {
@@ -51,7 +47,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
 
       // Clear cache if messages are cleared
       if (contentsWithoutSystem.length <= 1) {
-        resetCacheState();
+        state.cache = undefined;
       }
 
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
@@ -79,13 +75,11 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
 
       /** @type {GeminiGenerateContentInput} */
       const request =
-        state.cacheName &&
-        state.cacheExpireTime &&
-        new Date().getTime() < state.cacheExpireTime.getTime()
+        state.cache && new Date().getTime() < state.cache.expireTime.getTime()
           ? {
               ...baseRequest,
-              cachedContent: state.cacheName,
-              contents: contentsWithoutSystem.slice(state.cachedContentsLength),
+              cachedContent: state.cache.name,
+              contents: contentsWithoutSystem.slice(state.cache.contentsLength),
             }
           : {
               ...baseRequest,
@@ -193,8 +187,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
 
       // Create context cache for next request
       if (
-        props.minCacheableTokenCount < content.usageMetadata.promptTokenCount &&
-        !state.isCreatingCache
+        props.minCacheableTokenCount < content.usageMetadata.promptTokenCount
       ) {
         await updateCache({
           contentsWithoutSystem: [
@@ -230,8 +223,6 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
     systemInstruction,
     tools,
   }) {
-    state.isCreatingCache = true;
-
     const url = `https://generativelanguage.googleapis.com/v1beta/cachedContents?key=${GEMINI_API_KEY}`;
 
     /** @type {GeminiCreateCachedContentInput} */
@@ -266,18 +257,17 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
 
           // Delete old cache if previous cache is alive
           if (
-            state.cacheName &&
-            state.cacheExpireTime &&
-            new Date().getTime() < state.cacheExpireTime.getTime()
+            state.cache &&
+            new Date().getTime() < state.cache.expireTime.getTime()
           ) {
             console.error(
               styleText(
                 "gray",
-                `\nDeleting Gemini old context cache in background... (name=${state.cacheName})`,
+                `\nDeleting Gemini old context cache in background... (name=${state.cache.name})`,
               ),
             );
             fetch(
-              `https://generativelanguage.googleapis.com/v1beta/${state.cacheName}?key=${GEMINI_API_KEY}`,
+              `https://generativelanguage.googleapis.com/v1beta/${state.cache.name}?key=${GEMINI_API_KEY}`,
               {
                 method: "DELETE",
                 headers: {
@@ -305,9 +295,11 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
               });
           }
 
-          state.cacheName = cachedContents.name;
-          state.cachedContentsLength = contentsWithoutSystem.length;
-          state.cacheExpireTime = new Date(cachedContents.expireTime);
+          state.cache = {
+            name: cachedContents.name,
+            contentsLength: contentsWithoutSystem.length,
+            expireTime: new Date(cachedContents.expireTime),
+          };
         }
       })
       .catch((error) => {
@@ -317,9 +309,6 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
             `Failed to create Gemini context cache: ${error}`,
           ),
         );
-      })
-      .finally(() => {
-        state.isCreatingCache = false;
       });
   }
 
