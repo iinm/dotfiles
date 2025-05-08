@@ -128,6 +128,7 @@ export default {
       toolName: "exec_command",
       input: { command: "npm", args: ["run", /(check|fix)/] },
     },
+    { toolName: "web_search", input: { query: /./ } },
     {
       // Naming: mcp__<serverName>__<toolName>
       toolName: "mcp__fetch__fetch",

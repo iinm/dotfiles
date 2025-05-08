@@ -4,7 +4,6 @@
 
 import path from "node:path";
 import { execCommandTool } from "./tools/execCommand.mjs";
-import { tavilySearchTool } from "./tools/tavilySearch.mjs";
 import { tmuxCommandTool } from "./tools/tmuxCommand.mjs";
 
 export const AGENT_PROJECT_METADATA_DIR =
@@ -23,9 +22,6 @@ export const AGENT_MODEL = process.env.AGENT_MODEL || "claude-haiku";
 export function createDefaultAllowedToolUsePatterns({ sessionId }) {
   /** @type {ToolUsePattern[]} */
   return [
-    // Web search
-    { toolName: tavilySearchTool.def.name, input: { query: /./ } },
-
     // Exec command
     {
       toolName: execCommandTool.def.name,
