@@ -29,11 +29,34 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
     // Exec command
     {
       toolName: execCommandTool.def.name,
-      input: { command: /^(ls|wc|cat|head|tail|fd|rg|find|grep|date)$/ },
+      input: { command: /^(date|uname)$/ },
     },
     {
       toolName: execCommandTool.def.name,
-      input: { command: "sed", args: ["-n", /^.+p$/] },
+      input: {
+        command: /^(ls|wc|cat|head|tail|fd|rg|find|grep)$/,
+        /**
+         * @param {unknown=} args
+         */
+        args: (args) => {
+          if (!Array.isArray(args)) {
+            return false;
+          }
+          for (const arg of args) {
+            if (!isSafePath(arg)) {
+              return false;
+            }
+          }
+          return true;
+        },
+      },
+    },
+    {
+      toolName: execCommandTool.def.name,
+      input: {
+        command: "sed",
+        args: ["-n", /^.+p$/, isSafePath],
+      },
     },
     {
       toolName: execCommandTool.def.name,
@@ -63,6 +86,24 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
       },
     },
   ];
+}
+
+/**
+ * @param {unknown} arg
+ */
+export function isSafePath(arg) {
+  if (typeof arg !== "string") {
+    return false;
+  }
+  // Deny absolute paths or parent directory traversal
+  if (arg.startsWith("/") || arg.startsWith("..")) {
+    return false;
+  }
+  const segments = arg.split("/");
+  if (segments.includes("..")) {
+    return false;
+  }
+  return true;
 }
 
 /**
