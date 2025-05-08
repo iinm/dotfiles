@@ -2,6 +2,8 @@
  * @import { ToolUsePattern } from "./tool";
  */
 
+import { execFileSync } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import { execCommandTool } from "./tools/execCommand.mjs";
 import { tmuxCommandTool } from "./tools/tmuxCommand.mjs";
@@ -30,7 +32,7 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
     {
       toolName: execCommandTool.def.name,
       input: {
-        command: /^(ls|wc|cat|head|tail|fd|rg|find|grep)$/,
+        command: /^(ls|wc|cat|head|tail)$/,
         /**
          * @param {unknown=} args
          */
@@ -38,10 +40,57 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
           if (!Array.isArray(args)) {
             return false;
           }
-          for (const arg of args) {
-            if (!ensureSafeRelativePath(arg)) {
-              return false;
-            }
+          if (!args.every(ensureSafeRelativePath)) {
+            return false;
+          }
+          return true;
+        },
+      },
+    },
+    {
+      toolName: execCommandTool.def.name,
+      input: {
+        command: "fd",
+        /**
+         * @param {unknown=} args
+         */
+        args: (args) => {
+          if (!Array.isArray(args)) {
+            return false;
+          }
+          if (!args.every(ensureSafeRelativePath)) {
+            return false;
+          }
+          if (
+            args.some(
+              (arg) =>
+                ["-I", "-x"].includes(arg) ||
+                arg.startsWith("--no-ignore") ||
+                arg.startsWith("--exec"),
+            )
+          ) {
+            return false;
+          }
+          return true;
+        },
+      },
+    },
+    {
+      toolName: execCommandTool.def.name,
+      input: {
+        command: "rg",
+        /**
+         * @param {unknown=} args
+         */
+        args: (args) => {
+          if (!Array.isArray(args)) {
+            return false;
+          }
+          if (!args.every(ensureSafeRelativePath)) {
+            return false;
+          }
+          if (args.some((arg) => arg.startsWith("--no-ignore"))) {
+            return false;
           }
           return true;
         },
@@ -91,14 +140,46 @@ export function ensureSafeRelativePath(arg) {
   if (typeof arg !== "string") {
     return false;
   }
+
   // Deny absolute paths or parent directory traversal
-  if (arg.startsWith("/") || arg.startsWith("..")) {
+  if (
+    arg.startsWith("/") ||
+    arg.startsWith("..") ||
+    arg.split("/").includes("..")
+  ) {
     return false;
   }
-  const segments = arg.split("/");
-  if (segments.includes("..")) {
-    return false;
+
+  // Deny git ignored files (which may contain sensitive information or should not be accessed)
+  if (fs.existsSync(arg)) {
+    try {
+      execFileSync("git", ["check-ignore", "--no-index", "-q", arg], {
+        stdio: ["ignore", "ignore", "ignore"],
+      });
+      // The path is ignored (exit code 0)
+      return false;
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        "status" in error &&
+        typeof error.status === "number"
+      ) {
+        if (error.status === 1) {
+          // Path is not ignored,
+        } else {
+          // Other git error (e.g., status 128 if not a git repo).
+          return false;
+        }
+      } else {
+        console.error(
+          `Unexpected error checking git ignore for ${arg}:`,
+          error,
+        );
+        return false;
+      }
+    }
   }
+
   return true;
 }
 

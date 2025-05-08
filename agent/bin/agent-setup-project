@@ -8,9 +8,25 @@ app_root="$(cd "$this_dir/.." && pwd)"
 
 help() {
   cat << 'HELP'
-Usage: agent-init --metadata-dir <dir>
+Usage: agent-setup-project --metadata-dir <dir>
 
-Initialize a agent metadata directory.
+Initialize an agent metadata directory for storing project-specific resources.
+
+This script:
+- Creates a metadata directory at the specified location
+- Sets up a symbolic link from .agent to this directory
+- Creates the necessary subdirectories (memory/, workflows/)
+- Initializes an empty request.md file for task descriptions
+- Adds a .gitignore file to exclude temporary files
+
+The metadata directory stores:
+- Task memory files for context persistence across sessions
+- Reusable workflow definitions
+- Project-wide knowledge base
+- Task request descriptions
+
+Example:
+  ./bin/agent-setup-project --metadata-dir ~/agent-metadata/my-project
 HELP
 }
 
@@ -42,6 +58,4 @@ ln -sv "$metadata_dir" "$AGENT_PROJECT_METADATA_DIR"
 
 mkdir -pv "$AGENT_PROJECT_METADATA_DIR"/{memory,workflows}
 touch "$AGENT_PROJECT_METADATA_DIR"/request.md
-
-mkdir -pv "$AGENT_PROJECT_METADATA_DIR"/tmp
-echo -e "*\n!.gitignore" > "$AGENT_PROJECT_METADATA_DIR"/tmp/.gitignore
+echo -e "tmp/" > "$AGENT_PROJECT_METADATA_DIR"/.gitignore
