@@ -134,7 +134,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
                     },
                   },
                 )
-                  .then(async () => { })
+                  .then(async () => {})
                   .catch((error) => {
                     console.error(
                       styleText(
@@ -191,19 +191,19 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
       /** @type {GeminiGenerateContentInput} */
       const request =
         state.cacheName &&
-          state.cacheExpireTime &&
-          new Date().getTime() < state.cacheExpireTime.getTime()
+        state.cacheExpireTime &&
+        new Date().getTime() < state.cacheExpireTime.getTime()
           ? {
-            ...baseRequest,
-            cachedContent: state.cacheName,
-            contents: contentsWithoutSystem.slice(state.cachedContentsLength),
-          }
+              ...baseRequest,
+              cachedContent: state.cacheName,
+              contents: contentsWithoutSystem.slice(state.cachedContentsLength),
+            }
           : {
-            ...baseRequest,
-            system_instruction: systemInstruction,
-            contents: contentsWithoutSystem,
-            tools: tools.length ? tools : undefined,
-          };
+              ...baseRequest,
+              system_instruction: systemInstruction,
+              contents: contentsWithoutSystem,
+              tools: tools.length ? tools : undefined,
+            };
 
       const response = await fetch(url, {
         method: "POST",
