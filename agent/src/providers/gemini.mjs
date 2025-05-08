@@ -234,8 +234,6 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
       tools,
     };
 
-    console.error(styleText("gray", "\nCreating Gemini context cache..."));
-
     await fetch(url, {
       method: "POST",
       headers: {
@@ -260,12 +258,6 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
             state.cache &&
             new Date().getTime() < state.cache.expireTime.getTime()
           ) {
-            console.error(
-              styleText(
-                "gray",
-                `\nDeleting Gemini old context cache in background... (name=${state.cache.name})`,
-              ),
-            );
             fetch(
               `https://generativelanguage.googleapis.com/v1beta/${state.cache.name}?key=${GEMINI_API_KEY}`,
               {
