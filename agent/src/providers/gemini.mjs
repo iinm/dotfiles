@@ -18,9 +18,9 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
  */
 export function createCacheEnabledGeminiModelCaller(modelConfig) {
   const props = {
-    cacheTTL: 10 * 60, // seconds
+    cacheTTL: 5 * 60, // seconds
     // https://ai.google.dev/gemini-api/docs/caching#considerations
-    minCacheableTokenCount: 4096,
+    minCacheableTokenCount: 2048,
   };
 
   /**
