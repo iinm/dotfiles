@@ -134,7 +134,7 @@ Commands:
 
     if (inputTrimmed.toLowerCase() === "/request.archive") {
       const message = `
-System: Archive request file.
+System: Archive the request file.
 - Read the content of ${AGENT_PROJECT_METADATA_DIR}/request.md.
 - Generate a concise, kebab-case title from the content of request.md
 - Move ${AGENT_PROJECT_METADATA_DIR}/request.md to ${AGENT_PROJECT_METADATA_DIR}/request-archive/${sessionId}--<kebab-case-title>.md
@@ -191,7 +191,7 @@ System: Load task memory and resume work.
 
     if (inputTrimmed.toLowerCase() === "/bye") {
       const message = `
-System: Conversation is end.
+System: Conversation has ended.
 - Kill the tmux session named agent-${sessionId}.
       `.trim();
       console.log(styleText("gray", "\n<command>"));
