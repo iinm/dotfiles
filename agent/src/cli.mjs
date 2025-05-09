@@ -108,10 +108,6 @@ Memory Management:
   "save memory"           - Save the current task state to memory
   "resume work"           - Load a previously saved task memory
   "update project memory" - Update the project-wide knowledge base
-
-Workflow Management:
-  "use workflow"          - List and apply available workflows
-  "save workflow"         - Save current session steps as a reusable workflow
       `.trim(),
       );
       cli.prompt();

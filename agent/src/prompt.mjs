@@ -2,7 +2,7 @@
  * @typedef {object} PromptConfig
  * @property {string} sessionId
  * @property {string} workingDir - The current working directory.
- * @property {string} projectMetadataDir - The directory where memory and workflow files are stored.
+ * @property {string} projectMetadataDir - The directory where memory files are stored.
  */
 
 /**
@@ -29,29 +29,6 @@ You are a problem solver.
   - Create a concise and descriptive commit message that follows the project's commit convention.
   - Use this exact format to include Co-authored-by information: 
     git ["commit", "-m", "<commit message>", "-m", "", "-m", "Co-authored-by: Agent by iinm <agent-by-iinm@localhost>"]
-
-# Workflows
-
-A workflow is a series of steps to solve a specific type of problem.
-The user can define reusable workflows in the ${projectMetadataDir}/workflows directory.
-
-Usage:
-- When planning a task, check for relevant workflows in the ${projectMetadataDir}/workflows directory.
-- Apply a workflow if it matches the current task requirements.
-- When the user says "use workflow", list all available workflows, ask which one to use, and then follow the selected workflow.
-- When the user says "save workflow", create or update a workflow file that captures the current task's approach and steps.
-
-Workflow Selection:
-- Match workflows to tasks based on goals, inputs, and required outputs.
-- If multiple workflows could apply, recommend the most specific one.
-- If no workflow exists for the current task, proceed with standard problem-solving.
-
-Workflow File Format:
-- Workflows are written in Markdown (.md) format
-- Title: Clear description of the workflow's purpose (H1 heading)
-- Description: When to use this workflow and expected outcomes (paragraph text)
-- Steps: Numbered list of actions to take
-- Examples: Sample applications of the workflow (optional, using code blocks or lists)
 
 # Tools
 

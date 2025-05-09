@@ -4,7 +4,7 @@ A lightweight CLI-based coding agent designed to assist with your development ta
 
 ## Safety Controls
 
-This CLI tool automatically permits certain tool executions but requires explicit approval for security-sensitive operations. These include accessing absolute paths, parent directories, and git-ignored files. The security rules are defined in `src/config.mjs` within this repository.
+This CLI tool automatically permits certain tool executions but requires explicit approval for security-sensitive operations, such as accessing absolute paths, parent directories, and git-ignored files. The security rules are defined in `src/config.mjs` within this repository.
 
 ## Requirements
 
@@ -37,7 +37,7 @@ echo "$TAVILY_API_KEY" > .secrets/tavily-api-key.txt
 ## Getting Started
 
 ```sh
-# (Optional) Set up a metadata directory for storing memory, workflow files, and other resources.
+# (Optional) Set up a metadata directory for storing memory, and other resources.
 ./bin/agent-setup-project --metadata-dir ~/agent-metadata/<project-name>
 ```
 
@@ -68,29 +68,20 @@ These commands start with a slash (`/`):
 
 ### Conversation Keywords
 
-These are natural language phrases you can use in conversation:
+You can use these natural language phrases in conversation:
 
 - `commit` - Create a commit message based on staged changes
 - `bye` or `exit` - End the session and clean up resources (including tmux sessions)
 
 ### Memory Management
 
-The agent can save and retrieve information about tasks, helping maintain context across sessions:
+The agent can save and retrieve task information, helping maintain context across sessions:
 
 - `save memory` - Save the current task state to a dated memory file in `.agent/memory/`
 - `resume work` - List and load a previously saved task memory to continue where you left off
 - `update project memory` - Add or modify information in the project-wide knowledge base (`.agent/memory/project.md`)
 
-Memory files contain structured information about tasks, including the problem description, implementation plan, current status, and notes for future reference.
-
-### Workflow Management
-
-Workflows help automate repetitive tasks by providing reusable templates:
-
-- `use workflow` - List available workflows in `.agent/workflows/` and apply one to your current task
-- `save workflow` - Save the current session's approach and steps as a reusable workflow for similar future tasks
-
-Workflows are stored as Markdown files with clear titles, descriptions, and step-by-step instructions that the agent can follow.
+Memory files store structured task information, including problem descriptions, implementation plans, current status, and notes for future reference.
 
 ### Example Session
 
@@ -123,12 +114,11 @@ Workflows are stored as Markdown files with clear titles, descriptions, and step
         \__ memory/
               \__ project.md   # Project-wide knowledge base
               \__ <yyyy-mm-dd-hhmm>--<task-title>.md  # Task-specific memory files
-        \__ workflows/         # Reusable workflow definitions
 ```
 
 ## Project Configuration
 
-You can customize the agent's behavior by creating a configuration file in your project's metadata directory.
+Customize the agent's behavior by creating a configuration file in your project's metadata directory.
 
 Configuration Example:
 ```js
@@ -136,7 +126,7 @@ Configuration Example:
 export default {
   // Define patterns for tools that can be used without explicit approval
   allowedToolUsePatterns: [
-    // Allow npm run check/fix commands without confirmation
+    // Allow npm run check|fix commands without confirmation
     {
       toolName: "exec_command",
       input: { command: "npm", args: ["run", /(check|fix)/] },
