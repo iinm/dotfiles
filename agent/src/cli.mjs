@@ -99,7 +99,7 @@ export function startCLI({
 Commands:
   /help            - Display this help message
   /request         - Read ${AGENT_PROJECT_METADATA_DIR}/request.md
-  /request.archive - Archive request.md and clear its content.
+  /request.archive - Archive request.md and clear its content
   /commit          - Create a commit message based on staged changes
   /memory.save     - Save the current task state to memory
   /memory.resume   - Load a previously saved task memory
