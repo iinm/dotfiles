@@ -51,57 +51,8 @@ echo "$TAVILY_API_KEY" > .secrets/tavily-api-key.txt
 
 ## Usage
 
-### Commands
-
-These commands start with a slash (`/`):
-
-- `/help` - Display the help message with available commands
-- `/request` - Read the task request from `.agent/request.md`
-- `/resume` - Resume conversation after an LLM provider error or unexpected interruption
-- `/clear` - Clear conversation history (keeping only the system message)
-
-### Debug Commands
-
-- `/debug.msg.pop` - Remove the last message from the conversation
-- `/debug.msg.dump` - Save current messages to a JSON file
-- `/debug.msg.load` - Load messages from a JSON file
-
-### Conversation Keywords
-
-You can use these natural language phrases in conversation:
-
-- `commit` - Create a commit message based on staged changes
-- `bye` or `exit` - End the session and clean up resources (including tmux sessions)
-
-### Memory Management
-
-The agent can save and retrieve task information, helping maintain context across sessions:
-
-- `save memory` - Save the current task state to a dated memory file in `.agent/memory/`
-- `resume work` - List and load a previously saved task memory to continue where you left off
-- `update project memory` - Add or modify information in the project-wide knowledge base (`.agent/memory/project.md`)
-
-Memory files store structured task information, including problem descriptions, implementation plans, current status, and notes for future reference.
-
-### Example Session
-
 ```
-> /request
-<The agent displays the content of your request.md file>
-
-> Can you help me implement this feature?
-<The agent analyzes the request and provides a plan>
-
-> save memory
-<The agent saves the current task state>
-
-...
-
-> commit
-<The agent generates a commit message based on staged changes>
-
-> bye
-<The agent cleans up and exits>
+/help
 ```
 
 ## Metadata Directory Structure

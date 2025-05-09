@@ -15,13 +15,12 @@ Initialize an agent metadata directory for storing project-specific resources.
 This script:
 - Creates a metadata directory at the specified location
 - Sets up a symbolic link from .agent to this directory
-- Creates the necessary subdirectories (memory/, workflows/)
+- Creates the necessary subdirectories (memory/, request-archive/)
 - Initializes an empty request.md file for task descriptions
 - Adds a .gitignore file to exclude temporary files
 
 The metadata directory stores:
 - Task memory files for context persistence across sessions
-- Reusable workflow definitions
 - Project-wide knowledge base
 - Task request descriptions
 
@@ -56,6 +55,6 @@ fi
 mkdir -pv "$metadata_dir"
 ln -sv "$metadata_dir" "$AGENT_PROJECT_METADATA_DIR"
 
-mkdir -pv "$AGENT_PROJECT_METADATA_DIR"/{memory,workflows}
+mkdir -pv "$AGENT_PROJECT_METADATA_DIR"/{memory,request-archive}
 touch "$AGENT_PROJECT_METADATA_DIR"/request.md
 echo -e "tmp/" > "$AGENT_PROJECT_METADATA_DIR"/.gitignore

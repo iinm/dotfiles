@@ -113,7 +113,7 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
     },
     {
       toolName: execCommandTool.def.name,
-      input: { command: "mkdir", args: ["-p", ".agent/memory"] },
+      input: { command: "mkdir", args: ["-p", /^\.agent\//] },
     },
 
     // Tmux command
