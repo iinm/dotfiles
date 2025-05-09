@@ -20,6 +20,7 @@ const SLASH_COMMANDS = [
   "/request",
   "/request.archive",
   "/commit",
+  "/commit.no-co-author",
   "/memory.save",
   "/memory.resume",
   "/clear",
@@ -97,18 +98,19 @@ export function startCLI({
       console.log(
         `
 Commands:
-  /help            - Display this help message
-  /request         - Read ${AGENT_PROJECT_METADATA_DIR}/request.md
-  /request.archive - Archive request.md and clear its content
-  /commit          - Create a commit message based on staged changes
-  /memory.save     - Save the current task state to memory
-  /memory.resume   - Load a previously saved task memory
-  /clear           - Clear conversation
-  /bye             - End the session and clean up resources (including tmux sessions)
-  /resume          - Resume conversation after an LLM provider error
-  /debug.msg.pop   - Remove last message
-  /debug.msg.dump  - Save current messages to a JSON file
-  /debug.msg.load  - Load messages from a JSON file
+  /help                - Display this help message
+  /request             - Read ${AGENT_PROJECT_METADATA_DIR}/request.md
+  /request.archive     - Archive request.md and clear its content
+  /commit              - Create a commit message based on staged changes
+  /commit.no-co-author - Create a commit without Co-authored-by
+  /memory.save         - Save the current task state to memory
+  /memory.resume       - Load a previously saved task memory
+  /clear               - Clear conversation
+  /bye                 - End the session and clean up resources (including tmux sessions)
+  /resume              - Resume conversation after an LLM provider error
+  /debug.msg.pop       - Remove last message
+  /debug.msg.dump      - Save current messages to a JSON file
+  /debug.msg.load      - Load messages from a JSON file
       `.trim(),
       );
       cli.prompt();
@@ -134,7 +136,7 @@ Commands:
 
     if (inputTrimmed.toLowerCase() === "/request.archive") {
       const message = `
-System: Archive the request file.
+Archive the request file.
 - Read the content of ${AGENT_PROJECT_METADATA_DIR}/request.md.
 - Generate a concise, kebab-case title from the content of request.md
 - Move ${AGENT_PROJECT_METADATA_DIR}/request.md to ${AGENT_PROJECT_METADATA_DIR}/request-archive/${sessionId}--<kebab-case-title>.md
@@ -150,12 +152,28 @@ System: Archive the request file.
 
     if (inputTrimmed.toLowerCase() === "/commit") {
       const message = `
-System: Create a commit.
-- First run \`git diff --staged\` to understand the staged changes.
-- Then check the commit message format by running \`git log --no-merges --oneline -n 10\`.
+Create a commit.
+- Run \`git diff --staged\` to understand the staged changes.
+- Check the commit message format by running \`git log --no-merges --oneline -n 10\`.
 - Create a concise and descriptive commit message that follows the project's commit convention.
 - Use this exact format to include Co-authored-by information: 
   git ["commit", "-m", "<commit message>", "-m", "", "-m", "Co-authored-by: Agent by iinm <agent-by-iinm@localhost>"]
+      `.trim();
+      console.log(styleText("gray", "\n<command>"));
+      console.log(message);
+      console.log(styleText("gray", "</command>"));
+
+      userEventEmitter.emit("userInput", message);
+      return;
+    }
+
+    if (inputTrimmed.toLowerCase() === "/commit.no-co-author") {
+      const message = `
+Create a commit.
+- Run \`git diff --staged\` to understand the staged changes.
+- Check the commit message format by running \`git log --no-merges --oneline -n 10\`.
+- Create a concise and descriptive commit message that follows the project's commit convention.
+- Create a commit: git ["commit", "-m", "<commit message>"]
       `.trim();
       console.log(styleText("gray", "\n<command>"));
       console.log(message);
@@ -177,7 +195,7 @@ System: Create a commit.
 
     if (inputTrimmed.toLowerCase() === "/memory.resume") {
       const message = `
-System: Load task memory and resume work.
+Load task memory and resume work.
 - Display available task memory files and prompt the user to select one.
 - Read the content of the selected memory file after the user selects it.
       `.trim();
