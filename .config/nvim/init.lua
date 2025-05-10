@@ -211,7 +211,7 @@ local setup_keymap = function()
   -- copy
   vim.keymap.set('n', '<leader>cp', ':<C-u>CopyPath<CR>')
   vim.keymap.set('n', '<leader>cl', ':<C-u>CopyPathLine<CR>')
-  vim.keymap.set('n', '<leader>cr', ':<C-u>CopyPathRange<CR>')
+  vim.keymap.set('v', '<leader>cr', ':<C-u>CopyPathRange<CR>')
   vim.keymap.set('n', '<leader>cP', ':<C-u>CopyAbsolutePath<CR>')
 
   -- window
