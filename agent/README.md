@@ -37,11 +37,6 @@ echo "$TAVILY_API_KEY" > .secrets/tavily-api-key.txt
 ## Getting Started
 
 ```sh
-# (Optional) Set up a metadata directory for storing memory, and other resources.
-./bin/agent-setup-project --metadata-dir ~/agent-metadata/<project-name>
-```
-
-```sh
 # Run agent with default model
 ./bin/agent
 
@@ -59,9 +54,9 @@ echo "$TAVILY_API_KEY" > .secrets/tavily-api-key.txt
 
 ```
 <project-root>
-  \__ .agent/ --> (link to metadata directory)
-        \__ config.mjs         # Project-specific configuration
-        \__ request.md         # Task description for the agent
+  \__ .agent/
+        \__ config.mjs  # Project-specific configuration
+        \__ request.md  # Task description for the agent
         \__ memory/
               \__ <yyyy-mm-dd-hhmm>--<task-title>.md  # Task-specific memory files
 ```
