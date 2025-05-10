@@ -74,9 +74,6 @@ Other command examples:
 - Get current date time: date ["+%Y-%m-%d %H:%M:%S"]
 - Show git status (branch, modified files, etc.): git ["status"]
 - For commands requiring pipes or redirects: bash ["-c", "fd '.+.mjs' | wc -l"]
-- Open URL for the user:
-  - On Mac: open ["<url>"]
-  - On Linux: xdg-open ["<url>"]
 
 ## write file
 
@@ -131,11 +128,14 @@ Basic commands:
 - Send key to session: send-keys ["-t", "agent-${sessionId}:<window>", "echo hello", "Enter"]
 - Delete line: send-keys ["-t", "agent-${sessionId}:<window>, "C-a", "C-k"]
 
-# Memory
+# Memory Files
+
+Memory files maintain task context.
 
 Task Memory File:
 - Path: ${projectMetadataDir}/memory/${sessionId}--<kebab-case-title>.md
 - Create a concise, clear title (3-5 words) that represents the core task.
+- Create/Update at key checkpoints: after creating a plan, completing steps, encountering issues, or making important decisions.
 - Update existing task memory when continuing the same task.
 
 Task Memory Format:
