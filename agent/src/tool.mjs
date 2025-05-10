@@ -30,6 +30,11 @@ export function createToolUseApprover({
     return false;
   };
 
+  const reject = () => {
+    state.approveCount = 0;
+    return false;
+  };
+
   /**
    * @param {MessageContentToolUse} toolUse
    */
@@ -42,7 +47,7 @@ export function createToolUseApprover({
         return approve();
       }
     }
-    return false;
+    return reject();
   };
 
   /**
