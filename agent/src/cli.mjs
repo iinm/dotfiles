@@ -25,7 +25,7 @@ const SLASH_COMMANDS = [
   "/memory.resume",
   "/clear",
   "/bye",
-  "/resume",
+  "/debug.resume",
   "/debug.msg.pop",
   "/debug.msg.dump",
   "/debug.msg.load",
@@ -107,7 +107,7 @@ Commands:
   /memory.resume       - Load a previously saved task memory
   /clear               - Clear conversation
   /bye                 - End the session and clean up resources (including tmux sessions)
-  /resume              - Resume conversation after an LLM provider error
+  /debug.resume        - Resume conversation after an LLM provider error
   /debug.msg.pop       - Remove last message
   /debug.msg.dump      - Save current messages to a JSON file
   /debug.msg.load      - Load messages from a JSON file
