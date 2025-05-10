@@ -133,9 +133,6 @@ Basic commands:
 
 # Memory
 
-You should save important information in memory to resume work later.
-Include all necessary details to continue work even if you forget specifics.
-
 Task Memory File:
 - Path: ${projectMetadataDir}/memory/${sessionId}--<kebab-case-title>.md
 - Create a concise, clear title (3-5 words) that represents the core task.
