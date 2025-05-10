@@ -63,7 +63,6 @@ echo "$TAVILY_API_KEY" > .secrets/tavily-api-key.txt
         \__ config.mjs         # Project-specific configuration
         \__ request.md         # Task description for the agent
         \__ memory/
-              \__ project.md   # Project-wide knowledge base
               \__ <yyyy-mm-dd-hhmm>--<task-title>.md  # Task-specific memory files
 ```
 

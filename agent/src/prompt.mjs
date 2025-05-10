@@ -136,19 +136,12 @@ Basic commands:
 You should save important information in memory to resume work later.
 Include all necessary details to continue work even if you forget specifics.
 
-Memory Files:
-- Task memory: ${projectMetadataDir}/memory/${sessionId}--<kebab-case-title>.md
-  - Create a concise, clear title (3-5 words) that represents the core task.
-- Project memory: ${projectMetadataDir}/memory/project.md
-  - This file contains persistent project-wide knowledge.
-  - Reference existing files (README, etc.) rather than duplicating content.
-
-Memory Maintenance:
-- Aim to keep memory concise yet comprehensive.
+Task Memory File:
+- Path: ${projectMetadataDir}/memory/${sessionId}--<kebab-case-title>.md
+- Create a concise, clear title (3-5 words) that represents the core task.
 - Update existing task memory when continuing the same task.
 
 Task Memory Format:
-
 \`\`\`markdown
 # [title]
 

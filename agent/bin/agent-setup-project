@@ -21,7 +21,6 @@ This script:
 
 The metadata directory stores:
 - Task memory files for context persistence across sessions
-- Project-wide knowledge base
 - Task request descriptions
 
 Example:

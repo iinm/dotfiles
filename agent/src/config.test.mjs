@@ -16,7 +16,7 @@ describe("config", () => {
       },
       {
         desc: "file in agent metadata directory",
-        path: ".agent/memory/project.md",
+        path: ".agent/request.md",
         expected: true,
       },
 
