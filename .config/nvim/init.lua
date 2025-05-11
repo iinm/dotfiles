@@ -210,9 +210,9 @@ local setup_keymap = function()
 
   -- copy
   vim.keymap.set('n', '<leader>cp', ':<C-u>CopyPath<CR>')
-  vim.keymap.set('n', '<leader>cl', ':<C-u>CopyPathLine<CR>')
-  vim.keymap.set('v', '<leader>cr', ':<C-u>CopyPathRange<CR>')
+  vim.keymap.set('v', '<leader>cp', ':<C-u>CopyPathWithRange<CR>')
   vim.keymap.set('n', '<leader>cP', ':<C-u>CopyAbsolutePath<CR>')
+  vim.keymap.set('v', '<leader>cP', ':<C-u>CopyAbsolutePathWithRange<CR>')
 
   -- window
   vim.keymap.set('n', '<C-w>z', window_utils.toggle_maximize)
@@ -303,11 +303,17 @@ local setup_commands = function()
     { 'CloseTerms',           function() window_utils.close_terms() end,                {} },
     { 'ToggleHighlightColor', function() require("nvim-highlight-colors").toggle() end, {} },
     { 'Diagnostics',          function() vim.diagnostic.setloclist() end,               {} },
-    { 'CopyPath',             function() vim.fn.setreg('+', vim.fn.expand('%')) end,    {} },
-    { 'CopyPathLine', function()
-      vim.fn.setreg('+', vim.fn.expand('%') .. ':' .. vim.fn.line('.'))
+    { 'CopyPath', function()
+      local path_to_copy
+      if vim.bo.filetype == 'oil' then
+        require('oil.actions').copy_entry_path.callback()
+        path_to_copy = vim.fn.fnamemodify(vim.fn.getreg(vim.v.register), ":.")
+      else
+        path_to_copy = vim.fn.expand('%')
+      end
+      vim.fn.setreg('+', path_to_copy)
     end, {} },
-    { 'CopyPathRange', function()
+    { 'CopyPathWithRange', function()
       vim.fn.setreg(
         '+',
         vim.fn.expand('%') ..
@@ -317,7 +323,26 @@ local setup_commands = function()
         vim.api.nvim_buf_get_mark(0, ">")[1]
       )
     end, { range = true } },
-    { 'CopyAbsolutePath', function() vim.fn.setreg('+', vim.fn.expand('%:p')) end, {} },
+    { 'CopyAbsolutePath', function()
+      local path_to_copy
+      if vim.bo.filetype == 'oil' then
+        require('oil.actions').copy_entry_path.callback()
+        path_to_copy = vim.fn.getreg(vim.v.register)
+      else
+        path_to_copy = vim.fn.expand('%:p')
+      end
+      vim.fn.setreg('+', path_to_copy)
+    end, {} },
+    { 'CopyAbsorlutePathWithRange', function()
+      vim.fn.setreg(
+        '+',
+        vim.fn.expand('%:p') ..
+        ':' ..
+        vim.api.nvim_buf_get_mark(0, "<")[1] ..
+        '-' ..
+        vim.api.nvim_buf_get_mark(0, ">")[1]
+      )
+    end, { range = true } },
   }
 
   for _, command in ipairs(commands) do
