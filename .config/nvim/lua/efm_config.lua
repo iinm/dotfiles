@@ -11,6 +11,16 @@ local tools = {
         '%f:%l:%c: %tote: %m',
       },
     },
+    eslint = {
+      lintCommand = 'npx --no-install eslint_d --no-color --format visualstudio --stdin --stdin-filename ${INPUT}',
+      lintSource = "eslint_d",
+      lintStdin = true,
+      lintFormats = { '%f(%l,%c): %trror %m', '%f(%l,%c): %tarning %m' },
+      lintIgnoreExitCode = true,
+      rootMarkers = {
+        'eslint.config.mjs',
+      },
+    },
   },
   formatters = {
     prettier = {
@@ -40,6 +50,8 @@ local tools = {
 }
 
 local default_settings = {
+  -- logFile = "/tmp/efm.log",
+  -- logLevel = 1,
   rootMarkers = { ".git/" },
   languages = {
     sh = {
