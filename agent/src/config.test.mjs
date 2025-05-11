@@ -1,6 +1,9 @@
 import assert from "node:assert";
 import { describe, it } from "node:test";
-import { ensureSafeRelativePath } from "./config.mjs";
+import {
+  AGENT_PROJECT_METADATA_DIR,
+  ensureSafeRelativePath,
+} from "./config.mjs";
 
 describe("config", () => {
   describe("ensureSafeRelativePath", () => {
@@ -16,7 +19,7 @@ describe("config", () => {
       },
       {
         desc: "file in agent metadata directory",
-        path: ".agent/request.md",
+        path: `${AGENT_PROJECT_METADATA_DIR}/request.md`,
         expected: true,
       },
 

@@ -54,7 +54,7 @@ echo "$TAVILY_API_KEY" > .secrets/tavily-api-key.txt
 
 ```
 <project-root>
-  \__ .agent/
+  \__ $AGENT_PROJECT_METADATA_DIR (default: .agent)
         \__ config.mjs  # Project-specific configuration
         \__ request.md  # Task description for the agent
         \__ memory/
@@ -67,7 +67,7 @@ Customize the agent's behavior by creating a configuration file in your project'
 
 Configuration Example:
 ```js
-// .agent/config.mjs
+// $AGENT_PROJECT_METADATA_DIR/config.mjs
 export default {
   // Define patterns for tools that can be used without explicit approval
   allowedToolUsePatterns: [

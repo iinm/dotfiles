@@ -111,10 +111,6 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
       toolName: execCommandTool.def.name,
       input: { command: "git", args: ["branch", "--show-current"] },
     },
-    {
-      toolName: execCommandTool.def.name,
-      input: { command: "mkdir", args: ["-p", /^\.agent\//] },
-    },
 
     // Tmux command
     {
