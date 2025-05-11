@@ -638,13 +638,6 @@ local setup_lsp = function()
     })
   end
 
-  -- npm i -g vscode-langservers-extracted
-  if vim.fn.executable('vscode-eslint-language-server') then
-    lspconfig.eslint.setup({
-      capabilities = capabilities,
-    })
-  end
-
   -- https://github.com/redhat-developer/vscode-xml/releases
   -- xattr -d com.apple.quarantine lemminx
   if vim.fn.executable('lemminx') then
