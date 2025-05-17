@@ -288,6 +288,9 @@ local setup_keymap = function()
   local ls = require('luasnip')
   vim.keymap.set({ "i", "s" }, "<C-f>", function() ls.jump(1) end, { silent = true })
   vim.keymap.set({ "i", "s" }, "<C-b>", function() ls.jump(-1) end, { silent = true })
+
+  -- copilot
+  -- vim.keymap.set('i', '<C-l>', '<Plug>(copilot-suggest)')
 end
 
 local setup_commands = function()
@@ -573,7 +576,7 @@ local setup_plugins = function()
     'hrsh7th/cmp-cmdline',
     'hrsh7th/nvim-cmp',
 
-    -- 'github/copilot.vim',
+    'github/copilot.vim',
 
     -- snippets
     {
@@ -870,9 +873,9 @@ end
 
 local setup_others = function()
   vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
-  -- vim.g.copilot_filetypes = {
-  --   gitcommit = true,
-  -- }
+  vim.g.copilot_filetypes = {
+    ['*'] = false
+  }
   require('nvim-autopairs').setup()
   require("nvim-surround").setup()
   require('dressing').setup()
