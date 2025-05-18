@@ -286,11 +286,33 @@ local setup_keymap = function()
 
   -- luasnip
   local ls = require('luasnip')
-  vim.keymap.set({ "i", "s" }, "<C-f>", function() ls.jump(1) end, { silent = true })
-  vim.keymap.set({ "i", "s" }, "<C-b>", function() ls.jump(-1) end, { silent = true })
 
   -- copilot
-  -- vim.keymap.set('i', '<C-l>', '<Plug>(copilot-suggest)')
+  vim.keymap.set('i', '<C-l>', '<Plug>(copilot-suggest)')
+
+  vim.keymap.set({ "i", "s" }, "<C-f>", function()
+    if ls.jumpable(1) then
+      ls.jump(1)
+    elseif vim.fn.mode() == 'i' then
+      vim.api.nvim_feedkeys(
+        vim.api.nvim_replace_termcodes('<Plug>(copilot-next)', true, true, true),
+        'n',
+        false
+      )
+    end
+  end, { silent = true })
+
+  vim.keymap.set({ "i", "s" }, "<C-b>", function()
+    if ls.jumpable(1) then
+      ls.jump(-1)
+    elseif vim.fn.mode() == 'i' then
+      vim.api.nvim_feedkeys(
+        vim.api.nvim_replace_termcodes('<Plug>(copilot-previous)', true, true, true),
+        'n',
+        false
+      )
+    end
+  end, { silent = true })
 end
 
 local setup_commands = function()
@@ -749,15 +771,15 @@ local setup_cmp = function()
       --   end
       -- end),
 
-      ["<Tab>"] = cmp.mapping(function(fallback)
-        if cmp.visible() then
-          cmp.select_next_item()
-        elseif luasnip.locally_jumpable(1) then
-          luasnip.jump(1)
-        else
-          fallback()
-        end
-      end, { "i", "s" }),
+      -- ["<Tab>"] = cmp.mapping(function(fallback)
+      --   if cmp.visible() then
+      --     cmp.select_next_item()
+      --   elseif luasnip.locally_jumpable(1) then
+      --     luasnip.jump(1)
+      --   else
+      --     fallback()
+      --   end
+      -- end, { "i", "s" }),
     }),
 
     sources = cmp.config.sources({
