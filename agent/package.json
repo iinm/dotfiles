@@ -13,11 +13,11 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.11.1"
+    "@modelcontextprotocol/sdk": "^1.11.5"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@types/node": "^22.15.17",
+    "@types/node": "^22.15.21",
     "typescript": "^5.8.3"
   }
 }
