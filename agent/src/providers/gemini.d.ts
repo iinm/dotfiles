@@ -1,15 +1,23 @@
 /* Model */
 export type GeminiModelConfig = {
   // https://ai.google.dev/gemini-api/docs/models
-  model: "gemini-2.5-pro-preview-05-06" | "gemini-2.5-flash-preview-04-17";
+  model:
+    | "gemini-2.5-pro-preview-05-06"
+    | "gemini-2.5-flash-preview-04-17"
+    | "gemini-2.5-flash-preview-05-20";
   requestConfig?: {
     generationConfig: GeminiGenerationConfig;
-    safetySettings: GeminiSafetySetting[];
+    safetySettings?: GeminiSafetySetting[];
   };
 };
 
 export type GeminiGenerationConfig = {
   temperature: number;
+  // https://ai.google.dev/api/generate-content#ThinkingConfig
+  thinkingConfig?: {
+    includeThoughts: boolean;
+    thinkingBudget: number;
+  };
 };
 
 export type GeminiSafetySetting = {
@@ -70,6 +78,7 @@ export type GeminiFunctionContent = {
 /* Content Parts */
 export type GeminiContentPartText = {
   text: string;
+  thought?: boolean;
 };
 
 export type GeminiContentPartFunctionCall = {
@@ -140,6 +149,7 @@ export type GeminiUsageMetadata = {
   promptTokenCount: number;
   cachedContentTokenCount?: number;
   candidatesTokenCount?: number;
+  thoughtsTokenCount?: number;
   promptTokensDetails: GeminiTokensDetail[];
   cachedTokenDetails?: GeminiTokensDetail[];
 };

@@ -13,7 +13,7 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
  * References:
  * - https://ai.google.dev/gemini-api/docs/caching
  * - https://ai.google.dev/api/caching
- * @param {GeminiModelConfig} modelConfig
+ * @param {Pick<GeminiModelConfig, "model">} modelConfig
  * @returns {typeof callGeminiModel}
  */
 export function createCacheEnabledGeminiModelCaller(modelConfig) {
@@ -159,6 +159,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
           (content.usageMetadata.cachedContentTokenCount ?? 0),
         cached: content.usageMetadata.cachedContentTokenCount ?? 0,
         output: content.usageMetadata.candidatesTokenCount ?? 0,
+        thought: content.usageMetadata.thoughtsTokenCount ?? 0,
         total: content.usageMetadata.totalTokenCount,
       };
 
@@ -519,7 +520,9 @@ function convertGenericMessageToGeminiFormat(messages) {
         /** @type {(GeminiContentPartText | GeminiContentPartFunctionCall)[]} */
         const parts = [];
         for (const part of message.content) {
-          if (part.type === "text") {
+          if (part.type === "thinking") {
+            parts.push({ text: part.thinking, thought: true });
+          } else if (part.type === "text") {
             parts.push({ text: part.text });
           } else if (part.type === "tool_use") {
             parts.push({
@@ -528,8 +531,6 @@ function convertGenericMessageToGeminiFormat(messages) {
                 args: part.input,
               },
             });
-          } else if (part.type === "thinking") {
-            parts.push({ text: `Thinking: ${part.thinking}` });
           }
         }
         geminiContents.push({
@@ -631,7 +632,9 @@ function convertGeminiStreamContentToAgentPartialContents(
     /** @type {string | undefined} */
     let previousPartType = previousPartialContent?.type;
     for (const part of candiate.content.parts) {
-      const partType = "text" in part ? "text" : "tool_use";
+      const partType =
+        "text" in part ? (part.thought ? "thinking" : "text") : "tool_use";
+
       if (previousPartType && previousPartType !== partType) {
         partialMessageContents.push({
           type: previousPartType,
@@ -648,12 +651,21 @@ function convertGeminiStreamContentToAgentPartialContents(
       }
 
       if ("text" in part) {
-        partialMessageContents.push({
-          type: "text",
-          content: part.text,
-          position: "delta",
-        });
+        if (part.thought) {
+          partialMessageContents.push({
+            type: "thinking",
+            content: part.text,
+            position: "delta",
+          });
+        } else {
+          partialMessageContents.push({
+            type: "text",
+            content: part.text,
+            position: "delta",
+          });
+        }
       }
+
       if ("functionCall" in part) {
         partialMessageContents.push({
           type: "tool_use",
@@ -731,10 +743,17 @@ function convertGeminiAssistantMessageToGenericFormat(content) {
   const assistantMessageContent = [];
   for (const part of candidate.content.parts || []) {
     if ("text" in part) {
-      assistantMessageContent.push({
-        type: "text",
-        text: part.text,
-      });
+      if (part.thought) {
+        assistantMessageContent.push({
+          type: "thinking",
+          thinking: part.text,
+        });
+      } else {
+        assistantMessageContent.push({
+          type: "text",
+          text: part.text,
+        });
+      }
     }
     if ("functionCall" in part) {
       assistantMessageContent.push({

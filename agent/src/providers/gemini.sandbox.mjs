@@ -1,5 +1,6 @@
 (async () => {
-  const model = "gemini-2.5-pro-exp-03-25";
+  // const model = "gemini-2.5-flash-preview-05-20";
+  const model = "gemini-2.5-pro-preview-05-06";
   const apiKey = process.env.GEMINI_API_KEY;
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`,
@@ -14,6 +15,11 @@
         // },
         generationConfig: {
           temperature: 0,
+          thinkingConfig: {
+            includeThoughts: true,
+            // 2025-05-22時点では、Gemini 2.5 Flash のみサポート。Proでは無視される。
+            thinkingBudget: 2048,
+          },
         },
         safetySettings: [
           {
@@ -32,7 +38,8 @@
             parts: [
               {
                 // text: "こんにちは、あなたは何ができますか？",
-                text: "今日の東京、バンコク、台北、パリの天気は？",
+                // text: "今日の東京、バンコク、台北、パリの天気は？",
+                text: "1から1000までの和は？",
               },
             ],
           },

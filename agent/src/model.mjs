@@ -102,10 +102,24 @@ export function createModelCaller(modelName) {
         );
     case "gemini-pro-cached": {
       const model = "gemini-2.5-pro-preview-05-06";
-      const modelCaller = createCacheEnabledGeminiModelCaller({
-        model,
-      });
-      return (input) => modelCaller({ model }, input);
+      const modelCaller = createCacheEnabledGeminiModelCaller({ model });
+      return (input) =>
+        modelCaller(
+          {
+            model,
+            requestConfig: {
+              generationConfig: {
+                temperature: 0,
+                thinkingConfig: {
+                  includeThoughts: true,
+                  // 2025-05-22時点では、Gemini 2.5 Flash のみサポート。Proでは無視される。
+                  thinkingBudget: 2048,
+                },
+              },
+            },
+          },
+          input,
+        );
     }
     default:
       throw new Error(`Invalid model: ${modelName}`);
