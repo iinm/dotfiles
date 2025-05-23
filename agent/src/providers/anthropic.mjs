@@ -247,18 +247,11 @@ function convertAnthropicStreamEventsToChatCompletion(events) {
       chatCompletion = Object.assign(chatCompletion, event.message);
     } else if (event.type === "message_delta") {
       Object.assign(chatCompletion, event.delta);
-      if (event.usage) {
+      if (event.usage?.output_tokens) {
         const usage = /** @type {AnthropicChatCompletionUsage} */ (
           chatCompletion.usage || {}
         );
-        for (const [key, value] of Object.entries(event.usage)) {
-          /** @type {number} */
-          const currentValue =
-            usage[/** @type {keyof AnthropicChatCompletionUsage} */ (key)] || 0;
-          const updatedValue = currentValue + value;
-          usage[/** @type {keyof AnthropicChatCompletionUsage} */ (key)] =
-            updatedValue;
-        }
+        usage.output_tokens += event.usage.output_tokens;
         chatCompletion.usage = usage;
       }
     } else if (event.type === "content_block_start") {

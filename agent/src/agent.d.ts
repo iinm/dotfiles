@@ -1,5 +1,10 @@
 import type { EventEmitter } from "node:events";
-import type { CallModel, Message, PartialMessageContent } from "./model";
+import type {
+  CallModel,
+  Message,
+  PartialMessageContent,
+  ProviderTokenUsage,
+} from "./model";
 import type { Tool, ToolUseApprover } from "./tool";
 
 type UserEventMap = {
@@ -14,7 +19,7 @@ type AgentEventMap = {
   error: [Error];
   toolUseRequest: [];
   turnEnd: [];
-  providerTokenUsage: [Record<string, number | Record<string, number>>];
+  providerTokenUsage: [ProviderTokenUsage];
 };
 
 export type AgentEventEmitter = EventEmitter<AgentEventMap>;

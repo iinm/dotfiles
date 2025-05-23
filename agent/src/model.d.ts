@@ -15,7 +15,7 @@ export type ModelOutput = {
 
 export type ProviderTokenUsage = Record<
   string,
-  number | Record<string, number>
+  number | string | Record<string, number>
 >;
 
 export type PartialMessageContent = {

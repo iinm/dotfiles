@@ -463,6 +463,8 @@ function formatProviderTokenUsage(usage) {
   for (const [key, value] of Object.entries(usage)) {
     if (typeof value === "number") {
       header.push(`${key}: ${value}`);
+    } else if (typeof value === "string") {
+      header.push(`${key}: ${value}`);
     } else if (value) {
       lines.push(
         `(${key}) ${Object.entries(value)
