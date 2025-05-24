@@ -20,6 +20,8 @@ fish_add_path $HOME/tools/lua-language-server/bin
 fish_add_path $HOME/tools/google-cloud-sdk/bin
 fish_add_path $HOME/go/bin
 
+fish_add_path $HOME/dotfiles/bin
+fish_add_path $HOME/dotfiles/bin.local
 fish_add_path $HOME/dotfiles/agent/bin
 
 # Environment variables
