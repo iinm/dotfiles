@@ -210,6 +210,7 @@ local setup_keymap = function()
 
   -- copy
   vim.keymap.set('n', '<leader>cp', ':<C-u>CopyPath<CR>')
+  vim.keymap.set('n', '<leader>cl', ':<C-u>CopyPathWithLineNumber<CR>')
   vim.keymap.set('v', '<leader>cp', ':<C-u>CopyPathWithRange<CR>')
   vim.keymap.set('n', '<leader>cP', ':<C-u>CopyAbsolutePath<CR>')
   vim.keymap.set('v', '<leader>cP', ':<C-u>CopyAbsolutePathWithRange<CR>')
@@ -337,6 +338,11 @@ local setup_commands = function()
         path_to_copy = vim.fn.expand('%')
       end
       vim.fn.setreg('+', path_to_copy)
+    end, {} },
+    { 'CopyPathWithLineNumber', function()
+      local path_to_copy = vim.fn.expand('%')
+      local line_number = vim.api.nvim_win_get_cursor(0)[1]
+      vim.fn.setreg('+', path_to_copy .. ':' .. line_number)
     end, {} },
     { 'CopyPathWithRange', function()
       vim.fn.setreg(
