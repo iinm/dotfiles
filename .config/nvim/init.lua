@@ -212,8 +212,6 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>cp', ':<C-u>CopyPath<CR>')
   vim.keymap.set('n', '<leader>cl', ':<C-u>CopyPathWithLineNumber<CR>')
   vim.keymap.set('v', '<leader>cp', ':<C-u>CopyPathWithRange<CR>')
-  vim.keymap.set('n', '<leader>cP', ':<C-u>CopyAbsolutePath<CR>')
-  vim.keymap.set('v', '<leader>cP', ':<C-u>CopyAbsolutePathWithRange<CR>')
 
   -- window
   vim.keymap.set('n', '<C-w>z', window_utils.toggle_maximize)
@@ -348,26 +346,6 @@ local setup_commands = function()
       vim.fn.setreg(
         '+',
         vim.fn.expand('%') ..
-        ':' ..
-        vim.api.nvim_buf_get_mark(0, "<")[1] ..
-        '-' ..
-        vim.api.nvim_buf_get_mark(0, ">")[1]
-      )
-    end, { range = true } },
-    { 'CopyAbsolutePath', function()
-      local path_to_copy
-      if vim.bo.filetype == 'oil' then
-        require('oil.actions').copy_entry_path.callback()
-        path_to_copy = vim.fn.getreg(vim.v.register)
-      else
-        path_to_copy = vim.fn.expand('%:p')
-      end
-      vim.fn.setreg('+', path_to_copy)
-    end, {} },
-    { 'CopyAbsorlutePathWithRange', function()
-      vim.fn.setreg(
-        '+',
-        vim.fn.expand('%:p') ..
         ':' ..
         vim.api.nvim_buf_get_mark(0, "<")[1] ..
         '-' ..
