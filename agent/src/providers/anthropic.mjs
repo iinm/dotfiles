@@ -71,14 +71,18 @@ export async function callAnthropicModel(config, input, retryCount = 0) {
     /** @type {AnthropicStreamEvent[]} */
     const events = [];
     /** @type {PartialMessageContent | undefined} */
-    let partialContent = undefined;
+    let previousPartialContent = undefined;
     for await (const event of readAnthropicStreamEvents(reader)) {
       events.push(event);
 
-      partialContent = convertAnthropicStreamEventToAgentPartialContent(
+      const partialContent = convertAnthropicStreamEventToAgentPartialContent(
         event,
-        partialContent,
+        previousPartialContent,
       );
+
+      if (partialContent) {
+        previousPartialContent = partialContent;
+      }
 
       if (input.onPartialMessageContent && partialContent) {
         input.onPartialMessageContent(partialContent);
