@@ -441,6 +441,13 @@ local setup_commands = function()
 end
 
 local setup_auto_commands = function()
+  -- reload changed files
+  vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter", "FocusGained" }, {
+    group = vim.api.nvim_create_augroup("UserAutoReloadFile", {}),
+    pattern = "*",
+    command = "checktime",
+  })
+
   -- update oldfiles
   vim.api.nvim_create_autocmd({ 'BufEnter' }, {
     group = vim.api.nvim_create_augroup('UserUpdateOldfiles', {}),
