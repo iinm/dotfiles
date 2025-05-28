@@ -444,8 +444,13 @@ local setup_auto_commands = function()
   -- reload changed files
   vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter", "FocusGained" }, {
     group = vim.api.nvim_create_augroup("UserAutoReloadFile", {}),
-    pattern = "*",
-    command = "checktime",
+    callback = function(args)
+      local bufnr = args.buf
+      -- normal buffer and the buffer name (file path) exists
+      if vim.bo[bufnr].buftype == '' and vim.api.nvim_buf_get_name(bufnr) ~= '' then
+        vim.cmd("checktime")
+      end
+    end,
   })
 
   -- update oldfiles
