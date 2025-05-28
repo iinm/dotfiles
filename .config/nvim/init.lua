@@ -871,8 +871,9 @@ local setup_treesitter = function()
       'typescript', 'tsx',
       'mermaid',
       'fish',
-      'terraform',
-      'graphql'
+      'graphql',
+      -- Disabled due to instability
+      -- 'terraform',
     },
     highlight = { enable = true },
   })
