@@ -383,6 +383,33 @@ local setup_commands = function()
     end,
   })
 
+  -- Delete buffers that reference non-existent files
+  vim.api.nvim_create_user_command('DeleteUnavailableBuffers', function()
+    local bufs_to_delete = {}
+    for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+      if vim.api.nvim_buf_is_loaded(bufnr) then
+        local bufname = vim.api.nvim_buf_get_name(bufnr)
+        -- The buffer has a file path and the file is not readable,
+        if bufname ~= "" and vim.fn.filereadable(bufname) == 0 then
+          -- buftype is empty (not a special buffer)
+          local buftype = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
+          if buftype == "" then
+            table.insert(bufs_to_delete, bufnr)
+          end
+        end
+      end
+    end
+
+    if #bufs_to_delete > 0 then
+      for _, bufnr in ipairs(bufs_to_delete) do
+        vim.api.nvim_buf_delete(bufnr, { force = true })
+      end
+      vim.notify("Deleted " .. #bufs_to_delete .. " unavailable buffers.", vim.log.levels.INFO)
+    else
+      vim.notify("No unavailable buffers to delete.", vim.log.levels.INFO)
+    end
+  end, {})
+
   -- Function to get selected text in visual mode
   local get_visual_selection = function()
     local start_pos = vim.fn.getpos("'<")
@@ -870,7 +897,8 @@ local setup_oil = function()
     lsp_file_methods = {
       enabled = true,
       timeout_ms = 10000,
-      autosave_changes = "unmodified",
+      -- If set to true or unmodified, it will cause old files to reappear in cases where file movement and import path editing occur.
+      autosave_changes = false,
     },
   })
 end
