@@ -277,12 +277,6 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>gb', ':<C-u>Git blame<CR>')
   vim.keymap.set('n', '<leader>gl', ':<C-u>Git log %<CR>')
 
-  -- dap
-  vim.keymap.set('n', '<leader>dt', ':<C-u>ToggleDebugger<CR>')
-  vim.keymap.set('n', '<leader>db', ':<C-u>DapToggleBreakpoint<CR>')
-  vim.keymap.set('n', '<leader>dc', ':<C-u>DapContinue<CR>')
-  vim.keymap.set({ 'n', 'v' }, '<leader>de', '<Cmd>lua require("dapui").eval()<CR>')
-
   -- luasnip
   local ls = require('luasnip')
 
@@ -320,9 +314,6 @@ local setup_commands = function()
     { 'Buffers',              'call Buffers()',                                         {} },
     { 'Oldfiles',             function() vim.fn['Oldfiles']({ only_cwd = true }) end,   {} },
     { 'OldfilesGlobal',       function() vim.fn['Oldfiles']() end,                      {} },
-    { 'ToggleDebugger',       function() window_utils.toggle_debugger() end,            {} },
-    { 'ClearBreakpoints',     function() require('dap').clear_breakpoints() end,        {} },
-    { 'Debug',                function() require('dap').continue() end,                 {} },
     { 'Outline',              'call Outline()',                                         {} },
     { 'CloseTerms',           function() window_utils.close_terms() end,                {} },
     { 'ToggleHighlightColor', function() require("nvim-highlight-colors").toggle() end, {} },
@@ -630,13 +621,6 @@ local setup_plugins = function()
       dependencies = { "rafamadriz/friendly-snippets" },
     },
     'saadparwaiz1/cmp_luasnip',
-
-    -- debugger
-    'mfussenegger/nvim-dap',
-    {
-      'rcarriga/nvim-dap-ui',
-      dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
-    },
   })
 end
 
@@ -826,56 +810,6 @@ local setup_cmp = function()
   })
 end
 
-local setup_dap = function()
-  local local_config = require_safe('local_config')
-  local dap = require('dap')
-
-  -- https://github.com/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation
-  require("dap").adapters["pwa-node"] = {
-    type = "server",
-    host = "localhost",
-    port = "${port}",
-    executable = {
-      command = "node",
-      -- https://github.com/microsoft/vscode-js-debug/releases
-      args = { os.getenv('HOME') .. "/tools/js-debug/src/dapDebugServer.js", "${port}" },
-    }
-  }
-  dap.configurations = local_config.dap_configurations or {
-    typescript = {
-      {
-        name = 'Test (Jest)',
-        type = 'pwa-node',
-        request = 'launch',
-        console = "integratedTerminal",
-        cwd = '${workspaceFolder}',
-        program = '${workspaceFolder}/node_modules/.bin/jest',
-        args = { '--runInBand', '${file}' },
-      }
-    },
-    javascript = {
-      {
-        name = 'Test (Node.js)',
-        type = 'pwa-node',
-        request = 'launch',
-        console = "integratedTerminal",
-        cwd = '${workspaceFolder}',
-        -- program = 'node',
-        args = { '--test', '${file}' },
-      }
-    }
-  }
-
-  local window_utils = require('window_utils')
-  require('dapui').setup()
-  dap.listeners.after.event_initialized["dapui_config"] = function()
-    window_utils.open_debugger()
-  end
-  dap.listeners.before.event_exited["dapui_config"] = function()
-    window_utils.close_debugger()
-  end
-end
-
 local setup_oil = function()
   require("oil").setup({
     view_options = {
@@ -927,7 +861,6 @@ setup_plugins()
 setup_toggleterm()
 setup_lsp()
 setup_cmp()
-setup_dap()
 setup_oil()
 setup_treesitter()
 setup_others()
