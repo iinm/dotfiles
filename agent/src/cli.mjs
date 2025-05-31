@@ -93,9 +93,10 @@ export function startCLI({
     if (["/help", "help"].includes(inputTrimmed.toLowerCase())) {
       console.log(
         `
-@path/to/file          - Read content from a file
-@path/to/file:N        - Read line N from a file
-@path/to/file:N-M      - Read lines N to M from a file
+File Input Syntax:
+  @path/to/file          - Read content from a file
+  @path/to/file:N        - Read line N from a file
+  @path/to/file:N-M      - Read lines N to M from a file
 
 Commands:
   /help                - Display this help message
