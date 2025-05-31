@@ -657,51 +657,9 @@ end
 local setup_lsp = function()
   local local_config = require_safe('local_config')
 
-  -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md
-  local lspconfig = require('lspconfig')
-  local capabilities = require('cmp_nvim_lsp').default_capabilities()
-
-  if vim.fn.executable('lua-language-server') then
-    lspconfig.lua_ls.setup({
-      capabilities = capabilities,
-    })
-  end
-
-  -- npm install -g typescript-language-server typescript
-  if vim.fn.executable('tsserver') then
-    lspconfig.ts_ls.setup({
-      capabilities = capabilities
-    })
-  end
-
-  if vim.fn.executable('gopls') then
-    lspconfig.gopls.setup({
-      capabilities = capabilities,
-    })
-  end
-
-  -- brew install terraform-ls
-  if vim.fn.executable('terraform-ls') then
-    lspconfig.terraformls.setup({
-      capabilities = capabilities,
-    })
-  end
-
-  -- https://github.com/redhat-developer/vscode-xml/releases
-  -- xattr -d com.apple.quarantine lemminx
-  if vim.fn.executable('lemminx') then
-    lspconfig.lemminx.setup({
-      capabilities = capabilities,
-      settings = local_config.lemminx_settings or {
-        -- Example:
-        -- settings = {
-        --   xml = {
-        --     catalogs = { vim.fn.expand('~/catalog.xml') }
-        --   }
-        -- }
-      }
-    })
-  end
+  vim.lsp.config('*', {
+    capabilities = require('cmp_nvim_lsp').default_capabilities()
+  })
 
   local efm_default_settings = require('efm_config').default_settings
   local efm_settings = vim.tbl_deep_extend(
@@ -709,12 +667,45 @@ local setup_lsp = function()
     efm_default_settings,
     local_config.efm_settings or {}
   )
-  lspconfig.efm.setup({
-    capabilities = capabilities,
-    init_options = { documentFormatting = true },
-    filetypes = vim.tbl_keys(efm_settings.languages),
-    settings = efm_settings,
-  })
+
+  local servers = {
+    { name = 'lua_ls',      bin = 'lua-language-server' },
+    { name = 'ts_ls',       bin = 'tsserver' },
+    { name = 'gopls',       bin = 'gopls' },
+    { name = 'terraformls', bin = 'terraform-ls' },
+    {
+      name = 'lemminx',
+      bin = 'lemminx',
+      config = {
+        settings = local_config.lemminx_settings or {
+          -- Example:
+          -- settings = {
+          --   xml = {
+          --     catalogs = { vim.fn.expand('~/catalog.xml') }
+          --   }
+          -- }
+        }
+      }
+    },
+    {
+      name = 'efm',
+      bin = 'efm-langserver',
+      config = {
+        init_options = { documentFormatting = true },
+        filetypes = vim.tbl_keys(efm_settings.languages),
+        settings = efm_settings,
+      }
+    }
+  }
+
+  for _, server in ipairs(servers) do
+    if vim.fn.executable(server.bin) then
+      if server.config then
+        vim.lsp.config(server.name, server.config)
+      end
+      vim.lsp.enable(server.name)
+    end
+  end
 
   -- formatter
   local lsp_format_clients = vim.iter({
