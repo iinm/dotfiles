@@ -632,7 +632,6 @@ local setup_plugins = function()
     'saadparwaiz1/cmp_luasnip',
 
     -- debugger
-    'andrewferrier/debugprint.nvim',
     'mfussenegger/nvim-dap',
     {
       'rcarriga/nvim-dap-ui',
@@ -919,7 +918,6 @@ local setup_others = function()
   require("nvim-surround").setup()
   require('dressing').setup()
   require("luasnip.loaders.from_lua").load({ paths = vim.fn.stdpath('config') .. '/snippets' })
-  require('debugprint').setup()
 end
 
 setup_options()
