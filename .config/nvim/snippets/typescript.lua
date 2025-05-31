@@ -1,15 +1,12 @@
 return {
   s(
-    "cl",
-    fmt("console.log(<>);",
-      { i(1, "message") },
-      { delimiters = "<>", repeat_duplicates = true }
-    )
-  ),
-  s(
-    "cl-json-stringify",
-    fmt("console.log(JSON.stringify(<>, null, 2));",
-      { i(1, "obj") },
+    "debug",
+    fmt(
+      [[
+        console.debug("\n--- DEBUG: <description>");
+        console.debug(JSON.stringify({ <target> }, null, 2));
+      ]],
+      { description = i(1, "description"), target = i(2, "target") },
       { delimiters = "<>", repeat_duplicates = true }
     )
   ),
