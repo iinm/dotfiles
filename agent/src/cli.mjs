@@ -9,16 +9,12 @@
  */
 
 import fs from "node:fs";
-import path from "node:path";
 import readline from "node:readline";
 import { styleText } from "node:util";
-import { AGENT_PROJECT_METADATA_DIR } from "./config.mjs";
 
 // Define available slash commands for tab completion
 const SLASH_COMMANDS = [
   "/help",
-  "/request",
-  "/request.archive",
   "/commit",
   "/commit.no-co-author",
   "/memory.save",
@@ -97,10 +93,12 @@ export function startCLI({
     if (["/help", "help"].includes(inputTrimmed.toLowerCase())) {
       console.log(
         `
+@path/to/file          - Read content from a file
+@path/to/file:N        - Read line N from a file
+@path/to/file:N-M      - Read lines N to M from a file
+
 Commands:
   /help                - Display this help message
-  /request             - Read ${AGENT_PROJECT_METADATA_DIR}/request.md
-  /request.archive     - Archive request.md and clear its content
   /commit              - Create a commit message based on staged changes
   /commit.no-co-author - Create a commit without Co-authored-by
   /memory.save         - Save the current task state to memory
@@ -117,36 +115,31 @@ Commands:
       return;
     }
 
-    if (inputTrimmed.toLowerCase() === "/request") {
-      const filePath = path.join(AGENT_PROJECT_METADATA_DIR, "request.md");
-      if (!fs.existsSync(filePath)) {
-        console.log(styleText("red", `\nFile not found: ${filePath}`));
+    // Handle file reading when message starts with @
+    if (inputTrimmed.startsWith("@")) {
+      const fileMention = parseFileMention(inputTrimmed);
+      if (fileMention instanceof Error) {
+        console.log(styleText("red", `\n${fileMention.message}`));
         cli.prompt();
         return;
       }
-      const fileContent = fs.readFileSync(filePath, "utf-8");
+      const fileContentOrError = readFileContent(
+        fileMention.filePath,
+        fileMention.startLine,
+        fileMention.endLine,
+      );
 
-      console.log(styleText("gray", "\n<request>"));
-      console.log(fileContent.trim());
-      console.log(styleText("gray", "</request>"));
+      if (fileContentOrError instanceof Error) {
+        console.log(styleText("red", `\n${fileContentOrError.message}`));
+        cli.prompt();
+        return;
+      }
 
-      userEventEmitter.emit("userInput", fileContent);
-      return;
-    }
+      console.log(styleText("gray", "\n<input>"));
+      console.log(fileContentOrError);
+      console.log(styleText("gray", "</input>"));
 
-    if (inputTrimmed.toLowerCase() === "/request.archive") {
-      const message = `
-Archive the request file.
-- Read the content of ${AGENT_PROJECT_METADATA_DIR}/request.md.
-- Generate a concise, kebab-case title from the content of request.md
-- Move ${AGENT_PROJECT_METADATA_DIR}/request.md to ${AGENT_PROJECT_METADATA_DIR}/request-archive/${sessionId}--<kebab-case-title>.md
-- Clear the content of ${AGENT_PROJECT_METADATA_DIR}/request.md
-      `.trim();
-      console.log(styleText("gray", "\n<command>"));
-      console.log(message);
-      console.log(styleText("gray", "</command>"));
-
-      userEventEmitter.emit("userInput", message);
+      userEventEmitter.emit("userInput", fileContentOrError);
       return;
     }
 
@@ -490,4 +483,63 @@ function formatProviderTokenUsage(usage) {
   }
 
   return styleText("gray", outputLines.join("\n"));
+}
+
+/**
+ * @param {string} fileMentionString
+ * @returns {{filePath: string, startLine?: number, endLine?: number} | Error}
+ */
+function parseFileMention(fileMentionString) {
+  const match = fileMentionString.match(/^@([^:]+)(?::(\d+)(?:-(\d+))?)?$/);
+  if (!match) {
+    return new Error(
+      "Invalid format. Use: @path/to/file[:line] or @path/to/file[:start-end]",
+    );
+  }
+  const [, filePath, startLine, endLine] = match;
+  return {
+    filePath,
+    startLine: startLine ? Number.parseInt(startLine) : undefined,
+    endLine: endLine ? Number.parseInt(endLine) : undefined,
+  };
+}
+
+/**
+ * @param {string} filePath
+ * @param {number=} startLine
+ * @param {number=} endLine
+ * @returns {string | Error}
+ */
+function readFileContent(filePath, startLine, endLine) {
+  if (!fs.existsSync(filePath)) {
+    return new Error(`File not found: ${filePath}`);
+  }
+
+  let fileContent;
+  try {
+    fileContent = fs.readFileSync(filePath, "utf-8");
+  } catch (error) {
+    return new Error(
+      `Error reading file: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  const lines = fileContent.split("\n");
+
+  if (startLine) {
+    const start = startLine;
+    const end = endLine ? endLine : start;
+
+    if (
+      start < 1 ||
+      start > lines.length ||
+      end < start ||
+      end > lines.length
+    ) {
+      return new Error(`Invalid line range. File has ${lines.length} lines.`);
+    }
+
+    return lines.slice(start - 1, end).join("\n");
+  }
+  return fileContent;
 }

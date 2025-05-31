@@ -56,7 +56,6 @@ echo "$TAVILY_API_KEY" > .secrets/tavily-api-key.txt
 <project-root>
   \__ $AGENT_PROJECT_METADATA_DIR (default: .agent)
         \__ config.mjs  # Project-specific configuration
-        \__ request.md  # Task description for the agent
         \__ memory/
               \__ <yyyy-mm-dd-hhmm>--<task-title>.md  # Task-specific memory files
 ```
