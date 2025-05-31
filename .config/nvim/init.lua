@@ -202,16 +202,12 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>x', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
   vim.keymap.set('n', '<leader>z', ':<C-u>setl foldlevel=')
   vim.keymap.set('n', '<leader>q', window_utils.toggle_quickfix)
+  vim.keymap.set({ 'n', 'v' }, '<leader>c', ':CopyContext<CR>')
   vim.keymap.set('n', 's', '<Plug>(easymotion-overwin-f2)')
   vim.keymap.set('n', '-', '<Cmd>Oil<CR>')
   -- vim.keymap.set('n', '-', ':<C-u>e %:h <bar> /<C-r>=expand("%:t")<CR><CR>:nohlsearch<CR>:file<CR>')
   -- vim.keymap.set('n', '-', ':<C-u>e %:h<CR>')
   -- vim.keymap.set('v', '//', [[y/\V<C-r>=escape(@",'/\')<CR><CR>]]) -- -> use * or # instead
-
-  -- copy
-  vim.keymap.set('n', '<leader>cp', ':<C-u>CopyPath<CR>')
-  vim.keymap.set('n', '<leader>cl', ':<C-u>CopyPathWithLineNumber<CR>')
-  vim.keymap.set('v', '<leader>cp', ':<C-u>CopyPathWithRange<CR>')
 
   -- window
   vim.keymap.set('n', '<C-w>z', window_utils.toggle_maximize)
@@ -318,30 +314,27 @@ local setup_commands = function()
     { 'CloseTerms',           function() window_utils.close_terms() end,                {} },
     { 'ToggleHighlightColor', function() require("nvim-highlight-colors").toggle() end, {} },
     { 'Diagnostics',          function() vim.diagnostic.setloclist() end,               {} },
-    { 'CopyPath', function()
-      local path_to_copy
+    { 'CopyContext', function(opts)
+      -- file explorer -> copy path
       if vim.bo.filetype == 'oil' then
         require('oil.actions').copy_entry_path.callback()
-        path_to_copy = vim.fn.fnamemodify(vim.fn.getreg(vim.v.register), ":.")
-      else
-        path_to_copy = vim.fn.expand('%')
+        vim.fn.setreg('+', vim.fn.fnamemodify(vim.fn.getreg(vim.v.register), ":."))
+        return
       end
-      vim.fn.setreg('+', path_to_copy)
-    end, {} },
-    { 'CopyPathWithLineNumber', function()
-      local path_to_copy = vim.fn.expand('%')
+      -- visual mode or range -> copy path with range
+      if opts.range > 0 then
+        local range_start = opts.line1
+        local range_end = opts.line2
+        if range_start == range_end then
+          vim.fn.setreg('+', vim.fn.expand('%') .. ':' .. range_start)
+        else
+          vim.fn.setreg('+', vim.fn.expand('%') .. ':' .. range_start .. '-' .. range_end)
+        end
+        return
+      end
+      -- normal mode -> copy path with line number
       local line_number = vim.api.nvim_win_get_cursor(0)[1]
-      vim.fn.setreg('+', path_to_copy .. ':' .. line_number)
-    end, {} },
-    { 'CopyPathWithRange', function()
-      vim.fn.setreg(
-        '+',
-        vim.fn.expand('%') ..
-        ':' ..
-        vim.api.nvim_buf_get_mark(0, "<")[1] ..
-        '-' ..
-        vim.api.nvim_buf_get_mark(0, ">")[1]
-      )
+      vim.fn.setreg('+', vim.fn.expand('%') .. ':' .. line_number)
     end, { range = true } },
   }
 
