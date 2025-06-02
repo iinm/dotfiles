@@ -258,7 +258,7 @@ setup_fish() {
 function local_config --description "Host specific configuration"
   function local_config_first
     # fish_add_path /path/to/bin
-    # set -x CLOUDSDK_PYTHON /usr/bin/python3
+    # set -gx CLOUDSDK_PYTHON /usr/bin/python3
   end
 
   function local_config_last
