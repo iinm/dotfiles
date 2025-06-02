@@ -276,18 +276,11 @@ local setup_keymap = function()
   -- luasnip
   local ls = require('luasnip')
 
-  -- copilot
-  vim.keymap.set('i', '<C-l>', '<Plug>(copilot-suggest)')
-
   vim.keymap.set({ "i", "s" }, "<C-f>", function()
     if ls.jumpable(1) then
       ls.jump(1)
     elseif vim.fn.mode() == 'i' then
-      vim.api.nvim_feedkeys(
-        vim.api.nvim_replace_termcodes('<Plug>(copilot-next)', true, true, true),
-        'n',
-        false
-      )
+      require('minuet.virtualtext').action.next()
     end
   end, { silent = true })
 
@@ -295,11 +288,7 @@ local setup_keymap = function()
     if ls.jumpable(1) then
       ls.jump(-1)
     elseif vim.fn.mode() == 'i' then
-      vim.api.nvim_feedkeys(
-        vim.api.nvim_replace_termcodes('<Plug>(copilot-previous)', true, true, true),
-        'n',
-        false
-      )
+      require('minuet.virtualtext').action.prev()
     end
   end, { silent = true })
 end
@@ -604,8 +593,7 @@ local setup_plugins = function()
     'hrsh7th/cmp-path',
     'hrsh7th/cmp-cmdline',
     'hrsh7th/nvim-cmp',
-
-    'github/copilot.vim',
+    'milanglacier/minuet-ai.nvim',
 
     -- snippets
     {
@@ -614,6 +602,9 @@ local setup_plugins = function()
       dependencies = { "rafamadriz/friendly-snippets" },
     },
     'saadparwaiz1/cmp_luasnip',
+
+    -- required by minuet-ai
+    'nvim-lua/plenary.nvim',
   })
 end
 
@@ -836,11 +827,56 @@ local setup_treesitter = function()
   })
 end
 
+local setup_minuet = function()
+  require('minuet').setup({
+    cmp = {
+      enable_auto_complete = false,
+    },
+
+    virtualtext = {
+      auto_trigger_ft = {},
+      keymap = {
+        accept = '<Tab>',
+      },
+      show_on_completion_menu = true,
+    },
+
+    provider = 'openai',
+
+    provider_options = {
+      claude = {
+        model = 'claude-3-5-haiku-latest'
+      },
+
+      gemini = {
+        optional = {
+          generationConfig = {
+            maxOutputTokens = 256,
+            thinkingConfig = {
+              thinkingBudget = 0,
+            },
+          },
+          safetySettings = {
+            {
+              category = 'HARM_CATEGORY_DANGEROUS_CONTENT',
+              threshold = 'BLOCK_ONLY_HIGH',
+            },
+          },
+        },
+      },
+
+      openai = {
+        model = 'gpt-4.1-mini',
+        optional = {
+          max_tokens = 256,
+        },
+      },
+    },
+  })
+end
+
 local setup_others = function()
   vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
-  vim.g.copilot_filetypes = {
-    ['*'] = false
-  }
   require('nvim-autopairs').setup()
   require("nvim-surround").setup()
   require('dressing').setup()
@@ -856,6 +892,7 @@ setup_lsp()
 setup_cmp()
 setup_oil()
 setup_treesitter()
+setup_minuet()
 setup_others()
 
 setup_appearance()
