@@ -273,7 +273,7 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>gb', ':<C-u>Git blame<CR>')
   vim.keymap.set('n', '<leader>gl', ':<C-u>Git log %<CR>')
 
-  -- luasnip
+  -- luasnip & minuet
   local ls = require('luasnip')
 
   vim.keymap.set({ "i", "s" }, "<C-f>", function()
@@ -291,6 +291,14 @@ local setup_keymap = function()
       require('minuet.virtualtext').action.prev()
     end
   end, { silent = true })
+
+  vim.keymap.set({ "i", "s" }, "<Tab>", function()
+    if require('minuet.virtualtext').action.is_visible() then
+      require('minuet.virtualtext').action.accept()
+    else
+      return vim.api.nvim_replace_termcodes("<Tab>", true, false, true)
+    end
+  end, { expr = true, silent = true })
 end
 
 local setup_commands = function()
@@ -835,10 +843,8 @@ local setup_minuet = function()
 
     virtualtext = {
       auto_trigger_ft = {},
-      keymap = {
-        accept = '<Tab>',
-      },
-      show_on_completion_menu = true,
+      keymap = {},
+      -- show_on_completion_menu = true,
     },
 
     provider = 'openai',
