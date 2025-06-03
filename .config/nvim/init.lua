@@ -596,11 +596,7 @@ local setup_plugins = function()
     'neovim/nvim-lspconfig',
 
     -- completion
-    'hrsh7th/cmp-buffer',
-    'hrsh7th/cmp-nvim-lsp',
-    'hrsh7th/cmp-path',
-    'hrsh7th/cmp-cmdline',
-    'hrsh7th/nvim-cmp',
+    { 'saghen/blink.cmp', version = '1.*' },
     'milanglacier/minuet-ai.nvim',
 
     -- snippets
@@ -609,7 +605,6 @@ local setup_plugins = function()
       version = "v2.*",
       dependencies = { "rafamadriz/friendly-snippets" },
     },
-    'saadparwaiz1/cmp_luasnip',
 
     -- required by minuet-ai
     'nvim-lua/plenary.nvim',
@@ -633,7 +628,7 @@ local setup_lsp = function()
   local local_config = require_safe('local_config')
 
   vim.lsp.config('*', {
-    capabilities = require('cmp_nvim_lsp').default_capabilities()
+    capabilities = require('blink.cmp').get_lsp_capabilities()
   })
 
   local efm_default_settings = require('efm_config').default_settings
@@ -726,79 +721,33 @@ local setup_lsp = function()
   })
 end
 
-local setup_cmp = function()
-  -- https://github.com/hrsh7th/nvim-cmp
-  local cmp = require('cmp')
-
-  -- https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#add-snippets
-  local luasnip = require('luasnip')
-  require("luasnip.loaders.from_vscode").lazy_load()
-
-  cmp.setup({
-    snippet = {
-      expand = function(args)
-        luasnip.lsp_expand(args.body)
-      end,
+local setup_blink_cmp = function()
+  require('blink.cmp').setup({
+    keymap = {
+      preset = 'default',
+      ['<CR>'] = { 'accept', 'fallback' },
     },
-
-    mapping = cmp.mapping.preset.insert({
-      ['<C-p>'] = cmp.mapping.select_prev_item(),
-      ['<C-n>'] = cmp.mapping.select_next_item(),
-      ['<CR>'] = cmp.mapping.confirm({ select = false }),
-
-      -- https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings#super-tab-like-mapping
-      -- ['<CR>'] = cmp.mapping(function(fallback)
-      --   if cmp.visible() then
-      --     if luasnip.expandable() then
-      --       luasnip.expand()
-      --     else
-      --       cmp.confirm({
-      --         select = true,
-      --       })
-      --     end
-      --   else
-      --     fallback()
-      --   end
-      -- end),
-
-      -- ["<Tab>"] = cmp.mapping(function(fallback)
-      --   if cmp.visible() then
-      --     cmp.select_next_item()
-      --   elseif luasnip.locally_jumpable(1) then
-      --     luasnip.jump(1)
-      --   else
-      --     fallback()
-      --   end
-      -- end, { "i", "s" }),
-    }),
-
-    sources = cmp.config.sources({
-      { name = 'nvim_lsp' },
-      { name = 'luasnip' },
-    }, {
-      { name = 'buffer' },
-    }),
-
-    window = {
-      completion = cmp.config.window.bordered(),
-      documentation = cmp.config.window.bordered(),
+    completion = {
+      list = {
+        selection = { preselect = false, auto_insert = true },
+      },
+      documentation = {
+        auto_show = true,
+        auto_show_delay_ms = 200,
+      },
     },
-  })
-
-  cmp.setup.cmdline({ '/', '?' }, {
-    mapping = cmp.mapping.preset.cmdline(),
-    sources = {
-      { name = 'buffer' }
-    }
-  })
-
-  cmp.setup.cmdline(':', {
-    mapping = cmp.mapping.preset.cmdline(),
-    sources = cmp.config.sources({
-      { name = 'path' }
-    }, {
-      { name = 'cmdline' }
-    })
+    snippets = { preset = 'luasnip' },
+    cmdline = {
+      keymap = {
+        preset = 'cmdline'
+      },
+      completion = {
+        menu = { auto_show = true },
+        list = {
+          selection = { preselect = false, auto_insert = true },
+        },
+      },
+    },
   })
 end
 
@@ -838,6 +787,9 @@ end
 local setup_minuet = function()
   require('minuet').setup({
     cmp = {
+      enable_auto_complete = false,
+    },
+    blink = {
       enable_auto_complete = false,
     },
 
@@ -895,7 +847,7 @@ setup_utilities()
 setup_plugins()
 setup_toggleterm()
 setup_lsp()
-setup_cmp()
+setup_blink_cmp()
 setup_oil()
 setup_treesitter()
 setup_minuet()
