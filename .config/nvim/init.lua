@@ -739,7 +739,11 @@ local setup_blink_cmp = function()
     snippets = { preset = 'luasnip' },
     cmdline = {
       keymap = {
-        preset = 'cmdline'
+        preset = 'none',
+        ['<Tab>'] = { 'show_and_insert', 'select_next' },
+        ['<C-n>'] = { 'select_next', 'fallback' },
+        ['<C-p>'] = { 'select_prev', 'fallback' },
+        ['<C-e>'] = { 'cancel' },
       },
       completion = {
         menu = { auto_show = true },
