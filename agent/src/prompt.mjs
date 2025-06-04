@@ -81,7 +81,6 @@ write_file is used to write content to a file.
 
 patch_file is used to modify a file by replacing specific content with new content.
 
-Rules:
 - Content is searched as an exact match including indentation and line breaks.
 - The first match found will be replaced if there are multiple matches.
 - Use multiple SEARCH/REPLACE blocks to replace multiple contents.
@@ -111,7 +110,6 @@ Format:
 
 tmux is used to manage daemon processes (e.g., HTTP servers) and interactive processes (e.g., Node.js interpreters).
 
-Rules:
 - Use the given sessionId ( agent-${sessionId} ) to run the command.
 - If it's not available, create a new session with the given sessionId.
 - Current working directory is ${workingDir}.
