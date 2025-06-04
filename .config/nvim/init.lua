@@ -261,9 +261,8 @@ local setup_commands = function()
         end
         return
       end
-      -- normal mode -> copy path with line number
-      local line_number = vim.api.nvim_win_get_cursor(0)[1]
-      vim.fn.setreg('+', vim.fn.expand('%') .. ':' .. line_number)
+      -- normal mode -> copy path
+      vim.fn.setreg('+', vim.fn.expand('%'))
     end, { range = true } },
   }
 
