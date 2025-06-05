@@ -9,6 +9,8 @@
 |               | `:vsp foo.sh`                        | vsplit                                                                                                         |
 | motions       | `}`                                  | next paragraph                                                                                                 |
 |               | `{`                                  | previous paragraph                                                                                             |
+|               | `gj`                                 | move down by display line (wrapped line aware)                                                                |
+|               | `gk`                                 | move up by display line (wrapped line aware)                                                                  |
 |               | `C-f`                                | next page                                                                                                      |
 |               | `C-b`                                | previous page                                                                                                  |
 | scroll        | `zz`                                 | center                                                                                                         |
