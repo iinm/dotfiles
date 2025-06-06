@@ -96,12 +96,12 @@ export function createModelCaller(modelName) {
       return (input) =>
         callGeminiModel(
           {
-            model: "gemini-2.5-pro-preview-05-06",
+            model: "gemini-2.5-pro-preview-06-05",
           },
           input,
         );
     case "gemini-pro-cached": {
-      const model = "gemini-2.5-pro-preview-05-06";
+      const model = "gemini-2.5-pro-preview-06-05";
       const modelCaller = createCacheEnabledGeminiModelCaller({ model });
       return (input) =>
         modelCaller(
