@@ -12,11 +12,7 @@ const OUTPUT_MAX_LENGTH = 1024 * 8;
 export const execCommandTool = {
   def: {
     name: "exec_command",
-    description: `Run a command without shell interpretation.
-Examples:
-  { command: "ls", args: ["-l"] }
-  { command: "bash", args: ["-c", "find . -name '*.mjs' | xargs wc"] }
-      `.trim(),
+    description: "Run a command without shell interpretation.",
     inputSchema: {
       type: "object",
       properties: {
@@ -69,11 +65,7 @@ Examples:
               ].includes(command) &&
               stdout.length > OUTPUT_MAX_LENGTH
             ) {
-              return reject(
-                new Error(
-                  `Output too large. Here is the head of the output:\n\n${stdout.slice(0, 300)}... (Output omitted)`,
-                ),
-              );
+              return reject(new Error("Output too large. Use rg / sed to read specific parts."));
             }
 
             // stdout / stderr が長過ぎる場合は末尾を表示
