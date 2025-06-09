@@ -163,10 +163,7 @@ export async function createMCPTools(serverName, client) {
             await fs.promises.mkdir(tmpDir, { recursive: true });
             await fs.promises.writeFile(filePath, resultString, "utf8");
 
-            return `Result is saved to ${filePath}. Read it with rg / sed command.
-- Read specific lines: sed ["-n", "1,100p", "<file>"]
-- Find specific content: rg ["<regex>", "<file>"]
-            `.trim();
+            return `Result is saved to ${filePath}. Use rg / sed to read specific parts.`;
           }),
       };
     });
