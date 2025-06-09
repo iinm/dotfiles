@@ -197,6 +197,7 @@ export function ensureSafeRelativePath(arg) {
  * @typedef {object} MCPServerConfig
  * @property {string} command - The command to run the server.
  * @property {string[]} args - The arguments to pass to the command.
+ * @property {Record<string,string>=} env - The environment variables for the server.
  */
 
 /**

@@ -35,8 +35,16 @@ export async function createMCPClient(options) {
     version: "undefined",
   });
 
+  const { env, ...restParams } = options.params;
+  const defaultEnv = {
+    PWD: process.env.PWD || "",
+    PATH: process.env.PATH || "",
+    HOME: process.env.HOME || "",
+  };
+
   const transport = new mcpClientStdio.StdioClientTransport({
-    ...options.params,
+    ...restParams,
+    env: env ? { ...defaultEnv, ...env } : undefined,
   });
   await client.connect(transport);
 
