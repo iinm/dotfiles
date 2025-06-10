@@ -65,7 +65,11 @@ export const execCommandTool = {
               ].includes(command) &&
               stdout.length > OUTPUT_MAX_LENGTH
             ) {
-              return reject(new Error("Output too large. Use rg / sed to read specific parts."));
+              return reject(
+                new Error(
+                  "Output too large. Use rg / sed to read specific parts.",
+                ),
+              );
             }
 
             // stdout / stderr が長過ぎる場合は末尾を表示
