@@ -17,7 +17,7 @@ export type GeminiGenerationConfig = {
   // https://ai.google.dev/api/generate-content#ThinkingConfig
   thinkingConfig?: {
     includeThoughts: boolean;
-    thinkingBudget: number;
+    thinkingBudget?: number;
   };
 };
 

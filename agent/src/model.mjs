@@ -112,8 +112,6 @@ export function createModelCaller(modelName) {
                 temperature: 0,
                 thinkingConfig: {
                   includeThoughts: true,
-                  // 2025-05-22時点では、Gemini 2.5 Flash のみサポート。Proでは無視される。
-                  thinkingBudget: 2048,
                 },
               },
             },
