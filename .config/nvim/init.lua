@@ -734,11 +734,14 @@ local setup_minuet = function()
       -- show_on_completion_menu = true,
     },
 
-    provider = 'gemini',
+    provider = 'openai',
 
     provider_options = {
-      claude = {
-        model = 'claude-3-5-haiku-latest'
+      openai = {
+        model = 'gpt-4.1-mini',
+        optional = {
+          max_tokens = 256,
+        },
       },
 
       gemini = {
@@ -758,11 +761,8 @@ local setup_minuet = function()
         },
       },
 
-      openai = {
-        model = 'gpt-4.1-mini',
-        optional = {
-          max_tokens = 256,
-        },
+      claude = {
+        model = 'claude-3-5-haiku-latest'
       },
     },
   })
