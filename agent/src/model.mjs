@@ -112,6 +112,7 @@ export function createModelCaller(modelName) {
                 temperature: 0,
                 thinkingConfig: {
                   includeThoughts: true,
+                  thinkingBudget: 2048,
                 },
               },
             },
