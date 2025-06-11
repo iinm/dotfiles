@@ -51,6 +51,24 @@ export function createModelCaller(modelName) {
           },
           input,
         );
+    case "o3-medium":
+      return (input) =>
+        callOpenAIModel(
+          {
+            model: "o3",
+            reasoning_effort: "medium",
+          },
+          input,
+        );
+    case "o3-high":
+      return (input) =>
+        callOpenAIModel(
+          {
+            model: "o3",
+            reasoning_effort: "high",
+          },
+          input,
+        );
     case "claude-haiku":
       return (input) =>
         callAnthropicModel(
