@@ -59,6 +59,10 @@ local setup_options = function()
   vim.o.spelloptions = 'camel'
   -- disable mouse
   -- vim.o.mouse = ''
+  vim.opt.belloff =
+  'backspace,cursor,complete,copy,ctrlg,error,esc,hangul,lang,mess,showmatch,operator,register,shell,spell,wildmode'
+  vim.opt.errorbells = true
+  vim.opt.visualbell = false
 end
 
 local setup_utilities = function()
