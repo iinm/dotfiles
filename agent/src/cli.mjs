@@ -11,6 +11,7 @@
 import fs from "node:fs";
 import readline from "node:readline";
 import { styleText } from "node:util";
+import { notify } from "./utils/notify.mjs";
 
 // Define available slash commands for tab completion
 const SLASH_COMMANDS = [
@@ -259,7 +260,13 @@ System: Conversation has ended.
     );
   });
 
-  agentEventEmitter.on("turnEnd", () => {
+  agentEventEmitter.on("turnEnd", async () => {
+    const err = await notify();
+    if (err) {
+      console.error(
+        styleText("yellow", `\nNotification error: ${err.message}`),
+      );
+    }
     cli.prompt();
   });
 

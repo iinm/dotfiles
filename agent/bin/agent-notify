@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+title="$(basename "$(pwd)")"
+content="Agent is waiting for you 👋"
+
+if command -v osascript >/dev/null 2>&1; then
+    # macOS - use osascript
+    escaped_title=$(printf '%s' "$title" | sed -e 's,",\\\\",g')
+    escaped_content=$(printf '%s' "$content" | sed -e 's,",\\\\",g')
+    osascript -e "display notification \"$escaped_content\" with title \"$escaped_title\""
+elif command -v notify-send >/dev/null 2>&1; then
+    # Linux - use notify-send
+    notify-send "$title" "$content"
+else
+    echo "No notification system available"
+    exit 1
+fi
