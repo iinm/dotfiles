@@ -6,11 +6,10 @@ import { styleText } from "node:util";
 import { createAgent } from "./agent.mjs";
 import { startCLI } from "./cli.mjs";
 import {
-  AGENT_MODEL,
-  AGENT_PROJECT_METADATA_DIR,
   createDefaultAllowedToolUsePatterns,
   loadLocalConfig,
 } from "./config.mjs";
+import { AGENT_MODEL, AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
 import { createMCPClient, createMCPTools } from "./mcp.mjs";
 import { createModelCaller } from "./model.mjs";
 import { createPrompt } from "./prompt.mjs";

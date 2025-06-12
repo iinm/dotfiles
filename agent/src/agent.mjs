@@ -7,7 +7,7 @@
 import { EventEmitter } from "node:events";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { AGENT_PROJECT_METADATA_DIR } from "./config.mjs";
+import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
 
 /**
  * @param {AgentConfig} config

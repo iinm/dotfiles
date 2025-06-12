@@ -1,12 +1,10 @@
 import assert from "node:assert";
 import { describe, it } from "node:test";
-import {
-  AGENT_PROJECT_METADATA_DIR,
-  ensureSafeRelativePath,
-} from "./config.mjs";
+import { AGENT_PROJECT_METADATA_DIR } from "../env.mjs";
+import { isSafeRelativePath } from "./isSafeRelativePath.mjs";
 
 describe("config", () => {
-  describe("ensureSafeRelativePath", () => {
+  describe("isSafeRelativePath", () => {
     const testCases = [
       // Safe paths
       { desc: "simple file name", path: "file.txt", expected: true },
@@ -53,12 +51,12 @@ describe("config", () => {
 
     for (const { desc, path, expected } of testCases) {
       it(`should return ${expected} for ${desc}: ${path}`, () => {
-        assert.strictEqual(ensureSafeRelativePath(path), expected);
+        assert.strictEqual(isSafeRelativePath(path), expected);
       });
     }
   });
 
-  describe("ensureSafeRelativePath with gitignore (using existing project files and .gitignore)", () => {
+  describe("isSafeRelativePath with gitignore (using existing project files and .gitignore)", () => {
     const gitIgnoreTestCases = [
       // Ignored paths (based on project's .gitignore)
       // These should return false as they are potentially sensitive and should not be accessed
@@ -98,7 +96,7 @@ describe("config", () => {
 
     for (const { desc, path: testPath, expected } of gitIgnoreTestCases) {
       it(`should return ${expected} for ${desc}: ${testPath}`, () => {
-        assert.strictEqual(ensureSafeRelativePath(testPath), expected);
+        assert.strictEqual(isSafeRelativePath(testPath), expected);
       });
     }
   });

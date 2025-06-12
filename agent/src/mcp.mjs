@@ -6,7 +6,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { AGENT_PROJECT_METADATA_DIR } from "./config.mjs";
+import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
 import { noThrow } from "./utils/noThrow.mjs";
 
 async function lazyImport() {

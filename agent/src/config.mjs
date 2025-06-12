@@ -2,15 +2,11 @@
  * @import { ToolUsePattern } from "./tool";
  */
 
-import { execFileSync } from "node:child_process";
-import fs from "node:fs";
 import path from "node:path";
+import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
 import { execCommandTool } from "./tools/execCommand.mjs";
 import { tmuxCommandTool } from "./tools/tmuxCommand.mjs";
-
-export const AGENT_PROJECT_METADATA_DIR =
-  process.env.AGENT_PROJECT_METADATA_DIR || ".agent";
-export const AGENT_MODEL = process.env.AGENT_MODEL || "claude-haiku";
+import { isSafeRelativePath } from "./utils/isSafeRelativePath.mjs";
 
 /**
  * @typedef {object} CreateAllowedToolUsePatternsInput
@@ -40,7 +36,7 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
           if (!Array.isArray(args)) {
             return false;
           }
-          if (!args.every(ensureSafeRelativePath)) {
+          if (!args.every(isSafeRelativePath)) {
             return false;
           }
           return true;
@@ -58,7 +54,7 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
           if (!Array.isArray(args)) {
             return false;
           }
-          if (!args.every(ensureSafeRelativePath)) {
+          if (!args.every(isSafeRelativePath)) {
             return false;
           }
           if (
@@ -86,7 +82,7 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
           if (!Array.isArray(args)) {
             return false;
           }
-          if (!args.every(ensureSafeRelativePath)) {
+          if (!args.every(isSafeRelativePath)) {
             return false;
           }
           if (args.some((arg) => arg.startsWith("--no-ignore"))) {
@@ -100,7 +96,7 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
       toolName: execCommandTool.def.name,
       input: {
         command: "sed",
-        args: ["-n", /^.+p$/, ensureSafeRelativePath],
+        args: ["-n", /^.+p$/, isSafeRelativePath],
       },
     },
     {
@@ -127,64 +123,6 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
       },
     },
   ];
-}
-
-/**
- * @param {unknown} arg
- */
-export function ensureSafeRelativePath(arg) {
-  if (typeof arg !== "string") {
-    return false;
-  }
-
-  // Deny absolute paths or parent directory traversal
-  if (
-    arg.startsWith("/") ||
-    arg.startsWith("..") ||
-    arg.split("/").includes("..")
-  ) {
-    return false;
-  }
-
-  // Always allow access to agent project metadata directory
-  if (
-    arg === AGENT_PROJECT_METADATA_DIR ||
-    arg.startsWith(`${AGENT_PROJECT_METADATA_DIR}/`)
-  ) {
-    return true;
-  }
-
-  // Deny git ignored files (which may contain sensitive information or should not be accessed)
-  if (fs.existsSync(arg)) {
-    try {
-      execFileSync("git", ["check-ignore", "--no-index", "-q", arg], {
-        stdio: ["ignore", "ignore", "ignore"],
-      });
-      // The path is ignored (exit code 0)
-      return false;
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        "status" in error &&
-        typeof error.status === "number"
-      ) {
-        if (error.status === 1) {
-          // Path is not ignored,
-        } else {
-          // Other git error (e.g., status 128 if not a git repo).
-          return false;
-        }
-      } else {
-        console.error(
-          `Unexpected error checking git ignore for ${arg}:`,
-          error,
-        );
-        return false;
-      }
-    }
-  }
-
-  return true;
 }
 
 /**
