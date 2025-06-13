@@ -2,6 +2,7 @@
  * @import { ToolUsePattern } from "./tool";
  */
 
+import fs from "node:fs/promises";
 import path from "node:path";
 import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
 import { execCommandTool } from "./tools/execCommand.mjs";
@@ -156,5 +157,27 @@ export async function loadLocalConfig() {
       return {};
     }
     throw err;
+  }
+}
+
+export async function loadProjectPrompt() {
+  const files = ["CLAUDE.md", "CLAUDE.local.md"];
+  const contents = [];
+
+  for (const file of files) {
+    try {
+      const fileContent = await fs.readFile(file, "utf8");
+      contents.push(fileContent);
+    } catch (err) {
+      if (err instanceof Error && "code" in err && err.code === "ENOENT") {
+        // ignore
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  if (contents.length) {
+    return contents.join("\n\n");
   }
 }

@@ -8,6 +8,7 @@ import { startCLI } from "./cli.mjs";
 import {
   createDefaultAllowedToolUsePatterns,
   loadLocalConfig,
+  loadProjectPrompt,
 } from "./config.mjs";
 import { AGENT_MODEL, AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
 import { createMCPClient, createMCPTools } from "./mcp.mjs";
@@ -76,11 +77,15 @@ import { writeFileTool } from "./tools/writeFile.mjs";
     }
   }
 
-  const prompt = createPrompt({
+  const basePrompt = createPrompt({
     sessionId,
     workingDir: process.cwd(),
     projectMetadataDir: AGENT_PROJECT_METADATA_DIR,
   });
+  const projectPrompt = await loadProjectPrompt();
+  const prompt = [basePrompt, projectPrompt]
+    .filter(Boolean)
+    .join("\n\n---\n\n");
 
   const tools = [
     execCommandTool,
