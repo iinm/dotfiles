@@ -40,6 +40,7 @@ exec_command is used to run a one-shot command.
 File and directory command examples:
 - List files: ls ["-alh", "path/to/directory"]
 - Find files: fd ["<regex>", "path/to/directory"]
+  - Note: Use fd instead of find command
   - Options:
     - --type <type>: f for file, d for directory
     - --max-depth <N>
@@ -47,6 +48,7 @@ File and directory command examples:
   - List directories to get project structure: fd [".", "path/to/directory/", "--max-depth", "3", "--type", "d", "--hidden"]
     "." means "match all"
 - Search for a string in files: rg ["-n", "<regex>", "./"]
+  - Note: Use rg instead of grep command
   - Directory or file must be specified.
   - Note that special characters like $, ^, *, [, ], (, ), etc. in regex must be escaped with a backslash.
   - Options:
