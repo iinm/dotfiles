@@ -4,6 +4,7 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
+import { styleText } from "node:util";
 import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
 import { execCommandTool } from "./tools/execCommand.mjs";
 import { tmuxCommandTool } from "./tools/tmuxCommand.mjs";
@@ -168,6 +169,7 @@ export async function loadProjectPrompt() {
     try {
       const fileContent = await fs.readFile(file, "utf8");
       contents.push(fileContent);
+      console.log(styleText("blue", `Project prompt file loaded: ${file} ✅`));
     } catch (err) {
       if (err instanceof Error && "code" in err && err.code === "ENOENT") {
         // ignore
