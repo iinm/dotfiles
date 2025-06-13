@@ -261,7 +261,7 @@ System: Conversation has ended.
   });
 
   agentEventEmitter.on("turnEnd", async () => {
-    const err = await notify();
+    const err = notify();
     if (err) {
       console.error(
         styleText("yellow", `\nNotification error: ${err.message}`),

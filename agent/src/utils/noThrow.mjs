@@ -13,3 +13,19 @@ export async function noThrow(task) {
     throw new Error(`Non-Error thrown: ${error}`);
   }
 }
+
+/**
+ * @template T
+ * @param {() => T} task
+ * @returns {T | Error}
+ */
+export function noThrowSync(task) {
+  try {
+    return task();
+  } catch (error) {
+    if (error instanceof Error) {
+      return error;
+    }
+    throw new Error(`Non-Error thrown: ${error}`);
+  }
+}
