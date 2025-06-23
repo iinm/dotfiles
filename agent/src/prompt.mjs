@@ -24,7 +24,7 @@ Gather project-specific knowledge before taking any action
 1. First, list documentation files: fd ["--hidden", "--extension", "md"]
 2. Read relevant files from those results
   - For files in nested directories (e.g., foo/bar/baz/), check documentation at each level: foo/, foo/bar/, and foo/bar/baz/
-  - Priority order: CLAUDE.md, CLAUDE.local.md > .clinerules/ > .cursor/rules/ > README.md > other files
+  - Priority order: CLAUDE.md, CLAUDE.local.md (including referenced files) >> .clinerules/ > .cursor/rules/ > other files
 3. Read any files referenced within the documentation
 
 ## User Interactions
