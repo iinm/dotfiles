@@ -23,7 +23,7 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
     // Exec command
     {
       toolName: execCommandTool.def.name,
-      input: { command: /^(cd|pwd|date|uname)$/ },
+      input: { command: /^(pwd|cd|date|uname)$/ },
     },
     {
       toolName: execCommandTool.def.name,
@@ -106,6 +106,10 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
     {
       toolName: execCommandTool.def.name,
       input: { command: "git", args: ["branch", "--show-current"] },
+    },
+    {
+      toolName: execCommandTool.def.name,
+      input: { command: "docker", args: [/^(ps)$/] },
     },
 
     // Tmux command
