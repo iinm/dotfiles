@@ -738,7 +738,7 @@ local setup_minuet = function()
       -- show_on_completion_menu = true,
     },
 
-    provider = 'openai',
+    provider = 'gemini',
 
     provider_options = {
       openai = {
@@ -749,12 +749,14 @@ local setup_minuet = function()
       },
 
       gemini = {
+        model = 'gemini-2.0-flash',
         optional = {
           generationConfig = {
             maxOutputTokens = 256,
-            thinkingConfig = {
-              thinkingBudget = 0,
-            },
+            -- for thinking model
+            -- thinkingConfig = {
+            --   thinkingBudget = 0,
+            -- },
           },
           safetySettings = {
             {
