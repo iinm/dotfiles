@@ -113,7 +113,7 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
     },
     {
       toolName: execCommandTool.def.name,
-      input: { command: "docker", args: ["compose", /^(ps)$/] },
+      input: { command: "docker", args: ["compose", /^(ps|logs)$/] },
     },
 
     // Tmux command

@@ -52,6 +52,7 @@ File and directory command examples:
   - Options:
     - --type <type>: f for file, d for directory
     - --max-depth <N>
+    - --max-results <N>
     - --hidden: include hidden files
   - List directories to get project structure: fd [".", "path/to/directory/", "--max-depth", "3", "--type", "d", "--hidden"]
     "." means "match all"
