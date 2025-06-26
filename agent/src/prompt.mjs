@@ -27,7 +27,7 @@ You are a problem solver.
 
 ## Project Knowledge Discovery
 
-- You must gather project-specific knowledge before taking any action
+- You must gather project-specific knowledge when working within the project
 - Prioritize documentation over configuration files like package.json
 - Execute the following steps without exception and precisely
 
