@@ -723,6 +723,16 @@ local setup_treesitter = function()
   })
 end
 
+local read_llm_api_key_for_minuet = function(path)
+  local file = io.open(vim.fn.expand(path), 'r')
+  if file then
+    local content = file:read('*a')
+    file:close()
+    return content:gsub("^%s*(.-)%s*$", "%1")
+  end
+  return nil
+end
+
 local setup_minuet = function()
   require('minuet').setup({
     cmp = {
@@ -738,7 +748,7 @@ local setup_minuet = function()
       -- show_on_completion_menu = true,
     },
 
-    provider = 'gemini',
+    provider = 'openai',
 
     provider_options = {
       openai = {
@@ -746,6 +756,9 @@ local setup_minuet = function()
         optional = {
           max_tokens = 256,
         },
+        api_key = function()
+          return read_llm_api_key_for_minuet('~/dotfiles/agent/.secrets/openai-api-key.txt')
+        end,
       },
 
       gemini = {
@@ -765,10 +778,16 @@ local setup_minuet = function()
             },
           },
         },
+        api_key = function()
+          return read_llm_api_key_for_minuet('~/dotfiles/agent/.secrets/gemini-api-key.txt')
+        end,
       },
 
       claude = {
-        model = 'claude-3-5-haiku-latest'
+        model = 'claude-3-5-haiku-latest',
+        api_key = function()
+          return read_llm_api_key_for_minuet('~/dotfiles/agent/.secrets/anthropic-api-key.txt')
+        end,
       },
     },
   })
