@@ -20,8 +20,9 @@ fish_add_path $HOME/tools/lua-language-server/bin
 fish_add_path $HOME/tools/google-cloud-sdk/bin
 fish_add_path $HOME/go/bin
 
-fish_add_path $HOME/dotfiles/bin
-fish_add_path $HOME/dotfiles/agent/bin
+set -x DOTFILES_DIR (dirname (dirname (readlink -f $HOME/.config/fish)))
+fish_add_path $DOTFILES_DIR/dotfiles/bin
+fish_add_path $DOTFILES_DIR/dotfiles/agent/bin
 
 # Environment variables
 set -x SHELL (which fish)

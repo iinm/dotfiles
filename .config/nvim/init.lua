@@ -723,7 +723,8 @@ local setup_treesitter = function()
   })
 end
 
-local read_llm_api_key_for_minuet = function(path)
+local read_llm_api_key_for_minuet = function(provider_name)
+  local path = os.getenv('DOTFILES_DIR') .. '/agent/.secrets/' .. provider_name .. '-api-key.txt'
   local file = io.open(vim.fn.expand(path), 'r')
   if file then
     local content = file:read('*a')
@@ -757,7 +758,7 @@ local setup_minuet = function()
           max_tokens = 256,
         },
         api_key = function()
-          return read_llm_api_key_for_minuet('~/dotfiles/agent/.secrets/openai-api-key.txt')
+          return read_llm_api_key_for_minuet('openai')
         end,
       },
 
@@ -779,14 +780,14 @@ local setup_minuet = function()
           },
         },
         api_key = function()
-          return read_llm_api_key_for_minuet('~/dotfiles/agent/.secrets/gemini-api-key.txt')
+          return read_llm_api_key_for_minuet('gemini')
         end,
       },
 
       claude = {
         model = 'claude-3-5-haiku-latest',
         api_key = function()
-          return read_llm_api_key_for_minuet('~/dotfiles/agent/.secrets/anthropic-api-key.txt')
+          return read_llm_api_key_for_minuet('anthropic')
         end,
       },
     },
