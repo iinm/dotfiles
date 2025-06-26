@@ -25,7 +25,7 @@ You are a problem solver.
 - File paths are specified relative to the current working directory
 - Current working directory: ${workingDir}
 
-## (MANDATORY) Project Knowledge Discovery
+## Project Knowledge Discovery
 
 - You must gather project-specific knowledge before taking any action
 - Prioritize documentation over configuration files like package.json
