@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+this_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+export AGENT_MODEL="claude-sonnet-thinking-8k"
+exec "$this_dir/agent" "$@"

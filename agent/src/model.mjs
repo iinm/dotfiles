@@ -102,6 +102,58 @@ export function createModelCaller(modelName) {
           },
           input,
         );
+    case "claude-sonnet-thinking-4k":
+      return (input) =>
+        callAnthropicModel(
+          {
+            model: "claude-sonnet-4-20250514",
+            max_tokens: 1024 * 16,
+            thinking: {
+              type: "enabled",
+              budget_tokens: 1024 * 4,
+            },
+          },
+          input,
+        );
+    case "claude-sonnet-thinking-8k":
+      return (input) =>
+        callAnthropicModel(
+          {
+            model: "claude-sonnet-4-20250514",
+            max_tokens: 1024 * 16,
+            thinking: {
+              type: "enabled",
+              budget_tokens: 1024 * 8,
+            },
+          },
+          input,
+        );
+    case "claude-sonnet-thinking-16k":
+      return (input) =>
+        callAnthropicModel(
+          {
+            model: "claude-sonnet-4-20250514",
+            max_tokens: 1024 * 32,
+            thinking: {
+              type: "enabled",
+              budget_tokens: 1024 * 16,
+            },
+          },
+          input,
+        );
+    case "claude-sonnet-thinking-32k":
+      return (input) =>
+        callAnthropicModel(
+          {
+            model: "claude-sonnet-4-20250514",
+            max_tokens: 1024 * 48,
+            thinking: {
+              type: "enabled",
+              budget_tokens: 1024 * 32,
+            },
+          },
+          input,
+        );
     case "gemini-flash":
       return (input) =>
         callGeminiModel(
