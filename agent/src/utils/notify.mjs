@@ -18,6 +18,9 @@ export function notify() {
         PWD: process.env.PWD,
         PATH: process.env.PATH,
         HOME: process.env.HOME,
+        // for Linux
+        DISPLAY: process.env.DISPLAY,
+        DBUS_SESSION_BUS_ADDRESS: process.env.DBUS_SESSION_BUS_ADDRESS,
       },
       timeout: 10 * 1000,
     });
