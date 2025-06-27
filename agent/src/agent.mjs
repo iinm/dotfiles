@@ -124,7 +124,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
         (part) => part.type === "tool_use",
       );
       // Pending tool call
-      if (input.toLowerCase().match(/^(yes|y)$/i)) {
+      if (input.toLowerCase().match(/^(yes|y|ｙ)$/i)) {
         if (input.match(/^(YES|Y)$/)) {
           // Allow tool use
           for (const toolUse of toolUseParts) {
