@@ -3,10 +3,7 @@
  */
 
 import { callAnthropicModel } from "./providers/anthropic.mjs";
-import {
-  callGeminiModel,
-  createCacheEnabledGeminiModelCaller,
-} from "./providers/gemini.mjs";
+import { createCacheEnabledGeminiModelCaller } from "./providers/gemini.mjs";
 import { callOpenAIModel } from "./providers/openai.mjs";
 
 /**
@@ -154,23 +151,27 @@ export function createModelCaller(modelName) {
           },
           input,
         );
-    case "gemini-flash":
+    case "gemini-flash": {
+      const model = "gemini-2.5-flash";
+      const modelCaller = createCacheEnabledGeminiModelCaller({ model });
       return (input) =>
-        callGeminiModel(
+        modelCaller(
           {
-            model: "gemini-2.5-flash",
+            model,
+            requestConfig: {
+              generationConfig: {
+                temperature: 0,
+                thinkingConfig: {
+                  includeThoughts: true,
+                  thinkingBudget: 1024,
+                },
+              },
+            },
           },
           input,
         );
-    case "gemini-pro":
-      return (input) =>
-        callGeminiModel(
-          {
-            model: "gemini-2.5-pro",
-          },
-          input,
-        );
-    case "gemini-pro-cached": {
+    }
+    case "gemini-pro": {
       const model = "gemini-2.5-pro";
       const modelCaller = createCacheEnabledGeminiModelCaller({ model });
       return (input) =>

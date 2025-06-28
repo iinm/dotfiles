@@ -10,11 +10,19 @@ import { noThrow } from "../utils/noThrow.mjs";
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 /**
+ * @callback GeminiModelCaller
+ * @param {GeminiModelConfig} config
+ * @param {ModelInput} input
+ * @param {number=} retryCount
+ * @returns {Promise<ModelOutput | Error>}
+ */
+
+/**
  * References:
  * - https://ai.google.dev/gemini-api/docs/caching
  * - https://ai.google.dev/api/caching
  * @param {Pick<GeminiModelConfig, "model">} modelConfig
- * @returns {typeof callGeminiModel}
+ * @returns {GeminiModelCaller}
  */
 export function createCacheEnabledGeminiModelCaller(modelConfig) {
   const props = {
@@ -35,7 +43,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
     cache: undefined,
   };
 
-  /** @type {typeof callGeminiModel} */
+  /** @type {GeminiModelCaller} */
   async function modelCaller(config, input, retryCount = 0) {
     return await noThrow(async () => {
       const contents = convertGenericMessageToGeminiFormat(input.messages);
@@ -309,147 +317,6 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
   }
 
   return modelCaller;
-}
-
-/**
- * @param {GeminiModelConfig} config
- * @param {ModelInput} input
- * @param {number} retryCount
- * @returns {Promise<ModelOutput | Error>}
- */
-export async function callGeminiModel(config, input, retryCount = 0) {
-  return await noThrow(async () => {
-    const contents = convertGenericMessageToGeminiFormat(input.messages);
-    const tools = convertGenericToolDefinitionToGeminiFormat(input.tools || []);
-
-    const systemInstruction = contents.find((c) => c.role === "system");
-    const contentsWithoutSystem = contents.filter((c) => c.role !== "system");
-
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
-
-    /** @type {GeminiGenerateContentInput} */
-    const request = {
-      // default
-      generationConfig: {
-        temperature: 0,
-      },
-      safetySettings: [
-        {
-          category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-          threshold: "BLOCK_NONE",
-        },
-        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-        {
-          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-          threshold: "BLOCK_NONE",
-        },
-      ],
-      ...config.requestConfig,
-      system_instruction: systemInstruction,
-      contents: contentsWithoutSystem,
-      tools: tools.length ? tools : undefined,
-    };
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(request),
-      signal: AbortSignal.timeout(120 * 1000),
-    });
-
-    if (response.status === 429) {
-      const interval = Math.min(2 * 2 ** retryCount, 16);
-      console.error(
-        styleText(
-          "yellow",
-          `Gemini rate limit exceeded. Retrying in ${interval} seconds...`,
-        ),
-      );
-      await new Promise((resolve) => setTimeout(resolve, interval * 1000));
-      return callGeminiModel(config, input, retryCount + 1);
-    }
-
-    if (response.status !== 200) {
-      return new Error(
-        `Failed to call Gemini model: status=${response.status}, body=${await response.text()}`,
-      );
-    }
-
-    if (!response.body) {
-      throw new Error("Response body is empty");
-    }
-
-    const reader = response.body.getReader();
-
-    /** @type {GeminiGeneratedContent[]} */
-    const streamContents = [];
-    /** @type {PartialMessageContent | undefined} */
-    let previousPartialContent = undefined;
-
-    for await (const streamContent of readGeminiStreamContents(reader)) {
-      streamContents.push(streamContent);
-
-      const partialContents = convertGeminiStreamContentToAgentPartialContents(
-        streamContent,
-        previousPartialContent,
-      );
-      previousPartialContent = partialContents.at(-1);
-
-      if (input.onPartialMessageContent && partialContents.length) {
-        for (const partialContent of partialContents) {
-          input.onPartialMessageContent(partialContent);
-        }
-      }
-    }
-
-    if (input.onPartialMessageContent && previousPartialContent) {
-      input.onPartialMessageContent({
-        type: previousPartialContent.type,
-        position: "stop",
-      });
-    }
-
-    /** @type {GeminiGeneratedContent} */
-    const content = convertGeminiStreamContentsToContent(streamContents);
-
-    /** @type {ProviderTokenUsage} */
-    const tokenUsage = {
-      input: content.usageMetadata.promptTokenCount,
-      output: content.usageMetadata.candidatesTokenCount ?? 0,
-      total: content.usageMetadata.totalTokenCount,
-    };
-
-    const message = convertGeminiAssistantMessageToGenericFormat(content);
-    if (message instanceof GeminiNoCandidateError) {
-      const interval = Math.min(2 * 2 ** retryCount, 16);
-      console.error(
-        styleText(
-          "yellow",
-          `No candidates found in Gemini response. Retrying in ${interval} seconds...`,
-        ),
-      );
-      await new Promise((resolve) => setTimeout(resolve, interval * 1000));
-      return callGeminiModel(
-        config,
-        {
-          ...input,
-          messages: [
-            ...input.messages,
-            { role: "user", content: [{ type: "text", text: "continue" }] },
-          ],
-        },
-        retryCount + 1,
-      );
-    }
-
-    return {
-      message,
-      providerTokenUsage: tokenUsage,
-    };
-  });
 }
 
 /**
