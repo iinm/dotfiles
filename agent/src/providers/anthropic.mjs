@@ -72,7 +72,7 @@ export async function callAnthropicModel(config, input, retryCount = 0) {
     /** @type {AnthropicStreamEvent[]} */
     const events = [];
     /** @type {PartialMessageContent | undefined} */
-    let previousPartialContent = undefined;
+    let previousPartialContent;
     for await (const event of readAnthropicStreamEvents(reader)) {
       events.push(event);
 

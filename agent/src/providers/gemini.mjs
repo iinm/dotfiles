@@ -83,7 +83,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
 
       /** @type {GeminiGenerateContentInput} */
       const request =
-        state.cache && new Date().getTime() < state.cache.expireTime.getTime()
+        state.cache && Date.now() < state.cache.expireTime.getTime()
           ? {
               ...baseRequest,
               cachedContent: state.cache.name,
@@ -132,7 +132,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
       /** @type {GeminiGeneratedContent[]} */
       const streamContents = [];
       /** @type {PartialMessageContent | undefined} */
-      let previousPartialContent = undefined;
+      let previousPartialContent;
 
       for await (const streamContent of readGeminiStreamContents(reader)) {
         streamContents.push(streamContent);
@@ -265,10 +265,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
           const cachedContents = await response.json();
 
           // Delete old cache if previous cache is alive
-          if (
-            state.cache &&
-            new Date().getTime() < state.cache.expireTime.getTime()
-          ) {
+          if (state.cache && Date.now() < state.cache.expireTime.getTime()) {
             fetch(
               `https://generativelanguage.googleapis.com/v1beta/${state.cache.name}?key=${GEMINI_API_KEY}`,
               {

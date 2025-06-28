@@ -70,7 +70,7 @@ export async function callOpenAIModel(config, input, retryCount = 0) {
     /** @type {OpenAIStreamData[]} */
     const dataList = [];
     /** @type {PartialMessageContent | undefined} */
-    let partialContent = undefined;
+    let partialContent;
     for await (const data of readOpenAIStreamData(reader)) {
       dataList.push(data);
 
