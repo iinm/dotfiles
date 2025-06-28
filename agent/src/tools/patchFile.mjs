@@ -76,12 +76,14 @@ Expected format:
             JSON.stringify(`Search content not found: ${search}`),
           );
         }
+        // Escape $ characters in replacement string to prevent interpretation of $& $1 $$ patterns
+        const escapedReplace = replace.replace(/\$/g, "$$$$");
         newContent =
           replace === "" && newContent.includes(`${search}\n`)
             ? newContent.replace(`${search}\n`, replace)
             : replace === "" && newContent.includes(`\n${search}`)
               ? newContent.replace(`\n${search}`, replace)
-              : newContent.replace(search, replace);
+              : newContent.replace(search, escapedReplace);
       }
       fs.writeFileSync(filePath, newContent);
       return `Patched file: ${filePath}`;
