@@ -32,7 +32,7 @@ You are a problem solver.
 - Execute the following steps without exception and precisely
 
 Steps:
-1. List documentation files using: exec_command fd ["--hidden", "--extension", "md"]
+1. List documentation files using: exec_command fd ["--extension", "md", "--hidden", "--exclude", "${projectMetadataDir}"]
 2. Read files relevant to your current task from the results in the following priority order:
    1. CLAUDE.md, CLAUDE.local.md (including references) - Always read these if they exist in the target directory hierarchy
    2. .clinerules/, .cursor/rules/ (including references)
