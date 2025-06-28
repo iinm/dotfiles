@@ -4,6 +4,9 @@ set -eu -o pipefail
 
 this_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+AGENT_DIR=$this_dir
+export AGENT_DIR
+
 : "${AGENT_PROJECT_METADATA_DIR:=.agent}"
 export AGENT_PROJECT_METADATA_DIR
 

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+this_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+app_root="$(cd "$this_dir/.." && pwd)"
+
+# Launch persistent browser context using Playwright
+exec "$app_root/env.sh" node -e "$(cat << EOF
+const { chromium } = await import("playwright");
+const context = await chromium.launchPersistentContext("$app_root/.agent/chromium-profile", { headless: false });
+EOF
+)"
