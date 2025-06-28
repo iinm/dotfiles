@@ -89,20 +89,16 @@ export default {
 
   // Configure MCP servers for extended functionality
   mcpServers: {
-    fetch: {
-      command: "docker",
-      args: ["run", "-i", "--rm", "mcp/fetch"],
-    },
-    playwright: {
-      command: "npx",
-      args: ["-y", "@playwright/mcp@latest"],
-    },
     perplexity: {
       command: "npx",
       args: ["-y", "server-perplexity-ask"],
       env: {
         PERPLEXITY_API_KEY: "FIXME",
       },
+    },
+    playwright: {
+      command: "npx",
+      args: ["-y", "@playwright/mcp@latest"],
     },
     atlassian: {
       command: "npx",
