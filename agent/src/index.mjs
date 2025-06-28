@@ -16,6 +16,7 @@ import { createPrompt } from "./prompt.mjs";
 import { createToolUseApprover } from "./tool.mjs";
 import { execCommandTool } from "./tools/execCommand.mjs";
 import { patchFileTool } from "./tools/patchFile.mjs";
+import { readWebPageTool } from "./tools/readWebPage.mjs";
 import { tavilySearchTool } from "./tools/tavilySearch.mjs";
 import { tmuxCommandTool } from "./tools/tmuxCommand.mjs";
 import { writeFileTool } from "./tools/writeFile.mjs";
@@ -92,6 +93,7 @@ import { writeFileTool } from "./tools/writeFile.mjs";
     writeFileTool,
     patchFileTool,
     tmuxCommandTool,
+    readWebPageTool,
   ];
 
   if (process.env.TAVILY_API_KEY) {

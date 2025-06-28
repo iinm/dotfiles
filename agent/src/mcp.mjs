@@ -4,10 +4,8 @@
  * @import { StructuredToolResultContent, Tool, ToolImplementation } from "./tool";
  */
 
-import fs from "node:fs";
-import path from "node:path";
-import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
 import { noThrow } from "./utils/noThrow.mjs";
+import { writeTmpFile } from "./utils/tmpfile.mjs";
 
 async function lazyImport() {
   const mcpClient = await import("@modelcontextprotocol/sdk/client/index.js");
@@ -158,21 +156,12 @@ export async function createMCPTools(serverName, client) {
               return resultString;
             }
 
-            const timestamp = new Date()
-              .toISOString()
-              .slice(0, 19)
-              .replace("T", "-")
-              .replace(/:/g, "");
-            const tmpDir = `${AGENT_PROJECT_METADATA_DIR}/tmp`;
-            const filePath = path.join(
-              tmpDir,
-              `${timestamp}--${tool.name}.txt`,
-            );
-            await fs.promises.mkdir(tmpDir, { recursive: true });
-            await fs.promises.writeFile(filePath, resultString, "utf8");
+            const filePath = await writeTmpFile(resultString, tool.name, "txt");
+
+            const lineCount = resultString.split("\n").length;
 
             return [
-              `Result is saved to ${filePath}`,
+              `Content is large (${resultString.length} characters, ${lineCount} lines) and saved to ${filePath}`,
               '- Use exec_command head ["-c", "1000"] to get content format',
               "- Use rg / sed / jq to read specific parts",
             ].join("\n");
