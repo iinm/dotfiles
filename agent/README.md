@@ -95,10 +95,19 @@ export default {
     },
     playwright: {
       command: "npx",
-      args: [
-        "@playwright/mcp@latest"
-      ]
-    }
+      args: ["-y", "@playwright/mcp@latest"],
+    },
+    perplexity: {
+      command: "npx",
+      args: ["-y", "server-perplexity-ask"],
+      env: {
+        PERPLEXITY_API_KEY: "FIXME",
+      },
+    },
+    atlassian: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.atlassian.com/v1/sse"],
+    },
   },
 };
 ```

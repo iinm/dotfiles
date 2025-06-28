@@ -171,7 +171,11 @@ export async function createMCPTools(serverName, client) {
             await fs.promises.mkdir(tmpDir, { recursive: true });
             await fs.promises.writeFile(filePath, resultString, "utf8");
 
-            return `Result is saved to ${filePath}. Use rg / sed to read specific parts.`;
+            return [
+              `Result is saved to ${filePath}`,
+              '- Use exec_command head ["-c", "1000"] to get content format',
+              "- Use rg / sed / jq to read specific parts",
+            ].join("\n");
           }),
       };
     });
