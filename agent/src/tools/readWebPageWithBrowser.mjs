@@ -38,7 +38,7 @@ export const readWebPageWithBrowserTool = {
       const TurndownService = (await import("turndown")).default;
 
       const context = await chromium.launchPersistentContext(USER_DATA_DIR, {
-        headless: false,
+        headless: true,
       });
 
       /** @type {string | undefined} */
