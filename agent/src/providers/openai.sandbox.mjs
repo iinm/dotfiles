@@ -5,7 +5,7 @@
       "Content-Type": "application/json",
       Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
     },
-
+    signal: AbortSignal.timeout(120 * 1000),
     body: JSON.stringify({
       model: "gpt-4o-mini",
       messages: [

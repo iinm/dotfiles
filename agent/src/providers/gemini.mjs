@@ -94,6 +94,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(request),
+        signal: AbortSignal.timeout(120 * 1000),
       });
 
       if (response.status === 429) {
@@ -241,6 +242,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(request),
+      signal: AbortSignal.timeout(120 * 1000),
     })
       .then(async (response) => {
         if (response.status !== 200) {
@@ -266,6 +268,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
                 headers: {
                   "Content-Type": "application/json",
                 },
+                signal: AbortSignal.timeout(120 * 1000),
               },
             )
               .then(async (response) => {
@@ -354,6 +357,7 @@ export async function callGeminiModel(config, input, retryCount = 0) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(request),
+      signal: AbortSignal.timeout(120 * 1000),
     });
 
     if (response.status === 429) {

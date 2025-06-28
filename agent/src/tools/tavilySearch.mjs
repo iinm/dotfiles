@@ -37,6 +37,7 @@ export const tavilySearchTool = {
           ...input,
           max_results: 5,
         }),
+        signal: AbortSignal.timeout(120 * 1000),
       });
 
       if (!response.ok) {

@@ -40,6 +40,7 @@ export async function callOpenAIModel(config, input, retryCount = 0) {
         Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify(request),
+      signal: AbortSignal.timeout(120 * 1000),
     });
 
     if (response.status === 429) {

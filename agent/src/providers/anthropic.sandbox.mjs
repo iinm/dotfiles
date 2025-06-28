@@ -6,6 +6,7 @@
       "x-api-key": `${process.env.ANTHROPIC_API_KEY}`,
       "anthropic-version": "2023-06-01",
     },
+    signal: AbortSignal.timeout(120 * 1000),
     body: JSON.stringify({
       model: "claude-3-5-haiku-latest",
       messages: [{ role: "user", content: "Hello" }],
