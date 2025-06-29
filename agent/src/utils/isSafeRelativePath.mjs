@@ -10,6 +10,11 @@ export function isSafeRelativePath(arg) {
     return false;
   }
 
+  // Exceptions
+  if ([".claude/commands"].includes(arg)) {
+    return true;
+  }
+
   // Deny absolute paths or parent directory traversal
   if (
     arg.startsWith("/") ||

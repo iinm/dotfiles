@@ -16,6 +16,7 @@ import { notify } from "./utils/notify.mjs";
 // Define available slash commands for tab completion
 const SLASH_COMMANDS = [
   "/help",
+  "/command",
   "/commit",
   "/commit.no-co-author",
   "/memory.save",
@@ -101,6 +102,7 @@ File Input Syntax:
 
 Commands:
   /help                - Display this help message
+  /command             - Run a custom command
   /commit              - Create a commit message based on staged changes
   /commit.no-co-author - Create a commit without Co-authored-by
   /memory.save         - Save the current task state to memory
@@ -145,12 +147,29 @@ Commands:
       return;
     }
 
+    if (inputTrimmed.toLowerCase() === "/command") {
+      const message = `
+System: Run a custom command
+- List available custom commands: ls ["-al", ".claude/commands"]
+  - Wait for user selection before reading command contents
+- Display the commands with numbers to make it easy for users to select (e.g., 1. command1, 2. command2, ...)
+- Prompt the user to select a command by number or name and provide arguments
+- Read the command content and execute the selected command with the provided arguments
+      `.trim();
+      console.log(styleText("gray", "\n<command>"));
+      console.log(message);
+      console.log(styleText("gray", "</command>"));
+
+      userEventEmitter.emit("userInput", message);
+      return;
+    }
+
     if (inputTrimmed.toLowerCase() === "/commit") {
       const message = `
-Create a commit.
-- Run \`git diff --staged\` to understand the staged changes.
-- Check the commit message format by running \`git log --no-merges --oneline -n 10\`.
-- Create a concise and descriptive commit message that follows the project's commit convention.
+System: Create a commit
+- Understand the staged changes: git ["diff", "--staged"]
+- Check the commit message format: git ["log", "--no-merges", "--oneline", "-n", "10"]
+- Create a concise and descriptive commit message that follows the project's commit convention
 - Use this exact format to include Co-authored-by information: 
   git ["commit", "-m", "<commit message>", "-m", "", "-m", "Co-authored-by: Agent by iinm <agent-by-iinm@localhost>"]
       `.trim();
@@ -164,10 +183,10 @@ Create a commit.
 
     if (inputTrimmed.toLowerCase() === "/commit.no-co-author") {
       const message = `
-Create a commit.
-- Run \`git diff --staged\` to understand the staged changes.
-- Check the commit message format by running \`git log --no-merges --oneline -n 10\`.
-- Create a concise and descriptive commit message that follows the project's commit convention.
+System: Create a commit
+- Understand the staged changes: git ["diff", "--staged"]
+- Check the commit message format: git ["log", "--no-merges", "--oneline", "-n", "10"]
+- Create a concise and descriptive commit message that follows the project's commit convention
 - Create a commit: git ["commit", "-m", "<commit message>"]
       `.trim();
       console.log(styleText("gray", "\n<command>"));
@@ -179,7 +198,7 @@ Create a commit.
     }
 
     if (inputTrimmed.toLowerCase() === "/memory.save") {
-      const message = "System: Save task memory.".trim();
+      const message = "System: Save task memory".trim();
       console.log(styleText("gray", "\n<command>"));
       console.log(message);
       console.log(styleText("gray", "</command>"));
@@ -190,9 +209,10 @@ Create a commit.
 
     if (inputTrimmed.toLowerCase() === "/memory.resume") {
       const message = `
-Load task memory and resume work.
-- Display available task memory files and prompt the user to select one.
-- Read the content of the selected memory file after the user selects it.
+System: Load task memory and resume work
+- Display available task memory files with numbers and prompt the user to select one by number
+  - Wait for user selection before reading memory contents
+- Read the content of the selected memory file after the user selects it
       `.trim();
       console.log(styleText("gray", "\n<command>"));
       console.log(message);
@@ -204,8 +224,8 @@ Load task memory and resume work.
 
     if (inputTrimmed.toLowerCase() === "/bye") {
       const message = `
-System: Conversation has ended.
-- Kill the tmux session named agent-${sessionId}.
+System: Conversation has ended
+- Kill the tmux session named agent-${sessionId}
       `.trim();
       console.log(styleText("gray", "\n<command>"));
       console.log(message);
