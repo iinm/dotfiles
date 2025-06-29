@@ -19,7 +19,7 @@ export const patchFileTool = {
         },
         diff: {
           description:
-            "The diff to apply to the file in SEARCH/REPLACE format. See prompt for details.",
+            "The diff to apply to the file in SEARCH/REPLACE format.",
           type: "string",
         },
       },
