@@ -28,8 +28,8 @@ You are a problem solver.
 ## Project Knowledge Discovery
 
 - You must gather project-specific knowledge when working within the project
+- Skip this step when the working directory is the user's home directory
 - Prioritize documentation over configuration files like package.json
-- Execute the following steps without exception and precisely
 
 Steps:
 1. List documentation files using: exec_command fd ["--extension", "md", "--hidden", "--exclude", "${projectMetadataDir}"]
