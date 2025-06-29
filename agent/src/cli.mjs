@@ -16,7 +16,6 @@ import { notify } from "./utils/notify.mjs";
 // Define available slash commands for tab completion
 const SLASH_COMMANDS = [
   "/help",
-  "/command",
   "/commit",
   "/commit.no-co-author",
   "/memory.save",
@@ -102,7 +101,6 @@ File Input Syntax:
 
 Commands:
   /help                - Display this help message
-  /command             - Run a custom command
   /commit              - Create a commit message based on staged changes
   /commit.no-co-author - Create a commit without Co-authored-by
   /memory.save         - Save the current task state to memory
@@ -144,23 +142,6 @@ Commands:
       console.log(styleText("gray", "</input>"));
 
       userEventEmitter.emit("userInput", fileContentOrError);
-      return;
-    }
-
-    if (inputTrimmed.toLowerCase() === "/command") {
-      const message = `
-System: Run a custom command
-- List available custom commands: ls ["-al", ".claude/commands"]
-  - Wait for user selection before reading command contents
-- Display the commands with numbers to make it easy for users to select (e.g., 1. command1, 2. command2, ...)
-- Prompt the user to select a command by number or name and provide arguments
-- Read the command content and execute the selected command with the provided arguments
-      `.trim();
-      console.log(styleText("gray", "\n<command>"));
-      console.log(message);
-      console.log(styleText("gray", "</command>"));
-
-      userEventEmitter.emit("userInput", message);
       return;
     }
 
