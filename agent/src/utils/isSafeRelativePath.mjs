@@ -11,7 +11,7 @@ export function isSafeRelativePath(arg) {
   }
 
   // Exceptions
-  if ([".claude/commands"].includes(arg)) {
+  if (arg.startsWith(".claude/commands")) {
     return true;
   }
 
