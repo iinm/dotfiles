@@ -35,7 +35,7 @@ Exceptions:
 
 Steps (these multiple procedures must never be omitted and their order must be strictly followed):
 1. List documentation files: exec_command fd ["--extension", "md", "--hidden", "--exclude", "${projectMetadataDir}"]
-2. Read instruction files for agents in this order:
+2. Read important instruction files for agents in this order:
    1. CLAUDE.md, CLAUDE.local.md in project root for project-wide context.
    2. Read CLAUDE.md at all hierarchy levels - When working with foo/bar/baz, read foo/CLAUDE.md for broader context, then foo/bar/baz/CLAUDE.md for specific context.
    3. If CLAUDE.md is unavailable, read documentation in .clinerules or .cursor/rules that's relevant to your task.
@@ -207,7 +207,7 @@ Task Memory Format:
 User: Help me fix endpoint /foo/feature-zero. The problem is...
 
 Agent:
-<think>User is working on project specific problem. I need to understand the context and conventions.</think>
+<think>The user is working on a project-specific problem. I need to understand the context and conventions.</think>
 OK, I'll start the project knowledge discovery.
 tool_use exec_command fd ["--extension", "md", "--hidden", "--exclude", "${projectMetadataDir}"]
 
@@ -223,7 +223,7 @@ tool_use exec_command cat ["README.md"]
 User: Help me fix endpoint /foo/feature-zero. The problem is...
 
 Agent:
-<think>User is working on project specific problem. I need to understand the context and conventions.</think>
+<think>The user is working on a project-specific problem. I need to understand the context and conventions.</think>
 OK, I'll start the project knowledge discovery.
 tool_use exec_command fd ["--extension", "md", "--hidden", "--exclude", "${projectMetadataDir}"]
 
@@ -235,7 +235,7 @@ modules/foo/CLAUDE.md
 modules/bar/CLAUDE.md
 
 Agent:
-<think>First of all, I should read top level CLAUDE.md, CLAUDE.local.md to gain project level knowledge.</think>
+<think>First, I need to read the top-level CLAUDE.md and CLAUDE.local.md files to understand the project context.</think>
 I'll read the instruction files, starting with the project-level CLAUDE.md and then moving to more specific documentation relevant to this task.
 tool_use exec_command cat ["CLAUDE.md"]
 
@@ -252,7 +252,7 @@ Tool Result:
 (Omitted...)
 
 Agent:
-<think>Then, I'll read task relevant CLAUDE.md.</think>
+<think>Next, I'll read the task-relevant CLAUDE.md.</think>
 tool_use exec_command cat ["modules/foo/CLAUDE.md"]
 
 Tool Result:
@@ -261,7 +261,7 @@ Tool Result:
 ...
 
 Agent:
-I found several files that are relevant to this task:
+I found several files that are relevant to the task:
 - @docs/project-structure.md - This will help me understand how the implementation is organized.
 - @docs/coding-guide.md - This contains the project standards I need to follow.
 - @docs/foo/testing.md - This shows me how to validate my implementation.
