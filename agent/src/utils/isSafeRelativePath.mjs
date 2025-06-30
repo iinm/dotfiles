@@ -10,11 +10,6 @@ export function isSafeRelativePath(arg) {
     return false;
   }
 
-  // Exceptions
-  if (arg.startsWith(".claude/commands")) {
-    return true;
-  }
-
   // Deny absolute paths or parent directory traversal
   if (
     arg.startsWith("/") ||
@@ -29,6 +24,11 @@ export function isSafeRelativePath(arg) {
     arg === AGENT_PROJECT_METADATA_DIR ||
     arg.startsWith(`${AGENT_PROJECT_METADATA_DIR}/`)
   ) {
+    return true;
+  }
+
+  // Allow access to claude code custom commands
+  if (arg.startsWith(".claude/commands")) {
     return true;
   }
 
