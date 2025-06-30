@@ -96,6 +96,10 @@ export default {
         PERPLEXITY_API_KEY: "FIXME",
       },
     },
+    context7: {
+      command: "npx",
+      args: ["-y", "@upstash/context7-mcp"],
+    },
     playwright: {
       command: "npx",
       args: ["-y", "@playwright/mcp@latest"],
