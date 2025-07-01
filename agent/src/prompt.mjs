@@ -33,15 +33,16 @@ Exceptions:
 - Skip this when the working directory is the user's home directory.
 - Skip this when the user asks general questions.
 
-Steps:
+Follow these steps in the exact order below:
 1. List documentation files: exec_command fd ["--extension", "md", "--hidden", "--exclude", "${projectMetadataDir}"]
-2. Read instruction files for agents in this order:
-   1. CLAUDE.md, CLAUDE.local.md in project root for project-wide context.
-   2. Read CLAUDE.md at all hierarchy levels - When working with foo/bar/baz, read foo/CLAUDE.md for broader context, then foo/bar/baz/CLAUDE.md for specific context.
-   3. If CLAUDE.md is unavailable, read documentation in .clinerules or .cursor/rules that's relevant to your task.
-3. Read task-relevant files in this order:
-   1. Files referenced in agent instructions that are relevant to the task.
-   2. Other files relevant to the task.
+2. Read agent prompt files:
+   2-1. First, read CLAUDE.md, CLAUDE.local.md in project root for project-wide context.
+   2-2. Then, read CLAUDE.md at all task-relevant hierarchy levels in sequence - When working with foo/bar/baz, read foo/CLAUDE.md for broader context, then foo/bar/baz/CLAUDE.md for specific context.
+   2-3. Fallback: If no CLAUDE.md files are available, read the equivalent files in .clinerules or .cursor/rules.
+   2-4. Additional fallback: Read README.md files at all task-relevant hierarchy levels.
+3. Read task-relevant files:
+   3-1. Files referenced in the agent prompt.
+   3-2. Any other files that relate to the task.
 
 ## Tools
 
@@ -108,7 +109,6 @@ patch_file is used to modify a file by replacing specific content with new conte
 - Use multiple SEARCH/REPLACE blocks to replace multiple contents.
 
 Format:
-\`\`\`
 <<<<<<< SEARCH
 (content to be removed)
 =======
@@ -120,9 +120,6 @@ Format:
 =======
 (new content to replace the second removed content)
 >>>>>>> REPLACE
-
-...
-\`\`\`
 
 - <<<<<<< SEARCH (7 < characters + SEARCH) is the start of the search content.
 - ======= (7 = characters) is the separator between the search and replace content.
