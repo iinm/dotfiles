@@ -46,7 +46,6 @@ export const patchFileTool = {
 No matches found in diff.
 
 Expected format:
-\`\`\`
 <<<<<<< SEARCH
 (content to be removed)
 =======
@@ -59,9 +58,7 @@ Expected format:
 (new content to replace the second removed content)
 >>>>>>> REPLACE
 
-...
-\`\`\`
-
+Format description:
 - <<<<<<< SEARCH (7 < characters + SEARCH) is the start of the search content.
 - ======= (7 = characters) is the separator between the search and replace content.
 - >>>>>>> REPLACE (7 > characters + REPLACE) is the end of the replace content.
