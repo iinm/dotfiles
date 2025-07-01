@@ -30,8 +30,8 @@ You are a problem solver.
 Gather project-specific knowledge when working within a project.
 
 Exceptions:
-- Skip when the working directory is the user's home directory.
-- Skip when the user asks general questions.
+- Skip this when the working directory is the user's home directory.
+- Skip this when the user asks general questions.
 
 Steps:
 1. List documentation files: exec_command fd ["--extension", "md", "--hidden", "--exclude", "${projectMetadataDir}"]
