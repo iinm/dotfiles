@@ -121,6 +121,7 @@ Format:
 (new content to replace the second removed content)
 >>>>>>> REPLACE
 
+Format description:
 - <<<<<<< SEARCH (7 < characters + SEARCH) is the start of the search content.
 - ======= (7 = characters) is the separator between the search and replace content.
 - >>>>>>> REPLACE (7 > characters + REPLACE) is the end of the replace content.
@@ -153,7 +154,7 @@ Path: ${projectMetadataDir}/memory/${sessionId}--<kebab-case-title>.md
 Create a concise, clear title (3-5 words) that represents the core task.
 
 Task Memory Format:
-\`\`\`markdown
+<format>
 # [title]
 
 - Timestamp: [when memory was last updated]
@@ -195,6 +196,6 @@ Task Memory Format:
 - Alternative approaches considered
 - Potential optimizations
 - Related tasks that might follow]
-\`\`\`
+</format>
 `.trim();
 }
