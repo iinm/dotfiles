@@ -274,7 +274,6 @@ tool_use exec_command cat ["modules/foo/endpoints/feature-zero.mjs"]
 
 ## Reminder
 
-You MUST:
-Always start with project knowledge discovery to understand the context and conventions.
+You must always start with project knowledge discovery to understand the context and conventions.
 `.trim();
 }
