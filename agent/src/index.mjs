@@ -102,7 +102,7 @@ import { writeFileTool } from "./tools/writeFile.mjs";
     tools.push(tavilySearchTool);
   }
 
-  const { userEventEmitter, agentEventEmitter } = createAgent({
+  const { userEventEmitter, agentEventEmitter, agentCommands } = createAgent({
     callModel: createModelCaller(AGENT_MODEL),
     prompt,
     tools: [...tools, ...mcpTools],
@@ -112,6 +112,7 @@ import { writeFileTool } from "./tools/writeFile.mjs";
   startCLI({
     userEventEmitter,
     agentEventEmitter,
+    agentCommands,
     sessionId,
     modelName: AGENT_MODEL,
     onStop: async () => {

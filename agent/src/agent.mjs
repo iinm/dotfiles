@@ -1,5 +1,5 @@
 /**
- * @import { AgentConfig, AgentEventEmitter, UserEventEmitter } from "./agent"
+ * @import { Agent, AgentConfig, AgentEventEmitter, UserEventEmitter } from "./agent"
  * @import { Message, MessageContentToolResult, MessageContentToolUse, PartialMessageContent } from "./model"
  * @import { Tool, ToolDefinition } from "./tool"
  */
@@ -11,6 +11,7 @@ import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
 
 /**
  * @param {AgentConfig} config
+ * @returns {Agent}
  */
 export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
   /** @type {{ messages: Message[] }} */
@@ -45,77 +46,47 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
     state.messages.splice(1);
   }
 
-  /**
-   * Remove the last message from the conversation
-   * @returns {Message|undefined} The removed message or undefined if no message was removed
-   */
-  function removeLastMessage() {
-    // Don't remove the system message
-    if (state.messages.length <= 1) {
-      return undefined;
+  async function dumpMessages() {
+    const filePath = path.join(AGENT_PROJECT_METADATA_DIR, "messages.json");
+    try {
+      await fs.writeFile(filePath, JSON.stringify(state.messages, null, 2));
+      console.error(`Messages dumped to ${filePath}`);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(`Error dumping messages: ${error.message}`);
+      } else {
+        console.error(
+          "An unknown error occurred while dumping messages:",
+          error,
+        );
+      }
     }
-    const removedMessage = state.messages.pop();
-    return removedMessage;
+  }
+
+  async function loadMessages() {
+    const filePath = path.join(AGENT_PROJECT_METADATA_DIR, "messages.json");
+    try {
+      const data = await fs.readFile(filePath, "utf-8");
+      const loadedMessages = JSON.parse(data);
+      if (Array.isArray(loadedMessages)) {
+        // Keep the system message (index 0) and replace the rest
+        state.messages.splice(
+          1,
+          state.messages.length - 1,
+          ...loadedMessages.slice(1),
+        );
+        console.error(`Messages loaded from ${filePath}`);
+      } else {
+        console.error("Error loading messages: Invalid format in file.");
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(`Error dumping messages: ${error.message}`);
+      }
+    }
   }
 
   userEventEmitter.on("userInput", async (input) => {
-    // Handle special commands
-    if (input === "/clear") {
-      clearMessages();
-      agentEventEmitter.emit("turnEnd");
-      return;
-    }
-
-    if (input === "/debug.msg.pop") {
-      removeLastMessage();
-      agentEventEmitter.emit("turnEnd");
-      return;
-    }
-
-    if (input === "/debug.msg.dump") {
-      const filePath = path.join(AGENT_PROJECT_METADATA_DIR, "messages.json");
-      try {
-        await fs.writeFile(filePath, JSON.stringify(state.messages, null, 2));
-        console.error(`Messages dumped to ${filePath}`);
-      } catch (error) {
-        if (error instanceof Error) {
-          console.error(`Error dumping messages: ${error.message}`);
-        } else {
-          console.error(
-            "An unknown error occurred while dumping messages:",
-            error,
-          );
-        }
-      }
-      agentEventEmitter.emit("turnEnd");
-      return;
-    }
-
-    if (input === "/debug.msg.load") {
-      const filePath = path.join(AGENT_PROJECT_METADATA_DIR, "messages.json");
-      try {
-        const data = await fs.readFile(filePath, "utf-8");
-        const loadedMessages = JSON.parse(data);
-        if (Array.isArray(loadedMessages)) {
-          // Keep the system message (index 0) and replace the rest
-          state.messages.splice(
-            1,
-            state.messages.length - 1,
-            ...loadedMessages.slice(1),
-          );
-          console.error(`Messages loaded from ${filePath}`);
-        } else {
-          console.error("Error loading messages: Invalid format in file.");
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          console.error(`Error dumping messages: ${error.message}`);
-        }
-      }
-      agentEventEmitter.emit("turnEnd");
-      return;
-    }
-
     const lastMessage = state.messages.at(-1);
 
     if (lastMessage?.content.some((part) => part.type === "tool_use")) {
@@ -157,7 +128,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
           content: [{ type: "text", text: input }],
         });
       }
-    } else if (input.toLowerCase() === "/debug.resume") {
+    } else if (input.toLowerCase() === "/resume") {
       // Resume the conversation stopped by rate limit, etc.
     } else {
       // No pending tool call
@@ -223,6 +194,11 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
   return {
     userEventEmitter,
     agentEventEmitter,
+    agentCommands: {
+      clearMessages,
+      dumpMessages,
+      loadMessages,
+    },
   };
 }
 

@@ -1,6 +1,6 @@
 /**
  * @import { Message, MessageContentToolResult, MessageContentToolUse, ProviderTokenUsage } from "./model"
- * @import { UserEventEmitter, AgentEventEmitter } from "./agent"
+ * @import { UserEventEmitter, AgentEventEmitter, AgentCommands } from "./agent"
  * @import { ExecCommandInput } from "./tools/execCommand"
  * @import { PatchFileInput } from "./tools/patchFile"
  * @import { WriteFileInput } from "./tools/writeFile"
@@ -17,22 +17,21 @@ import { notify } from "./utils/notify.mjs";
 const SLASH_COMMANDS = [
   "/help",
   "/commit",
-  "/commit.no-co-author",
+  "/commit.by-user",
   "/memory.save",
   "/memory.resume",
-  "/clear",
-  "/bye",
   "/remind.project-knowledge-discovery",
-  "/debug.resume",
-  "/debug.msg.pop",
-  "/debug.msg.dump",
-  "/debug.msg.load",
+  "/clear",
+  "/resume",
+  "/messages.dump",
+  "/messages.load",
 ];
 
 /**
  * @typedef {object} CliOptions
  * @property {UserEventEmitter} userEventEmitter
  * @property {AgentEventEmitter} agentEventEmitter
+ * @property {AgentCommands} agentCommands
  * @property {string} sessionId
  * @property {string} modelName
  * @property {() => Promise<void>} onStop
@@ -44,6 +43,7 @@ const SLASH_COMMANDS = [
 export function startCLI({
   userEventEmitter,
   agentEventEmitter,
+  agentCommands,
   sessionId,
   modelName,
   onStop,
@@ -96,23 +96,21 @@ export function startCLI({
       console.log(
         `
 File Input Syntax:
-  @path/to/file          - Read content from a file
-  @path/to/file:N        - Read line N from a file
-  @path/to/file:N-M      - Read lines N to M from a file
+  @path/to/file     - Read content from a file
+  @path/to/file:N   - Read line N from a file
+  @path/to/file:N-M - Read lines N to M from a file
 
 Commands:
   /help                               - Display this help message
   /commit                             - Create a commit message based on staged changes
-  /commit.no-co-author                - Create a commit without Co-authored-by
+  /commit.by-user                     - Create a commit without Co-authored-by
   /memory.save                        - Save the current task state to memory
   /memory.resume                      - Load a previously saved task memory
   /remind.project-knowledge-discovery - Start project knowledge discovery process
   /clear                              - Clear conversation
-  /bye                                - End the session and clean up resources (including tmux sessions)
-  /debug.resume                       - Resume conversation after an LLM provider error
-  /debug.msg.pop                      - Remove last message
-  /debug.msg.dump                     - Save current messages to a JSON file
-  /debug.msg.load                     - Load messages from a JSON file
+  /resume                             - Resume conversation after an LLM provider error
+  /messages.dump                      - Save current messages to a JSON file
+  /messages.load                      - Load messages from a JSON file
       `.trim(),
       );
       cli.prompt();
@@ -147,6 +145,24 @@ Commands:
       return;
     }
 
+    if (inputTrimmed.toLowerCase() === "/clear") {
+      agentCommands.clearMessages();
+      cli.prompt();
+      return;
+    }
+
+    if (inputTrimmed.toLowerCase() === "/messages.dump") {
+      await agentCommands.dumpMessages();
+      cli.prompt();
+      return;
+    }
+
+    if (inputTrimmed.toLowerCase() === "/messages.load") {
+      await agentCommands.loadMessages();
+      cli.prompt();
+      return;
+    }
+
     if (inputTrimmed.toLowerCase() === "/commit") {
       const message = `
 System: Create a commit
@@ -164,7 +180,7 @@ System: Create a commit
       return;
     }
 
-    if (inputTrimmed.toLowerCase() === "/commit.no-co-author") {
+    if (inputTrimmed.toLowerCase() === "/commit.by-user") {
       const message = `
 System: Create a commit
 - Understand the staged changes: git ["diff", "--staged"]
@@ -196,19 +212,6 @@ System: Load task memory and resume work
 - Display available task memory files with numbers and prompt the user to select one by number
   - Wait for user selection before reading memory contents
 - Read the content of the selected memory file after the user selects it
-      `.trim();
-      console.log(styleText("gray", "\n<command>"));
-      console.log(message);
-      console.log(styleText("gray", "</command>"));
-
-      userEventEmitter.emit("userInput", message);
-      return;
-    }
-
-    if (inputTrimmed.toLowerCase() === "/bye") {
-      const message = `
-System: Conversation has ended
-- Kill the tmux session named agent-${sessionId}
       `.trim();
       console.log(styleText("gray", "\n<command>"));
       console.log(message);

@@ -7,6 +7,18 @@ import type {
 } from "./model";
 import type { Tool, ToolUseApprover } from "./tool";
 
+export type Agent = {
+  userEventEmitter: UserEventEmitter;
+  agentEventEmitter: AgentEventEmitter;
+  agentCommands: AgentCommands;
+};
+
+export type AgentCommands = {
+  clearMessages: () => void;
+  dumpMessages: () => Promise<void>;
+  loadMessages: () => Promise<void>;
+};
+
 type UserEventMap = {
   userInput: [string];
 };
