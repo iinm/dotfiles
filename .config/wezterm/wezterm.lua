@@ -25,7 +25,7 @@ config.font = wezterm.font_with_fallback {
   { family = "Noto Sans CJK JP" },
   -- { family = "codicon" },
 }
-config.font_size = 12.5
+config.font_size = 12
 config.color_scheme = "Eighties (base16)"
 config.use_ime = true
 config.hide_tab_bar_if_only_one_tab = true
