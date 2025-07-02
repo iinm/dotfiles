@@ -13,14 +13,51 @@ import readline from "node:readline";
 import { styleText } from "node:util";
 import { notify } from "./utils/notify.mjs";
 
+const PROMPT_COMMANDS = [
+  {
+    command: "/memory.save",
+    prompt: "Save task memory",
+  },
+  {
+    command: "/memory.resume",
+    prompt: `
+Load task memory and resume work.
+- Display available task memory files with numbers and prompt the user to select one by number.
+  - Wait for user selection before reading memory contents.
+- Read the content of the selected memory file after the user selects it.
+    `.trim(),
+  },
+  {
+    command: "/commit",
+    prompt: `
+Create a commit.
+- Understand the staged changes: git ["diff", "--staged"]
+- Check the commit message format: git ["log", "--no-merges", "--oneline", "-n", "10"]
+- Create a concise and descriptive commit message that follows the project's commit convention.
+- Use this exact format to include Co-authored-by information:
+  git ["commit", "-m", "<commit message>", "-m", "", "-m", "Co-authored-by: Agent by iinm <agent-by-iinm@localhost>"]
+    `.trim(),
+  },
+  {
+    command: "/commit.by-user",
+    prompt: `
+Create a commit.
+- Understand the staged changes: git ["diff", "--staged"]
+- Check the commit message format: git ["log", "--no-merges", "--oneline", "-n", "10"]
+- Create a concise and descriptive commit message that follows the project's commit convention.
+- Create a commit: git ["commit", "-m", "<commit message>"]
+    `.trim(),
+  },
+  {
+    command: "/remind.project-knowledge-discovery",
+    prompt: "Run project knowledge discovery process.",
+  },
+];
+
 // Define available slash commands for tab completion
 const SLASH_COMMANDS = [
   "/help",
-  "/commit",
-  "/commit.by-user",
-  "/memory.save",
-  "/memory.resume",
-  "/remind.project-knowledge-discovery",
+  ...PROMPT_COMMANDS.map(({ command }) => command),
   "/clear",
   "/resume",
   "/messages.dump",
@@ -102,10 +139,10 @@ File Input Syntax:
 
 Commands:
   /help                               - Display this help message
-  /commit                             - Create a commit message based on staged changes
-  /commit.by-user                     - Create a commit without Co-authored-by
   /memory.save                        - Save the current task state to memory
   /memory.resume                      - Load a previously saved task memory
+  /commit                             - Create a commit message based on staged changes
+  /commit.by-user                     - Create a commit without Co-authored-by
   /remind.project-knowledge-discovery - Start project knowledge discovery process
   /clear                              - Clear conversation
   /resume                             - Resume conversation after an LLM provider error
@@ -163,72 +200,16 @@ Commands:
       return;
     }
 
-    if (inputTrimmed.toLowerCase() === "/commit") {
-      const message = `
-System: Create a commit
-- Understand the staged changes: git ["diff", "--staged"]
-- Check the commit message format: git ["log", "--no-merges", "--oneline", "-n", "10"]
-- Create a concise and descriptive commit message that follows the project's commit convention
-- Use this exact format to include Co-authored-by information: 
-  git ["commit", "-m", "<commit message>", "-m", "", "-m", "Co-authored-by: Agent by iinm <agent-by-iinm@localhost>"]
-      `.trim();
-      console.log(styleText("gray", "\n<command>"));
-      console.log(message);
-      console.log(styleText("gray", "</command>"));
+    for (const cmd of PROMPT_COMMANDS) {
+      if (inputTrimmed.toLowerCase() === cmd.command) {
+        const message = `System: ${cmd.prompt}`;
+        console.log(styleText("gray", "\n<prompt>"));
+        console.log(message);
+        console.log(styleText("gray", "</prompt>"));
 
-      userEventEmitter.emit("userInput", message);
-      return;
-    }
-
-    if (inputTrimmed.toLowerCase() === "/commit.by-user") {
-      const message = `
-System: Create a commit
-- Understand the staged changes: git ["diff", "--staged"]
-- Check the commit message format: git ["log", "--no-merges", "--oneline", "-n", "10"]
-- Create a concise and descriptive commit message that follows the project's commit convention
-- Create a commit: git ["commit", "-m", "<commit message>"]
-      `.trim();
-      console.log(styleText("gray", "\n<command>"));
-      console.log(message);
-      console.log(styleText("gray", "</command>"));
-
-      userEventEmitter.emit("userInput", message);
-      return;
-    }
-
-    if (inputTrimmed.toLowerCase() === "/memory.save") {
-      const message = "System: Save task memory".trim();
-      console.log(styleText("gray", "\n<command>"));
-      console.log(message);
-      console.log(styleText("gray", "</command>"));
-
-      userEventEmitter.emit("userInput", message);
-      return;
-    }
-
-    if (inputTrimmed.toLowerCase() === "/memory.resume") {
-      const message = `
-System: Load task memory and resume work
-- Display available task memory files with numbers and prompt the user to select one by number
-  - Wait for user selection before reading memory contents
-- Read the content of the selected memory file after the user selects it
-      `.trim();
-      console.log(styleText("gray", "\n<command>"));
-      console.log(message);
-      console.log(styleText("gray", "</command>"));
-
-      userEventEmitter.emit("userInput", message);
-      return;
-    }
-
-    if (inputTrimmed.toLowerCase() === "/remind.project-knowledge-discovery") {
-      const message = "System: Run project knowledge discovery process";
-      console.log(styleText("gray", "\n<command>"));
-      console.log(message);
-      console.log(styleText("gray", "</command>"));
-
-      userEventEmitter.emit("userInput", message);
-      return;
+        userEventEmitter.emit("userInput", message);
+        return;
+      }
     }
 
     userEventEmitter.emit("userInput", inputTrimmed);
