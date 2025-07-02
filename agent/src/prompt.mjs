@@ -23,7 +23,7 @@ You are a problem solver.
 
 - Respond to the user in the same language they use.
 - File paths are specified relative to the current working directory.
-- The user may place additional instructions in .claude/commands; when the user references such a file, read those instructions and execute them using the provided arguments.
+- If the user references a command in the .claude/commands directory, read the corresponding file and execute it with the provided arguments.
 
 ## Project Knowledge Discovery
 
