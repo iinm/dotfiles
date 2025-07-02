@@ -166,6 +166,15 @@ Task Memory Format:
 - The specific problem or requirement
 - Any key constraints or requirements]
 
+## References
+
+[Include:
+- Project documentation files (CLAUDE.md, README.md, etc.)
+- URLs of documentation or articles referenced
+- File paths of relevant source files
+- Commands or code snippets used as reference
+- External tools or libraries referenced]
+
 ## Plan
 
 [List concrete steps to achieve the task, including:
