@@ -64,6 +64,25 @@ const SLASH_COMMANDS = [
   "/messages.load",
 ];
 
+const HELP_MESSAGE = `
+Commands:
+  /help                               - Display this help message
+  /memory.save                        - Save the current task state to memory
+  /memory.resume                      - Load a previously saved task memory
+  /commit                             - Create a commit message based on staged changes
+  /commit.by-user                     - Create a commit without Co-authored-by
+  /remind.project-knowledge-discovery - Start project knowledge discovery process
+  /clear                              - Clear conversation
+  /resume                             - Resume conversation after an LLM provider error
+  /messages.dump                      - Save current messages to a JSON file
+  /messages.load                      - Load messages from a JSON file
+
+File Input Syntax:
+  @path/to/file     - Read content from a file
+  @path/to/file:N   - Read line N from a file
+  @path/to/file:N-M - Read lines N to M from a file
+`.trim();
+
 /**
  * @typedef {object} CliOptions
  * @property {UserEventEmitter} userEventEmitter
@@ -130,26 +149,7 @@ export function startCLI({
     }
 
     if (["/help", "help"].includes(inputTrimmed.toLowerCase())) {
-      console.log(
-        `
-File Input Syntax:
-  @path/to/file     - Read content from a file
-  @path/to/file:N   - Read line N from a file
-  @path/to/file:N-M - Read lines N to M from a file
-
-Commands:
-  /help                               - Display this help message
-  /memory.save                        - Save the current task state to memory
-  /memory.resume                      - Load a previously saved task memory
-  /commit                             - Create a commit message based on staged changes
-  /commit.by-user                     - Create a commit without Co-authored-by
-  /remind.project-knowledge-discovery - Start project knowledge discovery process
-  /clear                              - Clear conversation
-  /resume                             - Resume conversation after an LLM provider error
-  /messages.dump                      - Save current messages to a JSON file
-  /messages.load                      - Load messages from a JSON file
-      `.trim(),
-      );
+      console.log(`\n${HELP_MESSAGE}`);
       cli.prompt();
       return;
     }
