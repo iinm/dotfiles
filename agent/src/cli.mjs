@@ -22,6 +22,7 @@ const SLASH_COMMANDS = [
   "/memory.resume",
   "/clear",
   "/bye",
+  "/remind.project-knowledge-discovery",
   "/debug.resume",
   "/debug.msg.pop",
   "/debug.msg.dump",
@@ -100,17 +101,18 @@ File Input Syntax:
   @path/to/file:N-M      - Read lines N to M from a file
 
 Commands:
-  /help                - Display this help message
-  /commit              - Create a commit message based on staged changes
-  /commit.no-co-author - Create a commit without Co-authored-by
-  /memory.save         - Save the current task state to memory
-  /memory.resume       - Load a previously saved task memory
-  /clear               - Clear conversation
-  /bye                 - End the session and clean up resources (including tmux sessions)
-  /debug.resume        - Resume conversation after an LLM provider error
-  /debug.msg.pop       - Remove last message
-  /debug.msg.dump      - Save current messages to a JSON file
-  /debug.msg.load      - Load messages from a JSON file
+  /help                               - Display this help message
+  /commit                             - Create a commit message based on staged changes
+  /commit.no-co-author                - Create a commit without Co-authored-by
+  /memory.save                        - Save the current task state to memory
+  /memory.resume                      - Load a previously saved task memory
+  /remind.project-knowledge-discovery - Start project knowledge discovery process
+  /clear                              - Clear conversation
+  /bye                                - End the session and clean up resources (including tmux sessions)
+  /debug.resume                       - Resume conversation after an LLM provider error
+  /debug.msg.pop                      - Remove last message
+  /debug.msg.dump                     - Save current messages to a JSON file
+  /debug.msg.load                     - Load messages from a JSON file
       `.trim(),
       );
       cli.prompt();
@@ -208,6 +210,16 @@ System: Load task memory and resume work
 System: Conversation has ended
 - Kill the tmux session named agent-${sessionId}
       `.trim();
+      console.log(styleText("gray", "\n<command>"));
+      console.log(message);
+      console.log(styleText("gray", "</command>"));
+
+      userEventEmitter.emit("userInput", message);
+      return;
+    }
+
+    if (inputTrimmed.toLowerCase() === "/remind.project-knowledge-discovery") {
+      const message = "System: Run project knowledge discovery process";
       console.log(styleText("gray", "\n<command>"));
       console.log(message);
       console.log(styleText("gray", "</command>"));
