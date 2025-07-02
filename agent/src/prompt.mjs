@@ -169,11 +169,10 @@ Task Memory Format:
 ## References
 
 [Include:
-- Project documentation files (CLAUDE.md, README.md, etc.)
-- URLs of documentation or articles referenced
-- File paths of relevant source files
-- Commands or code snippets used as reference
-- External tools or libraries referenced]
+- Links to issues, tickets, or PRs
+- Relevant source files and project documentation
+- External documentation, articles, or tools
+- Key commands or code snippets]
 
 ## Plan
 
