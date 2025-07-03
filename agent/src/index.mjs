@@ -63,23 +63,32 @@ import { writeFileTool } from "./tools/writeFile.mjs";
   /** @type {Tool[]} */
   const mcpTools = [];
   if (localConfig.mcpServers) {
-    for (const [serverName, params] of Object.entries(localConfig.mcpServers)) {
+    for (const [serverName, serverConfig] of Object.entries(
+      localConfig.mcpServers,
+    )) {
       console.log(
         styleText("blue", `Connecting to MCP server: ${serverName}...`),
       );
+      const { agentConfig, ...params } = serverConfig;
       const mcpClient = await createMCPClient({
         serverName,
         params,
       });
+      mcpCleanups.push(() => mcpClient.close());
+      const tools = (await createMCPTools(serverName, mcpClient)).filter(
+        (tool) =>
+          !agentConfig.enabledTools ||
+          agentConfig.enabledTools.find((enabledToolName) =>
+            tool.def.name.endsWith(`__${enabledToolName}`),
+          ),
+      );
+      mcpTools.push(...tools);
       console.log(
         styleText(
           "green",
           `Successfully connected to MCP server: ${serverName} ✅`,
         ),
       );
-      mcpCleanups.push(() => mcpClient.close());
-      const tools = await createMCPTools(serverName, mcpClient);
-      mcpTools.push(...tools);
     }
   }
 

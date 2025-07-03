@@ -80,9 +80,6 @@ export default {
     // Allow specific MCP tools
     {
       // Naming: mcp__<serverName>__<toolName>
-      toolName: "mcp__fetch__fetch",
-    },
-    {
       toolName: /mcp__playwright__browser_.+/,
     },
   ],
@@ -103,6 +100,14 @@ export default {
     playwright: {
       command: "npx",
       args: ["-y", "@playwright/mcp@latest"],
+    },
+    notion: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.notion.com/sse"],
+      agentConfig: {
+        // enable only specified tools
+        enabledTools: ["search", "fetch"],
+      },
     },
     atlassian: {
       command: "npx",

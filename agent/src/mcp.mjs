@@ -65,37 +65,9 @@ export async function createMCPTools(serverName, client) {
     .map((tool) => {
       // Temporary workaround:
       // Remove properties that are not supported by Gemini
-      const inputSchema = { ...tool.inputSchema };
-      if ("$schema" in inputSchema) {
-        inputSchema.$schema = undefined;
-      }
-      if ("additionalProperties" in inputSchema) {
-        inputSchema.additionalProperties = undefined;
-      }
-      if (typeof inputSchema.properties === "object") {
-        for (const [_, value] of Object.entries(inputSchema.properties)) {
-          if (typeof value === "object" && value && "default" in value) {
-            value.default = undefined;
-          }
-          if (
-            typeof value === "object" &&
-            value &&
-            "exclusiveMaximum" in value
-          ) {
-            value.exclusiveMaximum = undefined;
-          }
-          if (
-            typeof value === "object" &&
-            value &&
-            "exclusiveMinimum" in value
-          ) {
-            value.exclusiveMinimum = undefined;
-          }
-          if (typeof value === "object" && value && "format" in value) {
-            value.format = undefined;
-          }
-        }
-      }
+      const inputSchema = removeUnsupportedPropsFromInputSchema(
+        tool.inputSchema,
+      );
 
       return {
         def: {
@@ -170,4 +142,46 @@ export async function createMCPTools(serverName, client) {
     });
 
   return tools;
+}
+
+const UNSUPPORTED_INPUT_SCHEMA_PROPS = [
+  "$schema",
+  "additionalProperties",
+  "default",
+  "exclusiveMinimum",
+  "exclusiveMaximum",
+  "format",
+];
+
+/**
+ * @param {Record<string,unknown>} inputSchema
+ * @returns {Record<string,unknown>}
+ */
+export function removeUnsupportedPropsFromInputSchema(inputSchema) {
+  /**
+   * @param {unknown} value
+   * @returns {unknown}
+   */
+  function removeUnsupportedPropsRecur(value) {
+    if (Array.isArray(value)) {
+      return value.map(removeUnsupportedPropsRecur);
+    }
+
+    if (typeof value === "object" && value) {
+      /** @type {Record<string,unknown>} */
+      const cloned = {};
+      for (const [key, val] of Object.entries(value)) {
+        if (!UNSUPPORTED_INPUT_SCHEMA_PROPS.includes(key)) {
+          cloned[key] = removeUnsupportedPropsRecur(val);
+        }
+      }
+      return cloned;
+    }
+
+    return value;
+  }
+
+  return /** @type {Record<string,unknown>} */ (
+    removeUnsupportedPropsRecur(inputSchema)
+  );
 }
