@@ -148,7 +148,7 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
  * @property {string} command - The command to run the server.
  * @property {string[]} args - The arguments to pass to the command.
  * @property {Record<string,string>=} env - The environment variables for the server.
- * @property {MCPServerAgentConfig} agentConfig
+ * @property {MCPServerAgentConfig=} agentConfig
  */
 
 /**

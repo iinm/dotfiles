@@ -29,7 +29,7 @@ import { writeFileTool } from "./tools/writeFile.mjs";
   const sessionId = [
     startTime.toISOString().slice(0, 10),
     `0${startTime.getHours()}`.slice(-2) +
-      `0${startTime.getMinutes()}`.slice(-2),
+    `0${startTime.getMinutes()}`.slice(-2),
   ].join("-");
 
   const localConfig = await loadLocalConfig();
@@ -77,7 +77,7 @@ import { writeFileTool } from "./tools/writeFile.mjs";
       mcpCleanups.push(() => mcpClient.close());
       const tools = (await createMCPTools(serverName, mcpClient)).filter(
         (tool) =>
-          !agentConfig.enabledTools ||
+          !agentConfig?.enabledTools ||
           agentConfig.enabledTools.find((enabledToolName) =>
             tool.def.name.endsWith(`__${enabledToolName}`),
           ),
