@@ -47,11 +47,6 @@ config.keys = {
 }
 config.native_macos_fullscreen_mode = true
 
----@diagnostic disable-next-line: unused-local
-wezterm.on('bell', function(window, pane)
-  window:toast_notification('WezTerm', '🔔 Terminal bell rang', nil, 4000)
-end)
-
 -- host specific config
 if type(local_config.apply_to_config) == 'function' then
   local_config.apply_to_config(config)
