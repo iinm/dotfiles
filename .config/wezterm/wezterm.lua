@@ -19,6 +19,7 @@ if wezterm.config_builder then
   config = wezterm.config_builder()
 end
 
+config.unicode_version = 14
 config.font = wezterm.font_with_fallback {
   { family = "Operator Mono SSm", weight = "Book" },
   { family = "Hiragino Sans" },
