@@ -23,7 +23,7 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
     // Exec command
     {
       toolName: execCommandTool.def.name,
-      input: { command: /^(pwd|cd|date|uname)$/ },
+      input: { command: /^(pwd|cd|ls|date|uname)$/ },
     },
     {
       toolName: execCommandTool.def.name,
