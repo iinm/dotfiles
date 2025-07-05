@@ -85,7 +85,7 @@ describe("config", () => {
       {
         desc: "non-existent file in an ignored directory (node_modules)",
         path: "node_modules/this_file_does_not_exist.js",
-        expected: true,
+        expected: false,
       },
       {
         desc: "non-existent file in a non-ignored directory (src)",
