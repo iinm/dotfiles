@@ -5,7 +5,7 @@
  */
 
 import { styleText } from "node:util";
-import { OPENAI_API_KEY } from "../env.mjs";
+import { OPENAI_API_BASE_URL, OPENAI_API_KEY } from "../env.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
 
 /**
@@ -32,7 +32,7 @@ export async function callOpenAIModel(config, input, retryCount = 0) {
       },
     };
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch(`${OPENAI_API_BASE_URL}/v1/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

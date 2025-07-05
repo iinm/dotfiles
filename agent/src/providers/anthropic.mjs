@@ -5,7 +5,7 @@
  */
 
 import { styleText } from "node:util";
-import { ANTHROPIC_API_KEY } from "../env.mjs";
+import { ANTHROPIC_API_BASE_URL, ANTHROPIC_API_KEY } from "../env.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
 
 /**
@@ -33,7 +33,7 @@ export async function callAnthropicModel(config, input, retryCount = 0) {
       stream: true,
     };
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch(`${ANTHROPIC_API_BASE_URL}/v1/messages`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

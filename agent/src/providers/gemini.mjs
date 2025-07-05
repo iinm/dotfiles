@@ -5,7 +5,7 @@
  */
 
 import { styleText } from "node:util";
-import { GEMINI_API_KEY } from "../env.mjs";
+import { GEMINI_API_BASE_URL, GEMINI_API_KEY } from "../env.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
 
 /**
@@ -57,7 +57,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
         state.cache = undefined;
       }
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
+      const url = `${GEMINI_API_BASE_URL}/v1beta/models/${config.model}:streamGenerateContent?alt=sse`;
 
       /** @type {Pick<GeminiGenerateContentInput, "generationConfig" | "safetySettings">} */
       const baseRequest = {
@@ -99,6 +99,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-goog-api-key": GEMINI_API_KEY || "",
         },
         body: JSON.stringify(request),
         signal: AbortSignal.timeout(120 * 1000),
@@ -232,7 +233,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
     systemInstruction,
     tools,
   }) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/cachedContents?key=${GEMINI_API_KEY}`;
+    const url = `${GEMINI_API_BASE_URL}/v1beta/cachedContents`;
 
     /** @type {GeminiCreateCachedContentInput} */
     const request = {
@@ -247,6 +248,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-goog-api-key": GEMINI_API_KEY || "",
       },
       body: JSON.stringify(request),
       signal: AbortSignal.timeout(120 * 1000),
@@ -265,16 +267,14 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
 
           // Delete old cache if previous cache is alive
           if (state.cache && Date.now() < state.cache.expireTime.getTime()) {
-            fetch(
-              `https://generativelanguage.googleapis.com/v1beta/${state.cache.name}?key=${GEMINI_API_KEY}`,
-              {
-                method: "DELETE",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                signal: AbortSignal.timeout(120 * 1000),
+            fetch(`${GEMINI_API_BASE_URL}/v1beta/${state.cache.name}`, {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+                "x-goog-api-key": GEMINI_API_KEY || "",
               },
-            )
+              signal: AbortSignal.timeout(120 * 1000),
+            })
               .then(async (response) => {
                 if (response.status !== 200) {
                   console.error(
