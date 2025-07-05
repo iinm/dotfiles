@@ -5,7 +5,11 @@
  */
 
 import { styleText } from "node:util";
-import { GEMINI_API_BASE_URL, GEMINI_API_KEY } from "../env.mjs";
+import {
+  GEMINI_API_BASE_URL,
+  GEMINI_API_KEY,
+  GEMINI_CUSTOM_HEADERS,
+} from "../env.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
 
 /**
@@ -98,6 +102,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
       const response = await fetch(url, {
         method: "POST",
         headers: {
+          ...GEMINI_CUSTOM_HEADERS,
           "Content-Type": "application/json",
           "x-goog-api-key": GEMINI_API_KEY || "",
         },
@@ -247,6 +252,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
     await fetch(url, {
       method: "POST",
       headers: {
+        ...GEMINI_CUSTOM_HEADERS,
         "Content-Type": "application/json",
         "x-goog-api-key": GEMINI_API_KEY || "",
       },
@@ -270,6 +276,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
             fetch(`${GEMINI_API_BASE_URL}/v1beta/${state.cache.name}`, {
               method: "DELETE",
               headers: {
+                ...GEMINI_CUSTOM_HEADERS,
                 "Content-Type": "application/json",
                 "x-goog-api-key": GEMINI_API_KEY || "",
               },
