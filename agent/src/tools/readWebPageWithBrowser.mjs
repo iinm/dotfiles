@@ -2,19 +2,20 @@
  * @import { Tool } from '../tool'
  */
 
-import path from "node:path";
-import { AGENT_DIR } from "../env.mjs";
+import {
+  AGENT_ROOT,
+  READ_WEB_PAGE_WITH_BROWSER_TOOL_USER_DATA_DIR,
+} from "../env.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
 import { writeTmpFile } from "../utils/tmpfile.mjs";
 
-export const USER_DATA_DIR = path.join(AGENT_DIR, ".agent/chromium-profile");
 const MAX_CONTENT_LENGTH = 1024 * 8;
 
 /** @type {Tool} */
 export const readWebPageWithBrowserTool = {
   def: {
     name: "read_web_page_with_browser",
-    description: `Read and extract page content from a given URL using a browser, returning it as Markdown. Can handle JavaScript-rendered content. Note: If you encounter an error due to a missing browser, install it by running: bash ["-c", "cd ${AGENT_DIR} && npx playwright install chromium"]`,
+    description: `Read and extract page content from a given URL using a browser, returning it as Markdown. Can handle JavaScript-rendered content. Note: If you encounter an error due to a missing browser, install it by running: bash ["-c", "cd ${AGENT_ROOT} && npx playwright install chromium"]`,
     inputSchema: {
       type: "object",
       properties: {
@@ -37,9 +38,12 @@ export const readWebPageWithBrowserTool = {
       const { JSDOM } = await import("jsdom");
       const TurndownService = (await import("turndown")).default;
 
-      const context = await chromium.launchPersistentContext(USER_DATA_DIR, {
-        headless: true,
-      });
+      const context = await chromium.launchPersistentContext(
+        READ_WEB_PAGE_WITH_BROWSER_TOOL_USER_DATA_DIR,
+        {
+          headless: true,
+        },
+      );
 
       /** @type {string | undefined} */
       let html;

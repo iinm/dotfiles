@@ -12,7 +12,7 @@ import { callOpenAIModel } from "./providers/openai.mjs";
  */
 export function createModelCaller(modelName) {
   switch (modelName) {
-    case "gpt-4.1-mini":
+    case "gpt-4-1-mini":
       return (input) =>
         callOpenAIModel(
           {
@@ -21,7 +21,7 @@ export function createModelCaller(modelName) {
           },
           input,
         );
-    case "gpt-4.1":
+    case "gpt-4-1":
       return (input) =>
         callOpenAIModel(
           {
@@ -76,17 +76,7 @@ export function createModelCaller(modelName) {
           },
           input,
         );
-    case "claude-sonnet":
-      return (input) =>
-        callAnthropicModel(
-          {
-            model: "claude-sonnet-4-20250514",
-            max_tokens: 1024 * 16,
-            temperature: 0,
-          },
-          input,
-        );
-    case "claude-sonnet-thinking":
+    case "claude-sonnet-thinking-2k":
       return (input) =>
         callAnthropicModel(
           {
@@ -94,20 +84,7 @@ export function createModelCaller(modelName) {
             max_tokens: 1024 * 16,
             thinking: {
               type: "enabled",
-              budget_tokens: 1024,
-            },
-          },
-          input,
-        );
-    case "claude-sonnet-thinking-4k":
-      return (input) =>
-        callAnthropicModel(
-          {
-            model: "claude-sonnet-4-20250514",
-            max_tokens: 1024 * 16,
-            thinking: {
-              type: "enabled",
-              budget_tokens: 1024 * 4,
+              budget_tokens: 2024,
             },
           },
           input,
@@ -125,25 +102,12 @@ export function createModelCaller(modelName) {
           },
           input,
         );
-    case "claude-sonnet-thinking-16k":
+    case "claude-sonnet-thinking-32k-max":
       return (input) =>
         callAnthropicModel(
           {
             model: "claude-sonnet-4-20250514",
-            max_tokens: 1024 * 32,
-            thinking: {
-              type: "enabled",
-              budget_tokens: 1024 * 16,
-            },
-          },
-          input,
-        );
-    case "claude-sonnet-thinking-32k":
-      return (input) =>
-        callAnthropicModel(
-          {
-            model: "claude-sonnet-4-20250514",
-            max_tokens: 1024 * 48,
+            max_tokens: 1000 * 64,
             thinking: {
               type: "enabled",
               budget_tokens: 1024 * 32,
@@ -151,7 +115,7 @@ export function createModelCaller(modelName) {
           },
           input,
         );
-    case "gemini-flash": {
+    case "gemini-flash-thinking-4k": {
       const model = "gemini-2.5-flash";
       const modelCaller = createCacheEnabledGeminiModelCaller({ model });
       return (input) =>
@@ -163,7 +127,7 @@ export function createModelCaller(modelName) {
                 temperature: 0,
                 thinkingConfig: {
                   includeThoughts: true,
-                  thinkingBudget: 1024,
+                  thinkingBudget: 1024 * 4,
                 },
               },
             },
@@ -171,7 +135,47 @@ export function createModelCaller(modelName) {
           input,
         );
     }
-    case "gemini-pro": {
+    case "gemini-flash-thinking-16k": {
+      const model = "gemini-2.5-flash";
+      const modelCaller = createCacheEnabledGeminiModelCaller({ model });
+      return (input) =>
+        modelCaller(
+          {
+            model,
+            requestConfig: {
+              generationConfig: {
+                temperature: 0,
+                thinkingConfig: {
+                  includeThoughts: true,
+                  thinkingBudget: 1024 * 16,
+                },
+              },
+            },
+          },
+          input,
+        );
+    }
+    case "gemini-flash-thinking-24k-max": {
+      const model = "gemini-2.5-flash";
+      const modelCaller = createCacheEnabledGeminiModelCaller({ model });
+      return (input) =>
+        modelCaller(
+          {
+            model,
+            requestConfig: {
+              generationConfig: {
+                temperature: 0,
+                thinkingConfig: {
+                  includeThoughts: true,
+                  thinkingBudget: 1024 * 24,
+                },
+              },
+            },
+          },
+          input,
+        );
+    }
+    case "gemini-pro-thinking-2k": {
       const model = "gemini-2.5-pro";
       const modelCaller = createCacheEnabledGeminiModelCaller({ model });
       return (input) =>
@@ -183,7 +187,47 @@ export function createModelCaller(modelName) {
                 temperature: 0,
                 thinkingConfig: {
                   includeThoughts: true,
-                  thinkingBudget: 2048,
+                  thinkingBudget: 1024 * 2,
+                },
+              },
+            },
+          },
+          input,
+        );
+    }
+    case "gemini-pro-thinking-8k": {
+      const model = "gemini-2.5-pro";
+      const modelCaller = createCacheEnabledGeminiModelCaller({ model });
+      return (input) =>
+        modelCaller(
+          {
+            model,
+            requestConfig: {
+              generationConfig: {
+                temperature: 0,
+                thinkingConfig: {
+                  includeThoughts: true,
+                  thinkingBudget: 1024 * 8,
+                },
+              },
+            },
+          },
+          input,
+        );
+    }
+    case "gemini-pro-thinking-32k-max": {
+      const model = "gemini-2.5-pro";
+      const modelCaller = createCacheEnabledGeminiModelCaller({ model });
+      return (input) =>
+        modelCaller(
+          {
+            model,
+            requestConfig: {
+              generationConfig: {
+                temperature: 0,
+                thinkingConfig: {
+                  includeThoughts: true,
+                  thinkingBudget: 1024 * 32,
                 },
               },
             },

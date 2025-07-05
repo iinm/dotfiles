@@ -5,9 +5,8 @@
  */
 
 import { styleText } from "node:util";
+import { ANTHROPIC_API_KEY } from "../env.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
-
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 /**
  * @param {AnthropicModelConfig} config

@@ -13,6 +13,9 @@ export AGENT_PROJECT_METADATA_DIR
 : "${AGENT_NOTIFY_CMD:="$this_dir/bin/agent-notify"}"
 export AGENT_NOTIFY_CMD
 
+: "${AGENT_MODEL:="gemini-pro"}"
+export AGENT_MODEL
+
 if test -f "$this_dir/.secrets/openai-api-key.txt"; then
   OPENAI_API_KEY="$(cat "$this_dir/.secrets/openai-api-key.txt")"
   export OPENAI_API_KEY

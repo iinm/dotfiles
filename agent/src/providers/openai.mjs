@@ -5,9 +5,8 @@
  */
 
 import { styleText } from "node:util";
+import { OPENAI_API_KEY } from "../env.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
-
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 /**
  * @param {OpenAIModelConfig} config

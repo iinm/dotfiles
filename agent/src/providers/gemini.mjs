@@ -5,9 +5,8 @@
  */
 
 import { styleText } from "node:util";
+import { GEMINI_API_KEY } from "../env.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 /**
  * @callback GeminiModelCaller

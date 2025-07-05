@@ -29,7 +29,7 @@ import { writeFileTool } from "./tools/writeFile.mjs";
   const sessionId = [
     startTime.toISOString().slice(0, 10),
     `0${startTime.getHours()}`.slice(-2) +
-    `0${startTime.getMinutes()}`.slice(-2),
+      `0${startTime.getMinutes()}`.slice(-2),
   ].join("-");
 
   const localConfig = await loadLocalConfig();

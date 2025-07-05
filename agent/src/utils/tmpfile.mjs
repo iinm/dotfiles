@@ -17,7 +17,7 @@ export async function writeTmpFile(content, name, extension = "txt") {
     .replace(/:/g, "");
   const randomSuffix = Math.random().toString(36).substring(2, 8);
 
-  const tmpDir = `${AGENT_PROJECT_METADATA_DIR}/tmp`;
+  const tmpDir = path.join(AGENT_PROJECT_METADATA_DIR, "tmp");
   const fileName = `${timestamp}-${randomSuffix}--${name}.${extension}`;
   const filePath = path.join(tmpDir, fileName);
 

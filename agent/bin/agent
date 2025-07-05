@@ -1,8 +1,14 @@
-#!/usr/bin/env bash
+#!/usr/bin/env node
 
-set -eu -o pipefail
+import path from "node:path";
 
-this_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-app_root="$(cd "$this_dir/.." && pwd)"
+const filename = path.basename(process.argv[1])
+const model = filename.startsWith("agent-")
+  ? filename.slice("agent-".length)
+  : undefined;
 
-exec "$app_root/env.sh" node "$app_root/src/index.mjs" "$@"
+if (model) {
+  process.env.AGENT_MODEL = model;
+}
+
+import("../src/app.mjs");
