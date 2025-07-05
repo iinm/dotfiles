@@ -2,14 +2,10 @@
  * @import { ModelInput, Message, AssistantMessage, ModelOutput, PartialMessageContent, ProviderTokenUsage } from "../model";
  * @import { GeminiCachedContents, GeminiContent, GeminiContentPartFunctionCall, GeminiContentPartText, GeminiCreateCachedContentInput as GeminiCreateCachedContentInput, GeminiFunctionContent, GeminiGenerateContentInput, GeminiGeneratedContent, GeminiModelConfig, GeminiModelContent, GeminiSystemContent, GeminiToolDefinition, GeminiUserContent } from "./gemini";
  * @import { ToolDefinition } from "../tool";
+ * @import { GenericModelProviderConfig } from "../config"
  */
 
 import { styleText } from "node:util";
-import {
-  GEMINI_API_BASE_URL,
-  GEMINI_API_KEY,
-  GEMINI_CUSTOM_HEADERS,
-} from "../env.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
 
 /**
@@ -24,10 +20,17 @@ import { noThrow } from "../utils/noThrow.mjs";
  * References:
  * - https://ai.google.dev/gemini-api/docs/caching
  * - https://ai.google.dev/api/caching
+ * @param {GenericModelProviderConfig} providerConfig
  * @param {Pick<GeminiModelConfig, "model">} modelConfig
  * @returns {GeminiModelCaller}
  */
-export function createCacheEnabledGeminiModelCaller(modelConfig) {
+export function createCacheEnabledGeminiModelCaller(
+  providerConfig,
+  modelConfig,
+) {
+  const baseURL =
+    providerConfig.baseURL || "https://generativelanguage.googleapis.com";
+
   const props = {
     cacheTTL: 5 * 60, // seconds
     // https://ai.google.dev/gemini-api/docs/caching#considerations
@@ -61,7 +64,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
         state.cache = undefined;
       }
 
-      const url = `${GEMINI_API_BASE_URL}/v1beta/models/${config.model}:streamGenerateContent?alt=sse`;
+      const url = `${baseURL}/v1beta/models/${config.model}:streamGenerateContent?alt=sse`;
 
       /** @type {Pick<GeminiGenerateContentInput, "generationConfig" | "safetySettings">} */
       const baseRequest = {
@@ -102,9 +105,9 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
       const response = await fetch(url, {
         method: "POST",
         headers: {
-          ...GEMINI_CUSTOM_HEADERS,
+          ...providerConfig.customHeaders,
           "Content-Type": "application/json",
-          "x-goog-api-key": GEMINI_API_KEY || "",
+          "x-goog-api-key": `${providerConfig.apiKey}`,
         },
         body: JSON.stringify(request),
         signal: AbortSignal.timeout(120 * 1000),
@@ -238,7 +241,7 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
     systemInstruction,
     tools,
   }) {
-    const url = `${GEMINI_API_BASE_URL}/v1beta/cachedContents`;
+    const url = `${baseURL}/v1beta/cachedContents`;
 
     /** @type {GeminiCreateCachedContentInput} */
     const request = {
@@ -252,9 +255,9 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
     await fetch(url, {
       method: "POST",
       headers: {
-        ...GEMINI_CUSTOM_HEADERS,
+        ...providerConfig.customHeaders,
         "Content-Type": "application/json",
-        "x-goog-api-key": GEMINI_API_KEY || "",
+        "x-goog-api-key": `${providerConfig.apiKey}`,
       },
       body: JSON.stringify(request),
       signal: AbortSignal.timeout(120 * 1000),
@@ -273,12 +276,12 @@ export function createCacheEnabledGeminiModelCaller(modelConfig) {
 
           // Delete old cache if previous cache is alive
           if (state.cache && Date.now() < state.cache.expireTime.getTime()) {
-            fetch(`${GEMINI_API_BASE_URL}/v1beta/${state.cache.name}`, {
+            fetch(`${baseURL}/v1beta/${state.cache.name}`, {
               method: "DELETE",
               headers: {
-                ...GEMINI_CUSTOM_HEADERS,
+                ...providerConfig.customHeaders,
                 "Content-Type": "application/json",
-                "x-goog-api-key": GEMINI_API_KEY || "",
+                "x-goog-api-key": `${providerConfig.apiKey}`,
               },
               signal: AbortSignal.timeout(120 * 1000),
             })

@@ -2,12 +2,15 @@
  * @import { Tool } from '../tool'
  */
 
-import {
-  AGENT_ROOT,
-  READ_WEB_PAGE_WITH_BROWSER_TOOL_USER_DATA_DIR,
-} from "../env.mjs";
+import path from "node:path";
+import { AGENT_CACHE_DIR, AGENT_ROOT } from "../env.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
 import { writeTmpFile } from "../utils/tmpfile.mjs";
+
+export const READ_WEB_PAGE_WITH_BROWSER_TOOL_USER_DATA_DIR = path.join(
+  AGENT_CACHE_DIR,
+  "chromium-profile",
+);
 
 const MAX_CONTENT_LENGTH = 1024 * 8;
 

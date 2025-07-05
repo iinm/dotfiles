@@ -2,23 +2,27 @@
  * @import { ModelInput, Message, AssistantMessage, ModelOutput, PartialMessageContent } from "../model";
  * @import { AnthropicChatCompletion, AnthropicMessage, AnthropicToolDefinition, AnthropicModelConfig, AnthropicAssistantMessage, AnthropicStreamEvent, AnthropicAssistantMessageContent, AnthropicChatCompletionUsage, AnthropicRequestInput } from "./anthropic";
  * @import { ToolDefinition } from "../tool";
+ * @import { GenericModelProviderConfig } from "../config"
  */
 
 import { styleText } from "node:util";
-import {
-  ANTHROPIC_API_BASE_URL,
-  ANTHROPIC_API_KEY,
-  ANTHROPIC_CUSTOM_HEADERS,
-} from "../env.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
 
 /**
- * @param {AnthropicModelConfig} config
+ * @param {GenericModelProviderConfig} providerConfig
+ * @param {AnthropicModelConfig} modelConfig
  * @param {ModelInput} input
  * @param {number} [retryCount]
  * @returns {Promise<ModelOutput | Error>}
  */
-export async function callAnthropicModel(config, input, retryCount = 0) {
+export async function callAnthropicModel(
+  providerConfig,
+  modelConfig,
+  input,
+  retryCount = 0,
+) {
+  const baseURL = providerConfig.baseURL || "https://api.anthropic.com";
+
   return await noThrow(async () => {
     const messages = convertGenericMessageToAnthropicFormat(input.messages);
     const cacheEnabledMessages = enableContextCaching(messages);
@@ -28,7 +32,7 @@ export async function callAnthropicModel(config, input, retryCount = 0) {
 
     /** @type {AnthropicRequestInput} */
     const request = {
-      ...config,
+      ...modelConfig,
       system: messages
         .filter((m) => m.role === "system")
         .flatMap((m) => m.content),
@@ -37,12 +41,12 @@ export async function callAnthropicModel(config, input, retryCount = 0) {
       stream: true,
     };
 
-    const response = await fetch(`${ANTHROPIC_API_BASE_URL}/v1/messages`, {
+    const response = await fetch(`${baseURL}/v1/messages`, {
       method: "POST",
       headers: {
-        ...ANTHROPIC_CUSTOM_HEADERS,
+        ...providerConfig.customHeaders,
         "Content-Type": "application/json",
-        "x-api-key": `${ANTHROPIC_API_KEY}`,
+        "x-api-key": `${providerConfig.apiKey}`,
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify(request),
@@ -58,7 +62,12 @@ export async function callAnthropicModel(config, input, retryCount = 0) {
         ),
       );
       await new Promise((resolve) => setTimeout(resolve, interval * 1000));
-      return callAnthropicModel(config, input, retryCount + 1);
+      return callAnthropicModel(
+        providerConfig,
+        modelConfig,
+        input,
+        retryCount + 1,
+      );
     }
 
     if (response.status !== 200) {

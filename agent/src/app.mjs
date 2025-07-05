@@ -7,7 +7,7 @@ import { createAgent } from "./agent.mjs";
 import { startCLI } from "./cli.mjs";
 import {
   createDefaultAllowedToolUsePatterns,
-  loadLocalConfig,
+  loadAgentConfig,
 } from "./config.mjs";
 import { AGENT_MODEL, AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
 import { createMCPClient, createMCPTools } from "./mcp.mjs";
@@ -18,7 +18,7 @@ import { execCommandTool } from "./tools/execCommand.mjs";
 import { patchFileTool } from "./tools/patchFile.mjs";
 import { readWebPageTool } from "./tools/readWebPage.mjs";
 import { readWebPageWithBrowserTool } from "./tools/readWebPageWithBrowser.mjs";
-import { tavilySearchTool } from "./tools/tavilySearch.mjs";
+import { createTavilySearchTool } from "./tools/tavilySearch.mjs";
 import { tmuxCommandTool } from "./tools/tmuxCommand.mjs";
 import { writeFileTool } from "./tools/writeFile.mjs";
 
@@ -32,13 +32,13 @@ import { writeFileTool } from "./tools/writeFile.mjs";
       `0${startTime.getMinutes()}`.slice(-2),
   ].join("-");
 
-  const localConfig = await loadLocalConfig();
+  const agentConfig = await loadAgentConfig();
 
   const toolUseApprover = createToolUseApprover({
     maxApproveCount: 20,
     allowedToolUses: [
       ...createDefaultAllowedToolUsePatterns({ sessionId }),
-      ...(localConfig.allowedToolUsePatterns || []),
+      ...(agentConfig.allowedToolUsePatterns || []),
     ],
     maskAllowedInput: (toolName, input) => {
       if (toolName === patchFileTool.def.name) {
@@ -62,9 +62,9 @@ import { writeFileTool } from "./tools/writeFile.mjs";
 
   /** @type {Tool[]} */
   const mcpTools = [];
-  if (localConfig.mcpServers) {
+  if (agentConfig.mcpServers) {
     for (const [serverName, serverConfig] of Object.entries(
-      localConfig.mcpServers,
+      agentConfig.mcpServers,
     )) {
       console.log(
         styleText("blue", `Connecting to MCP server: ${serverName}...`),
@@ -107,12 +107,12 @@ import { writeFileTool } from "./tools/writeFile.mjs";
     readWebPageWithBrowserTool,
   ];
 
-  if (process.env.TAVILY_API_KEY) {
-    tools.push(tavilySearchTool);
+  if (agentConfig.tools?.tavily) {
+    tools.push(createTavilySearchTool(agentConfig.tools.tavily));
   }
 
   const { userEventEmitter, agentEventEmitter, agentCommands } = createAgent({
-    callModel: createModelCaller(AGENT_MODEL),
+    callModel: createModelCaller(AGENT_MODEL, agentConfig.providers),
     prompt,
     tools: [...tools, ...mcpTools],
     toolUseApprover,

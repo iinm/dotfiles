@@ -1,5 +1,6 @@
 /**
  * @import { CallModel } from "./model"
+ * @import { AgentModelProviders } from "./config";
  */
 
 import { callAnthropicModel } from "./providers/anthropic.mjs";
@@ -8,13 +9,15 @@ import { callOpenAIModel } from "./providers/openai.mjs";
 
 /**
  * @param {string} modelName
+ * @param {AgentModelProviders=} providers
  * @returns {CallModel}
  */
-export function createModelCaller(modelName) {
+export function createModelCaller(modelName, providers) {
   switch (modelName) {
     case "gpt-4-1-mini":
       return (input) =>
         callOpenAIModel(
+          providers?.openai ?? {},
           {
             model: "gpt-4.1-mini",
             temperature: 0,
@@ -24,6 +27,7 @@ export function createModelCaller(modelName) {
     case "gpt-4-1":
       return (input) =>
         callOpenAIModel(
+          providers?.openai ?? {},
           {
             model: "gpt-4.1",
             temperature: 0,
@@ -33,6 +37,7 @@ export function createModelCaller(modelName) {
     case "o4-mini-medium":
       return (input) =>
         callOpenAIModel(
+          providers?.openai ?? {},
           {
             model: "o4-mini",
             reasoning_effort: "medium",
@@ -42,6 +47,7 @@ export function createModelCaller(modelName) {
     case "o4-mini-high":
       return (input) =>
         callOpenAIModel(
+          providers?.openai ?? {},
           {
             model: "o4-mini",
             reasoning_effort: "high",
@@ -51,6 +57,7 @@ export function createModelCaller(modelName) {
     case "o3-medium":
       return (input) =>
         callOpenAIModel(
+          providers?.openai ?? {},
           {
             model: "o3",
             reasoning_effort: "medium",
@@ -60,6 +67,7 @@ export function createModelCaller(modelName) {
     case "o3-high":
       return (input) =>
         callOpenAIModel(
+          providers?.openai ?? {},
           {
             model: "o3",
             reasoning_effort: "high",
@@ -69,6 +77,7 @@ export function createModelCaller(modelName) {
     case "claude-haiku":
       return (input) =>
         callAnthropicModel(
+          providers?.anthropic ?? {},
           {
             model: "claude-3-5-haiku-latest",
             max_tokens: 1024 * 8,
@@ -79,6 +88,7 @@ export function createModelCaller(modelName) {
     case "claude-sonnet-thinking-2k":
       return (input) =>
         callAnthropicModel(
+          providers?.anthropic ?? {},
           {
             model: "claude-sonnet-4-20250514",
             max_tokens: 1024 * 16,
@@ -92,6 +102,7 @@ export function createModelCaller(modelName) {
     case "claude-sonnet-thinking-8k":
       return (input) =>
         callAnthropicModel(
+          providers?.anthropic ?? {},
           {
             model: "claude-sonnet-4-20250514",
             max_tokens: 1024 * 16,
@@ -105,6 +116,7 @@ export function createModelCaller(modelName) {
     case "claude-sonnet-thinking-32k-max":
       return (input) =>
         callAnthropicModel(
+          providers?.anthropic ?? {},
           {
             model: "claude-sonnet-4-20250514",
             max_tokens: 1000 * 64,
@@ -117,7 +129,10 @@ export function createModelCaller(modelName) {
         );
     case "gemini-flash-thinking-4k": {
       const model = "gemini-2.5-flash";
-      const modelCaller = createCacheEnabledGeminiModelCaller({ model });
+      const modelCaller = createCacheEnabledGeminiModelCaller(
+        providers?.gemini ?? {},
+        { model },
+      );
       return (input) =>
         modelCaller(
           {
@@ -137,7 +152,10 @@ export function createModelCaller(modelName) {
     }
     case "gemini-flash-thinking-16k": {
       const model = "gemini-2.5-flash";
-      const modelCaller = createCacheEnabledGeminiModelCaller({ model });
+      const modelCaller = createCacheEnabledGeminiModelCaller(
+        providers?.gemini ?? {},
+        { model },
+      );
       return (input) =>
         modelCaller(
           {
@@ -157,7 +175,10 @@ export function createModelCaller(modelName) {
     }
     case "gemini-flash-thinking-24k-max": {
       const model = "gemini-2.5-flash";
-      const modelCaller = createCacheEnabledGeminiModelCaller({ model });
+      const modelCaller = createCacheEnabledGeminiModelCaller(
+        providers?.gemini ?? {},
+        { model },
+      );
       return (input) =>
         modelCaller(
           {
@@ -177,7 +198,10 @@ export function createModelCaller(modelName) {
     }
     case "gemini-pro-thinking-2k": {
       const model = "gemini-2.5-pro";
-      const modelCaller = createCacheEnabledGeminiModelCaller({ model });
+      const modelCaller = createCacheEnabledGeminiModelCaller(
+        providers?.gemini ?? {},
+        { model },
+      );
       return (input) =>
         modelCaller(
           {
@@ -197,7 +221,10 @@ export function createModelCaller(modelName) {
     }
     case "gemini-pro-thinking-8k": {
       const model = "gemini-2.5-pro";
-      const modelCaller = createCacheEnabledGeminiModelCaller({ model });
+      const modelCaller = createCacheEnabledGeminiModelCaller(
+        providers?.gemini ?? {},
+        { model },
+      );
       return (input) =>
         modelCaller(
           {
@@ -217,7 +244,10 @@ export function createModelCaller(modelName) {
     }
     case "gemini-pro-thinking-32k-max": {
       const model = "gemini-2.5-pro";
-      const modelCaller = createCacheEnabledGeminiModelCaller({ model });
+      const modelCaller = createCacheEnabledGeminiModelCaller(
+        providers?.gemini ?? {},
+        { model },
+      );
       return (input) =>
         modelCaller(
           {

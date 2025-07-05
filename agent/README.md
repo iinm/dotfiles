@@ -12,61 +12,77 @@ This CLI tool automatically permits certain tool executions but requires explici
 - Anthropic API key, OpenAI API key, or Gemini API key
 - (Optional) Tavily API key
 
-## Setup
+## Quick Start
+
+Install the dependencies.
 
 ```sh
-# Install dependencies
 npm install
 ```
 
-```sh
-# Create secrets directory
-mkdir -p .secrets
+Create the user local configuration.
 
-# Configure API keys (set at least one of the following)
-echo "$ANTHROPIC_API_KEY" > .secrets/anthropic-api-key.txt
-# OR
-echo "$OPENAI_API_KEY" > .secrets/openai-api-key.txt
-# OR
-echo "$GEMINI_API_KEY" > .secrets/gemini-api-key.txt
-
-# (Optional)
-echo "$TAVILY_API_KEY" > .secrets/tavily-api-key.txt
+```js
+// $AGENT_ROOT(where this README file exists)/.config/config.local.mjs
+export default {
+  providers: {
+    anthropic: {
+      apiKey: "FIXME",
+      // AI Gateway
+      // baseURL: "https://gateway.ai.cloudflare.com/v1/FIXME/default/anthropic",
+      // customHeaders: { "cf-aig-metadata": JSON.stringify({ client: "agent-by-iinm" }) },
+    },
+    gemini: {
+      apiKey: "FIXME",
+      // baseURL: "https://gateway.ai.cloudflare.com/v1/FIXME/default/google-ai-studio",
+      // customHeaders: { "cf-aig-metadata": JSON.stringify({ client: "agent-by-iinm" }) },
+    },
+    openai: {
+      apiKey: "FIXME",
+      // baseURL: "https://gateway.ai.cloudflare.com/v1/FIXME/default/openai",
+      // customHeaders: { "cf-aig-metadata": JSON.stringify({ client: "agent-by-iinm" }) },
+    },
+  },
+  tools: {
+    // (Optional)
+    tavily: {
+      apiKey: "FIXME",
+    },
+  },
+};
 ```
 
-## Getting Started
+Run the agent.
 
 ```sh
-# Run agent with default model
-./bin/agent
-
-# or run with a specific model
 ./bin/agent-<model>
 ```
 
-## Usage
+Show help message.
 
 ```
 /help
 ```
 
-## Metadata Directory Structure
+## Directory Structure
 
 ```
+$AGENT_ROOT (where this README file exists)
+  \__ .config
+        \__ config.mjs        # User configuration
+        \__ config.local.mjs  # User local configuration (including secrets)
+
 <project-root>
   \__ $AGENT_PROJECT_METADATA_DIR (default: .agent)
-        \__ config.mjs  # Project-specific configuration
+        \__ config.mjs        # Project-specific configuration
+        \__ config.local.mjs  # Project-specific local configuration (including secrets)
         \__ memory/
               \__ <yyyy-mm-dd-hhmm>--<task-title>.md  # Task-specific memory files
 ```
 
-## Project Configuration
+## Configuration Format
 
-Customize the agent's behavior by creating a configuration file in your project's metadata directory.
-
-Configuration Example:
 ```js
-// $AGENT_PROJECT_METADATA_DIR/config.mjs
 export default {
   // Define patterns for tools that can be used without explicit approval
   allowedToolUsePatterns: [

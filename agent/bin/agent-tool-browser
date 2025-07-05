@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { READ_WEB_PAGE_WITH_BROWSER_TOOL_USER_DATA_DIR } from "../src/env.mjs";
+import { READ_WEB_PAGE_WITH_BROWSER_TOOL_USER_DATA_DIR } from "../src/tools/readWebPageWithBrowser.mjs";
 
 const { chromium } = await import("playwright");
 await chromium.launchPersistentContext(

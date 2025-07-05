@@ -2,23 +2,27 @@
  * @import { ModelInput, Message,  MessageContentToolResult, MessageContentText, AssistantMessage, MessageContentToolUse, ModelOutput, PartialMessageContent } from "../model"
  * @import { OpenAIAssistantMessage, OpenAIMessage, OpenAIMessageToolCall, OpenAIModelConfig, OpenAIToolDefinition, OpenAIStreamData, OpenAIChatCompletion, OpenAIMessageContentImage, OpenAIChatCompletionRequest } from "./openai"
  * @import { ToolDefinition } from "../tool"
+ * @import { GenericModelProviderConfig } from "../config"
  */
 
 import { styleText } from "node:util";
-import {
-  OPENAI_API_BASE_URL,
-  OPENAI_API_KEY,
-  OPENAI_CUSTOM_HEADERS,
-} from "../env.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
 
 /**
- * @param {OpenAIModelConfig} config
+ * @param {GenericModelProviderConfig} providerConfig
+ * @param {OpenAIModelConfig} modelConfig
  * @param {ModelInput} input
  * @param {number} retryCount
  * @returns {Promise<ModelOutput | Error>}
  */
-export async function callOpenAIModel(config, input, retryCount = 0) {
+export async function callOpenAIModel(
+  providerConfig,
+  modelConfig,
+  input,
+  retryCount = 0,
+) {
+  const baseURL = providerConfig.baseURL || "https://api.openai.com";
+
   return await noThrow(async () => {
     const messages = convertGenericMessageToOpenAIFormat(input.messages);
     const tools = convertGenericeToolDefinitionToOpenAIFormat(
@@ -27,7 +31,7 @@ export async function callOpenAIModel(config, input, retryCount = 0) {
 
     /** @type {OpenAIChatCompletionRequest} */
     const request = {
-      ...config,
+      ...modelConfig,
       messages,
       tools: tools.length ? tools : undefined,
       stream: true,
@@ -36,12 +40,12 @@ export async function callOpenAIModel(config, input, retryCount = 0) {
       },
     };
 
-    const response = await fetch(`${OPENAI_API_BASE_URL}/v1/chat/completions`, {
+    const response = await fetch(`${baseURL}/v1/chat/completions`, {
       method: "POST",
       headers: {
-        ...OPENAI_CUSTOM_HEADERS,
+        ...providerConfig.customHeaders,
         "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        Authorization: `Bearer ${providerConfig.apiKey}`,
       },
       body: JSON.stringify(request),
       signal: AbortSignal.timeout(120 * 1000),
@@ -56,7 +60,12 @@ export async function callOpenAIModel(config, input, retryCount = 0) {
         ),
       );
       await new Promise((resolve) => setTimeout(resolve, interval * 1000));
-      return callOpenAIModel(config, input, retryCount + 1);
+      return callOpenAIModel(
+        providerConfig,
+        modelConfig,
+        input,
+        retryCount + 1,
+      );
     }
 
     if (response.status !== 200) {

@@ -1,15 +1,33 @@
 import type { ToolUsePattern } from "./tool";
 
-export interface LocalConfig {
+export type AgentConfig = {
   allowedToolUsePatterns?: ToolUsePattern[];
   mcpServers?: Record<string, MCPServerConfig>;
-}
+  providers?: AgentModelProviders;
+  tools?: {
+    tavily?: {
+      apiKey?: string;
+    };
+  };
+};
 
-export interface MCPServerConfig {
+export type AgentModelProviders = {
+  gemini?: GenericModelProviderConfig;
+  anthropic?: GenericModelProviderConfig;
+  openai?: GenericModelProviderConfig;
+};
+
+export type GenericModelProviderConfig = {
+  apiKey?: string;
+  baseURL?: string;
+  customHeaders?: Record<string, string>;
+};
+
+export type MCPServerConfig = {
   command: string;
   args: string[];
   env?: Record<string, string>;
   options?: {
     enabledTools?: string[];
   };
-}
+};
