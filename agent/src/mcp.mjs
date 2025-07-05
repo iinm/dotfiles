@@ -7,15 +7,6 @@
 import { noThrow } from "./utils/noThrow.mjs";
 import { writeTmpFile } from "./utils/tmpfile.mjs";
 
-async function lazyImport() {
-  const mcpClient = await import("@modelcontextprotocol/sdk/client/index.js");
-  const mcpClientStdio = await import(
-    "@modelcontextprotocol/sdk/client/stdio.js"
-  );
-
-  return { mcpClient, mcpClientStdio };
-}
-
 /**
  * @typedef {Object} MCPClientOptions
  * @property {string} serverName - The name of the MCP server.
@@ -27,7 +18,11 @@ async function lazyImport() {
  * @returns {Promise<Client>} - The MCP client.
  */
 export async function createMCPClient(options) {
-  const { mcpClient, mcpClientStdio } = await lazyImport();
+  const mcpClient = await import("@modelcontextprotocol/sdk/client/index.js");
+  const mcpClientStdio = await import(
+    "@modelcontextprotocol/sdk/client/stdio.js"
+  );
+
   const client = new mcpClient.Client({
     name: "undefined",
     version: "undefined",
