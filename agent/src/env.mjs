@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const filename = fileURLToPath(import.meta.url);
 export const AGENT_ROOT = path.dirname(path.dirname(filename));
+export const AGENT_CACHE_DIR = path.join(AGENT_ROOT, ".cache");
 
 // Agent
 export const AGENT_PROJECT_METADATA_DIR =
@@ -11,6 +12,10 @@ export const AGENT_PROJECT_METADATA_DIR =
 export const AGENT_MODEL = process.env.AGENT_MODEL || "gemini-pro-thinking-8k";
 export const AGENT_NOTIFY_CMD =
   process.env.AGENT_NOTIFY_CMD ?? path.join(AGENT_ROOT, "bin", "agent-notify");
+export const TRUSTED_CONFIG_HASHES_DIR = path.join(
+  AGENT_CACHE_DIR,
+  "trusted-config-hashes",
+);
 
 // Gemini
 export const GEMINI_API_KEY = loadSecret("gemini-api-key.txt");
@@ -40,8 +45,7 @@ export const OPENAI_CUSTOM_HEADERS = parseJsonHeaders(
 // Tools
 export const TAVILY_API_KEY = loadSecret("tavily-api-key.txt");
 export const READ_WEB_PAGE_WITH_BROWSER_TOOL_USER_DATA_DIR = path.join(
-  AGENT_ROOT,
-  ".cache",
+  AGENT_CACHE_DIR,
   "chromium-profile",
 );
 
