@@ -69,7 +69,7 @@ import { writeFileTool } from "./tools/writeFile.mjs";
       console.log(
         styleText("blue", `Connecting to MCP server: ${serverName}...`),
       );
-      const { agentConfig, ...params } = serverConfig;
+      const { options, ...params } = serverConfig;
       const mcpClient = await createMCPClient({
         serverName,
         params,
@@ -77,8 +77,8 @@ import { writeFileTool } from "./tools/writeFile.mjs";
       mcpCleanups.push(() => mcpClient.close());
       const tools = (await createMCPTools(serverName, mcpClient)).filter(
         (tool) =>
-          !agentConfig?.enabledTools ||
-          agentConfig.enabledTools.find((enabledToolName) =>
+          !options?.enabledTools ||
+          options.enabledTools.find((enabledToolName) =>
             tool.def.name.endsWith(`__${enabledToolName}`),
           ),
       );

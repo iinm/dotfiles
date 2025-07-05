@@ -9,7 +9,7 @@ export interface MCPServerConfig {
   command: string;
   args: string[];
   env?: Record<string, string>;
-  agentConfig?: {
+  options?: {
     enabledTools?: string[];
   };
 }
