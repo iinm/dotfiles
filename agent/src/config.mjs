@@ -1,5 +1,6 @@
 /**
  * @import { ToolUsePattern } from "./tool";
+ * @import { LocalConfig } from "./config";
  */
 
 import crypto from "node:crypto";
@@ -117,25 +118,6 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
     },
   ];
 }
-
-/**
- * @typedef {object} LocalConfig
- * @property {ToolUsePattern[]} [allowedToolUsePatterns]
- * @property {Record<string,MCPServerConfig>} [mcpServers]
- */
-
-/**
- * @typedef {object} MCPServerConfig
- * @property {string} command - The command to run the server.
- * @property {string[]} args - The arguments to pass to the command.
- * @property {Record<string,string>=} env - The environment variables for the server.
- * @property {MCPServerAgentConfig=} agentConfig
- */
-
-/**
- * @typedef {object} MCPServerAgentConfig
- * @property {string[]=} enabledTools - Enabled tool names. Only tools in this list will be loaded.
- */
 
 /**
  * Local project local configuration.
