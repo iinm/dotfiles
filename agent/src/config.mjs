@@ -12,7 +12,7 @@ import {
 } from "./env.mjs";
 import { execCommandTool } from "./tools/execCommand.mjs";
 import { tmuxCommandTool } from "./tools/tmuxCommand.mjs";
-import { isSafeRelativePath } from "./utils/isSafeRelativePath.mjs";
+import { isSafeToolArg } from "./utils/isSafeToolArg.mjs";
 
 /**
  * @typedef {object} CreateAllowedToolUsePatternsInput
@@ -38,15 +38,7 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
         /**
          * @param {unknown=} args
          */
-        args: (args) => {
-          if (!Array.isArray(args)) {
-            return false;
-          }
-          if (!args.every(isSafeRelativePath)) {
-            return false;
-          }
-          return true;
-        },
+        args: (args) => Array.isArray(args) && args.every(isSafeToolArg),
       },
     },
     {
@@ -56,25 +48,15 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
         /**
          * @param {unknown=} args
          */
-        args: (args) => {
-          if (!Array.isArray(args)) {
-            return false;
-          }
-          if (!args.every(isSafeRelativePath)) {
-            return false;
-          }
-          if (
-            args.some(
-              (arg) =>
-                ["-I", "-x"].includes(arg) ||
-                arg.startsWith("--no-ignore") ||
-                arg.startsWith("--exec"),
-            )
-          ) {
-            return false;
-          }
-          return true;
-        },
+        args: (args) =>
+          Array.isArray(args) &&
+          args.every(
+            (arg) =>
+              isSafeToolArg(arg) &&
+              !["-I", "-x"].includes(arg) &&
+              !arg.startsWith("--no-ignore") &&
+              !arg.startsWith("--exec"),
+          ),
       },
     },
     {
@@ -84,25 +66,18 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
         /**
          * @param {unknown=} args
          */
-        args: (args) => {
-          if (!Array.isArray(args)) {
-            return false;
-          }
-          if (!args.every(isSafeRelativePath)) {
-            return false;
-          }
-          if (args.some((arg) => arg.startsWith("--no-ignore"))) {
-            return false;
-          }
-          return true;
-        },
+        args: (args) =>
+          Array.isArray(args) &&
+          args.every(
+            (arg) => isSafeToolArg(arg) && !arg.startsWith("--no-ignore"),
+          ),
       },
     },
     {
       toolName: execCommandTool.def.name,
       input: {
         command: "sed",
-        args: ["-n", /^.+p$/, isSafeRelativePath],
+        args: ["-n", /^.+p$/, isSafeToolArg],
       },
     },
     {
