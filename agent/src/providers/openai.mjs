@@ -48,7 +48,7 @@ export async function callOpenAIModel(
         Authorization: `Bearer ${providerConfig.apiKey}`,
       },
       body: JSON.stringify(request),
-      signal: AbortSignal.timeout(30 * 1000),
+      signal: AbortSignal.timeout(60 * 1000),
     });
 
     if (response.status === 429) {

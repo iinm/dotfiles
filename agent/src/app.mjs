@@ -4,7 +4,7 @@
 
 import { styleText } from "node:util";
 import { createAgent } from "./agent.mjs";
-import { startCLI } from "./cli.mjs";
+import { startInteractiveSession } from "./cli.mjs";
 import { loadAgentConfig } from "./config.mjs";
 import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
 import { connectToMCPServer } from "./mcp.mjs";
@@ -23,26 +23,6 @@ import { createSessionId } from "./utils/createSessionId.mjs";
 (async () => {
   const sessionId = createSessionId();
   const agentConfig = await loadAgentConfig({ sessionId });
-
-  const toolUseApprover = createToolUseApprover({
-    maxApproveCount: 20,
-    allowedToolUses: agentConfig.allowedToolUsePatterns || [],
-    maskAllowedInput: (toolName, input) => {
-      if (toolName === patchFileTool.def.name) {
-        return {
-          filePath: input.filePath,
-          // ignore diff
-        };
-      }
-      if (toolName === writeFileTool.def.name) {
-        return {
-          filePath: input.filePath,
-          // ignore content
-        };
-      }
-      return input;
-    },
-  });
 
   /** @type {(() => Promise<void>)[]} */
   const mcpCleanups = [];
@@ -77,7 +57,7 @@ import { createSessionId } from "./utils/createSessionId.mjs";
     projectMetadataDir: AGENT_PROJECT_METADATA_DIR,
   });
 
-  const tools = [
+  const builtinTools = [
     execCommandTool,
     writeFileTool,
     patchFileTool,
@@ -87,24 +67,39 @@ import { createSessionId } from "./utils/createSessionId.mjs";
   ];
 
   if (agentConfig.tools?.tavily) {
-    tools.push(createTavilySearchTool(agentConfig.tools.tavily));
+    builtinTools.push(createTavilySearchTool(agentConfig.tools.tavily));
   }
 
-  const modelName = /** @type {string} */ (agentConfig.model);
+  const toolUseApprover = createToolUseApprover({
+    maxAutoApprovals: agentConfig.permissions?.maxAutoApprovals || 0,
+    allowedToolUses: agentConfig.permissions?.allow || [],
+    maskAllowedInput: (toolName, input) => {
+      for (const tool of builtinTools) {
+        if (tool.def.name === toolName && tool.maskAllowedInput) {
+          return tool.maskAllowedInput(input);
+        }
+      }
+      return input;
+    },
+  });
+
   const { userEventEmitter, agentEventEmitter, agentCommands } = createAgent({
-    callModel: createModelCaller(modelName, agentConfig.providers),
+    callModel: createModelCaller(
+      agentConfig.model || "",
+      agentConfig.providers,
+    ),
     prompt,
-    tools: [...tools, ...mcpTools],
+    tools: [...builtinTools, ...mcpTools],
     toolUseApprover,
   });
 
-  startCLI({
+  startInteractiveSession({
     userEventEmitter,
     agentEventEmitter,
     agentCommands,
     sessionId,
-    modelName,
-    notifyCmd: /** @type {string} */ (agentConfig.notifyCmd),
+    modelName: agentConfig.model || "",
+    notifyCmd: agentConfig.notifyCmd || "",
     onStop: async () => {
       for (const cleanup of mcpCleanups) {
         await cleanup();

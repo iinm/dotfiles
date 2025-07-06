@@ -50,7 +50,7 @@ export async function callAnthropicModel(
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify(request),
-      signal: AbortSignal.timeout(30 * 1000),
+      signal: AbortSignal.timeout(60 * 1000),
     });
 
     if (response.status === 429) {

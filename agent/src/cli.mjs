@@ -97,7 +97,7 @@ File Input Syntax:
 /**
  * @param {CliOptions} options
  */
-export function startCLI({
+export function startInteractiveSession({
   userEventEmitter,
   agentEventEmitter,
   agentCommands,

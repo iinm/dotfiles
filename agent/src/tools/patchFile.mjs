@@ -85,4 +85,15 @@ Format description:
       fs.writeFileSync(filePath, newContent);
       return `Patched file: ${filePath}`;
     }),
+
+  /**
+   * @param {Record<string, unknown>} input
+   * @returns {Record<string, unknown>}
+   */
+  maskAllowedInput: (input) => {
+    const patchFileInput = /** @type {PatchFileInput} */ (input);
+    return {
+      filePath: patchFileInput.filePath,
+    };
+  },
 };

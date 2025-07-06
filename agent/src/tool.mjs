@@ -11,7 +11,7 @@ import { matchValue } from "./utils/matchValue.mjs";
  */
 export function createToolUseApprover({
   allowedToolUses,
-  maxApproveCount,
+  maxAutoApprovals: maxApproveCount,
   maskAllowedInput,
 }) {
   const state = {

@@ -110,7 +110,7 @@ export function createCacheEnabledGeminiModelCaller(
           "x-goog-api-key": `${providerConfig.apiKey}`,
         },
         body: JSON.stringify(request),
-        signal: AbortSignal.timeout(30 * 1000),
+        signal: AbortSignal.timeout(60 * 1000),
       });
 
       if (response.status === 429) {
@@ -260,7 +260,7 @@ export function createCacheEnabledGeminiModelCaller(
         "x-goog-api-key": `${providerConfig.apiKey}`,
       },
       body: JSON.stringify(request),
-      signal: AbortSignal.timeout(30 * 1000),
+      signal: AbortSignal.timeout(60 * 1000),
     })
       .then(async (response) => {
         if (response.status !== 200) {
@@ -283,7 +283,7 @@ export function createCacheEnabledGeminiModelCaller(
                 "Content-Type": "application/json",
                 "x-goog-api-key": `${providerConfig.apiKey}`,
               },
-              signal: AbortSignal.timeout(30 * 1000),
+              signal: AbortSignal.timeout(60 * 1000),
             })
               .then(async (response) => {
                 if (response.status !== 200) {

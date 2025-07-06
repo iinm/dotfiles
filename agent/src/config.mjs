@@ -42,10 +42,13 @@ export async function loadAgentConfig(input) {
   /** @type {AgentConfig} */
   let merged = {
     model: AGENT_MODEL || AGENT_MODEL_DEFAULT,
+    permissions: {
+      allow: createDefaultAllowedToolUsePatterns({
+        sessionId: input.sessionId,
+      }),
+      maxAutoApprovals: 20,
+    },
     notifyCmd: AGENT_NOTIFY_CMD_DEFAULT,
-    allowedToolUsePatterns: createDefaultAllowedToolUsePatterns({
-      sessionId: input.sessionId,
-    }),
   };
 
   for (const filePath of paths) {
@@ -55,14 +58,6 @@ export async function loadAgentConfig(input) {
     }
     merged = {
       model: config.model || merged.model,
-      allowedToolUsePatterns: [
-        ...(merged.allowedToolUsePatterns ?? []),
-        ...(config.allowedToolUsePatterns ?? []),
-      ],
-      mcpServers: {
-        ...(merged.mcpServers ?? {}),
-        ...(config.mcpServers ?? {}),
-      },
       providers: {
         gemini: {
           ...(merged.providers?.gemini ?? {}),
@@ -77,11 +72,24 @@ export async function loadAgentConfig(input) {
           ...(config.providers?.anthropic ?? {}),
         },
       },
+      permissions: {
+        allow: [
+          ...(merged.permissions?.allow ?? []),
+          ...(config.permissions?.allow ?? []),
+        ],
+        maxAutoApprovals:
+          config.permissions?.maxAutoApprovals ??
+          merged.permissions?.maxAutoApprovals,
+      },
       tools: {
         tavily: {
           ...(merged.tools?.tavily ?? {}),
           ...(config.tools?.tavily ?? {}),
         },
+      },
+      mcpServers: {
+        ...(merged.mcpServers ?? {}),
+        ...(config.mcpServers ?? {}),
       },
       notifyCmd: config.notifyCmd || merged.notifyCmd,
     };

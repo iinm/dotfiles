@@ -95,20 +95,22 @@ export default {
   // model: "gemini-flash-thinking-16k",
 
   // Define patterns for tools that can be used without explicit approval
-  allowedToolUsePatterns: [
-    // Allow npm run check|fix commands without confirmation
-    {
-      toolName: "exec_command",
-      input: { command: "npm", args: ["run", /(check|fix)/] },
-    },
-    // Allow all web searches
-    { toolName: "web_search", input: { query: /./ } },
-    // Allow specific MCP tools
-    {
-      // Naming: mcp__<serverName>__<toolName>
-      toolName: /mcp__playwright__browser_.+/,
-    },
-  ],
+  permissions: {
+    allow: [
+      // Allow npm run check|fix commands without confirmation
+      {
+        toolName: "exec_command",
+        input: { command: "npm", args: ["run", /(check|fix)/] },
+      },
+      // Allow all web searches
+      { toolName: "web_search", input: { query: /./ } },
+      // Allow specific MCP tools
+      {
+        // Naming: mcp__<serverName>__<toolName>
+        toolName: /mcp__playwright__browser_.+/,
+      },
+    ],
+  },
 
   // Configure MCP servers for extended functionality
   mcpServers: {
