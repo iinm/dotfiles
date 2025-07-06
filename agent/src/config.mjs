@@ -18,7 +18,6 @@ import { tmuxCommandTool } from "./tools/tmuxCommand.mjs";
 import { isSafeToolArg } from "./utils/isSafeToolArg.mjs";
 
 /**
- * Local project local configuration.
  * @returns {Promise<AgentConfig>}
  */
 export async function loadAgentConfig() {
@@ -78,7 +77,6 @@ export async function loadAgentConfig() {
 }
 
 /**
- * Local project local configuration.
  * @param {string} filePath
  * @returns {Promise<AgentConfig>}
  */
