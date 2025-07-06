@@ -10,6 +10,7 @@ export type AgentConfig = {
       apiKey?: string;
     };
   };
+  notifyCmd?: string;
 };
 
 export type AgentModelProviders = {

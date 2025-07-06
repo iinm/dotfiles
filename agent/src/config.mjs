@@ -68,6 +68,7 @@ export async function loadAgentConfig() {
           ...(config.tools?.tavily ?? {}),
         },
       },
+      notifyCmd: config.notifyCmd || merged.notifyCmd,
     };
   }
 

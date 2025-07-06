@@ -12,6 +12,7 @@ import {
 import {
   AGENT_MODEL,
   AGENT_MODEL_DEFAULT,
+  AGENT_NOTIFY_CMD_DEFAULT,
   AGENT_PROJECT_METADATA_DIR,
 } from "./env.mjs";
 import { createMCPClient, createMCPTools } from "./mcp.mjs";
@@ -129,6 +130,7 @@ import { writeFileTool } from "./tools/writeFile.mjs";
     agentCommands,
     sessionId,
     modelName,
+    notifyCmd: agentConfig.notifyCmd || AGENT_NOTIFY_CMD_DEFAULT,
     onStop: async () => {
       for (const cleanup of mcpCleanups) {
         await cleanup();

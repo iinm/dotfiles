@@ -90,6 +90,7 @@ File Input Syntax:
  * @property {AgentCommands} agentCommands
  * @property {string} sessionId
  * @property {string} modelName
+ * @property {string} notifyCmd
  * @property {() => Promise<void>} onStop
  */
 
@@ -102,6 +103,7 @@ export function startCLI({
   agentCommands,
   sessionId,
   modelName,
+  notifyCmd,
   onStop,
 }) {
   const cli = readline.createInterface({
@@ -258,7 +260,7 @@ export function startCLI({
   });
 
   agentEventEmitter.on("turnEnd", async () => {
-    const err = notify();
+    const err = notify(notifyCmd);
     if (err) {
       console.error(
         styleText("yellow", `\nNotification error: ${err.message}`),

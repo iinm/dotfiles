@@ -1,17 +1,17 @@
 import { execFileSync } from "node:child_process";
-import { AGENT_NOTIFY_CMD } from "../env.mjs";
 import { noThrowSync } from "./noThrow.mjs";
 
 /**
+ * @param {string=} notifyCmd
  * @returns {void | Error}
  */
-export function notify() {
-  if (!AGENT_NOTIFY_CMD) {
+export function notify(notifyCmd) {
+  if (!notifyCmd) {
     return;
   }
 
   return noThrowSync(() => {
-    execFileSync(/** @type {string} */ (AGENT_NOTIFY_CMD), [], {
+    execFileSync(/** @type {string} */ (notifyCmd), [], {
       shell: false,
       stdio: ["ignore", "inherit", "pipe"],
       env: {
