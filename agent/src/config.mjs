@@ -22,14 +22,14 @@ import { isSafeToolArg } from "./utils/isSafeToolArg.mjs";
 
 /**
  * @typedef {Object} LoadAgentConfigInput
- * @property {string} sessionId
+ * @property {string} tmuxSessionId
  */
 
 /**
  * @param {LoadAgentConfigInput} input
  * @returns {Promise<AgentConfig>}
  */
-export async function loadAgentConfig(input) {
+export async function loadAgentConfig({ tmuxSessionId }) {
   const paths = [
     `${AGENT_ROOT}/.config/config.mjs`,
     `${AGENT_ROOT}/.config/config.local.mjs`,
@@ -44,7 +44,7 @@ export async function loadAgentConfig(input) {
     model: AGENT_MODEL || AGENT_MODEL_DEFAULT,
     permissions: {
       allow: createDefaultAllowedToolUsePatterns({
-        sessionId: input.sessionId,
+        tmuxSessionId,
       }),
       maxAutoApprovals: 20,
     },
@@ -193,16 +193,17 @@ async function trustConfigHash(hash) {
   await fs.mkdir(TRUSTED_CONFIG_HASHES_DIR, { recursive: true });
   await fs.writeFile(path.join(TRUSTED_CONFIG_HASHES_DIR, hash), "");
 }
+
 /**
  * @typedef {object} CreateAllowedToolUsePatternsInput
- * @property {string} sessionId
+ * @property {string} tmuxSessionId
  */
 
 /**
  * @param {CreateAllowedToolUsePatternsInput} input
  * @returns {ToolUsePattern[]}
  */
-function createDefaultAllowedToolUsePatterns({ sessionId }) {
+function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
   /** @type {ToolUsePattern[]} */
   return [
     // Exec command
@@ -284,14 +285,28 @@ function createDefaultAllowedToolUsePatterns({ sessionId }) {
     {
       toolName: tmuxCommandTool.def.name,
       input: {
-        command: /^(list-sessions|list-windows|capture-pane)$/,
+        command: /^(list-sessions|list-windows)$/,
+      },
+    },
+    {
+      toolName: tmuxCommandTool.def.name,
+      input: {
+        command: "capture-pane",
+        args: [
+          "-p",
+          "-t",
+          /**
+           * @param {unknown} arg
+           */
+          (arg) => typeof arg === "string" && arg.startsWith(tmuxSessionId),
+        ],
       },
     },
     {
       toolName: tmuxCommandTool.def.name,
       input: {
         command: /^(new-session|new)$/,
-        args: ["-d", "-s", `agent-${sessionId}`],
+        args: ["-d", "-s", tmuxSessionId],
       },
     },
   ];

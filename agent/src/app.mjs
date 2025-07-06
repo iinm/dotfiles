@@ -22,7 +22,8 @@ import { createSessionId } from "./utils/createSessionId.mjs";
 
 (async () => {
   const sessionId = createSessionId();
-  const agentConfig = await loadAgentConfig({ sessionId });
+  const tmuxSessionId = `agent-${sessionId}`;
+  const agentConfig = await loadAgentConfig({ tmuxSessionId });
 
   /** @type {(() => Promise<void>)[]} */
   const mcpCleanups = [];
@@ -53,6 +54,7 @@ import { createSessionId } from "./utils/createSessionId.mjs";
 
   const prompt = createPrompt({
     sessionId,
+    tmuxSessionId,
     workingDir: process.cwd(),
     projectMetadataDir: AGENT_PROJECT_METADATA_DIR,
   });

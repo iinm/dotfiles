@@ -1,6 +1,7 @@
 /**
  * @typedef {object} PromptConfig
  * @property {string} sessionId
+ * @property {string} tmuxSessionId
  * @property {string} workingDir - The current working directory.
  * @property {string} projectMetadataDir - The directory where memory files are stored.
  */
@@ -9,7 +10,12 @@
  * @param {PromptConfig} config
  * @returns {string}
  */
-export function createPrompt({ sessionId, workingDir, projectMetadataDir }) {
+export function createPrompt({
+  sessionId,
+  tmuxSessionId,
+  workingDir,
+  projectMetadataDir,
+}) {
   return `
 You are a problem solver.
 
@@ -211,6 +217,6 @@ Task Memory Format:
 
 - Current working directory: ${workingDir}
 - Session id: ${sessionId}
-- tmux session id: agent-${sessionId}
+- tmux session id: ${tmuxSessionId}
 `.trim();
 }
