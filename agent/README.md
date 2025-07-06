@@ -4,7 +4,7 @@ A lightweight CLI-based coding agent designed to assist with your development ta
 
 ## Safety Controls
 
-This CLI tool automatically permits certain tool executions but requires explicit approval for security-sensitive operations, such as accessing absolute paths (to prevent unintended modification of system files or sensitive data outside the project scope), parent directories, and git-ignored files. The security rules are defined in `src/config.mjs` within this repository.
+This CLI tool automatically permits certain tool executions but requires explicit approval for security-sensitive operations, such as accessing parent directories and git-ignored files. The security rules are defined in `src/config.mjs` within this repository.
 
 ## Requirements
 
@@ -29,19 +29,19 @@ export default {
     anthropic: {
       apiKey: "FIXME",
       // AI Gateway example:
-      // baseURL: "https://gateway.ai.cloudflare.com/v1/FIXME/default/anthropic",
+      // baseURL: "https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/anthropic",
       // customHeaders: { "cf-aig-metadata": JSON.stringify({ client: "agent-by-iinm" }) },
     },
     gemini: {
       apiKey: "FIXME",
       // AI Gateway example:
-      // baseURL: "https://gateway.ai.cloudflare.com/v1/FIXME/default/google-ai-studio",
+      // baseURL: "https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/google-ai-studio",
       // customHeaders: { "cf-aig-metadata": JSON.stringify({ client: "agent-by-iinm" }) },
     },
     openai: {
       apiKey: "FIXME",
       // AI Gateway example:
-      // baseURL: "https://gateway.ai.cloudflare.com/v1/FIXME/default/openai",
+      // baseURL: "https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/openai",
       // customHeaders: { "cf-aig-metadata": JSON.stringify({ client: "agent-by-iinm" }) },
     },
   },
