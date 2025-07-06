@@ -32,7 +32,7 @@ export function createCacheEnabledGeminiModelCaller(
     providerConfig.baseURL || "https://generativelanguage.googleapis.com";
 
   const props = {
-    cacheTTL: 5 * 60, // seconds
+    cacheTTL: 2 * 60, // seconds
     // https://ai.google.dev/gemini-api/docs/caching#considerations
     minCacheableTokenCount: 2048,
   };
