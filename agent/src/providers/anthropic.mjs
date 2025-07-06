@@ -50,7 +50,7 @@ export async function callAnthropicModel(
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify(request),
-      signal: AbortSignal.timeout(120 * 1000),
+      signal: AbortSignal.timeout(30 * 1000),
     });
 
     if (response.status === 429) {
@@ -275,7 +275,7 @@ function convertAnthropicStreamEventsToChatCompletion(events) {
     } else if (event.type === "content_block_start") {
       chatCompletion.content = chatCompletion.content || [];
       chatCompletion.content.push(
-        /** @type {AnthropicAssistantMessageContent} */ (event.content_block),
+        /** @type {AnthropicAssistantMessageContent} */(event.content_block),
       );
     } else if (event.type === "content_block_delta") {
       const lastContentPart = chatCompletion.content?.at(-1);
