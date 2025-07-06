@@ -39,6 +39,7 @@ export async function loadAgentConfig() {
       loaded.push(filePath);
     }
     merged = {
+      model: config.model || merged.model,
       allowedToolUsePatterns: [
         ...(merged.allowedToolUsePatterns ?? []),
         ...(config.allowedToolUsePatterns ?? []),

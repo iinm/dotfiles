@@ -1,6 +1,7 @@
 import type { ToolUsePattern } from "./tool";
 
 export type AgentConfig = {
+  model?: string;
   allowedToolUsePatterns?: ToolUsePattern[];
   mcpServers?: Record<string, MCPServerConfig>;
   providers?: AgentModelProviders;

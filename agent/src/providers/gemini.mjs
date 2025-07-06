@@ -91,16 +91,16 @@ export function createCacheEnabledGeminiModelCaller(
       const request =
         state.cache && Date.now() < state.cache.expireTime.getTime()
           ? {
-            ...baseRequest,
-            cachedContent: state.cache.name,
-            contents: contentsWithoutSystem.slice(state.cache.contentsLength),
-          }
+              ...baseRequest,
+              cachedContent: state.cache.name,
+              contents: contentsWithoutSystem.slice(state.cache.contentsLength),
+            }
           : {
-            ...baseRequest,
-            system_instruction: systemInstruction,
-            contents: contentsWithoutSystem,
-            tools: tools.length ? tools : undefined,
-          };
+              ...baseRequest,
+              system_instruction: systemInstruction,
+              contents: contentsWithoutSystem,
+              tools: tools.length ? tools : undefined,
+            };
 
       const response = await fetch(url, {
         method: "POST",

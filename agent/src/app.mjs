@@ -9,7 +9,11 @@ import {
   createDefaultAllowedToolUsePatterns,
   loadAgentConfig,
 } from "./config.mjs";
-import { AGENT_MODEL, AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
+import {
+  AGENT_MODEL,
+  AGENT_MODEL_DEFAULT,
+  AGENT_PROJECT_METADATA_DIR,
+} from "./env.mjs";
 import { createMCPClient, createMCPTools } from "./mcp.mjs";
 import { createModelCaller } from "./model.mjs";
 import { createPrompt } from "./prompt.mjs";
@@ -111,8 +115,9 @@ import { writeFileTool } from "./tools/writeFile.mjs";
     tools.push(createTavilySearchTool(agentConfig.tools.tavily));
   }
 
+  const modelName = agentConfig.model || AGENT_MODEL || AGENT_MODEL_DEFAULT;
   const { userEventEmitter, agentEventEmitter, agentCommands } = createAgent({
-    callModel: createModelCaller(AGENT_MODEL, agentConfig.providers),
+    callModel: createModelCaller(modelName, agentConfig.providers),
     prompt,
     tools: [...tools, ...mcpTools],
     toolUseApprover,
@@ -123,7 +128,7 @@ import { writeFileTool } from "./tools/writeFile.mjs";
     agentEventEmitter,
     agentCommands,
     sessionId,
-    modelName: AGENT_MODEL,
+    modelName,
     onStop: async () => {
       for (const cleanup of mcpCleanups) {
         await cleanup();

@@ -326,7 +326,7 @@ function convertOpenAIStreamDataToChatCompletion(dataList) {
         for (const toolCallDelta of delta.tool_calls) {
           const toolCall =
             chatCompletion.choices?.[0].message.tool_calls?.[
-            toolCallDelta.index
+              toolCallDelta.index
             ];
           if (toolCall && toolCallDelta.function) {
             toolCall.function.arguments += toolCallDelta.function.arguments;
