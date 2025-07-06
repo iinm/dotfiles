@@ -209,24 +209,35 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>gb', ':<C-u>Git blame<CR>')
   vim.keymap.set('n', '<leader>gl', ':<C-u>Git log %<CR>')
 
-  -- luasnip & minuet
+  -- luasnip
   local ls = require('luasnip')
 
   vim.keymap.set({ "i", "s" }, "<C-f>", function()
     if ls.jumpable(1) then
       ls.jump(1)
-    elseif vim.fn.mode() == 'i' then
-      require('minuet.virtualtext').action.next()
     end
   end, { silent = true })
 
   vim.keymap.set({ "i", "s" }, "<C-b>", function()
     if ls.jumpable(1) then
       ls.jump(-1)
-    elseif vim.fn.mode() == 'i' then
-      require('minuet.virtualtext').action.prev()
     end
   end, { silent = true })
+
+  -- minuet
+  vim.keymap.set({ "i", "s" }, "<C-l>", function()
+    if vim.fn.mode() == 'i' then
+      require('minuet.virtualtext').action.next()
+    end
+  end, { silent = true })
+
+  vim.keymap.set({ "i", "s" }, "<C-h>", function()
+    if require('minuet.virtualtext').action.is_visible() then
+      require('minuet.virtualtext').action.prev()
+    else
+      return vim.api.nvim_replace_termcodes("<C-h>", true, false, true)
+    end
+  end, { expr = true, silent = true })
 
   vim.keymap.set({ "i", "s" }, "<Tab>", function()
     if require('minuet.virtualtext').action.is_visible() then
