@@ -50,7 +50,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
     const filePath = path.join(AGENT_PROJECT_METADATA_DIR, "messages.json");
     try {
       await fs.writeFile(filePath, JSON.stringify(state.messages, null, 2));
-      console.error(`Messages dumped to ${filePath}`);
+      console.log(`Messages dumped to ${filePath}`);
     } catch (error) {
       if (error instanceof Error) {
         console.error(`Error dumping messages: ${error.message}`);
@@ -75,7 +75,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
           state.messages.length - 1,
           ...loadedMessages.slice(1),
         );
-        console.error(`Messages loaded from ${filePath}`);
+        console.log(`Messages loaded from ${filePath}`);
       } else {
         console.error("Error loading messages: Invalid format in file.");
       }
