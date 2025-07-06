@@ -133,12 +133,10 @@ export function startCLI({
   process.stdin.on("keypress", async (_, key) => {
     if (key.ctrl && key.name === "c") {
       await onStop();
-      process.exit(1);
     }
 
     if (key.ctrl && key.name === "d") {
       await onStop();
-      process.exit(0);
     }
   });
 

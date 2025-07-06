@@ -5,17 +5,9 @@
 import { styleText } from "node:util";
 import { createAgent } from "./agent.mjs";
 import { startCLI } from "./cli.mjs";
-import {
-  createDefaultAllowedToolUsePatterns,
-  loadAgentConfig,
-} from "./config.mjs";
-import {
-  AGENT_MODEL,
-  AGENT_MODEL_DEFAULT,
-  AGENT_NOTIFY_CMD_DEFAULT,
-  AGENT_PROJECT_METADATA_DIR,
-} from "./env.mjs";
-import { createMCPClient, createMCPTools } from "./mcp.mjs";
+import { loadAgentConfig } from "./config.mjs";
+import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
+import { connectToMCPServer } from "./mcp.mjs";
 import { createModelCaller } from "./model.mjs";
 import { createPrompt } from "./prompt.mjs";
 import { createToolUseApprover } from "./tool.mjs";
@@ -26,25 +18,15 @@ import { readWebPageWithBrowserTool } from "./tools/readWebPageWithBrowser.mjs";
 import { createTavilySearchTool } from "./tools/tavilySearch.mjs";
 import { tmuxCommandTool } from "./tools/tmuxCommand.mjs";
 import { writeFileTool } from "./tools/writeFile.mjs";
+import { createSessionId } from "./utils/createSessionId.mjs";
 
 (async () => {
-  // Generate a session ID
-  // e.g. 2025-12-31-2359
-  const startTime = new Date();
-  const sessionId = [
-    startTime.toISOString().slice(0, 10),
-    `0${startTime.getHours()}`.slice(-2) +
-      `0${startTime.getMinutes()}`.slice(-2),
-  ].join("-");
-
-  const agentConfig = await loadAgentConfig();
+  const sessionId = createSessionId();
+  const agentConfig = await loadAgentConfig({ sessionId });
 
   const toolUseApprover = createToolUseApprover({
     maxApproveCount: 20,
-    allowedToolUses: [
-      ...createDefaultAllowedToolUsePatterns({ sessionId }),
-      ...(agentConfig.allowedToolUsePatterns || []),
-    ],
+    allowedToolUses: agentConfig.allowedToolUsePatterns || [],
     maskAllowedInput: (toolName, input) => {
       if (toolName === patchFileTool.def.name) {
         return {
@@ -74,20 +56,12 @@ import { writeFileTool } from "./tools/writeFile.mjs";
       console.log(
         styleText("blue", `Connecting to MCP server: ${serverName}...`),
       );
-      const { options, ...params } = serverConfig;
-      const mcpClient = await createMCPClient({
+      const { tools, cleanup } = await connectToMCPServer(
         serverName,
-        params,
-      });
-      mcpCleanups.push(() => mcpClient.close());
-      const tools = (await createMCPTools(serverName, mcpClient)).filter(
-        (tool) =>
-          !options?.enabledTools ||
-          options.enabledTools.find((enabledToolName) =>
-            tool.def.name.endsWith(`__${enabledToolName}`),
-          ),
+        serverConfig,
       );
       mcpTools.push(...tools);
+      mcpCleanups.push(cleanup);
       console.log(
         styleText(
           "green",
@@ -116,7 +90,7 @@ import { writeFileTool } from "./tools/writeFile.mjs";
     tools.push(createTavilySearchTool(agentConfig.tools.tavily));
   }
 
-  const modelName = agentConfig.model || AGENT_MODEL || AGENT_MODEL_DEFAULT;
+  const modelName = /** @type {string} */ (agentConfig.model);
   const { userEventEmitter, agentEventEmitter, agentCommands } = createAgent({
     callModel: createModelCaller(modelName, agentConfig.providers),
     prompt,
@@ -130,7 +104,7 @@ import { writeFileTool } from "./tools/writeFile.mjs";
     agentCommands,
     sessionId,
     modelName,
-    notifyCmd: agentConfig.notifyCmd || AGENT_NOTIFY_CMD_DEFAULT,
+    notifyCmd: /** @type {string} */ (agentConfig.notifyCmd),
     onStop: async () => {
       for (const cleanup of mcpCleanups) {
         await cleanup();

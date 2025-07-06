@@ -9,6 +9,9 @@ import path from "node:path";
 import readline from "node:readline";
 import { styleText } from "node:util";
 import {
+  AGENT_MODEL,
+  AGENT_MODEL_DEFAULT,
+  AGENT_NOTIFY_CMD_DEFAULT,
   AGENT_PROJECT_METADATA_DIR,
   AGENT_ROOT,
   TRUSTED_CONFIG_HASHES_DIR,
@@ -18,9 +21,15 @@ import { tmuxCommandTool } from "./tools/tmuxCommand.mjs";
 import { isSafeToolArg } from "./utils/isSafeToolArg.mjs";
 
 /**
+ * @typedef {Object} LoadAgentConfigInput
+ * @property {string} sessionId
+ */
+
+/**
+ * @param {LoadAgentConfigInput} input
  * @returns {Promise<AgentConfig>}
  */
-export async function loadAgentConfig() {
+export async function loadAgentConfig(input) {
   const paths = [
     `${AGENT_ROOT}/.config/config.mjs`,
     `${AGENT_ROOT}/.config/config.local.mjs`,
@@ -31,7 +40,13 @@ export async function loadAgentConfig() {
   /** @type {string[]} */
   const loaded = [];
   /** @type {AgentConfig} */
-  let merged = {};
+  let merged = {
+    model: AGENT_MODEL || AGENT_MODEL_DEFAULT,
+    notifyCmd: AGENT_NOTIFY_CMD_DEFAULT,
+    allowedToolUsePatterns: createDefaultAllowedToolUsePatterns({
+      sessionId: input.sessionId,
+    }),
+  };
 
   for (const filePath of paths) {
     const config = await loadConfigFile(path.resolve(filePath));
@@ -179,7 +194,7 @@ async function trustConfigHash(hash) {
  * @param {CreateAllowedToolUsePatternsInput} input
  * @returns {ToolUsePattern[]}
  */
-export function createDefaultAllowedToolUsePatterns({ sessionId }) {
+function createDefaultAllowedToolUsePatterns({ sessionId }) {
   /** @type {ToolUsePattern[]} */
   return [
     // Exec command

@@ -2,10 +2,44 @@
  * @import { Client } from "@modelcontextprotocol/sdk/client/index.js";
  * @import { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
  * @import { StructuredToolResultContent, Tool, ToolImplementation } from "./tool";
+ * @import { MCPServerConfig } from "./config";
  */
 
 import { noThrow } from "./utils/noThrow.mjs";
 import { writeTmpFile } from "./utils/tmpfile.mjs";
+
+/**
+ * @typedef {Object} StartMCPServrResult
+ * @property {Tool[]} tools
+ * @property {() => Promise<void>} cleanup
+ */
+
+/**
+ * @param {string} serverName
+ * @param {MCPServerConfig} serverConfig
+ * @returns {Promise<StartMCPServrResult>}
+ */
+export async function connectToMCPServer(serverName, serverConfig) {
+  const { options, ...params } = serverConfig;
+
+  const mcpClient = await createMCPClient({
+    serverName,
+    params,
+  });
+
+  const tools = (await createMCPTools(serverName, mcpClient)).filter(
+    (tool) =>
+      !options?.enabledTools ||
+      options.enabledTools.find((enabledToolName) =>
+        tool.def.name.endsWith(`__${enabledToolName}`),
+      ),
+  );
+
+  return {
+    tools,
+    cleanup: () => mcpClient.close(),
+  };
+}
 
 /**
  * @typedef {Object} MCPClientOptions
@@ -17,7 +51,7 @@ import { writeTmpFile } from "./utils/tmpfile.mjs";
  * @param {MCPClientOptions} options - The options for the client.
  * @returns {Promise<Client>} - The MCP client.
  */
-export async function createMCPClient(options) {
+async function createMCPClient(options) {
   const mcpClient = await import("@modelcontextprotocol/sdk/client/index.js");
   const mcpClientStdio = await import(
     "@modelcontextprotocol/sdk/client/stdio.js"
@@ -49,7 +83,7 @@ export async function createMCPClient(options) {
  * @param {Client} client - The MCP client.
  * @returns {Promise<Tool[]>} - The list of tools.
  */
-export async function createMCPTools(serverName, client) {
+async function createMCPTools(serverName, client) {
   const { tools: mcpTools } = await client.listTools();
   /** @type {Tool[]} */
   const tools = mcpTools
