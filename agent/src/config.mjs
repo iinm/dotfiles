@@ -233,7 +233,7 @@ export function createDefaultAllowedToolUsePatterns({ sessionId }) {
       toolName: execCommandTool.def.name,
       input: {
         command: "sed",
-        args: ["-n", /^.+p$/, isSafeToolArg],
+        args: ["-n", /^\d+(,\d+)?p$/, isSafeToolArg],
       },
     },
     {
