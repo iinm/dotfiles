@@ -48,7 +48,7 @@ export async function callOpenAIModel(
         Authorization: `Bearer ${providerConfig.apiKey}`,
       },
       body: JSON.stringify(request),
-      signal: AbortSignal.timeout(60 * 1000),
+      signal: AbortSignal.timeout(120 * 1000),
     });
 
     if (response.status === 429) {
@@ -326,7 +326,7 @@ function convertOpenAIStreamDataToChatCompletion(dataList) {
         for (const toolCallDelta of delta.tool_calls) {
           const toolCall =
             chatCompletion.choices?.[0].message.tool_calls?.[
-              toolCallDelta.index
+            toolCallDelta.index
             ];
           if (toolCall && toolCallDelta.function) {
             toolCall.function.arguments += toolCallDelta.function.arguments;
