@@ -28,17 +28,19 @@ export default {
   providers: {
     anthropic: {
       apiKey: "FIXME",
-      // AI Gateway
+      // AI Gateway example:
       // baseURL: "https://gateway.ai.cloudflare.com/v1/FIXME/default/anthropic",
       // customHeaders: { "cf-aig-metadata": JSON.stringify({ client: "agent-by-iinm" }) },
     },
     gemini: {
       apiKey: "FIXME",
+      // AI Gateway example:
       // baseURL: "https://gateway.ai.cloudflare.com/v1/FIXME/default/google-ai-studio",
       // customHeaders: { "cf-aig-metadata": JSON.stringify({ client: "agent-by-iinm" }) },
     },
     openai: {
       apiKey: "FIXME",
+      // AI Gateway example:
       // baseURL: "https://gateway.ai.cloudflare.com/v1/FIXME/default/openai",
       // customHeaders: { "cf-aig-metadata": JSON.stringify({ client: "agent-by-iinm" }) },
     },
@@ -55,6 +57,10 @@ export default {
 Run the agent.
 
 ```sh
+# Use default model defined in config files
+./bin/agent
+
+# Or specify a specific model
 ./bin/agent-<model>
 ```
 
@@ -84,6 +90,10 @@ $AGENT_ROOT (where this README file exists)
 
 ```js
 export default {
+  // Set default model used by ./bin/agent
+  // See model.mjs for available models
+  // model: "gemini-flash-thinking-16k",
+
   // Define patterns for tools that can be used without explicit approval
   allowedToolUsePatterns: [
     // Allow npm run check|fix commands without confirmation
@@ -130,6 +140,9 @@ export default {
       args: ["-y", "mcp-remote", "https://mcp.atlassian.com/v1/sse"],
     },
   },
+
+  // Override default notification command
+  // notifyCmd: "/path/to/notification-command"
 };
 ```
 
