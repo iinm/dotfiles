@@ -100,9 +100,9 @@ File and directory command examples:
     - Read more lines if needed.
 
 Other command examples:
-- Get current date time: date ["+%Y-%m-%d %H:%M:%S"]
-- Show git status (branch, modified files, etc.): git ["status"]
-- For commands requiring pipes or redirects: bash ["-c", "fd '.+.mjs' | wc -l"]
+- Get current date and time: date ["+%Y-%m-%d %H:%M:%S"]
+- Show staged changes: git ["diff", "--staged"]
+- For commands that require pipes or redirects: bash ["-c", "fd '.+\\.mjs' | xargs wc -l"]
 
 ### write file
 
