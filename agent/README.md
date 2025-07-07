@@ -145,7 +145,7 @@ export default {
     notion: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.notion.com/sse"],
-      agentConfig: {
+      options: {
         // enable only specified tools
         enabledTools: ["search", "fetch"],
       },
