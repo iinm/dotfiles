@@ -90,7 +90,16 @@ $AGENT_ROOT (where this README file exists)
               \__ <yyyy-mm-dd-hhmm>--<task-title>.md  # Task-specific memory files
 ```
 
-## Configuration Format
+## Configuration
+
+Agent loads configuration files in the following order. Settings in later files will override those in earlier files.
+
+- `$AGENT_ROOT/.config/config.mjs`: User configuration for all projects.
+- `$AGENT_ROOT/.config/config.local.mjs`: User local configuration, typically for sensitive information.
+- `$AGENT_PROJECT_METADATA_DIR/config.mjs`: Project-specific configuration.
+- `$AGENT_PROJECT_METADATA_DIR/config.local.mjs`: Project-specific local configuration, typically for sensitive information or local development overrides.
+
+### Format
 
 ```js
 export default {
