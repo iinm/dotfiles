@@ -8,9 +8,10 @@ export type GeminiModelConfig = {
   };
 };
 
+// https://ai.google.dev/api/generate-content
 export type GeminiGenerationConfig = {
   temperature: number;
-  // https://ai.google.dev/api/generate-content#ThinkingConfig
+  maxOutputTokens?: number;
   thinkingConfig?: {
     includeThoughts: boolean;
     thinkingBudget?: number;

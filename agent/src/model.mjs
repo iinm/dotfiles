@@ -140,6 +140,7 @@ export function createModelCaller(modelName, providers) {
             requestConfig: {
               generationConfig: {
                 temperature: 0,
+                maxOutputTokens: 1024 * 8,
                 thinkingConfig: {
                   includeThoughts: true,
                   thinkingBudget: 1024 * 4,
@@ -163,6 +164,7 @@ export function createModelCaller(modelName, providers) {
             requestConfig: {
               generationConfig: {
                 temperature: 0,
+                maxOutputTokens: 1024 * 32,
                 thinkingConfig: {
                   includeThoughts: true,
                   thinkingBudget: 1024 * 16,
@@ -186,6 +188,7 @@ export function createModelCaller(modelName, providers) {
             requestConfig: {
               generationConfig: {
                 temperature: 0,
+                maxOutputTokens: 1024 * 48,
                 thinkingConfig: {
                   includeThoughts: true,
                   thinkingBudget: 1024 * 24,
@@ -209,6 +212,7 @@ export function createModelCaller(modelName, providers) {
             requestConfig: {
               generationConfig: {
                 temperature: 0,
+                maxOutputTokens: 1024 * 8,
                 thinkingConfig: {
                   includeThoughts: true,
                   thinkingBudget: 1024 * 2,
@@ -232,6 +236,7 @@ export function createModelCaller(modelName, providers) {
             requestConfig: {
               generationConfig: {
                 temperature: 0,
+                maxOutputTokens: 1024 * 32,
                 thinkingConfig: {
                   includeThoughts: true,
                   thinkingBudget: 1024 * 8,
@@ -255,6 +260,7 @@ export function createModelCaller(modelName, providers) {
             requestConfig: {
               generationConfig: {
                 temperature: 0,
+                maxOutputTokens: 1024 * 64,
                 thinkingConfig: {
                   includeThoughts: true,
                   thinkingBudget: 1024 * 32,
