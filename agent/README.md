@@ -24,25 +24,29 @@ Create the user local configuration.
 
 ```js
 // $AGENT_ROOT(where this README file exists)/.config/config.local.mjs
+
+// (Optional) AI Gateway example:
+const customHeaders = {
+  "cf-aig-authorization": "Bearer FIXME",
+  "cf-aig-collect-log": false, // Collect token and cost metrics, but do not log the message content.
+  "cf-aig-metadata": JSON.stringify({
+    client: "agent-by-iinm",
+  }),
+};
+
 export default {
   providers: {
     anthropic: {
       apiKey: "FIXME",
-      // AI Gateway example:
+      // (Optional) AI Gateway example:
       // baseURL: "https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/anthropic",
-      // customHeaders: { "cf-aig-metadata": JSON.stringify({ client: "agent-by-iinm" }) },
+      // customHeaders,
     },
     gemini: {
       apiKey: "FIXME",
-      // AI Gateway example:
-      // baseURL: "https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/google-ai-studio",
-      // customHeaders: { "cf-aig-metadata": JSON.stringify({ client: "agent-by-iinm" }) },
     },
     openai: {
       apiKey: "FIXME",
-      // AI Gateway example:
-      // baseURL: "https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/openai",
-      // customHeaders: { "cf-aig-metadata": JSON.stringify({ client: "agent-by-iinm" }) },
     },
   },
   tools: {
