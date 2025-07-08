@@ -31,7 +31,7 @@ export function matchValue(value, pattern) {
       typeof value === "object" &&
       value !== null &&
       Object.entries(pattern).every(([k, p]) =>
-        matchValue(p, value[/** @type {keyof value} */ (k)]),
+        matchValue(value[/** @type {keyof value} */ (k)], p),
       )
     );
   }

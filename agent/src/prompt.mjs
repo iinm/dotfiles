@@ -102,6 +102,7 @@ File and directory command examples:
 Other command examples:
 - Get current date and time: date ["+%Y-%m-%d %H:%M:%S"]
 - Show staged changes: git ["diff", "--staged"]
+- View pull request on GitHub : gh ["pr", "view" , "123"]
 - For commands that require pipes or redirects: bash ["-c", "fd '.+\\.mjs' | xargs wc -l"]
 
 ### write file

@@ -55,8 +55,8 @@ describe("matchValue", () => {
     {
       desc: "object and object",
       value: { foo: "bar" },
-      /** @type {Record<string, string>} */
-      pattern: { foo: "bar" },
+      /** @type {Record<string, RegExp>} */
+      pattern: { foo: /^bar$/ },
       expected: true,
     },
     {
@@ -68,8 +68,8 @@ describe("matchValue", () => {
     },
   ];
 
-  for (const { value, pattern, expected } of testCases) {
-    test(`should return ${expected} for ${value} and ${pattern}`, () => {
+  for (const { desc, value, pattern, expected } of testCases) {
+    test(`${desc}: should return ${expected} for ${value} and ${pattern}`, () => {
       assert.strictEqual(matchValue(value, pattern), expected);
     });
   }
