@@ -209,7 +209,7 @@ function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
     // Exec command
     {
       toolName: execCommandTool.def.name,
-      input: { command: /^(pwd|cd|ls|date|uname)$/ },
+      input: { command: /^(pwd|date|uname)$/ },
     },
     {
       toolName: execCommandTool.def.name,
