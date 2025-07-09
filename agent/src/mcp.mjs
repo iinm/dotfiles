@@ -180,6 +180,10 @@ const UNSUPPORTED_INPUT_SCHEMA_PROPS = [
   "exclusiveMinimum",
   "exclusiveMaximum",
   "format",
+  "$ref",
+  "definitions",
+  "anyOf",
+  "allOf",
 ];
 
 /**

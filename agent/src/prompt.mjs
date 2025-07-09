@@ -66,17 +66,17 @@ exec_command is used to run a one-shot command without shell interpretation.
 - Use head, tail, sed, rg to read a required part of the file instead of reading the entire file.
 
 File and directory command examples:
-- List files: ls ["-alh", "path/to/directory"]
-- Find files: fd ["<regex>", "path/to/directory"]
+- List files: { command: "ls", args: ["-alh", "path/to/directory"] }
+- Find files: { command: "fd", args: ["<regex>", "path/to/directory"] }
   - Note: Use fd instead of find command.
   - Options:
     - --type <type>: f for file, d for directory
     - --max-depth <N>
     - --max-results <N>
     - --hidden: Include hidden files.
-  - List directories to get project structure: fd [".", "path/to/directory/", "--max-depth", "3", "--type", "d", "--hidden"]
+  - List directories to get project structure: { command: "fd", args: [".", "path/to/directory/", "--max-depth", "3", "--type", "d", "--hidden"] }
     "." means "match all"
-- Search for a string in files: rg ["-n", "<regex>", "./"]
+- Search for a string in files: { command: "rg", args: ["-n", "<regex>", "./"] }
   - Note: Use rg instead of grep command.
   - Directory or file must be specified.
   - Note that special characters like $, ^, *, [, ], (, ), etc. in regex must be escaped with a backslash.
@@ -88,22 +88,22 @@ File and directory command examples:
     - -A <N>: Show lines after the match.
     - -B <N>: Show lines before the match.
     - --hidden: Include hidden files.
-- Extract the outline of a file, including line numbers for headings, function definitions, etc.: rg ["-n", "<patterns according to file type>", "<file>"]
-  - markdown: rg ["-n", "^#+", "file.md"]
-  - typescript: rg ["-n", "^(export|const|function|class|interface|type|enum)", "file.ts"]
+- Extract the outline of a file, including line numbers for headings, function definitions, etc.: { command: "rg", args: ["-n", "<patterns according to file type>", "<file>"] }
+  - markdown: { command: "rg", args: ["-n", "^#+", "file.md"] }
+  - typescript: { command: "rg", args: ["-n", "^(export|const|function|class|interface|type|enum)", "file.ts"] }
 - Read lines from a file:
   - Use rg to either extract the outline or get the line numbers of lines containing a specific pattern.
-  - Get the specific lines: sed ["-n", "<start>,<end>p", "file.txt"]
+  - Get the specific lines: { command: "sed", args: ["-n", "<start>,<end>p", "file.txt"] }
     - It is recommended to read 200 lines at a time.
-    - 1st to 200th lines: sed ["-n", "1,200p", "file.txt"]
-    - 201st to 400th lines: sed ["-n", "201,400p", "file.txt"]
+    - 1st to 200th lines: { command: "sed", args: ["-n", "1,200p", "file.txt"] }
+    - 201st to 400th lines: { command: "sed", args: ["-n", "201,400p", "file.txt"] }
     - Read more lines if needed.
 
 Other command examples:
-- Get current date and time: date ["+%Y-%m-%d %H:%M:%S"]
-- Show staged changes: git ["diff", "--staged"]
-- View pull request on GitHub : gh ["pr", "view" , "123"]
-- For commands that require pipes or redirects: bash ["-c", "fd '.+\\.mjs' | xargs wc -l"]
+- Get current date and time: { command: "date", args: ["+%Y-%m-%d %H:%M:%S"] }
+- Show staged changes: { command: "git", args: ["diff", "--staged"] }
+- View pull request on GitHub : { command: "gh", args: ["pr", "view" , "123"] }
+- For commands that require pipes or redirects: { command: "bash", args: ["-c", "fd '.+\\.mjs' | xargs wc -l"] }
 
 ### write file
 

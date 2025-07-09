@@ -31,21 +31,21 @@ Load task memory and resume work.
     command: "/commit",
     prompt: `
 Create a commit.
-- Understand the staged changes: git ["diff", "--staged"]
-- Check the commit message format: git ["log", "--no-merges", "--oneline", "-n", "10"]
+- Understand the staged changes: exec_command { command: "git", args: ["diff", "--staged"] }
+- Check the commit message format: exec_command { command: "git", args: ["log", "--no-merges", "--oneline", "-n", "10"] }
 - Create a concise and descriptive commit message that follows the project's commit convention.
 - Use this exact format to include Co-authored-by information:
-  git ["commit", "-m", "<commit message>", "-m", "", "-m", "Co-authored-by: Agent by iinm <agent-by-iinm@localhost>"]
+  exec_command: { command: "git", args: ["commit", "-m", "<commit message>", "-m", "", "-m", "Co-authored-by: Agent by iinm <agent-by-iinm@localhost>"] }
     `.trim(),
   },
   {
     command: "/commit.by-user",
     prompt: `
 Create a commit.
-- Understand the staged changes: git ["diff", "--staged"]
-- Check the commit message format: git ["log", "--no-merges", "--oneline", "-n", "10"]
+- Understand the staged changes: exec_command { command: "git", args: ["diff", "--staged"] }
+- Check the commit message format: exec_command { command: "git", args: ["log", "--no-merges", "--oneline", "-n", "10"] }
 - Create a concise and descriptive commit message that follows the project's commit convention.
-- Create a commit: git ["commit", "-m", "<commit message>"]
+- Create a commit: exec_command { command: "git", args: ["commit", "-m", "<commit message>"] }
     `.trim(),
   },
   {
