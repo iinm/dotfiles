@@ -11,7 +11,7 @@ import { matchValue } from "./utils/matchValue.mjs";
  */
 export function createToolUseApprover({
   allowedToolUses,
-  maxAutoApprovals: maxApproveCount,
+  maxAutoApprovals,
   maskAllowedInput,
 }) {
   const state = {
@@ -22,7 +22,7 @@ export function createToolUseApprover({
 
   const approve = () => {
     state.approveCount += 1;
-    if (state.approveCount <= maxApproveCount) {
+    if (state.approveCount <= maxAutoApprovals) {
       return true;
     }
 

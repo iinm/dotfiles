@@ -46,7 +46,7 @@ export async function loadAgentConfig({ tmuxSessionId }) {
       allow: createDefaultAllowedToolUsePatterns({
         tmuxSessionId,
       }),
-      maxAutoApprovals: 20,
+      maxAutoApprovals: 30,
     },
     notifyCmd: AGENT_NOTIFY_CMD_DEFAULT,
   };

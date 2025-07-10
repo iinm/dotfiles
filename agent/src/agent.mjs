@@ -7,6 +7,7 @@
 import { EventEmitter } from "node:events";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { styleText } from "node:util";
 import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
 
 /**
@@ -138,6 +139,9 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
       });
     }
 
+    let thinkingLoops = 0;
+    const maxThinkingLoops = 5;
+
     while (true) {
       const modelOutput = await callModel({
         messages: state.messages,
@@ -160,15 +164,38 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
       agentEventEmitter.emit("message", assistantMessage);
       agentEventEmitter.emit("providerTokenUsage", providerTokenUsage);
 
-      // Approve tool use
+      // Gemini may stop with "thinking" -> continue
+      const lastContent = assistantMessage.content.at(-1);
+      if (lastContent?.type === "thinking") {
+        thinkingLoops += 1;
+        if (thinkingLoops > maxThinkingLoops) {
+          break;
+        }
+
+        state.messages.push({
+          role: "user",
+          content: [{ type: "text", text: "System: Continue" }],
+        });
+        console.error(
+          styleText(
+            "yellow",
+            `\nModel is thinking. Sending "System: Continue" (Loop: ${thinkingLoops}/${maxThinkingLoops})`,
+          ),
+        );
+        continue;
+      }
+
       /** @type {MessageContentToolUse[]} */
       const toolUseParts = assistantMessage.content.filter(
         (part) => part.type === "tool_use",
       );
+
+      // No tool use -> turn end
       if (toolUseParts.length === 0) {
         break;
       }
 
+      // Auto approve tool use
       const isAllToolUseApproved = toolUseParts.every(
         toolUseApprover.isAllowedToolUse,
       );
