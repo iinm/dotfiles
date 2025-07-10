@@ -127,6 +127,31 @@ export function createModelCaller(modelName, providers) {
           },
           input,
         );
+    case "gemini-flash-thinking": {
+      const model = "gemini-2.5-flash";
+      const modelCaller = createCacheEnabledGeminiModelCaller(
+        providers?.gemini ?? {},
+        { model },
+      );
+      return (input) =>
+        modelCaller(
+          {
+            model,
+            requestConfig: {
+              generationConfig: {
+                temperature: 0,
+                maxOutputTokens: 1024 * 48,
+                thinkingConfig: {
+                  includeThoughts: true,
+                  // dynamic thinking
+                  thinkingBudget: -1,
+                },
+              },
+            },
+          },
+          input,
+        );
+    }
     case "gemini-flash-thinking-4k": {
       const model = "gemini-2.5-flash";
       const modelCaller = createCacheEnabledGeminiModelCaller(
@@ -192,6 +217,31 @@ export function createModelCaller(modelName, providers) {
                 thinkingConfig: {
                   includeThoughts: true,
                   thinkingBudget: 1024 * 24,
+                },
+              },
+            },
+          },
+          input,
+        );
+    }
+    case "gemini-pro-thinking": {
+      const model = "gemini-2.5-pro";
+      const modelCaller = createCacheEnabledGeminiModelCaller(
+        providers?.gemini ?? {},
+        { model },
+      );
+      return (input) =>
+        modelCaller(
+          {
+            model,
+            requestConfig: {
+              generationConfig: {
+                temperature: 0,
+                maxOutputTokens: 1024 * 64,
+                thinkingConfig: {
+                  includeThoughts: true,
+                  // dynamic thinking
+                  thinkingBudget: -1,
                 },
               },
             },
