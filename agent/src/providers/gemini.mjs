@@ -180,9 +180,6 @@ export function createCacheEnabledGeminiModelCaller(
         total: content.usageMetadata.totalTokenCount,
       };
 
-      // console.debug("\n--- DEBUG: gemini content");
-      // console.debug(JSON.stringify({ content }, null, 2));
-
       const message = convertGeminiAssistantMessageToGenericFormat(content);
       if (message instanceof GeminiNoCandidateError) {
         const interval = Math.min(2 * 2 ** retryCount, 16);
@@ -401,11 +398,10 @@ function convertGenericMessageToGeminiFormat(messages) {
         const parts = [];
         for (const part of message.content) {
           if (part.type === "thinking") {
-            // Ignore thought summary
-            // parts.push({
-            //   text: part.thinking,
-            //   thought: true,
-            // });
+            parts.push({
+              text: part.thinking,
+              thought: true,
+            });
           } else if (part.type === "text") {
             parts.push({
               text: part.text,
@@ -632,11 +628,11 @@ function convertGeminiAssistantMessageToGenericFormat(content) {
   for (const part of candidate.content.parts || []) {
     if ("text" in part) {
       if (part.thought) {
-        // Ignore thought summary
-        // assistantMessageContent.push({
-        //   type: "thinking",
-        //   thinking: part.text,
-        // });
+        // thought summary
+        assistantMessageContent.push({
+          type: "thinking",
+          thinking: part.text,
+        });
       } else {
         assistantMessageContent.push({
           type: "text",
