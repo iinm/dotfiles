@@ -52,50 +52,46 @@ export const execCommandTool = {
             timeout: 120 * 1000,
           },
           async (err, stdout, stderr) => {
-            if (
-              [
-                "ls",
-                "cat",
-                "head",
-                "tail",
-                "sed",
-                "fd",
-                "rg",
-                "find",
-                "grep",
-              ].includes(command) &&
-              stdout.length > OUTPUT_MAX_LENGTH
-            ) {
+            let stdoutOrMessage = stdout;
+            if (stdout.length > OUTPUT_MAX_LENGTH) {
               const filePath = await writeTmpFile(
                 stdout,
                 `exec_command-${command}`,
                 "txt",
               );
               const lineCount = stdout.split("\n").length;
-              return resolve(
-                [
-                  `Content is large (${stdout.length} characters, ${lineCount} lines) and saved to ${filePath}`,
-                  "- Use rg / sed to read specific parts",
-                ].join("\n"),
-              );
+              stdoutOrMessage = [
+                `Content is large (${stdout.length} characters, ${lineCount} lines) and saved to ${filePath}`,
+                "Use head / tail / rg / sed to read specific parts",
+              ].join("\n");
             }
 
-            // stdout / stderr が長過ぎる場合は末尾を表示
-            const stdoutOmitted = stdout.slice(-OUTPUT_MAX_LENGTH);
-            const isStdoutOmitted = stdout.length > OUTPUT_MAX_LENGTH;
-            const stderrOmitted = stderr.slice(-OUTPUT_MAX_LENGTH);
-            const isStderrOmitted = stderr.length > OUTPUT_MAX_LENGTH;
+            let stderrOrMessage = stderr;
+            if (stderr.length > OUTPUT_MAX_LENGTH) {
+              const filePath = await writeTmpFile(
+                stderr,
+                `exec_command-${command}`,
+                "txt",
+              );
+              const lineCount = stderr.split("\n").length;
+              stderrOrMessage = [
+                `Content is large (${stderr.length} characters, ${lineCount} lines) and saved to ${filePath}`,
+                "Use head / tail / rg / sed to read specific parts",
+              ].join("\n");
+            }
+
             const result = [
               `<command>${command}</command>`,
               "",
-              stdoutOmitted
-                ? `<stdout>\n${isStdoutOmitted ? "(Output omitted) ..." : ""}${stdoutOmitted}</stdout>`
+              stdoutOrMessage
+                ? `<stdout>\n${stdoutOrMessage}</stdout>`
                 : "<stdout></stdout>",
               "",
-              stderrOmitted
-                ? `<stderr>\n${isStderrOmitted ? "(Output omitted) ..." : ""}${stderrOmitted}</stderr>`
+              stderrOrMessage
+                ? `<stderr>\n${stderrOrMessage}</stderr>`
                 : "<stderr></stderr>",
             ];
+
             if (err) {
               // rg: 何もマッチしない場合は exit status != 0 になるので無視
               const ignoreError = ["rg"].includes(command);
