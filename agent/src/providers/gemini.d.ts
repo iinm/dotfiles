@@ -76,6 +76,7 @@ export type GeminiFunctionContent = {
 /* Content Parts */
 export type GeminiContentPartText = {
   text: string;
+  thoughtSignature?: string;
   thought?: boolean;
 };
 
@@ -84,6 +85,7 @@ export type GeminiContentPartFunctionCall = {
     name: string;
     args: Record<string, unknown>;
   };
+  thoughtSignature?: string;
 };
 
 export type GeminiContentPartFunctionResponse = {

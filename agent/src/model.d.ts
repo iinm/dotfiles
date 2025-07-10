@@ -54,6 +54,7 @@ export type MessageContentThinking = {
 export type MessageContentText = {
   type: "text";
   text: string;
+  providerMetadata?: Record<string, unknown>;
 };
 
 export type MessageContentImage = {
@@ -71,6 +72,7 @@ export type MessageContentToolUse = {
   toolUseId: string;
   toolName: string;
   input: Record<string, unknown>;
+  providerMetadata?: Record<string, unknown>;
 };
 
 export type MessageContentToolResult = {

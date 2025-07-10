@@ -180,6 +180,9 @@ export function createCacheEnabledGeminiModelCaller(
         total: content.usageMetadata.totalTokenCount,
       };
 
+      // console.debug("\n--- DEBUG: gemini content");
+      // console.debug(JSON.stringify({ content }, null, 2));
+
       const message = convertGeminiAssistantMessageToGenericFormat(content);
       if (message instanceof GeminiNoCandidateError) {
         const interval = Math.min(2 * 2 ** retryCount, 16);
@@ -398,15 +401,23 @@ function convertGenericMessageToGeminiFormat(messages) {
         const parts = [];
         for (const part of message.content) {
           if (part.type === "thinking") {
-            parts.push({ text: part.thinking, thought: true });
+            // Ignore thought summary
+            // parts.push({
+            //   text: part.thinking,
+            //   thought: true,
+            // });
           } else if (part.type === "text") {
-            parts.push({ text: part.text });
+            parts.push({
+              text: part.text,
+              ...(part.providerMetadata || {}),
+            });
           } else if (part.type === "tool_use") {
             parts.push({
               functionCall: {
                 name: part.toolName,
                 args: part.input,
               },
+              ...(part.providerMetadata || {}),
             });
           }
         }
@@ -621,14 +632,18 @@ function convertGeminiAssistantMessageToGenericFormat(content) {
   for (const part of candidate.content.parts || []) {
     if ("text" in part) {
       if (part.thought) {
-        assistantMessageContent.push({
-          type: "thinking",
-          thinking: part.text,
-        });
+        // Ignore thought summary
+        // assistantMessageContent.push({
+        //   type: "thinking",
+        //   thinking: part.text,
+        // });
       } else {
         assistantMessageContent.push({
           type: "text",
           text: part.text,
+          providerMetadata: part.thoughtSignature
+            ? { thoughtSignature: part.thoughtSignature }
+            : undefined,
         });
       }
     }
@@ -638,6 +653,9 @@ function convertGeminiAssistantMessageToGenericFormat(content) {
         toolUseId: part.functionCall.name,
         toolName: part.functionCall.name,
         input: part.functionCall.args,
+        providerMetadata: part.thoughtSignature
+          ? { thoughtSignature: part.thoughtSignature }
+          : undefined,
       });
     }
   }
