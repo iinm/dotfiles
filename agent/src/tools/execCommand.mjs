@@ -5,6 +5,7 @@
 
 import { execFile } from "node:child_process";
 import { noThrow } from "../utils/noThrow.mjs";
+import { writeTmpFile } from "../utils/tmpfile.mjs";
 
 const OUTPUT_MAX_LENGTH = 1024 * 8;
 
@@ -37,7 +38,7 @@ export const execCommandTool = {
   impl: async (input) =>
     await noThrow(async () => {
       const { command, args } = input;
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve, _reject) => {
         execFile(
           command,
           args,
@@ -50,7 +51,7 @@ export const execCommandTool = {
             },
             timeout: 120 * 1000,
           },
-          (err, stdout, stderr) => {
+          async (err, stdout, stderr) => {
             if (
               [
                 "ls",
@@ -65,10 +66,17 @@ export const execCommandTool = {
               ].includes(command) &&
               stdout.length > OUTPUT_MAX_LENGTH
             ) {
-              return reject(
-                new Error(
-                  "Output too large. Use rg / sed to read specific parts.",
-                ),
+              const filePath = await writeTmpFile(
+                stdout,
+                `exec_command-${command}`,
+                "txt",
+              );
+              const lineCount = stdout.split("\n").length;
+              return resolve(
+                [
+                  `Content is large (${stdout.length} characters, ${lineCount} lines) and saved to ${filePath}`,
+                  "- Use rg / sed to read specific parts",
+                ].join("\n"),
               );
             }
 
