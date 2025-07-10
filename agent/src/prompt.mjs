@@ -101,6 +101,7 @@ File and directory command examples:
 
 Other command examples:
 - Get current date and time: { command: "date", args: ["+%Y-%m-%d %H:%M:%S"] }
+- Show current branch: { command: "git", args: ["branch", "--show-current"] }
 - Show staged changes: { command: "git", args: ["diff", "--staged"] }
 - View pull request on GitHub : { command: "gh", args: ["pr", "view" , "123"] }
 - For commands that require pipes or redirects: { command: "bash", args: ["-c", "fd '.+\\.mjs' | xargs wc -l"] }
