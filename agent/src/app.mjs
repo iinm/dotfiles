@@ -6,7 +6,7 @@ import { styleText } from "node:util";
 import { createAgent } from "./agent.mjs";
 import { startInteractiveSession } from "./cli.mjs";
 import { loadAgentConfig } from "./config.mjs";
-import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
+import { AGENT_PROJECT_METADATA_DIR, USER_NAME } from "./env.mjs";
 import { connectToMCPServer } from "./mcp.mjs";
 import { createModelCaller } from "./model.mjs";
 import { createPrompt } from "./prompt.mjs";
@@ -53,6 +53,7 @@ import { createSessionId } from "./utils/createSessionId.mjs";
   }
 
   const prompt = createPrompt({
+    username: USER_NAME,
     sessionId,
     tmuxSessionId,
     workingDir: process.cwd(),

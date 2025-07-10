@@ -21,3 +21,5 @@ export const AGENT_NOTIFY_CMD_DEFAULT = path.join(
   "bin",
   "agent-notify",
 );
+
+export const USER_NAME = process.env.USER || "unknown";

@@ -1,5 +1,6 @@
 /**
  * @typedef {object} PromptConfig
+ * @property {string} username
  * @property {string} sessionId
  * @property {string} tmuxSessionId
  * @property {string} workingDir - The current working directory.
@@ -11,6 +12,7 @@
  * @returns {string}
  */
 export function createPrompt({
+  username,
   sessionId,
   tmuxSessionId,
   workingDir,
@@ -28,6 +30,7 @@ You are a problem solver.
 ## User Interactions
 
 - Respond to the user in the same language they use.
+- Address the user by their name, rather than 'user'.
 - Use emojis to make the conversation more friendly and approachable.
 - Respond in Markdown, using "-" for lists and 2 spaces for indentation.
 - File paths are specified relative to the current working directory.
@@ -217,6 +220,7 @@ Task Memory Format:
 
 ## Environment
 
+- User name: ${username} 
 - Current working directory: ${workingDir}
 - Session id: ${sessionId}
 - tmux session id: ${tmuxSessionId}
