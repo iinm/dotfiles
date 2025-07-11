@@ -16,11 +16,12 @@ import { notify } from "./utils/notify.mjs";
 const PROMPT_COMMANDS = [
   {
     command: "/memory.save",
-    prompt: "Save task memory",
+    prompt: () => "Save task memory",
   },
   {
     command: "/memory.resume",
-    prompt: `
+    prompt: () =>
+      `
 Load task memory and resume work.
 - Display available task memory files with numbers and prompt the user to select one by number.
   - Wait for user selection before reading memory contents.
@@ -29,18 +30,24 @@ Load task memory and resume work.
   },
   {
     command: "/commit",
-    prompt: `
+    /**
+     * @param {{modelName: string}} args
+     * @returns {string}
+     */
+    prompt: ({ modelName }) =>
+      `
 Create a commit.
 - Understand the staged changes: exec_command { command: "git", args: ["diff", "--staged"] }
 - Check the commit message format: exec_command { command: "git", args: ["log", "--no-merges", "--oneline", "-n", "10"] }
 - Create a concise and descriptive commit message that follows the project's commit convention.
 - Use this exact format to include Co-authored-by information:
-  exec_command: { command: "git", args: ["commit", "-m", "<commit message>", "-m", "", "-m", "Co-authored-by: Agent by iinm <agent-by-iinm@localhost>"] }
+  exec_command: { command: "git", args: ["commit", "-m", "<commit message>", "-m", "", "-m", "Co-authored-by: Agent by iinm <agent-by-iinm+${modelName}@localhost>"] }
     `.trim(),
   },
   {
     command: "/commit.by-user",
-    prompt: `
+    prompt: () =>
+      `
 Create a commit.
 - Understand the staged changes: exec_command { command: "git", args: ["diff", "--staged"] }
 - Check the commit message format: exec_command { command: "git", args: ["log", "--no-merges", "--oneline", "-n", "10"] }
@@ -50,7 +57,7 @@ Create a commit.
   },
   {
     command: "/remind.project-knowledge-discovery",
-    prompt: "Run project knowledge discovery process.",
+    prompt: () => "Run project knowledge discovery process.",
   },
 ];
 
@@ -202,7 +209,8 @@ export function startInteractiveSession({
 
     for (const cmd of PROMPT_COMMANDS) {
       if (inputTrimmed.toLowerCase() === cmd.command) {
-        const message = `System: ${cmd.prompt}`;
+        const rawMessage = cmd.prompt({ modelName });
+        const message = `System: ${rawMessage}`;
         console.log(styleText("gray", "\n<prompt>"));
         console.log(message);
         console.log(styleText("gray", "</prompt>"));
