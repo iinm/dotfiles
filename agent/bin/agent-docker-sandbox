@@ -1,0 +1,162 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+help() {
+  cat << HELP
+Usage: $(basename "${BASH_SOURCE[0]}")
+                      --dockerfile FILE
+                      [--silent] [--allow-write] [--allow-net] [--no-tty]
+                      [--volume DIR]
+                      -- COMMAND
+HELP
+}
+
+silent="no"
+dockerfile=""
+allow_write="no"
+allow_net="no"
+allocate_tty="yes"
+volumes=()
+docker_run_opts=()
+command=()
+
+while test "$#" -gt 0; do
+  case "$1" in
+    --help )
+      help
+      exit 0
+      ;;
+    --dockerfile )
+      dockerfile="$2"
+      shift 2
+      ;;
+    --silent )
+      silent="yes"
+      shift
+      ;;
+    --allow-write )
+      allow_write="yes"
+      shift
+      ;;
+    --allow-net )
+      allow_net="yes"
+      shift
+      ;;
+    --no-tty )
+      allocate_tty="no"
+      shift
+      ;;
+    --volume )
+      shift
+      while test "$#" -gt 0; do
+        if echo "$1" | grep -qE "^--.*"; then
+          break
+        fi
+        volumes+=("$1")
+        shift
+      done
+      ;;
+    -- )
+      shift
+      command+=("$@")
+      break
+      ;;
+    * )
+      command+=("$1")
+      shift
+      ;;
+  esac
+done
+
+# validate args
+if test ${#command[@]} -eq 0; then
+  echo "Error: COMMAND is required" >&2
+  help
+  exit 1
+fi
+
+if test -z "$dockerfile"; then
+  echo "Error: --dockerfile is required" >&2
+  help
+  exit 1
+fi
+
+# save stdout, stderr
+exec {stdout}>&1
+exec {stderr}>&2
+
+if test "$silent" = "yes"; then
+  # discard stderr
+  exec 2> /dev/null
+fi
+# stdout to stderr
+exec 1>&2
+
+# set options
+image_name="agent-sandbox--$(basename "$(pwd)")"
+image_tag="latest"
+
+project_root="$(git rev-parse --show-toplevel || pwd)"
+if test "$allow_write" = "yes"; then
+  docker_run_opts+=(--volume "${project_root}:${project_root}")
+else
+  docker_run_opts+=(--volume "${project_root}:${project_root}:ro")
+fi
+
+if test "$allow_net" = "yes"; then
+  :
+else
+  docker_run_opts+=(--net none)
+fi
+
+if test "$allocate_tty" = "yes"; then
+  docker_run_opts+=(--tty)
+fi
+
+for volume in "${volumes[@]}"; do
+  volume_name="$(basename "$(pwd)")--${volume//\//-}"
+  mount_path="$(readlink -f "${volume}")"
+  docker_run_opts+=(--volume "${volume_name}:${mount_path}")
+  # TODO: macosでも同じように動作する？
+  if test "$(uname)" = "Linux"; then
+    docker run --rm -v "${volume_name}:/mnt" busybox:latest chown "$(id -u):$(id -g)" /mnt
+  fi
+done
+
+if test "$(uname)" = "Linux"; then
+  docker_run_opts+=(--user "$(id -u):$(id -g)")
+fi
+
+log() {
+  now="$(date "+%Y-%m-%d %H:%M:%S")"
+  echo -e "$now" "$@"
+}
+
+log "$(cat << EOF
+Sandbox Configurations:
+  silent=${silent}
+  dockerfile=${dockerfile}
+  image_name=${image_name}
+  image_tag=${image_tag}
+  docker_run_opts=${docker_run_opts[@]}
+  command=${command[@]}
+EOF
+)"
+
+log "Build docker image"
+# shellcheck disable=SC2068
+if ! docker build --tag "${image_name}:${image_tag}" - < "$dockerfile"; then
+  log "Error: failed to build image"
+  exit 1
+fi
+
+# restore stdout, stderr
+exec 2>&${stderr} {stderr}>&-
+exec 1>&${stdout} {stdout}>&-
+
+# shellcheck disable=SC2068
+docker run --rm --interactive --workdir "$(pwd)" \
+  ${docker_run_opts[@]} \
+  "${image_name}:${image_tag}" \
+  ${command[@]}
