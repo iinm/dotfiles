@@ -25,7 +25,7 @@ Execute a command within a container defined by a Dockerfile.
 
 Examples:
   $script_name --dockerfile ./Dockerfile.sandbox --verbose bash
-  $script_name --dockerfile ./Dockerfile.sandbox --allow-write --allow-net --volume node_module npm install
+  $script_name --dockerfile ./Dockerfile.sandbox --allow-write --allow-net --volume node_module --no-tty npm install
 HELP
 }
 
