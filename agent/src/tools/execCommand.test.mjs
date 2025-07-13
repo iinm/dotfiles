@@ -15,6 +15,7 @@ describe("execCommandTool", () => {
       result,
       `
 <command>echo</command>
+<args>["Hello World"]</args>
 
 <stdout>
 Hello World
@@ -37,6 +38,7 @@ Hello World
       result,
       `
 <command>node</command>
+<args>["-e","process.stderr.write(\\"Hello from stderr\\")"]</args>
 
 <stdout></stdout>
 
@@ -58,6 +60,7 @@ Hello from stderr</stderr>
       result,
       `
 <command>node</command>
+<args>["-e","process.exit(1)"]</args>
 
 <stdout></stdout>
 

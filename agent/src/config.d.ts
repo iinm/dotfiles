@@ -1,11 +1,12 @@
-import type { ToolUsePattern } from "./tool";
+import { ToolUsePattern, ToolUseRewriteRule } from "./tool";
 
-export type AgentConfig = {
+export type AppConfig = {
   model?: string;
   providers?: AgentModelProviders;
   permissions?: {
     allow?: ToolUsePattern[];
     maxAutoApprovals?: number;
+    rewrite?: ToolUseRewriteRule[];
   };
   tools?: {
     tavily?: {

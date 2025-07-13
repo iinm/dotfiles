@@ -1,7 +1,7 @@
 /**
  * @import { Agent, AgentConfig, AgentEventEmitter, UserEventEmitter } from "./agent"
  * @import { Message, MessageContentToolResult, MessageContentToolUse, PartialMessageContent } from "./model"
- * @import { Tool, ToolDefinition } from "./tool"
+ * @import { Tool, ToolDefinition, ToolUseRewriteRule } from "./tool"
  */
 
 import { EventEmitter } from "node:events";
@@ -9,12 +9,19 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { styleText } from "node:util";
 import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
+import { matchValue } from "./utils/matchValue.mjs";
 
 /**
  * @param {AgentConfig} config
  * @returns {Agent}
  */
-export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
+export function createAgent({
+  callModel,
+  prompt,
+  tools,
+  toolUseApprover,
+  toolUseRewriteRules,
+}) {
   /** @type {{ messages: Message[] }} */
   const state = {
     messages: [
@@ -106,7 +113,9 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
 
         // Approved
         const toolResults = await Promise.all(
-          toolUseParts.map((toolUse) => callTool(toolUse, toolByName)),
+          toolUseParts.map((toolUse) =>
+            callTool(toolUse, toolByName, toolUseRewriteRules),
+          ),
         );
         state.messages.push({ role: "user", content: toolResults });
         agentEventEmitter.emit(
@@ -205,7 +214,9 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
       }
 
       const toolResults = await Promise.all(
-        toolUseParts.map((toolUse) => callTool(toolUse, toolByName)),
+        toolUseParts.map((toolUse) =>
+          callTool(toolUse, toolByName, toolUseRewriteRules),
+        ),
       );
 
       state.messages.push({ role: "user", content: toolResults });
@@ -232,10 +243,17 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
 /**
  * @param {MessageContentToolUse} toolUse
  * @param {Map<string, Tool>} toolByName
+ * @param {ToolUseRewriteRule[]} rewriteRules
  * @returns {Promise<MessageContentToolResult>}
  */
-async function callTool(toolUse, toolByName) {
-  const tool = toolByName.get(toolUse.toolName);
+async function callTool(toolUse, toolByName, rewriteRules) {
+  const rewrite =
+    (rewriteRules || []).find((rule) => matchValue(toolUse, rule.pattern))
+      ?.rewrite || ((x) => x);
+
+  const rewritedToolUse = rewrite(toolUse);
+
+  const tool = toolByName.get(rewritedToolUse.toolName);
   if (!tool) {
     return {
       type: "tool_result",
@@ -246,7 +264,7 @@ async function callTool(toolUse, toolByName) {
     };
   }
 
-  const result = await tool.impl(toolUse.input);
+  const result = await tool.impl(rewritedToolUse.input);
   if (result instanceof Error) {
     return {
       type: "tool_result",

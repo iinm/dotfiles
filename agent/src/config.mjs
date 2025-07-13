@@ -1,6 +1,6 @@
 /**
  * @import { ToolUsePattern } from "./tool";
- * @import { AgentConfig } from "./config";
+ * @import { AppConfig } from "./config";
  */
 
 import crypto from "node:crypto";
@@ -27,7 +27,7 @@ import { isSafeToolArg } from "./utils/isSafeToolArg.mjs";
 
 /**
  * @param {LoadAgentConfigInput} input
- * @returns {Promise<AgentConfig>}
+ * @returns {Promise<AppConfig>}
  */
 export async function loadAgentConfig({ tmuxSessionId }) {
   const paths = [
@@ -39,7 +39,7 @@ export async function loadAgentConfig({ tmuxSessionId }) {
 
   /** @type {string[]} */
   const loaded = [];
-  /** @type {AgentConfig} */
+  /** @type {AppConfig} */
   let merged = {
     model: AGENT_MODEL || AGENT_MODEL_DEFAULT,
     permissions: {
@@ -80,6 +80,10 @@ export async function loadAgentConfig({ tmuxSessionId }) {
         maxAutoApprovals:
           config.permissions?.maxAutoApprovals ??
           merged.permissions?.maxAutoApprovals,
+        rewrite: [
+          ...(merged.permissions?.rewrite ?? []),
+          ...(config.permissions?.rewrite ?? []),
+        ],
       },
       tools: {
         tavily: {
@@ -103,7 +107,7 @@ export async function loadAgentConfig({ tmuxSessionId }) {
 
 /**
  * @param {string} filePath
- * @returns {Promise<AgentConfig>}
+ * @returns {Promise<AppConfig>}
  */
 export async function loadConfigFile(filePath) {
   let content;

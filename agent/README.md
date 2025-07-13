@@ -102,6 +102,18 @@ Agent loads configuration files in the following order. Settings in later files 
 ### Format
 
 ```js
+const sandbox = {
+  command: "agent-docker-sandbox",
+  args: [
+    "--silent",
+    "--dockerfile",
+    ".agent/Dockerfile.sandbox",
+    "--no-tty",
+    "--volume",
+    "node_modules",
+  ],
+};
+
 export default {
   // Set default model used by ./bin/agent
   // See model.mjs for available models
@@ -121,6 +133,29 @@ export default {
       {
         // Naming: mcp__<serverName>__<toolName>
         toolName: /mcp__playwright__browser_.+/,
+      },
+    ],
+
+    // The maximum number of automatic approvals.
+    maxAutoApprovals: 30, 
+
+    // Rewrite tool use
+    rewrite: [
+      {
+        pattern: {
+          toolName: "exec_command",
+          input: { command: "npm", args: ["install"] },
+        },
+        rewrite: (toolUse) => ({
+          toolName: "exec_command",
+          input: {
+            command: sandbox.command,
+            args: [
+              ...sandbox.args, "--allow-net", "--allow-write", "--",
+              toolUse.input.command, ...toolUse.input.args,
+            ],
+          },
+        }),
       },
     ],
   },

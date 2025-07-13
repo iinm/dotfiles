@@ -4,3 +4,4 @@ node_modules/
 
 .agent/*
 !.agent/Dockerfile.sandbox
+!.agent/config.mjs

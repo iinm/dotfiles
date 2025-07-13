@@ -82,6 +82,7 @@ export const execCommandTool = {
 
             const result = [
               `<command>${command}</command>`,
+              `<args>${JSON.stringify(args || [])}</args>`,
               "",
               stdoutOrMessage
                 ? `<stdout>\n${stdoutOrMessage}</stdout>`

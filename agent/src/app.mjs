@@ -94,6 +94,7 @@ import { createSessionId } from "./utils/createSessionId.mjs";
     prompt,
     tools: [...builtinTools, ...mcpTools],
     toolUseApprover,
+    toolUseRewriteRules: agentConfig.permissions?.rewrite || [],
   });
 
   startInteractiveSession({
