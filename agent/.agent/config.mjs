@@ -1,12 +1,11 @@
 const sandbox = {
-  command: "agent-docker-sandbox",
+  command: "docker-sandbox",
   args: [
-    "--silent",
     "--dockerfile",
     ".agent/Dockerfile.sandbox",
-    "--no-tty",
     "--volume",
     "node_modules",
+    "--no-tty",
   ],
 };
 
@@ -33,7 +32,6 @@ export default {
               ...sandbox.args,
               "--allow-net",
               "--allow-write",
-              "--",
               toolUse.input.command,
               ...toolUse.input.args,
             ],
@@ -51,7 +49,6 @@ export default {
             command: sandbox.command,
             args: [
               ...sandbox.args,
-              "--",
               toolUse.input.command,
               ...toolUse.input.args,
             ],
