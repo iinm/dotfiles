@@ -109,9 +109,9 @@ for volume in "${volumes[@]}"; do
   # fi
 done
 
-if test "$(uname)" = "Linux"; then
-  docker_run_opts+=(--user "$(id -u):$(id -g)")
-fi
+# if test "$(uname)" = "Linux"; then
+docker_run_opts+=(--user "$(id -u):$(id -g)")
+# fi
 
 log() {
   now="$(date "+%Y-%m-%d %H:%M:%S")"
