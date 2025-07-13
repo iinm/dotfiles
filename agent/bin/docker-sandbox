@@ -78,7 +78,7 @@ exec 1>&2
 # set options
 image_name="agent-sandbox--$(basename "$(pwd)")"
 image_tag="latest"
-docker_run_opts=()
+docker_run_opts=(--rm --interactive --workdir "$(pwd)" --add-host host.docker.internal:host-gateway)
 
 project_root="$(git rev-parse --show-toplevel || pwd)"
 if test "$allow_write" = "yes"; then
@@ -164,8 +164,4 @@ exec 2>&${stderr} {stderr}>&-
 exec 1>&${stdout} {stdout}>&-
 
 # shellcheck disable=SC2068
-docker run --rm --interactive --workdir "$(pwd)" \
-  ${docker_run_opts[@]} \
-  --add-host host.docker.internal:host-gateway \
-  "${image_name}:${image_tag}" \
-  ${command[@]}
+docker run ${docker_run_opts[@]} "${image_name}:${image_tag}" ${command[@]}
