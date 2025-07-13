@@ -104,13 +104,7 @@ Agent loads configuration files in the following order. Settings in later files 
 ```js
 const sandbox = {
   command: "docker-sandbox",
-  args: [
-    "--dockerfile",
-    ".agent/Dockerfile.sandbox",
-    "--volume",
-    "node_modules",
-    "--no-tty",
-  ],
+  args: ["--dockerfile", ".agent/Dockerfile.sandbox", "--volume", "node_modules"],
 };
 
 export default {

@@ -5,7 +5,6 @@ const sandbox = {
     ".agent/Dockerfile.sandbox",
     "--volume",
     "node_modules",
-    "--no-tty",
   ],
 };
 
