@@ -2,13 +2,13 @@
 
 set -eu -o pipefail
 
-script_name="$(basename "${BASH_SOURCE[0]}")"
+SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 
 help() {
   cat << HELP
-Usage: $script_name --dockerfile FILE
+Usage: $SCRIPT_NAME --dockerfile FILE
            [--allow-write] [--allow-net|--allow-net-host-only]
-           [--volume DIR] [--tty] [--verbose]
+           [--use-volume DIR] [--tty] [--verbose]
            COMMAND
 
 Execute a command within a container defined by a Dockerfile.
@@ -18,15 +18,15 @@ Execute a command within a container defined by a Dockerfile.
                          (By default, the project root is mounted read-only.)
   --allow-net            Allow full network access for the container.
   --allow-net-host-only  Allow network access only to the host machine (via a dedicated bridge network).
-  --volume DIR           Mount a named volume for the specified host directory.
+  --use-volume DIR       Mount a named volume for the specified host directory.
                          The volume will be mounted at the absolute path of DIR inside the container.
   --tty                  Allocate a pseudo-TTY for the container.
   --verbose              Output verbose logs to stderr.
 
 Examples:
-  $script_name --dockerfile ./Dockerfile.sandbox --verbose --tty bash
-  $script_name --dockerfile ./Dockerfile.sandbox --allow-write --allow-net --volume node_module npm install
-  $script_name --dockerfile ./Dockerfile.sandbox --allow-net-host-only wget -O - host.docker.internal:8000 
+  $SCRIPT_NAME --dockerfile ./Dockerfile.sandbox --verbose --tty bash
+  $SCRIPT_NAME --dockerfile ./Dockerfile.sandbox --allow-write --allow-net --use-volume node_module npm install
+  $SCRIPT_NAME --dockerfile ./Dockerfile.sandbox --allow-net-host-only wget -O - host.docker.internal:8000 
 HELP
 }
 
@@ -34,7 +34,7 @@ verbose="no"
 dockerfile=""
 allow_write="no"
 allow_net="no"
-volumes=()
+volume_dirs=()
 allocate_tty="no"
 
 while test "$#" -gt 0; do
@@ -46,7 +46,7 @@ while test "$#" -gt 0; do
     --allow-net           ) allow_net="yes"; shift ;;
     --allow-net-host-only ) allow_net="host_only"; shift ;;
     --tty                 ) allocate_tty="yes"; shift ;;
-    --volume              ) volumes+=("$2"); shift 2 ;;
+    --use-volume          ) volume_dirs+=("$2"); shift 2 ;;
     --*                   ) echo "Error: unknown option: $1" >&2; exit 1 ;;
     *                     ) break ;;
   esac
@@ -77,7 +77,7 @@ fi
 exec 1>&2
 
 # set options
-image_name="agent-sandbox--$(basename "$(pwd)")"
+image_name="${SCRIPT_NAME}--$(basename "$(pwd)")"
 image_tag="latest"
 docker_run_opts=(
   --rm
@@ -106,9 +106,9 @@ if test "$allocate_tty" = "yes"; then
   docker_run_opts+=(--tty)
 fi
 
-for volume in "${volumes[@]}"; do
-  volume_name="$(basename "$(pwd)")--${volume//\//-}"
-  mount_path="$(readlink -f "${volume}")"
+for dir in "${volume_dirs[@]}"; do
+  volume_name="$(basename "$(pwd)")--${dir//\//-}"
+  mount_path="$(readlink -f "${dir}")"
   docker_run_opts+=(--volume "${volume_name}:${mount_path}")
   if test "$(uname)" = "Linux"; then
     docker run --rm -v "${volume_name}:/mnt" busybox:latest chown "$(id -u):$(id -g)" /mnt
