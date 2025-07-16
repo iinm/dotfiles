@@ -43,7 +43,7 @@ local setup_options = function()
   vim.opt.softtabstop = 2
   vim.opt.grepprg = 'grep -n -H -R --exclude-dir ".git" $* .'
   if vim.fn.executable('rg') then
-    vim.opt.grepprg = 'rg --vimgrep --hidden --glob "!.git" --glob "!node_modules"'
+    vim.opt.grepprg = 'rg --vimgrep --glob "!.git" --glob "!node_modules"'
   end
   vim.opt.maxmempattern = 10000
   vim.opt.cmdheight = 2
