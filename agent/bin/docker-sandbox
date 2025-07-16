@@ -77,33 +77,37 @@ fi
 exec 1>&2
 
 # set options
+project_root="$(git rev-parse --show-toplevel || pwd)"
 image_name="${SCRIPT_NAME}--$(basename "$(pwd)")"
 image_tag="latest"
+container_name="${image_name}--$(env LC_CTYPE=C tr -dc '[:alnum:]' < /dev/urandom 2> /dev/null | head -c 10 || true)"
+host_only_network_name="${image_name}--host-only"
+
 docker_run_opts=(
-  --rm
+  --name "$container_name"
   --interactive
-  --workdir "$(pwd)"
+  --user 0:0
   --add-host host.docker.internal:host-gateway
+  --cap-add NET_ADMIN
 )
 
-project_root="$(git rev-parse --show-toplevel || pwd)"
+docker_exec_opts=(
+  --interactive
+  --workdir "$(pwd)"
+)
+
 if test "$allow_write" = "yes"; then
   docker_run_opts+=(--volume "${project_root}:${project_root}")
 else
   docker_run_opts+=(--volume "${project_root}:${project_root}:ro")
 fi
 
-host_only_network_name="${image_name}--host-only"
 if test "$allow_net" = "yes"; then
   :
 elif test "$allow_net" = "host_only"; then
   docker_run_opts+=(--net "$host_only_network_name")
 else
   docker_run_opts+=(--net none)
-fi
-
-if test "$allocate_tty" = "yes"; then
-  docker_run_opts+=(--tty)
 fi
 
 for dir in "${volume_dirs[@]}"; do
@@ -115,8 +119,12 @@ for dir in "${volume_dirs[@]}"; do
   fi
 done
 
+if test "$allocate_tty" = "yes"; then
+  docker_exec_opts+=(--tty)
+fi
+
 if test "$(uname)" = "Linux"; then
-  docker_run_opts+=(--user "$(id -u):$(id -g)")
+  docker_exec_opts+=(--user "$(id -u):$(id -g)")
 fi
 
 log() {
@@ -132,8 +140,14 @@ on_exit() {
   fi
   exec 1>&2
 
+  log "Stop container"
+  docker stop -t 0 "$container_name" || true
+
+  log "Remove container"
+  docker rm -f "$container_name" || true
+
   if docker network inspect "$host_only_network_name" &> /dev/null; then
-    log "Remove host network"
+    log "Remove network"
     docker network rm "$host_only_network_name"
   fi
 
@@ -148,6 +162,7 @@ Sandbox Configurations:
   image_name=${image_name}
   image_tag=${image_tag}
   docker_run_opts=${docker_run_opts[@]}
+  docker_exec_opts=${docker_exec_opts[@]}
   command=$@
 EOF
 )"
@@ -165,9 +180,19 @@ if test "$allow_net" = "host_only"; then
     -o com.docker.network.bridge.enable_ip_masquerade=false
 fi
 
+log "Create container"
+# shellcheck disable=SC2068
+docker run ${docker_run_opts[@]} "${image_name}:${image_tag}" sh < /dev/null
+
+log "Start container"
+docker start "$container_name"
+
+# TODO: setup firewall
+# ref. https://github.com/anthropics/claude-code/blob/main/.devcontainer/init-firewall.sh
+
 # restore stdout, stderr
 exec 2>&${stderr} {stderr}>&-
 exec 1>&${stdout} {stdout}>&-
 
 # shellcheck disable=SC2068
-docker run ${docker_run_opts[@]} "${image_name}:${image_tag}" $@
+docker exec ${docker_exec_opts[@]} "$container_name" $@
