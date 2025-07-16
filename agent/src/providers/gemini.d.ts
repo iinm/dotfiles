@@ -105,12 +105,15 @@ export type GeminiContentPartInlineData = {
   };
 };
 
-/* Tool */
+/**
+ * Tool
+ * ref. https://cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1beta1/FunctionDeclaration
+ */
 export type GeminiToolDefinition = {
   functionDeclarations: {
     name: string;
     description: string;
-    parameters: Record<string, unknown>;
+    parametersJsonSchema: Record<string, unknown>;
   }[];
 };
 

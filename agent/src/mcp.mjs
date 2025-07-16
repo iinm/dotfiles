@@ -92,17 +92,11 @@ async function createMCPTools(serverName, client) {
       return ![""].includes(tool.name);
     })
     .map((tool) => {
-      // Temporary workaround:
-      // Remove properties that are not supported by Gemini
-      const inputSchema = removeUnsupportedPropsFromInputSchema(
-        tool.inputSchema,
-      );
-
       return {
         def: {
           name: `mcp__${serverName}__${tool.name}`,
           description: tool.description || `${tool.name} tool`,
-          inputSchema: /** @type {Record<string, unknown>} */ (inputSchema),
+          inputSchema: tool.inputSchema,
         },
 
         /** @type {ToolImplementation} */
@@ -171,50 +165,4 @@ async function createMCPTools(serverName, client) {
     });
 
   return tools;
-}
-
-const UNSUPPORTED_INPUT_SCHEMA_PROPS = [
-  "$schema",
-  "additionalProperties",
-  "default",
-  "exclusiveMinimum",
-  "exclusiveMaximum",
-  "format",
-  "$ref",
-  "definitions",
-  "anyOf",
-  "allOf",
-];
-
-/**
- * @param {Record<string,unknown>} inputSchema
- * @returns {Record<string,unknown>}
- */
-export function removeUnsupportedPropsFromInputSchema(inputSchema) {
-  /**
-   * @param {unknown} value
-   * @returns {unknown}
-   */
-  function removeUnsupportedPropsRecur(value) {
-    if (Array.isArray(value)) {
-      return value.map(removeUnsupportedPropsRecur);
-    }
-
-    if (typeof value === "object" && value) {
-      /** @type {Record<string,unknown>} */
-      const cloned = {};
-      for (const [key, val] of Object.entries(value)) {
-        if (!UNSUPPORTED_INPUT_SCHEMA_PROPS.includes(key)) {
-          cloned[key] = removeUnsupportedPropsRecur(val);
-        }
-      }
-      return cloned;
-    }
-
-    return value;
-  }
-
-  return /** @type {Record<string,unknown>} */ (
-    removeUnsupportedPropsRecur(inputSchema)
-  );
 }

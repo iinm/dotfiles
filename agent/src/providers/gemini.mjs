@@ -440,7 +440,7 @@ function convertGenericToolDefinitionToGeminiFormat(tools) {
     functionDeclarations.push({
       name: tool.name,
       description: tool.description,
-      parameters: tool.inputSchema,
+      parametersJsonSchema: tool.inputSchema,
     });
   }
 
