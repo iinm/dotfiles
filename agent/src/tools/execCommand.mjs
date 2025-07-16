@@ -54,16 +54,24 @@ export const execCommandTool = {
           async (err, stdout, stderr) => {
             let stdoutOrMessage = stdout;
             if (stdout.length > OUTPUT_MAX_LENGTH) {
-              const filePath = await writeTmpFile(
-                stdout,
-                `exec_command-${command}`,
-                "txt",
-              );
-              const lineCount = stdout.split("\n").length;
-              stdoutOrMessage = [
-                `Content is large (${stdout.length} characters, ${lineCount} lines) and saved to ${filePath}`,
-                "Use head / tail / rg / sed to read specific parts",
-              ].join("\n");
+              if (["cat", "head", "tail"].includes(command)) {
+                const lineCount = stdout.split("\n").length;
+                stdoutOrMessage = [
+                  `Content is too large (${stdout.length} characters, ${lineCount} lines).`,
+                  "Use head, tail, rg, or sed to read specific parts.",
+                ].join("\n");
+              } else {
+                const filePath = await writeTmpFile(
+                  stdout,
+                  `exec_command-${command}`,
+                  "txt",
+                );
+                const lineCount = stdout.split("\n").length;
+                stdoutOrMessage = [
+                  `Content is too large (${stdout.length} characters, ${lineCount} lines). Saved to ${filePath}.`,
+                  "Use head, tail, rg, or sed to read specific parts.",
+                ].join("\n");
+              }
             }
 
             let stderrOrMessage = stderr;
