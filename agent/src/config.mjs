@@ -99,7 +99,7 @@ export async function loadAgentConfig({ tmuxSessionId }) {
     };
   }
 
-  console.log(styleText("green", "\nConfiguration files loaded:"));
+  console.log(styleText("green", "\nLoaded configuration files:"));
   console.log(loaded.map((p) => `- ${p}`).join("\n"));
 
   return merged;
