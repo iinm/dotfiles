@@ -317,22 +317,39 @@ if test "$allow_net" = "yes"; then
     "$(declare -f setup_firewall); setup_firewall ${allow_net_destinations[@]}"
 fi
 
-if test "$container_default_user_id" -ne 0; then
-  log "Updating user id"
+log "Setting up user"
 
-  update_user_id() {
-    local original_user_id="$1"
-    local original_group_id="$2"
-    local user_id="$3"
-    local group_id="$4"
+setup_user() {
+  local container_default_user_id="$1"
+  local container_default_group_id="$2"
+  local host_user_id="$3"
+  local host_group_id="$4"
 
-    usermod -u "$user_id" "$(getent passwd "$original_user_id" | cut -d: -f1)" || true
-    groupmod -g "$group_id" "$(getent group "$original_group_id" | cut -d: -f1)" || true
-  }
+  if test "$container_default_user_id" -eq 0; then
+    if ! id -u "$host_user_id" > /dev/null 2>&1; then
+      echo "Creating user $host_user_id"
+      adduser --uid "$host_user_id" --gid "$host_group_id" --home /home/sandbox-user --gecos "" --disabled-password sandbox-user
+    fi
+  else
+    local container_user
+    local container_group
+    container_user=$(getent passwd "$container_default_user_id" | cut -d: -f1)
+    container_group=$(getent group "$container_default_group_id" | cut -d: -f1)
 
-  docker exec --user 0:0 "$container_name" bash -eu -o pipefail -c \
-    "$(declare -f update_user_id); update_user_id $container_default_user_id $container_default_group_id $host_user_id $host_group_id"
-fi
+    echo "Updating user:group $container_default_user_id:$container_default_group_id -> $host_user_id:$host_group_id"
+    usermod -u "$host_user_id" "$container_user" || true
+    groupmod -g "$host_group_id" "$container_group" || true
+
+    echo "Updating home directory permissions"
+    chown -R "$host_user_id:$host_group_id" /home/"$container_user"
+  fi
+
+  echo "Updating group name"
+  groupmod --new-name sandbox-user "$(getent group "$host_group_id" | cut -d: -f1)"
+}
+
+docker exec --user 0:0 "$container_name" bash -eu -o pipefail -c \
+  "$(declare -f setup_user); setup_user $container_default_user_id $container_default_group_id $host_user_id $host_group_id"
 
 # restore stdout, stderr
 exec 2>&${stderr} {stderr}>&-
