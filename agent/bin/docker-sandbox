@@ -138,14 +138,12 @@ else
   docker_run_opts+=(--net none)
 fi
 
-mount_paths=()
 for dir in "${volume_dirs[@]}"; do
   volume_name="${image_name}--${dir//\//-}"
   if ! test -e "$dir"; then
     mkdir -p "$dir"
   fi
   mount_path="$(readlink -f "${dir}")"
-  mount_paths+=("${mount_path}")
   docker_run_opts+=(--volume "${volume_name}:${mount_path}")
   docker run --rm -v "${volume_name}:/mnt" busybox:latest chown "$host_user_id:$host_group_id" /mnt
 done
