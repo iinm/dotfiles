@@ -7,26 +7,28 @@ SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 help() {
   cat << HELP
 Usage: $SCRIPT_NAME --dockerfile FILE
-           [--allow-write] [--allow-net|--allow-net-host-only]
-           [--use-volume DIR] [--tty] [--verbose]
+           [--allow-write] [--allow-net [DESTINATIONS]]
+           [--use-volume DIRECTORIES] [--tty] [--verbose]
            COMMAND
 
 Execute a command within a container defined by a Dockerfile.
 
-  --dockerfile FILE      (Required) Path to the Dockerfile.
-  --allow-write          Enable write access to the project root directory inside the container.
-                         (By default, the project root is mounted read-only.)
-  --allow-net            Allow full network access for the container.
-  --allow-net-host-only  Allow network access only to the host machine (via a dedicated bridge network).
-  --use-volume DIR       Mount a named volume for the specified host directory.
-                         The volume will be mounted at the absolute path of DIR inside the container.
-  --tty                  Allocate a pseudo-TTY for the container.
-  --verbose              Output verbose logs to stderr.
+  --dockerfile FILE         (Required) Path to the Dockerfile.
+  --allow-write             Enable write access to the project root directory inside the container.
+                            (By default, the project root is mounted read-only.)
+  --allow-net DESTINATIONS  Allow connections to the specified domain or IP address.
+                            Multiple destinations can be specified, separated by commas.
+                            e.g. host.docker.internal:8000,registry.npmjs.org
+  --use-volume DIRECTORIES  Mount a named volume for the specified host directory.
+                            Multiple directories can be specified, separated by commas.
+                            The volume will be mounted at the absolute path of DIR inside the container.
+  --tty                     Allocate a pseudo-TTY for the container.
+  --verbose                 Output verbose logs to stderr.
 
 Examples:
-  $SCRIPT_NAME --dockerfile ./Dockerfile.sandbox --verbose --tty bash
-  $SCRIPT_NAME --dockerfile ./Dockerfile.sandbox --allow-write --allow-net --use-volume node_module npm install
-  $SCRIPT_NAME --dockerfile ./Dockerfile.sandbox --allow-net-host-only wget -O - host.docker.internal:8000 
+  $SCRIPT_NAME --dockerfile .agent/sandbox/Dockerfile --verbose --tty bash
+  $SCRIPT_NAME --dockerfile .agent/sandbox/Dockerfile --verbose --allow-write --allow-net registry.npmjs.org --use-volume node_modules npm install
+  $SCRIPT_NAME --dockerfile .agent/sandbox/Dockerfile --verbose --allow-net host.docker.internal:3306 npm run test
 HELP
 }
 
@@ -34,21 +36,37 @@ verbose="no"
 dockerfile=""
 allow_write="no"
 allow_net="no"
+allow_net_destinations=()
 volume_dirs=()
 allocate_tty="no"
 
 while test "$#" -gt 0; do
   case "$1" in
-    --help                ) help; exit 0 ;;
-    --dockerfile          ) dockerfile="$2"; shift 2 ;;
-    --verbose             ) verbose="yes"; shift ;;
-    --allow-write         ) allow_write="yes"; shift ;;
-    --allow-net           ) allow_net="yes"; shift ;;
-    --allow-net-host-only ) allow_net="host_only"; shift ;;
-    --tty                 ) allocate_tty="yes"; shift ;;
-    --use-volume          ) volume_dirs+=("$2"); shift 2 ;;
-    --*                   ) echo "Error: unknown option: $1" >&2; exit 1 ;;
-    *                     ) break ;;
+    --help        ) help; exit 0 ;;
+    --dockerfile  ) dockerfile="$2"; shift 2 ;;
+    --allow-write ) allow_write="yes"; shift ;;
+    --allow-net   )
+      allow_net="yes"
+      if test -n "$2" && ! grep -q "^--" <<< "$2"; then
+        IFS=',' read -r -a allow_net_destinations <<< "$2"
+        shift 2
+      else
+        shift 1
+      fi
+    ;;
+    --use-volume  )
+      if test -n "$2" && ! grep -q "^--" <<< "$2"; then
+        IFS=',' read -r -a volume_dirs <<< "$2"
+        shift 2
+      else
+        shift 1
+      fi
+    ;;
+    --tty         ) allocate_tty="yes"; shift ;;
+    --verbose     ) verbose="yes"; shift ;;
+    --            ) shift; continue ;;
+    --*           ) echo "Error: unknown option: $1" >&2; exit 1 ;;
+    *             ) break ;;
   esac
 done
 
@@ -65,6 +83,11 @@ if test "$#" -eq 0; then
   exit 1
 fi
 
+log() {
+  now="$(date "+%Y-%m-%d %H:%M:%S")"
+  echo -e "$now" "$@"
+}
+
 # save stdout, stderr
 exec {stdout}>&1
 exec {stderr}>&2
@@ -76,24 +99,26 @@ fi
 # stdout to stderr
 exec 1>&2
 
+host_user_id=$(id -u)
+host_group_id=$(id -g)
+
 # set options
 project_root="$(git rev-parse --show-toplevel || pwd)"
 image_name="${SCRIPT_NAME}--$(basename "$(pwd)")"
 image_tag="latest"
 container_name="${image_name}--$(env LC_CTYPE=C tr -dc '[:alnum:]' < /dev/urandom 2> /dev/null | head -c 10 || true)"
-host_only_network_name="${image_name}--host-only"
+network_name="${container_name}"
 
 docker_run_opts=(
   --name "$container_name"
   --interactive
-  --user 0:0
-  --add-host host.docker.internal:host-gateway
-  --cap-add NET_ADMIN
+  --user "$host_user_id:$host_group_id"
 )
 
 docker_exec_opts=(
   --interactive
   --workdir "$(pwd)"
+  --user "$host_user_id:$host_group_id"
 )
 
 if test "$allow_write" = "yes"; then
@@ -103,34 +128,31 @@ else
 fi
 
 if test "$allow_net" = "yes"; then
-  :
-elif test "$allow_net" = "host_only"; then
-  docker_run_opts+=(--net "$host_only_network_name")
+  docker_run_opts+=(
+    --cap-add NET_ADMIN
+    --cap-add NET_RAW
+    --net "$network_name"
+    --add-host host.docker.internal:host-gateway
+  )
 else
   docker_run_opts+=(--net none)
 fi
 
+mount_paths=()
 for dir in "${volume_dirs[@]}"; do
-  volume_name="$(basename "$(pwd)")--${dir//\//-}"
-  mount_path="$(readlink -f "${dir}")"
-  docker_run_opts+=(--volume "${volume_name}:${mount_path}")
-  if test "$(uname)" = "Linux"; then
-    docker run --rm -v "${volume_name}:/mnt" busybox:latest chown "$(id -u):$(id -g)" /mnt
+  volume_name="${image_name}--${dir//\//-}"
+  if ! test -e "$dir"; then
+    mkdir -p "$dir"
   fi
+  mount_path="$(readlink -f "${dir}")"
+  mount_paths+=("${mount_path}")
+  docker_run_opts+=(--volume "${volume_name}:${mount_path}")
+  docker run --rm -v "${volume_name}:/mnt" busybox:latest chown "$host_user_id:$host_group_id" /mnt
 done
 
 if test "$allocate_tty" = "yes"; then
   docker_exec_opts+=(--tty)
 fi
-
-if test "$(uname)" = "Linux"; then
-  docker_exec_opts+=(--user "$(id -u):$(id -g)")
-fi
-
-log() {
-  now="$(date "+%Y-%m-%d %H:%M:%S")"
-  echo -e "$now" "$@"
-}
 
 on_exit() {
   local exit_status="$?"
@@ -140,15 +162,15 @@ on_exit() {
   fi
   exec 1>&2
 
-  log "Stop container"
+  log "Stopping container"
   docker stop -t 0 "$container_name" || true
 
-  log "Remove container"
+  log "Removing container"
   docker rm -f "$container_name" || true
 
-  if docker network inspect "$host_only_network_name" &> /dev/null; then
-    log "Remove network"
-    docker network rm "$host_only_network_name"
+  if docker network inspect "$network_name" &> /dev/null; then
+    log "Removing network"
+    docker network rm "$network_name"
   fi
 
   return "$exit_status"
@@ -167,28 +189,152 @@ Sandbox Configurations:
 EOF
 )"
 
-log "Build docker image"
+log "Building docker image"
 # shellcheck disable=SC2068
 if ! docker build --tag "${image_name}:${image_tag}" - < "$dockerfile"; then
   log "Error: failed to build image"
   exit 1
 fi
 
-if test "$allow_net" = "host_only"; then
-  log "Create host-only network"
-  docker network create "$host_only_network_name" --driver bridge \
-    -o com.docker.network.bridge.enable_ip_masquerade=false
+if test "$allow_net" = "yes"; then
+  log "Creating network"
+  docker network create "$network_name" --driver bridge \
+    -o com.docker.network.bridge.enable_ip_masquerade=true
 fi
 
-log "Create container"
-# shellcheck disable=SC2068
-docker run ${docker_run_opts[@]} "${image_name}:${image_tag}" sh < /dev/null
+log "Inspect container user and group id"
+container_default_user_group=$(docker run --rm "${image_name}:${image_tag}" bash -c 'echo $(id -u):$(id -g)')
+container_default_user_id=$(cut -d: -f1 <<< "$container_default_user_group")
+container_default_group_id=$(cut -d: -f2 <<< "$container_default_user_group")
 
-log "Start container"
+log "Creating container"
+# shellcheck disable=SC2068
+docker run ${docker_run_opts[@]} "${image_name}:${image_tag}" bash < /dev/null
+
+log "Starting container"
 docker start "$container_name"
 
-# TODO: setup firewall
-# ref. https://github.com/anthropics/claude-code/blob/main/.devcontainer/init-firewall.sh
+if test "$allow_net" = "yes"; then
+  log "Setting up firewall"
+
+  setup_firewall() {
+    local destinations=("$@")
+    local addresses=()
+
+    local address_pattern='^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'
+    
+    for destination in "${destinations[@]}"; do
+      local host="$destination"
+      local port=''
+      if grep -q ':' <<< "$destination"; then
+        host=$(cut -d: -f1 <<< "$destination")
+        port=$(cut -d: -f2 <<< "$destination")
+      fi
+
+      # address
+      if grep -qE "$address_pattern" <<< "$host"; then
+        echo "Allow outgoing connections to $destination"
+        if test -n "$port"; then
+          addresses+=("$host:$port")
+        else
+          addresses+=("$host")
+        fi
+        continue
+      fi
+
+      # domain
+      local domain_address_count=0
+      for address in $(getent hosts "$host" | awk '{print $1}'; dig +short A "$host"); do
+        if ! grep -qE "$address_pattern" <<< "$address"; then
+          echo "Warn: Ignore invalid address $address of $host" >&2
+          continue
+        fi
+
+        if test -n "$port"; then
+          echo "Allow outgoing connections to $destination $address:$port"
+          addresses+=("$address:$port")
+        else
+          echo "Allow outgoing connections to $destination $address"
+          addresses+=("$address")
+        fi
+
+        domain_address_count=$((domain_address_count + 1))
+      done
+
+      if test "$domain_address_count" = 0; then
+        echo "Error: Failed to resolve any address for $host" >&2
+        exit 1
+      fi
+    done
+    
+    docker_host_address=$(ip route | grep default | cut -d" " -f3)
+    if test -z "$docker_host_address"; then
+      echo "Error: Failed to determine docker host address" >&2
+      exit 1
+    fi
+    
+    # reset
+    iptables -F
+    iptables -X
+    #iptables -t nat -F
+    #iptables -t nat -X
+    iptables -t mangle -F
+    iptables -t mangle -X
+    
+    # allow dns
+    iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+    iptables -A INPUT -p udp --sport 53 -j ACCEPT
+    
+    # allow localhost
+    iptables -A INPUT -i lo -j ACCEPT
+    iptables -A OUTPUT -o lo -j ACCEPT
+    
+    # set default policies
+    iptables -P INPUT DROP
+    iptables -P FORWARD DROP
+    iptables -P OUTPUT DROP
+    
+    # allow docker host
+    iptables -A INPUT -s "$docker_host_address" -j ACCEPT
+    iptables -A OUTPUT -d "$docker_host_address" -j ACCEPT
+    
+    # allow established connections
+    iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+    iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+    
+    # allow given addresses
+    for address in "${addresses[@]}"; do
+      if grep -q ':' <<< "$address"; then
+        port=$(cut -d: -f2 <<< "$address")
+        address=$(cut -d: -f1 <<< "$address")
+        iptables -A OUTPUT -d "$address" -p tcp --dport "$port" -j ACCEPT
+      else
+        iptables -A OUTPUT -d "$address" -j ACCEPT
+      fi
+    done
+  }
+
+  # shellcheck disable=SC2145
+  docker exec --user 0:0 "$container_name" bash -eu -o pipefail -c \
+    "$(declare -f setup_firewall); setup_firewall ${allow_net_destinations[@]}"
+fi
+
+if test "$container_default_user_id" -ne 0; then
+  log "Updating user id"
+
+  update_user_id() {
+    local original_user_id="$1"
+    local original_group_id="$2"
+    local user_id="$3"
+    local group_id="$4"
+
+    usermod -u "$user_id" "$(getent passwd "$original_user_id" | cut -d: -f1)" || true
+    groupmod -g "$group_id" "$(getent group "$original_group_id" | cut -d: -f1)" || true
+  }
+
+  docker exec --user 0:0 "$container_name" bash -eu -o pipefail -c \
+    "$(declare -f update_user_id); update_user_id $container_default_user_id $container_default_group_id $host_user_id $host_group_id"
+fi
 
 # restore stdout, stderr
 exec 2>&${stderr} {stderr}>&-

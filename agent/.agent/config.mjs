@@ -2,8 +2,8 @@ const sandbox = {
   command: "docker-sandbox",
   args: [
     "--dockerfile",
-    ".agent/Dockerfile.sandbox",
-    "--volume",
+    ".agent/sandbox/Dockerfile",
+    "--use-volume",
     "node_modules",
   ],
 };
@@ -29,8 +29,8 @@ export default {
             command: sandbox.command,
             args: [
               ...sandbox.args,
-              "--allow-net",
               "--allow-write",
+              "--allow-net registry.npmjs.org",
               toolUse.input.command,
               ...toolUse.input.args,
             ],

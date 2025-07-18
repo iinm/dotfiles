@@ -13,7 +13,7 @@
 .envrc
 
 # agent working directory
-.agent
+.agent/*
 
 # Claude Code
 .claude/settings.local.json
