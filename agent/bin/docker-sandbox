@@ -324,9 +324,13 @@ setup_user() {
   local host_group_id="$4"
 
   if test "$container_default_user_id" -eq 0; then
-    if ! id -u "$host_user_id" > /dev/null 2>&1; then
+    if ! id -gn "$host_group_id" &> /dev/null; then
+      echo "Creating group $host_group_id"
+      groupadd -g "$host_group_id" sandbox-group
+    fi
+    if ! id -un "$host_user_id" &> /dev/null; then
       echo "Creating user $host_user_id"
-      adduser --uid "$host_user_id" --gid "$host_group_id" --home /home/sandbox-user --gecos "" --disabled-password sandbox-user
+      useradd -u "$host_user_id" -g "$host_group_id" sandbox-user
     fi
   else
     local container_user
@@ -343,7 +347,7 @@ setup_user() {
   fi
 
   echo "Updating group name"
-  groupmod --new-name sandbox-user "$(getent group "$host_group_id" | cut -d: -f1)"
+  groupmod --new-name sandbox-group "$(getent group "$host_group_id" | cut -d: -f1)"
 }
 
 docker exec --user 0:0 "$container_name" bash -eu -o pipefail -c \
