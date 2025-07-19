@@ -215,6 +215,7 @@ docker start "$container_name"
 if test "$allow_net" = "yes"; then
   log "Setting up firewall"
 
+  unset -f setup_firewall
   setup_firewall() {
     local destinations=("$@")
     local addresses=()
@@ -314,11 +315,12 @@ if test "$allow_net" = "yes"; then
 
   # shellcheck disable=SC2145
   docker exec --user 0:0 "$container_name" bash -eu -o pipefail -c \
-    "$(declare -f setup_firewall); setup_firewall ${allow_net_destinations[@]}"
+    "$(declare -f setup_firewall); setup_firewall \"\$@\"" -- "${allow_net_destinations[@]}"
 fi
 
 log "Setting up user"
 
+unset -f setup_user
 setup_user() {
   local container_default_user_id="$1"
   local container_default_group_id="$2"
@@ -349,11 +351,11 @@ setup_user() {
 }
 
 docker exec --user 0:0 "$container_name" bash -eu -o pipefail -c \
-  "$(declare -f setup_user); setup_user $container_default_user_id $container_default_group_id $host_user_id $host_group_id"
+  "$(declare -f setup_user); setup_user \"\$@\"" -- "$container_default_user_id" "$container_default_group_id" "$host_user_id" "$host_group_id"
 
 # restore stdout, stderr
 exec 2>&${stderr} {stderr}>&-
 exec 1>&${stdout} {stdout}>&-
 
 # shellcheck disable=SC2068
-docker exec ${docker_exec_opts[@]} "$container_name" $@
+docker exec "${docker_exec_opts[@]}" "$container_name" "$@"
