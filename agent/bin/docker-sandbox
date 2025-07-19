@@ -18,6 +18,7 @@ Execute a command within a container defined by a Dockerfile.
                             (By default, the project root is mounted read-only.)
   --allow-net DESTINATIONS  Allow connections to the specified domain or IP address.
                             Multiple destinations can be specified, separated by commas.
+                             When no port is specified, allow only HTTPS (443) connections.
                             e.g. host.docker.internal:8000,registry.npmjs.org
   --use-volume DIRECTORIES  Mount a named volume for the specified host directory.
                             Multiple directories can be specified, separated by commas.
@@ -304,11 +305,12 @@ if test "$allow_net" = "yes"; then
     # allow given addresses
     for address in "${addresses[@]}"; do
       if grep -q ':' <<< "$address"; then
-        port=$(cut -d: -f2 <<< "$address")
         address=$(cut -d: -f1 <<< "$address")
+        port=$(cut -d: -f2 <<< "$address")
         iptables -A OUTPUT -d "$address" -p tcp --dport "$port" -j ACCEPT
       else
-        iptables -A OUTPUT -d "$address" -j ACCEPT
+        # allow only HTTPS (443) connections
+        iptables -A OUTPUT -d "$address" -p tcp --dport 443 -j ACCEPT
       fi
     done
   }
