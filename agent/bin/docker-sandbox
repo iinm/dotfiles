@@ -189,7 +189,6 @@ EOF
 )"
 
 log "Building docker image"
-# shellcheck disable=SC2068
 if ! docker build --tag "${image_name}:${image_tag}" - < "$dockerfile"; then
   log "Error: failed to build image"
   exit 1
@@ -207,8 +206,7 @@ container_default_user_id=$(cut -d: -f1 <<< "$container_default_user_group")
 container_default_group_id=$(cut -d: -f2 <<< "$container_default_user_group")
 
 log "Creating container"
-# shellcheck disable=SC2068
-docker run ${docker_run_opts[@]} "${image_name}:${image_tag}" bash < /dev/null
+docker run "${docker_run_opts[@]}" "${image_name}:${image_tag}" bash < /dev/null
 
 log "Starting container"
 docker start "$container_name"
@@ -315,7 +313,6 @@ if test "$allow_net" = "yes"; then
     done
   }
 
-  # shellcheck disable=SC2145
   docker exec --user 0:0 "$container_name" bash -eu -o pipefail -c \
     "$(declare -f setup_firewall); setup_firewall \"\$@\"" -- "${allow_net_destinations[@]}"
 fi
@@ -359,5 +356,4 @@ docker exec --user 0:0 "$container_name" bash -eu -o pipefail -c \
 exec 2>&${stderr} {stderr}>&-
 exec 1>&${stdout} {stdout}>&-
 
-# shellcheck disable=SC2068
 docker exec "${docker_exec_opts[@]}" "$container_name" "$@"
