@@ -314,7 +314,7 @@ if test "$allow_net" = "yes"; then
     "$(declare -f setup_firewall); setup_firewall \"\$@\"" -- "${allow_net_destinations[@]}"
 fi
 
-log "Setting up user"
+log "Setting up container user to match host user ($host_user_id:$host_group_id) for file access"
 
 unset -f setup_user
 setup_user() {
@@ -323,31 +323,83 @@ setup_user() {
   local host_user_id="$3"
   local host_group_id="$4"
 
+  local user
+  local group
+  user=$(getent passwd "$container_default_user_id" | cut -d: -f1 2> /dev/null || echo "")
+  group=$(getent group "$container_default_group_id" | cut -d: -f1 2> /dev/null || echo "")
+
   if test "$container_default_user_id" -eq 0; then
-    if ! id -gn "$host_group_id" &> /dev/null; then
-      echo "Creating group $host_group_id"
-      groupadd -g "$host_group_id" sandbox-group
+    echo "Container default user is root, creating sandbox user/group"
+    
+    if ! getent group sandbox &> /dev/null; then
+      echo "Creating group sandbox"
+      groupadd sandbox
     fi
-    if ! id -un "$host_user_id" &> /dev/null; then
-      echo "Creating user $host_user_id"
-      useradd -u "$host_user_id" -g "$host_group_id" sandbox-user
+    
+    if ! getent passwd sandbox &> /dev/null; then
+      echo "Creating user sandbox"
+      useradd -g sandbox -m sandbox
     fi
-  else
-    local container_user
-    local container_group
-    container_user=$(getent passwd "$container_default_user_id" | cut -d: -f1)
-    container_group=$(getent group "$container_default_group_id" | cut -d: -f1)
-
-    echo "Updating user:group $container_default_user_id:$container_default_group_id -> $host_user_id:$host_group_id"
-    usermod -u "$host_user_id" "$container_user" || true
-    groupmod -g "$host_group_id" "$container_group" || true
-
-    echo "Updating home directory permissions"
-    chown -R "$host_user_id:$host_group_id" /home/"$container_user"
+    
+    user="sandbox"
+    group="sandbox"
   fi
 
-  echo "Updating group name"
-  groupmod --new-name sandbox-group "$(getent group "$host_group_id" | cut -d: -f1)"
+  echo "Updating group '$group' ID to $host_group_id"
+  local conflicting_group
+  conflicting_group=$(getent group "$host_group_id" | cut -d: -f1 2> /dev/null || echo "")
+  if test -n "$conflicting_group" && test "$conflicting_group" != "$group"; then
+    echo "Resolving group ID conflict: moving group '$conflicting_group'"
+    local temp_gid
+    for gid in $(seq 1000 65533); do
+      if ! getent group "$gid" &> /dev/null; then
+        temp_gid=$gid
+        break
+      fi
+    done
+    
+    if test -z "$temp_gid"; then
+      echo "Error: No available GID in user range" >&2
+      return 1
+    fi
+    
+    groupmod -g "$temp_gid" "$conflicting_group"
+  fi
+
+  groupmod -g "$host_group_id" "$group"
+
+  echo "Updating user '$user' ID to $host_user_id:$host_group_id"
+  local conflicting_user
+  conflicting_user=$(getent passwd "$host_user_id" | cut -d: -f1 2> /dev/null || echo "")
+  if test -n "$conflicting_user" && test "$conflicting_user" != "$user"; then
+    echo "Resolving user ID conflict: moving user '$conflicting_user'"
+    local temp_uid
+    for uid in $(seq 1000 65533); do
+      if ! getent passwd "$uid" &> /dev/null; then
+        temp_uid=$uid
+        break
+      fi
+    done
+    
+    if test -z "$temp_uid"; then
+      echo "Error: No available UID in user range" >&2
+      return 1
+    fi
+    
+    usermod -u "$temp_uid" "$conflicting_user"
+  fi
+
+  usermod -u "$host_user_id" -g "$host_group_id" "$user"
+
+  # Adjust home directory permissions to match new UID/GID
+  local home_dir
+  home_dir=$(getent passwd "$user" | cut -d: -f6)
+  if test -n "$home_dir" && test -d "$home_dir"; then
+    echo "Updating home directory ownership: $home_dir"
+    chown -R "$host_user_id:$host_group_id" "$home_dir"
+  fi
+
+  echo "User setup completed: $user ($host_user_id:$host_group_id)"
 }
 
 docker exec --user 0:0 "$container_name" bash -eu -o pipefail -c \
