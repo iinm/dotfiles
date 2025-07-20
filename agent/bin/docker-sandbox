@@ -12,7 +12,7 @@ Usage: $SCRIPT_NAME --dockerfile FILE
            [--allow-write] [--allow-net [DESTINATIONS]]
            [--use-volume DIRECTORIES]
            [--mount-writable HOST_DIR:CONTAINER_DIR] [--mount-readonly HOST_DIR:CONTAINER_DIR]
-           [--publish [HOST_ADDRESS:]HOST_PORT:CONTAINER_PORT]
+           [--publish [[HOST_ADDRESS:]HOST_PORT:]CONTAINER_PORT]
            [--tty]
            [--verbose] [--dry-run]
            COMMAND
@@ -34,8 +34,9 @@ Execute a command within a container defined by a Dockerfile.
                             Mount a host directory to a container directory with read-only access.
   --mount-writable HOST_DIR:CONTAINER_DIR
                             Mount a host directory to a container directory with write access.
-  --publish [HOST_ADDRESS:]HOST_PORT:CONTAINER_PORT
-                            Publish a container's port(s) to the host. If the host address is not specified, the port will be bound to 127.0.0.1 by default.
+  --publish [[HOST_ADDRESS:]HOST_PORT:]CONTAINER_PORT
+                            Publish a container's port(s) to the host. If the host address is not specified,
+                            the port will be bound to 127.0.0.1 by default.
   --tty                     Allocate a pseudo-TTY for the container.
   --verbose                 Output verbose logs to stderr.
   --dry-run                 Do not execute the command, just print the command to stdout.
@@ -222,6 +223,22 @@ main() {
     local container_dir
     IFS=':' read -r host_dir container_dir <<< "$mount"
     docker_run_opts+=(--mount "type=bind,source=${host_dir},target=${container_dir}")
+  done
+
+  # publish options
+  for port in "${publish_ports[@]}"; do
+    if grep -qE '.+:.+:.+' <<< "$port"; then
+      # host_address:host_port:container_port
+      IFS=':' read -r host_address host_port container_port <<< "$port"
+      docker_run_opts+=(--publish "${host_address}:${host_port}:${container_port}")
+    elif grep -qE '.+:.+' <<< "$port"; then
+      # host_port:container_port
+      IFS=':' read -r host_port container_port <<< "$port"
+      docker_run_opts+=(--publish "127.0.0.1:${host_port}:${container_port}")
+    else
+      # # container_port
+      docker_run_opts+=(--publish "127.0.0.1::${port}")
+    fi
   done
   
   if test "$allocate_tty" = "yes"; then
