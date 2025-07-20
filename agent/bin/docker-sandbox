@@ -204,6 +204,7 @@ log "Inspect container user and group id"
 container_default_user_group=$(docker run --rm "${image_name}:${image_tag}" bash -c 'echo $(id -u):$(id -g)')
 container_default_user_id=$(cut -d: -f1 <<< "$container_default_user_group")
 container_default_group_id=$(cut -d: -f2 <<< "$container_default_user_group")
+echo "Container default user and group id: $container_default_user_group"
 
 log "Starting container"
 docker run --detach "${docker_run_opts[@]}" "${image_name}:${image_tag}" tail -f /dev/null
