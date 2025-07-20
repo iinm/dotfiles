@@ -44,9 +44,8 @@ main() {
   local volume_dirs=()
   local allocate_tty="no"
 
-  # TODO: global
-  verbose="no"
-  dry_run="no"
+  VERBOSE="no"
+  DRY_RUN="no"
   
   while test "$#" -gt 0; do
     case "$1" in
@@ -71,8 +70,8 @@ main() {
         fi
       ;;
       --tty         ) allocate_tty="yes"; shift ;;
-      --verbose     ) verbose="yes"; shift ;;
-      --dry-run     ) dry_run="yes"; shift ;;
+      --verbose     ) VERBOSE="yes"; shift ;;
+      --dry-run     ) DRY_RUN="yes"; shift ;;
       --            ) shift; continue ;;
       --*           ) echo "Error: unknown option: $1" >&2; return 1 ;;
       *             ) break ;;
@@ -103,14 +102,14 @@ main() {
   exec 4>&2
  
   run() {
-    if test "$dry_run" = "yes"; then
+    if test "$DRY_RUN" = "yes"; then
       echo "DRY_RUN: $*" >&3
       return 0
     fi
     "$@"
   }
  
-  if test "$verbose" = "no"; then
+  if test "$VERBOSE" = "no"; then
     # discard stderr
     exec 2> /dev/null
   fi
@@ -136,12 +135,11 @@ main() {
   image_name="${SCRIPT_NAME}--$(basename "$(pwd)")"
   image_tag="latest"
 
-  # TODO: global
-  container_name="${image_name}--$(env LC_CTYPE=C tr -dc '[:alnum:]' < /dev/urandom 2> /dev/null | head -c 10 || true)"
-  network_name="${container_name}"
+  CONTAINER_NAME="${image_name}--$(env LC_CTYPE=C tr -dc '[:alnum:]' < /dev/urandom 2> /dev/null | head -c 10 || true)"
+  NETWORK_NAME="${CONTAINER_NAME}"
   
   local docker_run_opts=(
-    --name "$container_name"
+    --name "$CONTAINER_NAME"
     --entrypoint ""
     --user "$host_user_id:$host_group_id"
     --mount "type=bind,source=${SCRIPT_PATH},target=${SCRIPT_PATH},readonly"
@@ -163,7 +161,7 @@ main() {
     docker_run_opts+=(
       --cap-add NET_ADMIN
       --cap-add NET_RAW
-      --net "$network_name"
+      --net "$NETWORK_NAME"
       --add-host host.docker.internal:host-gateway
     )
   else
@@ -185,23 +183,23 @@ main() {
     docker_exec_opts+=(--tty)
   fi
 
-  cleanup() {
+  on_exit() {
     local exit_status="$?"
   
-    if test "$verbose" = "no"; then
+    if test "$VERBOSE" = "no"; then
       exec 2> /dev/null
     fi
     exec 1>&2
   
     log "Stopping container"
-    run docker stop -t 0 "$container_name" || true
+    run docker stop -t 0 "$CONTAINER_NAME" || true
   
     log "Removing container"
-    run docker rm -f "$container_name" || true
+    run docker rm -f "$CONTAINER_NAME" || true
   
-    if docker network inspect "$network_name" &> /dev/null; then
+    if docker network inspect "$NETWORK_NAME" &> /dev/null; then
       log "Removing network"
-      run docker network rm "$network_name"
+      run docker network rm "$NETWORK_NAME"
     fi
 
     exec 3>&-
@@ -210,7 +208,7 @@ main() {
     return "$exit_status"
   }
   
-  trap 'cleanup' EXIT
+  trap 'on_exit' EXIT
 
   log "$(cat << EOF
 Sandbox Configurations:
@@ -231,7 +229,7 @@ EOF
 
   if test "$allow_net" = "yes"; then
     log "Creating network"
-    run docker network create "$network_name" --driver bridge \
+    run docker network create "$NETWORK_NAME" --driver bridge \
       -o com.docker.network.bridge.enable_ip_masquerade=true
   fi
 
@@ -239,7 +237,7 @@ EOF
   local container_default_user_group
   local container_default_user_id
   local container_default_group_id
-  if test "$dry_run" = "no"; then
+  if test "$DRY_RUN" = "no"; then
     container_default_user_group=$(docker run --rm "${image_name}:${image_tag}" bash -c 'echo $(id -u):$(id -g)')
   else
     container_default_user_group="0:0"
@@ -253,11 +251,11 @@ EOF
 
   if test "$allow_net" = "yes"; then
     log "Setting up firewall"
-    run docker exec --user 0:0 "$container_name" "$SCRIPT_PATH" setup_container_firewall "${allow_net_destinations[@]}"
+    run docker exec --user 0:0 "$CONTAINER_NAME" "$SCRIPT_PATH" setup_container_firewall "${allow_net_destinations[@]}"
   fi
   
   log "Setting up container user to match host user ($host_user_id:$host_group_id) for file access"
-  run docker exec --user 0:0 "$container_name" "$SCRIPT_PATH" setup_container_user \
+  run docker exec --user 0:0 "$CONTAINER_NAME" "$SCRIPT_PATH" setup_container_user \
      "$container_default_user_id" "$container_default_group_id" \
      "$host_user_id" "$host_group_id"
   
@@ -265,7 +263,7 @@ EOF
   exec 1>&3
   exec 2>&4
   
-  run docker exec "${docker_exec_opts[@]}" "$container_name" "$@"
+  run docker exec "${docker_exec_opts[@]}" "$CONTAINER_NAME" "$@"
 }
 
 setup_container_firewall() {
