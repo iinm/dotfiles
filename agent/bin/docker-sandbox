@@ -33,13 +33,13 @@ Examples:
 HELP
 }
 
-verbose="no"
 dockerfile=""
 allow_write="no"
 allow_net="no"
 allow_net_destinations=()
 volume_dirs=()
 allocate_tty="no"
+verbose="no"
 
 while test "$#" -gt 0; do
   case "$1" in
@@ -90,8 +90,8 @@ log() {
 }
 
 # save stdout, stderr
-exec {stdout}>&1
-exec {stderr}>&2
+exec 3>&1
+exec 4>&2
 
 if test "$verbose" = "no"; then
   # discard stderr
@@ -104,7 +104,9 @@ host_user_id=$(id -u)
 host_group_id=$(id -g)
 
 # set options
-project_root="$(git rev-parse --show-toplevel || pwd)"
+host_project_root="$(git rev-parse --show-toplevel || pwd)"
+container_project_root="/sandbox/$(basename "$host_project_root")"
+container_workdir="$(pwd | sed "s,^${host_project_root},${container_project_root},")"
 image_name="${SCRIPT_NAME}--$(basename "$(pwd)")"
 image_tag="latest"
 container_name="${image_name}--$(env LC_CTYPE=C tr -dc '[:alnum:]' < /dev/urandom 2> /dev/null | head -c 10 || true)"
@@ -118,14 +120,14 @@ docker_run_opts=(
 
 docker_exec_opts=(
   --interactive
-  --workdir "$(pwd)"
+  --workdir "$container_workdir"
   --user "$host_user_id:$host_group_id"
 )
 
 if test "$allow_write" = "yes"; then
-  docker_run_opts+=(--volume "${project_root}:${project_root}")
+  docker_run_opts+=(--volume "${host_project_root}:${container_project_root}")
 else
-  docker_run_opts+=(--volume "${project_root}:${project_root}:ro")
+  docker_run_opts+=(--volume "${host_project_root}:${container_project_root}:ro")
 fi
 
 if test "$allow_net" = "yes"; then
@@ -144,7 +146,7 @@ for dir in "${volume_dirs[@]}"; do
   if ! test -e "$dir"; then
     mkdir -p "$dir"
   fi
-  mount_path="$(readlink -f "${dir}")"
+  mount_path="$(readlink -f "${dir}" | sed "s,^${host_project_root},${container_project_root},")"
   docker_run_opts+=(--volume "${volume_name}:${mount_path}")
   docker run --rm -v "${volume_name}:/mnt" busybox:latest chown "$host_user_id:$host_group_id" /mnt
 done
@@ -407,7 +409,7 @@ docker exec --user 0:0 "$container_name" bash -eu -o pipefail -c \
   "$(declare -f setup_user); setup_user \"\$@\"" -- "$container_default_user_id" "$container_default_group_id" "$host_user_id" "$host_group_id"
 
 # restore stdout, stderr
-exec 2>&${stderr} {stderr}>&-
-exec 1>&${stdout} {stdout}>&-
+exec 1>&3 3>&-
+exec 2>&4 4>&-
 
 docker exec "${docker_exec_opts[@]}" "$container_name" "$@"
