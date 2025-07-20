@@ -30,10 +30,10 @@ Execute a command within a container defined by a Dockerfile.
   --use-volume DIRECTORIES  Mount a named volume for the specified host directory.
                             Multiple directories can be specified, separated by commas.
                             The volume will be mounted at the absolute path of DIR inside the container.
-  --mount-writable HOST_DIR:CONTAINER_DIR
-                            Mount a host directory to a container directory with write access.
   --mount-readonly HOST_DIR:CONTAINER_DIR
                             Mount a host directory to a container directory with read-only access.
+  --mount-writable HOST_DIR:CONTAINER_DIR
+                            Mount a host directory to a container directory with write access.
   --publish [HOST_ADDRESS:]HOST_PORT:CONTAINER_PORT
                             Publish a container's port(s) to the host. If the host address is not specified, the port will be bound to 127.0.0.1 by default.
   --tty                     Allocate a pseudo-TTY for the container.
@@ -53,6 +53,9 @@ main() {
   local allow_net="no"
   local allow_net_destinations=()
   local volume_dirs=()
+  local readonly_mounts=()
+  local writable_mounts=()
+  local publish_ports=()
   local allocate_tty="no"
   local platform=""
 
@@ -73,15 +76,23 @@ main() {
         else
           shift 1
         fi
-      ;;
+        ;;
       --use-volume  )
-        if test -n "$2" && ! grep -q "^--" <<< "$2"; then
-          IFS=',' read -r -a volume_dirs <<< "$2"
-          shift 2
-        else
-          shift 1
-        fi
-      ;;
+        IFS=',' read -r -a volume_dirs <<< "$2"
+        shift 2
+        ;;
+      --mount-readonly)
+        IFS=',' read -r -a readonly_mounts <<< "$2"
+        shift 2
+        ;;
+      --mount-writable)
+        IFS=',' read -r -a writable_mounts <<< "$2"
+        shift 2
+        ;;
+      --publish     )
+        IFS=',' read -r -a publish_ports <<< "$2"
+        shift 2
+        ;;
       --tty         ) allocate_tty="yes"; shift ;;
       --verbose     ) VERBOSE="yes"; shift ;;
       --dry-run     ) DRY_RUN="yes"; shift ;;
@@ -186,6 +197,7 @@ main() {
     docker_run_opts+=(--net none)
   fi
   
+  # volume options
   for dir in "${volume_dirs[@]}"; do
     volume_name="${image_name}--${dir//\//-}"
     if ! test -e "$dir"; then
@@ -195,6 +207,21 @@ main() {
     docker_run_opts+=(--volume "${volume_name}:${mount_path}")
     log "Setting up volume ownership for $dir ($host_user_id:$host_group_id)"
     run docker run --rm -v "${volume_name}:/mnt" busybox:latest chown "$host_user_id:$host_group_id" /mnt
+  done
+
+  # mount options
+  for mount in "${readonly_mounts[@]}"; do
+    local host_dir
+    local container_dir
+    IFS=':' read -r host_dir container_dir <<< "$mount"
+    docker_run_opts+=(--mount "type=bind,source=${host_dir},target=${container_dir},readonly")
+  done
+  
+  for mount in "${writable_mounts[@]}"; do
+    local host_dir
+    local container_dir
+    IFS=':' read -r host_dir container_dir <<< "$mount"
+    docker_run_opts+=(--mount "type=bind,source=${host_dir},target=${container_dir}")
   done
   
   if test "$allocate_tty" = "yes"; then
@@ -461,7 +488,7 @@ setup_container_user() {
   home_dir=$(getent passwd "$user" | cut -d: -f6)
   if test -n "$home_dir" && test -d "$home_dir"; then
     echo "Updating home directory ownership: $home_dir"
-    chown -R "$host_user_id:$host_group_id" "$home_dir"
+    chown -R "$host_user_id:$host_group_id" "$home_dir" || true
   fi
 
   echo "User setup completed: $user ($host_user_id:$host_group_id)"
