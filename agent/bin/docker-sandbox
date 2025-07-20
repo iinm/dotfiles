@@ -9,13 +9,17 @@ help() {
   cat << HELP
 Usage: $SCRIPT_NAME --dockerfile FILE
            [--allow-write] [--allow-net [DESTINATIONS]]
-           [--use-volume DIRECTORIES] [--tty]
+           [--use-volume DIRECTORIES]
+           [--mount-writable HOST_DIR:CONTAINER_DIR] [--mount-readonly HOST_DIR:CONTAINER_DIR]
+           [--publish [HOST_ADDRESS:]HOST_PORT:CONTAINER_PORT]
+           [--tty]
            [--verbose] [--dry-run]
            COMMAND
 
 Execute a command within a container defined by a Dockerfile.
 
   --dockerfile FILE         (Required) Path to the Dockerfile.
+  --arch                    Specify the architecture for both image building and container execution. For example: linux/arm64 or linux/amd64.
   --allow-write             Enable write access to the project root directory inside the container.
                             (By default, the project root is mounted read-only.)
   --allow-net DESTINATIONS  Allow connections to the specified domain or IP address.
@@ -25,6 +29,12 @@ Execute a command within a container defined by a Dockerfile.
   --use-volume DIRECTORIES  Mount a named volume for the specified host directory.
                             Multiple directories can be specified, separated by commas.
                             The volume will be mounted at the absolute path of DIR inside the container.
+  --mount-writable HOST_DIR:CONTAINER_DIR
+                            Mount a host directory to a container directory with write access.
+  --mount-readonly HOST_DIR:CONTAINER_DIR
+                            Mount a host directory to a container directory with read-only access.
+  --publish [HOST_ADDRESS:]HOST_PORT:CONTAINER_PORT
+                            Publish a container's port(s) to the host. If the host address is not specified, the port will be bound to 127.0.0.1 by default.
   --tty                     Allocate a pseudo-TTY for the container.
   --verbose                 Output verbose logs to stderr.
   --dry-run                 Do not execute the command, just print the command to stdout.
