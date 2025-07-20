@@ -8,6 +8,7 @@ SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 help() {
   cat << HELP
 Usage: $SCRIPT_NAME --dockerfile FILE
+           [--platform PLATFORM]
            [--allow-write] [--allow-net [DESTINATIONS]]
            [--use-volume DIRECTORIES]
            [--mount-writable HOST_DIR:CONTAINER_DIR] [--mount-readonly HOST_DIR:CONTAINER_DIR]
@@ -19,7 +20,7 @@ Usage: $SCRIPT_NAME --dockerfile FILE
 Execute a command within a container defined by a Dockerfile.
 
   --dockerfile FILE         (Required) Path to the Dockerfile.
-  --arch                    Specify the architecture for both image building and container execution. For example: linux/arm64 or linux/amd64.
+  --platform                Specify the platform for both image building and container execution. For example: linux/arm64 or linux/amd64.
   --allow-write             Enable write access to the project root directory inside the container.
                             (By default, the project root is mounted read-only.)
   --allow-net DESTINATIONS  Allow connections to the specified domain or IP address.
@@ -53,6 +54,7 @@ main() {
   local allow_net_destinations=()
   local volume_dirs=()
   local allocate_tty="no"
+  local platform=""
 
   VERBOSE="no"
   DRY_RUN="no"
@@ -61,6 +63,7 @@ main() {
     case "$1" in
       --help        ) help; return 0 ;;
       --dockerfile  ) dockerfile="$2"; shift 2 ;;
+      --platform    ) platform="$2"; shift 2 ;;
       --allow-write ) allow_write="yes"; shift ;;
       --allow-net   )
         allow_net="yes"
@@ -147,6 +150,11 @@ main() {
 
   CONTAINER_NAME="${image_name}--$(env LC_CTYPE=C tr -dc '[:alnum:]' < /dev/urandom 2> /dev/null | head -c 10 || true)"
   NETWORK_NAME="${CONTAINER_NAME}"
+
+  local docker_platform_opts=()
+  if test -n "$platform"; then
+    docker_platform_opts+=(--platform "$platform")
+  fi
   
   local docker_run_opts=(
     --name "$CONTAINER_NAME"
@@ -232,7 +240,7 @@ EOF
   )"
 
   log "Building docker image"
-  if ! run docker build --tag "${image_name}:${image_tag}" - < "$dockerfile"; then
+  if ! run docker build "${docker_platform_opts[@]}" --tag "${image_name}:${image_tag}" - < "$dockerfile"; then
     log "Error: failed to build image"
     return 1
   fi
@@ -248,7 +256,7 @@ EOF
   local container_default_user_id
   local container_default_group_id
   if test "$DRY_RUN" = "no"; then
-    container_default_user_group=$(docker run --rm "${image_name}:${image_tag}" bash -c 'echo $(id -u):$(id -g)')
+    container_default_user_group=$(docker run --rm "${docker_platform_opts[@]}" "${image_name}:${image_tag}" bash -c 'echo $(id -u):$(id -g)')
   else
     container_default_user_group="0:0"
   fi
@@ -257,7 +265,7 @@ EOF
   echo "Container default user and group id: $container_default_user_group"
   
   log "Starting container"
-  run docker run --detach "${docker_run_opts[@]}" "${image_name}:${image_tag}" tail -f /dev/null
+  run docker run --detach "${docker_platform_opts[@]}" "${docker_run_opts[@]}" "${image_name}:${image_tag}" tail -f /dev/null
 
   if test "$allow_net" = "yes"; then
     log "Setting up firewall"
