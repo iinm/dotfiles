@@ -2,6 +2,7 @@
 
 set -eu -o pipefail
 
+SCRIPT_PATH="${BASH_SOURCE[0]}"
 SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 
 help() {
@@ -33,153 +34,166 @@ Examples:
 HELP
 }
 
-dockerfile=""
-allow_write="no"
-allow_net="no"
-allow_net_destinations=()
-volume_dirs=()
-allocate_tty="no"
-verbose="no"
-
-while test "$#" -gt 0; do
-  case "$1" in
-    --help        ) help; exit 0 ;;
-    --dockerfile  ) dockerfile="$2"; shift 2 ;;
-    --allow-write ) allow_write="yes"; shift ;;
-    --allow-net   )
-      allow_net="yes"
-      if test -n "$2" && ! grep -q "^--" <<< "$2"; then
-        IFS=',' read -r -a allow_net_destinations <<< "$2"
-        shift 2
-      else
-        shift 1
-      fi
-    ;;
-    --use-volume  )
-      if test -n "$2" && ! grep -q "^--" <<< "$2"; then
-        IFS=',' read -r -a volume_dirs <<< "$2"
-        shift 2
-      else
-        shift 1
-      fi
-    ;;
-    --tty         ) allocate_tty="yes"; shift ;;
-    --verbose     ) verbose="yes"; shift ;;
-    --            ) shift; continue ;;
-    --*           ) echo "Error: unknown option: $1" >&2; exit 1 ;;
-    *             ) break ;;
-  esac
-done
-
-# validate arguments
-if test -z "$dockerfile"; then
-  echo "Error: --dockerfile is required" >&2
-  help >&2
-  exit 1
-fi
-
-if test "$#" -eq 0; then
-  echo "Error: COMMAND is required" >&2
-  help >&2
-  exit 1
-fi
-
-log() {
-  now="$(date "+%Y-%m-%d %H:%M:%S")"
-  echo -e "$now" "$@"
-}
-
-# save stdout, stderr
-exec 3>&1
-exec 4>&2
-
-if test "$verbose" = "no"; then
-  # discard stderr
-  exec 2> /dev/null
-fi
-# stdout to stderr
-exec 1>&2
-
-host_user_id=$(id -u)
-host_group_id=$(id -g)
-
-# set options
-host_project_root="$(git rev-parse --show-toplevel || pwd)"
-container_project_root="/sandbox/$(basename "$host_project_root")"
-container_workdir="$(pwd | sed "s,^${host_project_root},${container_project_root},")"
-image_name="${SCRIPT_NAME}--$(basename "$(pwd)")"
-image_tag="latest"
-container_name="${image_name}--$(env LC_CTYPE=C tr -dc '[:alnum:]' < /dev/urandom 2> /dev/null | head -c 10 || true)"
-network_name="${container_name}"
-
-docker_run_opts=(
-  --name "$container_name"
-  --entrypoint ""
-  --user "$host_user_id:$host_group_id"
-)
-
-docker_exec_opts=(
-  --interactive
-  --workdir "$container_workdir"
-  --user "$host_user_id:$host_group_id"
-)
-
-if test "$allow_write" = "yes"; then
-  docker_run_opts+=(--volume "${host_project_root}:${container_project_root}")
-else
-  docker_run_opts+=(--volume "${host_project_root}:${container_project_root}:ro")
-fi
-
-if test "$allow_net" = "yes"; then
-  docker_run_opts+=(
-    --cap-add NET_ADMIN
-    --cap-add NET_RAW
-    --net "$network_name"
-    --add-host host.docker.internal:host-gateway
-  )
-else
-  docker_run_opts+=(--net none)
-fi
-
-for dir in "${volume_dirs[@]}"; do
-  volume_name="${image_name}--${dir//\//-}"
-  if ! test -e "$dir"; then
-    mkdir -p "$dir"
+main() {
+  local dockerfile=""
+  local allow_write="no"
+  local allow_net="no"
+  local allow_net_destinations=()
+  local volume_dirs=()
+  local allocate_tty="no"
+  local verbose="no"
+  
+  while test "$#" -gt 0; do
+    case "$1" in
+      --help        ) help; exit 0 ;;
+      --dockerfile  ) dockerfile="$2"; shift 2 ;;
+      --allow-write ) allow_write="yes"; shift ;;
+      --allow-net   )
+        allow_net="yes"
+        if test -n "$2" && ! grep -q "^--" <<< "$2"; then
+          IFS=',' read -r -a allow_net_destinations <<< "$2"
+          shift 2
+        else
+          shift 1
+        fi
+      ;;
+      --use-volume  )
+        if test -n "$2" && ! grep -q "^--" <<< "$2"; then
+          IFS=',' read -r -a volume_dirs <<< "$2"
+          shift 2
+        else
+          shift 1
+        fi
+      ;;
+      --tty         ) allocate_tty="yes"; shift ;;
+      --verbose     ) verbose="yes"; shift ;;
+      --            ) shift; continue ;;
+      --*           ) echo "Error: unknown option: $1" >&2; exit 1 ;;
+      *             ) break ;;
+    esac
+  done
+  
+  # validate arguments
+  if test -z "$dockerfile"; then
+    echo "Error: --dockerfile is required" >&2
+    help >&2
+    exit 1
   fi
-  mount_path="$(readlink -f "${dir}" | sed "s,^${host_project_root},${container_project_root},")"
-  docker_run_opts+=(--volume "${volume_name}:${mount_path}")
-  docker run --rm -v "${volume_name}:/mnt" busybox:latest chown "$host_user_id:$host_group_id" /mnt
-done
-
-if test "$allocate_tty" = "yes"; then
-  docker_exec_opts+=(--tty)
-fi
-
-on_exit() {
-  local exit_status="$?"
-
+  
+  if test "$#" -eq 0; then
+    echo "Error: COMMAND is required" >&2
+    help >&2
+    exit 1
+  fi
+  
+  log() {
+    local now
+    now="$(date "+%Y-%m-%d %H:%M:%S")"
+    echo -e "$now" "$@"
+  }
+  
+  # save stdout, stderr
+  exec 3>&1
+  exec 4>&2
+  
   if test "$verbose" = "no"; then
+    # discard stderr
     exec 2> /dev/null
   fi
+  # stdout to stderr
   exec 1>&2
 
-  log "Stopping container"
-  docker stop -t 0 "$container_name" || true
+  local host_user_id
+  local host_group_id
+  host_user_id=$(id -u)
+  host_group_id=$(id -g)
+  
+  # set options
+  local host_project_root
+  local container_project_root
+  local container_workdir
+  host_project_root="$(git rev-parse --show-toplevel || pwd)"
+  container_project_root="/sandbox/$(basename "$host_project_root")"
+  container_workdir="$(pwd | sed "s,^${host_project_root},${container_project_root},")"
 
-  log "Removing container"
-  docker rm -f "$container_name" || true
-
-  if docker network inspect "$network_name" &> /dev/null; then
-    log "Removing network"
-    docker network rm "$network_name"
+  local image_name
+  local image_tag
+  local container_name
+  local network_name
+  image_name="${SCRIPT_NAME}--$(basename "$(pwd)")"
+  image_tag="latest"
+  container_name="${image_name}--$(env LC_CTYPE=C tr -dc '[:alnum:]' < /dev/urandom 2> /dev/null | head -c 10 || true)"
+  network_name="${container_name}"
+  
+  local docker_run_opts=(
+    --name "$container_name"
+    --entrypoint ""
+    --user "$host_user_id:$host_group_id"
+    --mount "type=bind,source=${SCRIPT_PATH},target=${SCRIPT_PATH},readonly"
+  )
+  
+  local docker_exec_opts=(
+    --interactive
+    --workdir "$container_workdir"
+    --user "$host_user_id:$host_group_id"
+  )
+  
+  if test "$allow_write" = "yes"; then
+    docker_run_opts+=(--volume "${host_project_root}:${container_project_root}")
+  else
+    docker_run_opts+=(--volume "${host_project_root}:${container_project_root}:ro")
+  fi
+  
+  if test "$allow_net" = "yes"; then
+    docker_run_opts+=(
+      --cap-add NET_ADMIN
+      --cap-add NET_RAW
+      --net "$network_name"
+      --add-host host.docker.internal:host-gateway
+    )
+  else
+    docker_run_opts+=(--net none)
+  fi
+  
+  for dir in "${volume_dirs[@]}"; do
+    volume_name="${image_name}--${dir//\//-}"
+    if ! test -e "$dir"; then
+      mkdir -p "$dir"
+    fi
+    mount_path="$(readlink -f "${dir}" | sed "s,^${host_project_root},${container_project_root},")"
+    docker_run_opts+=(--volume "${volume_name}:${mount_path}")
+    docker run --rm -v "${volume_name}:/mnt" busybox:latest chown "$host_user_id:$host_group_id" /mnt
+  done
+  
+  if test "$allocate_tty" = "yes"; then
+    docker_exec_opts+=(--tty)
   fi
 
-  return "$exit_status"
-}
+  cleanup() {
+    local exit_status="$?"
+  
+    if test "$verbose" = "no"; then
+      exec 2> /dev/null
+    fi
+    exec 1>&2
+  
+    log "Stopping container"
+    docker stop -t 0 "$container_name" || true
+  
+    log "Removing container"
+    docker rm -f "$container_name" || true
+  
+    if docker network inspect "$network_name" &> /dev/null; then
+      log "Removing network"
+      docker network rm "$network_name"
+    fi
+  
+    return "$exit_status"
+  }
+  
+  trap 'cleanup' EXIT
 
-trap 'on_exit' EXIT
-
-log "$(cat << EOF
+  log "$(cat << EOF
 Sandbox Configurations:
   dockerfile=${dockerfile}
   image_name=${image_name}
@@ -188,139 +202,148 @@ Sandbox Configurations:
   docker_exec_opts=${docker_exec_opts[@]}
   command=$@
 EOF
-)"
+  )"
 
-log "Building docker image"
-if ! docker build --tag "${image_name}:${image_tag}" - < "$dockerfile"; then
-  log "Error: failed to build image"
-  exit 1
-fi
+  log "Building docker image"
+  if ! docker build --tag "${image_name}:${image_tag}" - < "$dockerfile"; then
+    log "Error: failed to build image"
+    exit 1
+  fi
 
-if test "$allow_net" = "yes"; then
-  log "Creating network"
-  docker network create "$network_name" --driver bridge \
-    -o com.docker.network.bridge.enable_ip_masquerade=true
-fi
+  if test "$allow_net" = "yes"; then
+    log "Creating network"
+    docker network create "$network_name" --driver bridge \
+      -o com.docker.network.bridge.enable_ip_masquerade=true
+  fi
 
-log "Inspect container user and group id"
-container_default_user_group=$(docker run --rm "${image_name}:${image_tag}" bash -c 'echo $(id -u):$(id -g)')
-container_default_user_id=$(cut -d: -f1 <<< "$container_default_user_group")
-container_default_group_id=$(cut -d: -f2 <<< "$container_default_user_group")
-echo "Container default user and group id: $container_default_user_group"
+  log "Inspect container user and group id"
+  local container_default_user_group
+  local container_default_user_id
+  local container_default_group_id
+  container_default_user_group=$(docker run --rm "${image_name}:${image_tag}" bash -c 'echo $(id -u):$(id -g)')
+  container_default_user_id=$(cut -d: -f1 <<< "$container_default_user_group")
+  container_default_group_id=$(cut -d: -f2 <<< "$container_default_user_group")
+  echo "Container default user and group id: $container_default_user_group"
+  
+  log "Starting container"
+  docker run --detach "${docker_run_opts[@]}" "${image_name}:${image_tag}" tail -f /dev/null
 
-log "Starting container"
-docker run --detach "${docker_run_opts[@]}" "${image_name}:${image_tag}" tail -f /dev/null
+  if test "$allow_net" = "yes"; then
+    log "Setting up firewall"
+    docker exec --user 0:0 "$container_name" "$SCRIPT_PATH" setup_container_firewall "${allow_net_destinations[@]}"
+  fi
+  
+  log "Setting up container user to match host user ($host_user_id:$host_group_id) for file access"
+  docker exec --user 0:0 "$container_name" "$SCRIPT_PATH" setup_container_user \
+     "$container_default_user_id" "$container_default_group_id" \
+     "$host_user_id" "$host_group_id"
+  
+  # restore stdout, stderr
+  exec 1>&3 3>&-
+  exec 2>&4 4>&-
+  
+  docker exec "${docker_exec_opts[@]}" "$container_name" "$@"
+}
 
-if test "$allow_net" = "yes"; then
-  log "Setting up firewall"
+setup_container_firewall() {
+  local destinations=("$@")
+  local addresses=()
 
-  unset -f setup_firewall
-  setup_firewall() {
-    local destinations=("$@")
-    local addresses=()
+  local address_pattern='^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'
+  
+  for destination in "${destinations[@]}"; do
+    local host="$destination"
+    local port=''
+    if grep -q ':' <<< "$destination"; then
+      host=$(cut -d: -f1 <<< "$destination")
+      port=$(cut -d: -f2 <<< "$destination")
+    fi
 
-    local address_pattern='^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'
-    
-    for destination in "${destinations[@]}"; do
-      local host="$destination"
-      local port=''
-      if grep -q ':' <<< "$destination"; then
-        host=$(cut -d: -f1 <<< "$destination")
-        port=$(cut -d: -f2 <<< "$destination")
+    # address
+    if grep -qE "$address_pattern" <<< "$host"; then
+      echo "Allow outgoing connections to $destination"
+      if test -n "$port"; then
+        addresses+=("$host:$port")
+      else
+        addresses+=("$host")
       fi
+      continue
+    fi
 
-      # address
-      if grep -qE "$address_pattern" <<< "$host"; then
-        echo "Allow outgoing connections to $destination"
-        if test -n "$port"; then
-          addresses+=("$host:$port")
-        else
-          addresses+=("$host")
-        fi
+    # domain
+    local domain_address_count=0
+    for address in $(getent hosts "$host" | awk '{print $1}'; dig +short A "$host"); do
+      if ! grep -qE "$address_pattern" <<< "$address"; then
+        echo "Warn: Ignore invalid address $address of $host" >&2
         continue
       fi
 
-      # domain
-      local domain_address_count=0
-      for address in $(getent hosts "$host" | awk '{print $1}'; dig +short A "$host"); do
-        if ! grep -qE "$address_pattern" <<< "$address"; then
-          echo "Warn: Ignore invalid address $address of $host" >&2
-          continue
-        fi
-
-        if test -n "$port"; then
-          echo "Allow outgoing connections to $destination $address:$port"
-          addresses+=("$address:$port")
-        else
-          echo "Allow outgoing connections to $destination $address"
-          addresses+=("$address")
-        fi
-
-        domain_address_count=$((domain_address_count + 1))
-      done
-
-      if test "$domain_address_count" = 0; then
-        echo "Error: Failed to resolve any address for $host" >&2
-        exit 1
+      if test -n "$port"; then
+        echo "Allow outgoing connections to $destination $address:$port"
+        addresses+=("$address:$port")
+      else
+        echo "Allow outgoing connections to $destination $address"
+        addresses+=("$address")
       fi
+
+      domain_address_count=$((domain_address_count + 1))
     done
-    
-    docker_host_address=$(ip route | grep default | cut -d" " -f3)
-    if test -z "$docker_host_address"; then
-      echo "Error: Failed to determine docker host address" >&2
+
+    if test "$domain_address_count" = 0; then
+      echo "Error: Failed to resolve any address for $host" >&2
       exit 1
     fi
-    
-    # reset
-    iptables -F
-    iptables -X
-    #iptables -t nat -F
-    #iptables -t nat -X
-    iptables -t mangle -F
-    iptables -t mangle -X
-    
-    # allow dns
-    iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
-    iptables -A INPUT -p udp --sport 53 -j ACCEPT
-    
-    # allow localhost
-    iptables -A INPUT -i lo -j ACCEPT
-    iptables -A OUTPUT -o lo -j ACCEPT
-    
-    # set default policies
-    iptables -P INPUT DROP
-    iptables -P FORWARD DROP
-    iptables -P OUTPUT DROP
-    
-    # allow docker host
-    iptables -A INPUT -s "$docker_host_address" -j ACCEPT
-    iptables -A OUTPUT -d "$docker_host_address" -j ACCEPT
-    
-    # allow established connections
-    iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-    iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-    
-    # allow given addresses
-    for address in "${addresses[@]}"; do
-      if grep -q ':' <<< "$address"; then
-        address=$(cut -d: -f1 <<< "$address")
-        port=$(cut -d: -f2 <<< "$address")
-        iptables -A OUTPUT -d "$address" -p tcp --dport "$port" -j ACCEPT
-      else
-        # allow only HTTPS (443) connections
-        iptables -A OUTPUT -d "$address" -p tcp --dport 443 -j ACCEPT
-      fi
-    done
-  }
+  done
+  
+  docker_host_address=$(ip route | grep default | cut -d" " -f3)
+  if test -z "$docker_host_address"; then
+    echo "Error: Failed to determine docker host address" >&2
+    exit 1
+  fi
+  
+  # reset
+  iptables -F
+  iptables -X
+  #iptables -t nat -F
+  #iptables -t nat -X
+  iptables -t mangle -F
+  iptables -t mangle -X
+  
+  # allow dns
+  iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+  iptables -A INPUT -p udp --sport 53 -j ACCEPT
+  
+  # allow localhost
+  iptables -A INPUT -i lo -j ACCEPT
+  iptables -A OUTPUT -o lo -j ACCEPT
+  
+  # set default policies
+  iptables -P INPUT DROP
+  iptables -P FORWARD DROP
+  iptables -P OUTPUT DROP
+  
+  # allow docker host
+  iptables -A INPUT -s "$docker_host_address" -j ACCEPT
+  iptables -A OUTPUT -d "$docker_host_address" -j ACCEPT
+  
+  # allow established connections
+  iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+  iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+  
+  # allow given addresses
+  for address in "${addresses[@]}"; do
+    if grep -q ':' <<< "$address"; then
+      address=$(cut -d: -f1 <<< "$address")
+      port=$(cut -d: -f2 <<< "$address")
+      iptables -A OUTPUT -d "$address" -p tcp --dport "$port" -j ACCEPT
+    else
+      # allow only HTTPS (443) connections
+      iptables -A OUTPUT -d "$address" -p tcp --dport 443 -j ACCEPT
+    fi
+  done
+}
 
-  docker exec --user 0:0 "$container_name" bash -eu -o pipefail -c \
-    "$(declare -f setup_firewall); setup_firewall \"\$@\"" -- "${allow_net_destinations[@]}"
-fi
-
-log "Setting up container user to match host user ($host_user_id:$host_group_id) for file access"
-
-unset -f setup_user
-setup_user() {
+setup_container_user() {
   local container_default_user_id="$1"
   local container_default_group_id="$2"
   local host_user_id="$3"
@@ -405,11 +428,10 @@ setup_user() {
   echo "User setup completed: $user ($host_user_id:$host_group_id)"
 }
 
-docker exec --user 0:0 "$container_name" bash -eu -o pipefail -c \
-  "$(declare -f setup_user); setup_user \"\$@\"" -- "$container_default_user_id" "$container_default_group_id" "$host_user_id" "$host_group_id"
-
-# restore stdout, stderr
-exec 1>&3 3>&-
-exec 2>&4 4>&-
-
-docker exec "${docker_exec_opts[@]}" "$container_name" "$@"
+case "$1" in
+  setup_container_firewall | setup_container_user )
+    "$@"
+    ;;
+  * )
+    main "$@"
+esac
