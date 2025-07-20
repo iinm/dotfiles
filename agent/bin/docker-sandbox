@@ -22,7 +22,7 @@ Execute a command within a container defined by a Dockerfile.
   --dockerfile FILE         (Required) Path to the Dockerfile.
   --platform                Specify the platform for both image building and container execution. For example: linux/arm64 or linux/amd64.
   --allow-write             Enable write access to the project root directory inside the container.
-                            (By default, the project root is mounted read-only.)
+                            By default, the project root (git root or current directory) is mounted read-only.
   --allow-net DESTINATIONS  Allow connections to the specified domain or IP address.
                             Multiple destinations can be specified, separated by commas.
                              When no port is specified, allow only HTTPS (443) connections.
