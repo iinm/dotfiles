@@ -8,6 +8,8 @@ CONTAINER_SCRIPT_PATH="/sandbox/bin/$SCRIPT_NAME"
 
 help() {
   cat << HELP
+$SCRIPT_NAME - Run a command in a sandboxed environment
+
 Usage: $SCRIPT_NAME [--dockerfile FILE]
            [--platform PLATFORM]
            [--env-file FILE]
@@ -20,14 +22,17 @@ Usage: $SCRIPT_NAME [--dockerfile FILE]
            [--verbose] [--dry-run]
            COMMAND
 
-Run a command in a container.
-
-  --dockerfile FILE         Path to the Dockerfile. If not set, a default Dockerfile is used.
-  --env-file FILE           Path to a .env FILE to load environment variables from.
+Options:
+  --dockerfile FILE         Path to the Dockerfile. If not set, a preset Dockerfile is used.
+                            The container must include bash, iptables, ip, dnsmasq, and dig commands.
+  --env-file FILE           Path to a .env file To load environment variables from.
   --platform                Specify the platform for image building and container execution (e.g., linux/arm64 or linux/amd64).
-  --allow-write             Allow write access to the project root inside the container. By default, the project root (git root or current directory) is read-only.
-  --allow-net DESTINATIONS  Allow connections to specified domains or IP addresses. Separate multiple destinations with commas. If no port is given, only HTTPS (443) is allowed.
-  --use-volume DIRECTORIES  Mount a named volume for the host directory. Separate multiple directories with commas. The volume is mounted at the absolute path of the directory inside the container.
+  --allow-write             Allow write access to the project root inside the container.
+                            By default, the project root (git root or current directory) is read-only.
+  --allow-net DESTINATIONS  Allow connections to specified domains or IP addresses. Separate multiple destinations with commas.
+                            If no port is given, only HTTPS (443) is allowed.
+  --use-volume DIRECTORIES  Mount specified directories as volumes inside the container. Separate multiple directories with commas.
+                            The volume is mounted at the absolute path of the directory inside the container.
   --mount-readonly HOST_DIR:CONTAINER_DIR
                             Mount a host file or directory to a container path as read-only.
   --mount-writable HOST_DIR:CONTAINER_DIR
@@ -194,22 +199,27 @@ main() {
     log "Dockerfile not specified, using preset."
     "$SCRIPT_PATH" print_preset_dockerfile
 
+    # Persist project files: shell history, .local
     local host_project_persistent_dir=".$SCRIPT_NAME/persistent"
+    log "Setting up project persistent directory: $host_project_persistent_dir"
 
-    # Persist shell history, .local
     local host_project_persistent_home_dir="$host_project_persistent_dir/home/sandbox"
+
     run mkdir -p "$host_project_persistent_home_dir"
     run touch "$host_project_persistent_home_dir/.bash_history"
     run touch "$host_project_persistent_home_dir/.zsh_history"
     run mkdir -p "$host_project_persistent_home_dir/.local"
+
     writable_mounts+=(
       "$host_project_persistent_home_dir/.bash_history:/home/sandbox/.bash_history"
       "$host_project_persistent_home_dir/.zsh_history:/home/sandbox/.zsh_history"
       "$host_project_persistent_home_dir/.local:/home/sandbox/.local"
     )
 
-    # Persist .gitconfig, .git-credentials, mise data
+    # Persist shared files: .gitconfig, .git-credentials, mise data
     local host_persistent_dir="$HOME/.$SCRIPT_NAME/persistent"
+    log "Setting up shared persistent directory: $host_persistent_dir"
+
     local host_persistent_home_dir="$host_persistent_dir/home/sandbox"
     run mkdir -p "$host_persistent_home_dir"
     if ! test -e "$host_persistent_home_dir/.gitconfig"; then
@@ -224,6 +234,7 @@ EOF
       fi
     fi
     run mkdir -p "$host_persistent_home_dir/.local/share/mise"
+
     writable_mounts+=(
       "$host_persistent_home_dir/.gitconfig:/home/sandbox/.gitconfig"
       "$host_persistent_home_dir/.local/share/mise:/home/sandbox/.local/share/mise"
@@ -233,6 +244,7 @@ EOF
     run mkdir -p "$HOME/.claude"
     run touch "$HOME/.claude.json"
     run mkdir -p "$HOME/.gemini"
+
     writable_mounts+=(
       "$HOME/.claude:/home/sandbox/.claude"
       "$HOME/.claude.json:/home/sandbox/.claude.json"
@@ -590,9 +602,10 @@ setup_container_firewall() {
   # allow given addresses
   for address in "${addresses[@]}"; do
     if grep -q ':' <<< "$address"; then
-      address=$(cut -d: -f1 <<< "$address")
-      port=$(cut -d: -f2 <<< "$address")
-      iptables -A OUTPUT -d "$address" -p tcp --dport "$port" -j ACCEPT
+      local address_part
+      local port
+      IFS=':' read -r address_part port <<< "$address"
+      iptables -A OUTPUT -d "$address_part" -p tcp --dport "$port" -j ACCEPT
     else
       # allow only HTTPS (443) connections
       iptables -A OUTPUT -d "$address" -p tcp --dport 443 -j ACCEPT
