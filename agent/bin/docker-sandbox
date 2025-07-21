@@ -82,16 +82,16 @@ RUN apt update && apt install -y \
       iptables ipset iproute2 dnsmasq \
       dnsutils iputils-ping netcat-openbsd \
       gpg \
-      curl \
+      curl wget \
       git tig \
       xz-utils
 
-# https://grml.org/zsh/
+# grml zsh config: https://grml.org/zsh/
 RUN curl -fsSL https://grml.org/console/zshrc -o /etc/skel/.zshrc \
     && curl -fsSL https://grml.org/console/zshrc.local -o /etc/skel/.zshrc.local \
     && echo 'unsetopt HIST_SAVE_BY_COPY' >> /etc/skel/.zshrc.local
 
-# https://mise.jdx.dev/
+# mise-en-place: https://mise.jdx.dev/
 RUN install -dm 755 /etc/apt/keyrings \
     && curl -fsSL https://mise.jdx.dev/gpg-key.pub | gpg --dearmor | tee /etc/apt/keyrings/mise-archive-keyring.gpg 1> /dev/null \
     && echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg arch=$(dpkg --print-architecture)] https://mise.jdx.dev/deb stable main" | tee /etc/apt/sources.list.d/mise.list \
@@ -99,6 +99,16 @@ RUN install -dm 755 /etc/apt/keyrings \
     && apt install -y mise \
     && echo 'eval "$(mise activate bash)"' >> /etc/skel/.bashrc \
     && echo 'eval "$(mise activate bash)"' >> /etc/skel/.zshrc
+
+# GitHub CLI: https://github.com/cli/cli
+RUN mkdir -p -m 755 /etc/apt/keyrings \
+    && out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+    && cat $out | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+    && chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+    && mkdir -p -m 755 /etc/apt/sources.list.d \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+    && apt update \
+    && apt install gh -y
 
 RUN groupadd sandbox \
     && useradd -g sandbox -m sandbox \
@@ -291,6 +301,7 @@ EOF
 
       # github
       "github.com"
+      "api.github.com"
       "raw.githubusercontent.com"
 
       # npm
@@ -354,9 +365,9 @@ EOF
   fi
   
   if test "$allow_write" = "yes"; then
-    docker_run_opts+=(--mount "type=bind,source=${host_project_root},target=${container_project_root}")
+    docker_run_opts+=(--mount "type=bind,source=${host_project_root},target=${container_project_root},consistency=delegated")
   else
-    docker_run_opts+=(--mount "type=bind,source=${host_project_root},target=${container_project_root},readonly")
+    docker_run_opts+=(--mount "type=bind,source=${host_project_root},target=${container_project_root},readonly,consistency=delegated")
   fi
   
   if test "$allow_net" = "yes"; then
@@ -381,7 +392,7 @@ EOF
         fi
         mount_path="$(readlink -f "${dir}" | sed "s,^${host_project_root},${container_project_root},")"
       fi
-      docker_run_opts+=(--mount "type=volume,source=${volume_name},target=${mount_path}")
+      docker_run_opts+=(--mount "type=volume,source=${volume_name},target=${mount_path},consistency=delegated")
       log "Setting up volume ownership for $dir ($host_user_id:$host_group_id)."
       run docker run --rm -v "${volume_name}:/mnt" busybox:latest chown "$host_user_id:$host_group_id" /mnt
     done
@@ -393,7 +404,7 @@ EOF
       local host_path
       local container_path
       IFS=':' read -r host_path container_path <<< "$mount"
-      docker_run_opts+=(--mount "type=bind,source=$(readlink -f "$host_path"),target=${container_path},readonly")
+      docker_run_opts+=(--mount "type=bind,source=$(readlink -f "$host_path"),target=${container_path},readonly,consistency=delegated")
     done
   fi
   
@@ -402,7 +413,7 @@ EOF
       local host_path
       local container_path
       IFS=':' read -r host_path container_path <<< "$mount"
-      docker_run_opts+=(--mount "type=bind,source=$(readlink -f "$host_path"),target=${container_path}")
+      docker_run_opts+=(--mount "type=bind,source=$(readlink -f "$host_path"),target=${container_path},consistency=delegated")
     done
   fi
 
