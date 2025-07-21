@@ -1,5 +1,5 @@
 const sandbox = {
-  command: "docker-sandbox",
+  command: "agent-sandbox",
   args: [
     "--dockerfile",
     ".agent/sandbox/Dockerfile",
