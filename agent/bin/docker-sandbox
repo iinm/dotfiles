@@ -4,6 +4,7 @@ set -eu -o pipefail
 
 SCRIPT_PATH="${BASH_SOURCE[0]}"
 SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
+CONTAINER_SCRIPT_PATH="/sandbox/bin/$SCRIPT_NAME"
 
 help() {
   cat << HELP
@@ -121,9 +122,7 @@ main() {
   fi
   
   log() {
-    local now
-    now="$(date "+%Y-%m-%d %H:%M:%S")"
-    echo -e "$now" "$@"
+    echo "[$(date "+%Y-%m-%d %H:%M:%S")] $*"
   }
 
   # save stdout, stderr
@@ -181,7 +180,7 @@ main() {
     --name "$CONTAINER_NAME"
     --entrypoint ""
     --user "$host_user_id:$host_group_id"
-    --mount "type=bind,source=${SCRIPT_PATH},target=${SCRIPT_PATH},readonly"
+    --mount "type=bind,source=${SCRIPT_PATH},target=${CONTAINER_SCRIPT_PATH},readonly"
   )
   
   local docker_exec_opts=(
@@ -324,11 +323,11 @@ EOF
 
   if test "$allow_net" = "yes"; then
     log "Setting up firewall"
-    run docker exec --user 0:0 "$CONTAINER_NAME" "$SCRIPT_PATH" setup_container_firewall "${allow_net_destinations[@]}"
+    run docker exec --user 0:0 "$CONTAINER_NAME" "$CONTAINER_SCRIPT_PATH" setup_container_firewall "${allow_net_destinations[@]}"
   fi
   
   log "Setting up container user to match host user ($host_user_id:$host_group_id) for file access"
-  run docker exec --user 0:0 "$CONTAINER_NAME" "$SCRIPT_PATH" setup_container_user \
+  run docker exec --user 0:0 "$CONTAINER_NAME" "$CONTAINER_SCRIPT_PATH" setup_container_user \
      "$container_default_user_id" "$container_default_group_id" \
      "$host_user_id" "$host_group_id"
   
