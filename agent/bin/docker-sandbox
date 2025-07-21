@@ -262,10 +262,12 @@ EOF
         echo "DRY_RUN: cat > '$host_persistent_home_dir/.gitconfig' << EOF..."
       fi
     fi
+    run touch "$host_persistent_home_dir/.git-credentials"
     run mkdir -p "$host_persistent_home_dir/.local/share/mise"
 
     writable_mounts+=(
       "$host_persistent_home_dir/.gitconfig:/home/sandbox/.gitconfig"
+      "$host_persistent_home_dir/.gitconfig:/home/sandbox/.git-credentials"
       "$host_persistent_home_dir/.local/share/mise:/home/sandbox/.local/share/mise"
     )
 
