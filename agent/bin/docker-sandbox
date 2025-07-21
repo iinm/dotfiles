@@ -317,9 +317,9 @@ EOF
   CONTAINER_NAME="${image_name}--$(env LC_CTYPE=C tr -dc '[:alnum:]' < /dev/urandom 2> /dev/null | head -c 10 || true)"
   NETWORK_NAME="${CONTAINER_NAME}"
 
-  local docker_platform_opts=()
   if test -n "$platform"; then
-    docker_platform_opts+=(--platform "$platform")
+    docker_build_opts+=(--platform "$platform")
+    docker_run_opts+=(--platform "$platform")
   fi
  
   local docker_build_opts=(--tag "$image_name:$image_tag")
@@ -369,50 +369,58 @@ EOF
   fi
   
   # volume options
-  for dir in "${volume_dirs[@]}"; do
-    volume_name="${image_name}--$(echo "$dir" | sed 's,/,-,g; s,\.,-dot-,g')"
-    mount_path="$dir"
-    if ! grep -qE "^/" <<< "$mount_path"; then
-      if ! test -e "$dir"; then
-        mkdir -p "$dir"
+  if test "${#volume_dirs[@]}" -gt 0; then
+    for dir in "${volume_dirs[@]}"; do
+      volume_name="${image_name}--$(echo "$dir" | sed 's,/,-,g; s,\.,-dot-,g')"
+      mount_path="$dir"
+      if ! grep -qE "^/" <<< "$mount_path"; then
+        if ! test -e "$dir"; then
+          mkdir -p "$dir"
+        fi
+        mount_path="$(readlink -f "${dir}" | sed "s,^${host_project_root},${container_project_root},")"
       fi
-      mount_path="$(readlink -f "${dir}" | sed "s,^${host_project_root},${container_project_root},")"
-    fi
-    docker_run_opts+=(--mount "type=volume,source=${volume_name},target=${mount_path}")
-    log "Setting up volume ownership for $dir ($host_user_id:$host_group_id)."
-    run docker run --rm -v "${volume_name}:/mnt" busybox:latest chown "$host_user_id:$host_group_id" /mnt
-  done
+      docker_run_opts+=(--mount "type=volume,source=${volume_name},target=${mount_path}")
+      log "Setting up volume ownership for $dir ($host_user_id:$host_group_id)."
+      run docker run --rm -v "${volume_name}:/mnt" busybox:latest chown "$host_user_id:$host_group_id" /mnt
+    done
+  fi
 
   # mount options
-  for mount in "${readonly_mounts[@]}"; do
-    local host_path
-    local container_path
-    IFS=':' read -r host_path container_path <<< "$mount"
-    docker_run_opts+=(--mount "type=bind,source=$(readlink -f "$host_path"),target=${container_path},readonly")
-  done
+  if test "${#readonly_mounts[@]}" -gt 0; then
+    for mount in "${readonly_mounts[@]}"; do
+      local host_path
+      local container_path
+      IFS=':' read -r host_path container_path <<< "$mount"
+      docker_run_opts+=(--mount "type=bind,source=$(readlink -f "$host_path"),target=${container_path},readonly")
+    done
+  fi
   
-  for mount in "${writable_mounts[@]}"; do
-    local host_path
-    local container_path
-    IFS=':' read -r host_path container_path <<< "$mount"
-    docker_run_opts+=(--mount "type=bind,source=$(readlink -f "$host_path"),target=${container_path}")
-  done
+  if test "${#writable_mounts[@]}" -gt 0; then
+    for mount in "${writable_mounts[@]}"; do
+      local host_path
+      local container_path
+      IFS=':' read -r host_path container_path <<< "$mount"
+      docker_run_opts+=(--mount "type=bind,source=$(readlink -f "$host_path"),target=${container_path}")
+    done
+  fi
 
   # publish options
-  for port in "${publish_ports[@]}"; do
-    if grep -qE '.+:.+:.+' <<< "$port"; then
-      # host_address:host_port:container_port
-      IFS=':' read -r host_address host_port container_port <<< "$port"
-      docker_run_opts+=(--publish "${host_address}:${host_port}:${container_port}")
-    elif grep -qE '.+:.+' <<< "$port"; then
-      # host_port:container_port
-      IFS=':' read -r host_port container_port <<< "$port"
-      docker_run_opts+=(--publish "127.0.0.1:${host_port}:${container_port}")
-    else
-      # # container_port
-      docker_run_opts+=(--publish "127.0.0.1::${port}")
-    fi
-  done
+  if test "${#publish_ports[@]}" -gt 0; then
+    for port in "${publish_ports[@]}"; do
+      if grep -qE '.+:.+:.+' <<< "$port"; then
+        # host_address:host_port:container_port
+        IFS=':' read -r host_address host_port container_port <<< "$port"
+        docker_run_opts+=(--publish "${host_address}:${host_port}:${container_port}")
+      elif grep -qE '.+:.+' <<< "$port"; then
+        # host_port:container_port
+        IFS=':' read -r host_port container_port <<< "$port"
+        docker_run_opts+=(--publish "127.0.0.1:${host_port}:${container_port}")
+      else
+        # # container_port
+        docker_run_opts+=(--publish "127.0.0.1::${port}")
+      fi
+    done
+  fi
   
   if test "$allocate_tty" = "yes"; then
     docker_exec_opts+=(--tty)
@@ -448,8 +456,6 @@ EOF
   # shellcheck disable=SC2001
   log "$(cat << EOF
 Sandbox Configurations:
-  docker_platform_opts=
-    $(echo "${docker_platform_opts[*]}" | sed 's, ,\n    ,g')
   docker_build_opts=
     $(echo "${docker_build_opts[*]}" | sed 's, ,\n    ,g')
   docker_build_context=$docker_build_context
@@ -463,9 +469,9 @@ EOF
 
   log "Building docker image."
   if test -n "$dockerfile"; then
-    run docker build "${docker_platform_opts[@]}" "${docker_build_opts[@]}" "$docker_build_context"
+    run docker build "${docker_build_opts[@]}" "$docker_build_context"
   else
-    run docker build "${docker_platform_opts[@]}" "${docker_build_opts[@]}" - \
+    run docker build "${docker_build_opts[@]}" - \
       < <("$SCRIPT_PATH" print_preset_dockerfile)
   fi
 
@@ -480,7 +486,7 @@ EOF
   local container_default_user_id
   local container_default_group_id
   if test "$DRY_RUN" = "no"; then
-    container_default_user_group=$(docker run --rm "${docker_platform_opts[@]}" "${image_name}:${image_tag}" bash -c 'echo $(id -u):$(id -g)')
+    container_default_user_group=$(docker run --rm "${image_name}:${image_tag}" bash -c 'echo $(id -u):$(id -g)')
   else
     container_default_user_group="0:0"
   fi
@@ -489,7 +495,7 @@ EOF
   log "Container default user and group id: $container_default_user_group"
   
   log "Starting container."
-  run docker run "${docker_platform_opts[@]}" "${docker_run_opts[@]}" "${image_name}:${image_tag}" \
+  run docker run "${docker_run_opts[@]}" "${image_name}:${image_tag}" \
     "$CONTAINER_SCRIPT_PATH" start_container_dnsmasq
 
   if test "$allow_net" = "yes"; then
