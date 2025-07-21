@@ -46,6 +46,58 @@ Examples:
 HELP
 }
 
+print_preset_dockerfile() {
+  cat << 'EOF'
+FROM debian:12
+
+ARG NODE_VERSION="22.17.1"
+
+RUN apt update && apt install -y \
+      busybox \
+      bash zsh \
+      iptables ipset iproute2 dnsmasq \
+      dnsutils iputils-ping netcat-openbsd \
+      gpg \
+      curl \
+      git tig \
+      xz-utils
+
+# https://grml.org/zsh/
+RUN curl -fsSL https://grml.org/console/zshrc -o /etc/skel/.zshrc \
+    && curl -fsSL https://grml.org/console/zshrc.local -o /etc/skel/.zshrc.local \
+    && echo 'unsetopt HIST_SAVE_BY_COPY' >> /etc/skel/.zshrc.local
+
+# https://mise.jdx.dev/
+RUN install -dm 755 /etc/apt/keyrings \
+    && curl -fsSL https://mise.jdx.dev/gpg-key.pub | gpg --dearmor | tee /etc/apt/keyrings/mise-archive-keyring.gpg 1> /dev/null \
+    && echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg arch=$(dpkg --print-architecture)] https://mise.jdx.dev/deb stable main" | tee /etc/apt/sources.list.d/mise.list \
+    && apt update \
+    && apt install -y mise \
+    && echo 'eval "$(mise activate bash)"' >> /etc/skel/.bashrc \
+    && echo 'eval "$(mise activate bash)"' >> /etc/skel/.zshrc
+
+RUN groupadd sandbox \
+    && useradd -g sandbox -m sandbox \
+    && mkdir -p /sandbox/tools \
+    && chown sandbox:sandbox /sandbox/tools
+USER sandbox
+
+# Install Node.js
+RUN curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-$(uname -m | sed 's,86_,,').tar.xz" | tar -C /sandbox/tools -xJf - \
+    && mv /sandbox/tools/node-v${NODE_VERSION}* /sandbox/tools/node \
+    && env PATH=/sandbox/tools/node/bin:$PATH npm install -g npm@latest
+ENV PATH=/sandbox/tools/node/bin:$PATH
+
+# Install Coding Agents
+RUN npm install -g @anthropic-ai/claude-code \
+    && npm install -g ccusage \
+    && npm install -g @google/gemini-cli \
+    && rm -rf /home/sandbox/.npm
+
+ENV EDITOR="busybox vi"
+EOF
+}
+
 main() {
   local dockerfile=""
   local allow_write="no"
@@ -192,11 +244,15 @@ main() {
     local host_persistent_home_dir="$host_persistent_dir/home/sandbox"
     run mkdir -p "$host_persistent_home_dir"
     if ! test -e "$host_persistent_home_dir/.gitconfig"; then
+      if test "$DRY_RUN" = "no"; then
       cat > "$host_persistent_home_dir/.gitconfig" << EOF
 [user]
-  name = "$(git config --get user.name)"
-  email = "$(git config --get user.email)"
+  name = "$(git config --get user.name || true)"
+  email = "$(git config --get user.email || true)"
 EOF
+      else
+        echo "DRY_RUN: cat > '$host_persistent_home_dir/.gitconfig' << EOF..."
+      fi
     fi
     run mkdir -p "$host_persistent_home_dir/.local/share/mise"
     writable_mounts+=(
@@ -238,8 +294,6 @@ EOF
       # npm
       "registry.npmjs.org"
     )
-
-    allocate_tty="yes"
   fi
 
   if test "$no_cache" = "yes"; then
@@ -617,58 +671,6 @@ setup_container_user() {
   fi
 
   echo "User setup completed: $user ($host_user_id:$host_group_id)"
-}
-
-print_preset_dockerfile() {
-  cat << 'EOF'
-FROM debian:12
-
-ARG NODE_VERSION="22.17.1"
-
-RUN apt update && apt install -y \
-      busybox \
-      bash zsh \
-      iptables ipset iproute2 dnsmasq \
-      dnsutils iputils-ping netcat-openbsd \
-      gpg \
-      curl \
-      git tig \
-      xz-utils
-
-# https://grml.org/zsh/
-RUN curl -fsSL https://grml.org/console/zshrc -o /etc/skel/.zshrc \
-    && curl -fsSL https://grml.org/console/zshrc.local -o /etc/skel/.zshrc.local \
-    && echo 'unsetopt HIST_SAVE_BY_COPY' >> /etc/skel/.zshrc.local
-
-# https://mise.jdx.dev/
-RUN install -dm 755 /etc/apt/keyrings \
-    && curl -fsSL https://mise.jdx.dev/gpg-key.pub | gpg --dearmor | tee /etc/apt/keyrings/mise-archive-keyring.gpg 1> /dev/null \
-    && echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg arch=$(dpkg --print-architecture)] https://mise.jdx.dev/deb stable main" | tee /etc/apt/sources.list.d/mise.list \
-    && apt update \
-    && apt install -y mise \
-    && echo 'eval "$(mise activate bash)"' >> /etc/skel/.bashrc \
-    && echo 'eval "$(mise activate bash)"' >> /etc/skel/.zshrc
-
-RUN groupadd sandbox \
-    && useradd -g sandbox -m sandbox \
-    && mkdir -p /sandbox/tools \
-    && chown sandbox:sandbox /sandbox/tools
-USER sandbox
-
-# Install Node.js
-RUN curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-$(uname -m | sed 's,86_,,').tar.xz" | tar -C /sandbox/tools -xJf - \
-    && mv /sandbox/tools/node-v${NODE_VERSION}* /sandbox/tools/node \
-    && env PATH=/sandbox/tools/node/bin:$PATH npm install -g npm@latest
-ENV PATH=/sandbox/tools/node/bin:$PATH
-
-# Install Coding Agents
-RUN npm install -g @anthropic-ai/claude-code \
-    && npm install -g ccusage \
-    && npm install -g @google/gemini-cli \
-    && rm -rf /home/sandbox/.npm
-
-ENV EDITOR="busybox vi"
-EOF
 }
 
 if test "$#" -gt 0; then
