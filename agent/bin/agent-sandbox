@@ -20,32 +20,24 @@ Usage: $SCRIPT_NAME [--dockerfile FILE]
            [--verbose] [--dry-run]
            COMMAND
 
-Execute a command within a container defined by a Dockerfile.
+Run a command in a container.
 
-  --dockerfile FILE         Path to the Dockerfile.
-                            If not provided, it defaults to a preset Dockerfile.
-  --env-file FILE           Path to a .env file to load environment variables from.
-  --platform                Specify the platform for both image building and container execution. For example: linux/arm64 or linux/amd64.
-  --allow-write             Enable write access to the project root directory inside the container.
-                            By default, the project root (git root or current directory) is mounted read-only.
-  --allow-net DESTINATIONS  Allow connections to the specified domain or IP address.
-                            Multiple destinations can be specified, separated by commas.
-                             When no port is specified, allow only HTTPS (443) connections.
-                            e.g. host.docker.internal:8000,registry.npmjs.org
-  --use-volume DIRECTORIES  Mount a named volume for the specified host directory.
-                            Multiple directories can be specified, separated by commas.
-                            The volume will be mounted at the absolute path of DIR inside the container.
+  --dockerfile FILE         Path to the Dockerfile. If not set, a default Dockerfile is used.
+  --env-file FILE           Path to a .env FILE to load environment variables from.
+  --platform                Specify the platform for image building and container execution (e.g., linux/arm64 or linux/amd64).
+  --allow-write             Allow write access to the project root inside the container. By default, the project root (git root or current directory) is read-only.
+  --allow-net DESTINATIONS  Allow connections to specified domains or IP addresses. Separate multiple destinations with commas. If no port is given, only HTTPS (443) is allowed.
+  --use-volume DIRECTORIES  Mount a named volume for the host directory. Separate multiple directories with commas. The volume is mounted at the absolute path of the directory inside the container.
   --mount-readonly HOST_DIR:CONTAINER_DIR
-                            Mount a host directory to a container directory with read-only access.
+                            Mount a host file or directory to a container path as read-only.
   --mount-writable HOST_DIR:CONTAINER_DIR
-                            Mount a host directory to a container directory with write access.
+                            Mount a host file or directory to a container path as writable.
   --publish [[HOST_ADDRESS:]HOST_PORT:]CONTAINER_PORT
-                            Publish a container's port(s) to the host. If the host address is not specified,
-                            the port will be bound to 127.0.0.1 by default.
+                            Publish container port(s) to the host. If no host address is given, the port binds to 127.0.0.1 by default.
   --tty                     Allocate a pseudo-TTY for the container.
-  --no-cache                Do not use cache when building the image.
+  --no-cache                Don't use cache when building the image.
   --verbose                 Output verbose logs to stderr.
-  --dry-run                 Do not execute the command, just print the command to stdout.
+  --dry-run                 Don't execute the command; just print it to stdout.
 
 Examples:
   $SCRIPT_NAME --dockerfile .agent/sandbox/Dockerfile --verbose --tty bash
@@ -181,24 +173,41 @@ main() {
     log "Dockerfile not specified, using preset."
     "$SCRIPT_PATH" print_preset_dockerfile
 
-    local host_persistent_dir=".$SCRIPT_NAME/persistent"
+    local host_project_persistent_dir=".$SCRIPT_NAME/persistent"
 
-    # Persist shell history, mise data
-    local host_persistent_home_dir="$host_persistent_dir/home/sandbox"
-    mkdir -p "$host_persistent_home_dir"
-    touch "$host_persistent_home_dir/.bash_history"
-    touch "$host_persistent_home_dir/.zsh_history"
-    mkdir -p "$host_persistent_home_dir/.local"
+    # Persist shell history, .local
+    local host_project_persistent_home_dir="$host_project_persistent_dir/home/sandbox"
+    run mkdir -p "$host_project_persistent_home_dir"
+    run touch "$host_project_persistent_home_dir/.bash_history"
+    run touch "$host_project_persistent_home_dir/.zsh_history"
+    run mkdir -p "$host_project_persistent_home_dir/.local"
     writable_mounts+=(
-      "$host_persistent_home_dir/.bash_history:/home/sandbox/.bash_history"
-      "$host_persistent_home_dir/.zsh_history:/home/sandbox/.zsh_history"
-      "$host_persistent_home_dir/.local:/home/sandbox/.local"
+      "$host_project_persistent_home_dir/.bash_history:/home/sandbox/.bash_history"
+      "$host_project_persistent_home_dir/.zsh_history:/home/sandbox/.zsh_history"
+      "$host_project_persistent_home_dir/.local:/home/sandbox/.local"
+    )
+
+    # Persist .gitconfig, .git-credentials, mise data
+    local host_persistent_dir="$HOME/.$SCRIPT_NAME/persistent"
+    local host_persistent_home_dir="$host_persistent_dir/home/sandbox"
+    run mkdir -p "$host_persistent_home_dir"
+    if ! test -e "$host_persistent_home_dir/.gitconfig"; then
+      cat > "$host_persistent_home_dir/.gitconfig" << EOF
+[user]
+  name = "$(git config --get user.name)"
+  email = "$(git config --get user.email)"
+EOF
+    fi
+    run mkdir -p "$host_persistent_home_dir/.local/share/mise"
+    writable_mounts+=(
+      "$host_persistent_home_dir/.gitconfig:/home/sandbox/.gitconfig"
+      "$host_persistent_home_dir/.local/share/mise:/home/sandbox/.local/share/mise"
     )
 
     # allow access to host LLM provider configurations
-    mkdir -p "$HOME/.claude"
-    touch "$HOME/.claude.json"
-    mkdir -p "$HOME/.gemini"
+    run mkdir -p "$HOME/.claude"
+    run touch "$HOME/.claude.json"
+    run mkdir -p "$HOME/.gemini"
     writable_mounts+=(
       "$HOME/.claude:/home/sandbox/.claude"
       "$HOME/.claude.json:/home/sandbox/.claude.json"
@@ -207,10 +216,10 @@ main() {
 
     allow_net="yes"
     allow_net_destinations+=(
-      "raw.githubusercontent.com"
-
-      # npm
-      "registry.npmjs.org"
+      # mise
+      "mise-versions.jdx.dev"
+      "nodejs.org"
+      "dl.google.com"
 
       # Claude Code
       "api.anthropic.com"
@@ -221,6 +230,13 @@ main() {
       "play.googleapis.com"
       "oauth2.googleapis.com"
       "cloudcode-pa.googleapis.com"
+
+      # github
+      "github.com"
+      "raw.githubusercontent.com"
+
+      # npm
+      "registry.npmjs.org"
     )
 
     allocate_tty="yes"
@@ -248,9 +264,9 @@ main() {
   fi
   
   if test "$allow_write" = "yes"; then
-    docker_run_opts+=(--volume "${host_project_root}:${container_project_root}")
+    docker_run_opts+=(--mount "type=bind,source=${host_project_root},target=${container_project_root}")
   else
-    docker_run_opts+=(--volume "${host_project_root}:${container_project_root}:ro")
+    docker_run_opts+=(--mount "type=bind,source=${host_project_root},target=${container_project_root},readonly")
   fi
   
   if test "$allow_net" = "yes"; then
@@ -274,7 +290,7 @@ main() {
       fi
       mount_path="$(readlink -f "${dir}" | sed "s,^${host_project_root},${container_project_root},")"
     fi
-    docker_run_opts+=(--volume "${volume_name}:${mount_path}")
+    docker_run_opts+=(--mount "type=volume,source=${volume_name},target=${mount_path}")
     log "Setting up volume ownership for $dir ($host_user_id:$host_group_id)."
     run docker run --rm -v "${volume_name}:/mnt" busybox:latest chown "$host_user_id:$host_group_id" /mnt
   done
@@ -341,13 +357,14 @@ main() {
   
   trap 'on_exit' EXIT
 
+  # shellcheck disable=SC2001
   log "$(cat << EOF
 Sandbox Configurations:
-  docker_platform_opts=(${docker_platform_opts[@]})
-  docker_build_opts=(${docker_build_opts[@]})
+  docker_platform_opts=$(echo "${docker_platform_opts[*]}" | sed 's, ,\n    ,g')
+  docker_build_opts=$(echo "${docker_build_opts[*]}" | sed 's, ,\n    ,g')
   docker_build_context=$docker_build_context
-  docker_run_opts=(${docker_run_opts[@]})
-  docker_exec_opts=(${docker_exec_opts[@]})
+  docker_run_opts=$(echo "${docker_run_opts[*]}" | sed 's, ,\n    ,g')
+  docker_exec_opts=$(echo "${docker_exec_opts[*]}" | sed 's, ,\n    ,g')
   command=$@
 EOF
   )"
@@ -606,18 +623,22 @@ print_preset_dockerfile() {
   cat << 'EOF'
 FROM debian:12
 
+ARG NODE_VERSION="22.17.1"
+
 RUN apt update && apt install -y \
+      busybox \
       bash zsh \
       iptables ipset iproute2 dnsmasq \
       dnsutils iputils-ping netcat-openbsd \
       gpg \
       curl \
-      git \
+      git tig \
       xz-utils
 
 # https://grml.org/zsh/
 RUN curl -fsSL https://grml.org/console/zshrc -o /etc/skel/.zshrc \
-    && curl -fsSL https://grml.org/console/zshrc.local -o /etc/skel/.zshrc.local
+    && curl -fsSL https://grml.org/console/zshrc.local -o /etc/skel/.zshrc.local \
+    && echo 'unsetopt HIST_SAVE_BY_COPY' >> /etc/skel/.zshrc.local
 
 # https://mise.jdx.dev/
 RUN install -dm 755 /etc/apt/keyrings \
@@ -635,8 +656,8 @@ RUN groupadd sandbox \
 USER sandbox
 
 # Install Node.js
-RUN curl -fsSL "https://nodejs.org/dist/v22.17.1/node-v22.17.1-linux-$(uname -m | sed 's,86_,,').tar.xz" | tar -C /sandbox/tools -xJf - \
-    && mv /sandbox/tools/node-v* /sandbox/tools/node \
+RUN curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-$(uname -m | sed 's,86_,,').tar.xz" | tar -C /sandbox/tools -xJf - \
+    && mv /sandbox/tools/node-v${NODE_VERSION}* /sandbox/tools/node \
     && env PATH=/sandbox/tools/node/bin:$PATH npm install -g npm@latest
 ENV PATH=/sandbox/tools/node/bin:$PATH
 
@@ -645,6 +666,8 @@ RUN npm install -g @anthropic-ai/claude-code \
     && npm install -g ccusage \
     && npm install -g @google/gemini-cli \
     && rm -rf /home/sandbox/.npm
+
+ENV EDITOR="busybox vi"
 EOF
 }
 
