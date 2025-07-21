@@ -8,7 +8,7 @@ CONTAINER_SCRIPT_PATH="/sandbox/bin/$SCRIPT_NAME"
 
 help() {
   cat << HELP
-$SCRIPT_NAME - Run a command in a sandboxed environment
+$SCRIPT_NAME - Run a command in a sandboxed Docker environment
 
 Usage: $SCRIPT_NAME [--dockerfile FILE]
            [--platform PLATFORM]
@@ -23,6 +23,7 @@ Usage: $SCRIPT_NAME [--dockerfile FILE]
            COMMAND
 
 Options:
+
   --dockerfile FILE         Path to the Dockerfile. If not set, a preset Dockerfile is used.
                             The container must include bash, iptables, ip, dnsmasq, and dig commands.
   --env-file FILE           Path to a .env file To load environment variables from.
@@ -45,9 +46,27 @@ Options:
   --dry-run                 Don't execute the command; just print it to stdout.
 
 Examples:
-  $SCRIPT_NAME --dockerfile .agent/sandbox/Dockerfile --verbose --tty bash
-  $SCRIPT_NAME --dockerfile .agent/sandbox/Dockerfile --verbose --allow-write --allow-net registry.npmjs.org --use-volume node_modules npm install
-  $SCRIPT_NAME --dockerfile .agent/sandbox/Dockerfile --verbose --allow-net host.docker.internal:3306 npm run test
+
+  Start shell with preset configurations:
+    $SCRIPT_NAME --tty --verbose zsh
+
+  Check preset configurations:
+    $SCRIPT_NAME --tty --verbose --dry-run zsh
+
+  Run Claude Code:
+    $SCRIPT_NAME --allow-write --tty claude
+
+  Run Gemini CLI:
+    $SCRIPT_NAME --allow-write --tty gemini
+
+  Run with Dockerfile:
+    $SCRIPT_NAME --dockerfile .agent/sandbox/Dockerfile --verbose --tty bash
+
+  Allow write access to project directory and network access to NPM:
+    $SCRIPT_NAME --dockerfile .agent/sandbox/Dockerfile --verbose --allow-write --allow-net registry.npmjs.org --use-volume node_modules npm install
+
+  Allow access to docker host port:
+    $SCRIPT_NAME --dockerfile .agent/sandbox/Dockerfile --verbose --allow-net host.docker.internal:3306 npm run test
 HELP
 }
 
