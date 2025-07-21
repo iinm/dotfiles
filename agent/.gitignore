@@ -5,3 +5,5 @@ node_modules/
 .agent/*
 !.agent/sandbox/
 !.agent/config.mjs
+
+.docker-sandbox/

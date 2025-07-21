@@ -108,13 +108,6 @@ main() {
     esac
   done
   
-  # validate arguments
-  if test -z "$dockerfile"; then
-    echo "Error: --dockerfile is required" >&2
-    help >&2
-    return 1
-  fi
-  
   if test "$#" -eq 0; then
     echo "Error: COMMAND is required" >&2
     help >&2
@@ -122,7 +115,7 @@ main() {
   fi
   
   log() {
-    echo "[$(date "+%Y-%m-%d %H:%M:%S")] $*"
+    echo "[$(date "+%Y-%m-%d %H:%M:%S%z")] $*"
   }
 
   # save stdout, stderr
@@ -155,8 +148,8 @@ main() {
   local container_project_root
   local container_workdir
   host_project_root="$(git rev-parse --show-toplevel || pwd)"
-  container_project_root="/sandbox/$(basename "$host_project_root")"
-  container_workdir="$(pwd | sed "s,^${host_project_root},${container_project_root},")"
+  container_project_root="$host_project_root"
+  container_workdir="$host_project_root"
 
   local image_name
   local image_tag
@@ -170,8 +163,53 @@ main() {
   if test -n "$platform"; then
     docker_platform_opts+=(--platform "$platform")
   fi
-  
-  local docker_build_opts=()
+ 
+  local docker_build_opts=(--tag "$image_name:$image_tag")
+  local docker_build_context=""
+  if test -n "$dockerfile"; then
+    docker_build_opts+=(--file "$dockerfile")
+    docker_build_context=$(dirname "$dockerfile")
+  else
+    # No Dockerfile -> Use preset Dockerfile
+    local host_persistent_dir=".$SCRIPT_NAME/persistent"
+
+    # Persist shell history, mise data
+    local host_persistent_home_dir="$host_persistent_dir/home/sandbox"
+    mkdir -p "$host_persistent_home_dir"
+    touch "$host_persistent_home_dir/.bash_history"
+    touch "$host_persistent_home_dir/.zsh_history"
+    touch "$host_persistent_home_dir/.zsh_history.new"
+    mkdir -p "$host_persistent_home_dir/.local"
+    writable_mounts+=(
+      "$host_persistent_home_dir/.bash_history:/home/sandbox/.bash_history"
+      "$host_persistent_home_dir/.zsh_history:/home/sandbox/.zsh_history"
+      "$host_persistent_home_dir/.zsh_history.new:/home/sandbox/.zsh_history.new"
+      "$host_persistent_home_dir/.local:/home/sandbox/.local"
+    )
+
+    # allow access to host LLM provider configurations
+    mkdir -p "$HOME/.claude"
+    touch "$HOME/.claude.json"
+    mkdir -p "$HOME/.gemini"
+    writable_mounts+=(
+      "$HOME/.claude:/home/sandbox/.claude"
+      "$HOME/.claude.json:/home/sandbox/.claude.json"
+      "$HOME/.gemini:/home/sandbox/.gemini"
+    )
+
+    # allow access to LLM providers
+    allow_net="yes"
+    allow_net_destinations+=(
+      "api.anthropic.com"
+      "statsig.anthropic.com"
+      # TODO
+      "www.googleapis.com"
+      "generativelanguage.googleapis.com"
+    )
+
+    allocate_tty="yes"
+  fi
+
   if test "$no_cache" = "yes"; then
     docker_build_opts+=(--no-cache)
   fi
@@ -208,11 +246,14 @@ main() {
   
   # volume options
   for dir in "${volume_dirs[@]}"; do
-    volume_name="${image_name}--${dir//\//-}"
-    if ! test -e "$dir"; then
-      mkdir -p "$dir"
+    volume_name="${image_name}--$(echo "$dir" | sed 's,/,-,g; s,\.,-dot-,g')"
+    mount_path="$dir"
+    if ! grep -qE "^/" <<< "$mount_path"; then
+      if ! test -e "$dir"; then
+        mkdir -p "$dir"
+      fi
+      mount_path="$(readlink -f "${dir}" | sed "s,^${host_project_root},${container_project_root},")"
     fi
-    mount_path="$(readlink -f "${dir}" | sed "s,^${host_project_root},${container_project_root},")"
     docker_run_opts+=(--volume "${volume_name}:${mount_path}")
     log "Setting up volume ownership for $dir ($host_user_id:$host_group_id)"
     run docker run --rm -v "${volume_name}:/mnt" busybox:latest chown "$host_user_id:$host_group_id" /mnt
@@ -282,11 +323,9 @@ main() {
 
   log "$(cat << EOF
 Sandbox Configurations:
-  dockerfile=${dockerfile}
-  image_name=${image_name}
-  image_tag=${image_tag}
   docker_platform_opts=(${docker_platform_opts[@]})
   docker_build_opts=(${docker_build_opts[@]})
+  docker_build_context=$docker_build_context
   docker_run_opts=(${docker_run_opts[@]})
   docker_exec_opts=(${docker_exec_opts[@]})
   command=$@
@@ -294,9 +333,11 @@ EOF
   )"
 
   log "Building docker image"
-  if ! run docker build "${docker_platform_opts[@]}" "${docker_build_opts[@]}" --tag "${image_name}:${image_tag}" - < "$dockerfile"; then
-    log "Error: failed to build image"
-    return 1
+  if test -n "$dockerfile"; then
+    run docker build "${docker_platform_opts[@]}" "${docker_build_opts[@]}" "$docker_build_context"
+  else
+    run docker build "${docker_platform_opts[@]}" "${docker_build_opts[@]}" - \
+      < <("$SCRIPT_PATH" print_preset_dockerfile)
   fi
 
   if test "$allow_net" = "yes"; then
@@ -515,14 +556,59 @@ setup_container_user() {
   home_dir=$(getent passwd "$user" | cut -d: -f6)
   if test -n "$home_dir" && test -d "$home_dir"; then
     echo "Updating home directory ownership: $home_dir"
-    chown -R "$host_user_id:$host_group_id" "$home_dir" || true
+    chown "$host_user_id:$host_group_id" "$home_dir" || true
   fi
 
   echo "User setup completed: $user ($host_user_id:$host_group_id)"
 }
 
+print_preset_dockerfile() {
+  cat << 'EOF'
+FROM debian:12
+
+RUN apt update && apt install -y \
+      bash zsh \
+      iptables ipset iproute2 \
+      dnsutils iputils-ping netcat-openbsd \
+      gpg \
+      curl \
+      git \
+      xz-utils
+
+# https://grml.org/zsh/
+RUN curl -fsSL https://grml.org/console/zshrc -o /etc/skel/.zshrc \
+    && curl -fsSL https://grml.org/console/zshrc.local -o /etc/skel/.zshrc.local
+
+# https://mise.jdx.dev/
+RUN install -dm 755 /etc/apt/keyrings \
+    && curl -fsSL https://mise.jdx.dev/gpg-key.pub | gpg --dearmor | tee /etc/apt/keyrings/mise-archive-keyring.gpg 1> /dev/null \
+    && echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg arch=$(dpkg --print-architecture)] https://mise.jdx.dev/deb stable main" | tee /etc/apt/sources.list.d/mise.list \
+    && apt update \
+    && apt install -y mise \
+    && echo 'eval "$(mise activate bash)"' >> /etc/skel/.bashrc \
+    && echo 'eval "$(mise activate bash)"' >> /etc/skel/.zshrc
+
+RUN groupadd sandbox \
+    && useradd -g sandbox -m sandbox \
+    && mkdir -p /sandbox/tools \
+    && chown sandbox:sandbox /sandbox/tools
+USER sandbox
+
+# Install Node.js
+RUN curl -fsSL "https://nodejs.org/dist/v22.17.1/node-v22.17.1-linux-$(uname -m | sed 's,86_,,').tar.xz" | tar -C /sandbox/tools -xJf - \
+    && mv /sandbox/tools/node-v* /sandbox/tools/node \
+    && env PATH=/sandbox/tools/node/bin:$PATH npm install -g npm@latest
+ENV PATH=/sandbox/tools/node/bin:$PATH
+
+# Install Coding Agents
+RUN npm install -g @anthropic-ai/claude-code \
+    && npm install -g @google/gemini-cli \
+    && rm -rf /home/sandbox/.npm
+EOF
+}
+
 case "$1" in
-  setup_container_firewall | setup_container_user )
+  setup_container_firewall | setup_container_user | print_preset_dockerfile )
     "$@"
     ;;
   * )
