@@ -157,7 +157,7 @@ main() {
   local container_workdir
   host_project_root="$(git rev-parse --show-toplevel || pwd)"
   container_project_root="$host_project_root"
-  container_workdir="$host_project_root"
+  container_workdir=$(pwd)
 
   local image_name
   local image_tag
@@ -178,7 +178,9 @@ main() {
     docker_build_opts+=(--file "$dockerfile")
     docker_build_context=$(dirname "$dockerfile")
   else
-    # No Dockerfile -> Use preset Dockerfile
+    log "Dockerfile not specified, using preset."
+    "$SCRIPT_PATH" print_preset_dockerfile
+
     local host_persistent_dir=".$SCRIPT_NAME/persistent"
 
     # Persist shell history, mise data
@@ -186,12 +188,10 @@ main() {
     mkdir -p "$host_persistent_home_dir"
     touch "$host_persistent_home_dir/.bash_history"
     touch "$host_persistent_home_dir/.zsh_history"
-    touch "$host_persistent_home_dir/.zsh_history.new"
     mkdir -p "$host_persistent_home_dir/.local"
     writable_mounts+=(
       "$host_persistent_home_dir/.bash_history:/home/sandbox/.bash_history"
       "$host_persistent_home_dir/.zsh_history:/home/sandbox/.zsh_history"
-      "$host_persistent_home_dir/.zsh_history.new:/home/sandbox/.zsh_history.new"
       "$host_persistent_home_dir/.local:/home/sandbox/.local"
     )
 
@@ -205,14 +205,22 @@ main() {
       "$HOME/.gemini:/home/sandbox/.gemini"
     )
 
-    # allow access to LLM providers
     allow_net="yes"
     allow_net_destinations+=(
+      "raw.githubusercontent.com"
+
+      # npm
+      "registry.npmjs.org"
+
+      # Claude Code
       "api.anthropic.com"
       "statsig.anthropic.com"
-      # TODO
-      "www.googleapis.com"
+
+      # Gemini CLI
       "generativelanguage.googleapis.com"
+      "play.googleapis.com"
+      "oauth2.googleapis.com"
+      "cloudcode-pa.googleapis.com"
     )
 
     allocate_tty="yes"
@@ -225,7 +233,7 @@ main() {
   local docker_run_opts=(
     --name "$CONTAINER_NAME"
     --entrypoint ""
-    --user "$host_user_id:$host_group_id"
+    --user 0:0
     --mount "type=bind,source=${SCRIPT_PATH},target=${CONTAINER_SCRIPT_PATH},readonly"
   )
   
@@ -267,7 +275,7 @@ main() {
       mount_path="$(readlink -f "${dir}" | sed "s,^${host_project_root},${container_project_root},")"
     fi
     docker_run_opts+=(--volume "${volume_name}:${mount_path}")
-    log "Setting up volume ownership for $dir ($host_user_id:$host_group_id)"
+    log "Setting up volume ownership for $dir ($host_user_id:$host_group_id)."
     run docker run --rm -v "${volume_name}:/mnt" busybox:latest chown "$host_user_id:$host_group_id" /mnt
   done
 
@@ -314,14 +322,14 @@ main() {
     fi
     exec 1>&2
   
-    log "Stopping container"
+    log "Stopping container."
     run docker stop -t 0 "$CONTAINER_NAME" || true
   
-    log "Removing container"
+    log "Removing container."
     run docker rm -f "$CONTAINER_NAME" || true
   
     if docker network inspect "$NETWORK_NAME" &> /dev/null; then
-      log "Removing network"
+      log "Removing network."
       run docker network rm "$NETWORK_NAME"
     fi
 
@@ -344,7 +352,7 @@ Sandbox Configurations:
 EOF
   )"
 
-  log "Building docker image"
+  log "Building docker image."
   if test -n "$dockerfile"; then
     run docker build "${docker_platform_opts[@]}" "${docker_build_opts[@]}" "$docker_build_context"
   else
@@ -353,12 +361,12 @@ EOF
   fi
 
   if test "$allow_net" = "yes"; then
-    log "Creating network"
+    log "Creating network."
     run docker network create "$NETWORK_NAME" --driver bridge \
       -o com.docker.network.bridge.enable_ip_masquerade=true
   fi
 
-  log "Inspect container user and group id"
+  log "Inspect container user and group id."
   local container_default_user_group
   local container_default_user_id
   local container_default_group_id
@@ -371,15 +379,17 @@ EOF
   container_default_group_id=$(cut -d: -f2 <<< "$container_default_user_group")
   echo "Container default user and group id: $container_default_user_group"
   
-  log "Starting container"
-  run docker run --detach "${docker_platform_opts[@]}" "${docker_run_opts[@]}" "${image_name}:${image_tag}" tail -f /dev/null
+  log "Starting container."
+  run docker run --detach "${docker_platform_opts[@]}" "${docker_run_opts[@]}" "${image_name}:${image_tag}" \
+    "$CONTAINER_SCRIPT_PATH" start_dnsmasq
 
   if test "$allow_net" = "yes"; then
-    log "Setting up firewall"
-    run docker exec --user 0:0 "$CONTAINER_NAME" "$CONTAINER_SCRIPT_PATH" setup_container_firewall "${allow_net_destinations[@]}"
+    log "Setting up firewall."
+    run docker exec --user 0:0 "$CONTAINER_NAME" \
+      "$CONTAINER_SCRIPT_PATH" setup_container_firewall "${allow_net_destinations[@]}"
   fi
   
-  log "Setting up container user to match host user ($host_user_id:$host_group_id) for file access"
+  log "Setting up container user to match host user ($host_user_id:$host_group_id) for file access."
   run docker exec --user 0:0 "$CONTAINER_NAME" "$CONTAINER_SCRIPT_PATH" setup_container_user \
      "$container_default_user_id" "$container_default_group_id" \
      "$host_user_id" "$host_group_id"
@@ -389,6 +399,24 @@ EOF
   exec 2>&4
   
   run docker exec "${docker_exec_opts[@]}" "$CONTAINER_NAME" "$@"
+}
+
+start_dnsmasq() {
+  local servers=("$(grep nameserver /etc/resolv.conf | awk '{print $2}')")
+
+  mkdir -p /sandbox/etc
+  cat > /sandbox/etc/dnsmasq.conf << 'EOF'
+log-queries
+listen-address=127.0.0.1
+EOF
+
+  for server in "${servers[@]}"; do
+    echo "server=$server" >> /sandbox/etc/dnsmasq.conf
+  done
+
+  echo "nameserver 127.0.0.1" > /etc/resolv.conf
+
+  dnsmasq -k -C /sandbox/etc/dnsmasq.conf --log-facility /dev/stdout
 }
 
 setup_container_firewall() {
@@ -580,7 +608,7 @@ FROM debian:12
 
 RUN apt update && apt install -y \
       bash zsh \
-      iptables ipset iproute2 \
+      iptables ipset iproute2 dnsmasq \
       dnsutils iputils-ping netcat-openbsd \
       gpg \
       curl \
@@ -614,15 +642,20 @@ ENV PATH=/sandbox/tools/node/bin:$PATH
 
 # Install Coding Agents
 RUN npm install -g @anthropic-ai/claude-code \
+    && npm install -g ccusage \
     && npm install -g @google/gemini-cli \
     && rm -rf /home/sandbox/.npm
 EOF
 }
 
-case "$1" in
-  setup_container_firewall | setup_container_user | print_preset_dockerfile )
-    "$@"
-    ;;
-  * )
-    main "$@"
-esac
+if test "$#" -gt 0; then
+  case "$1" in
+    start_dnsmasq | setup_container_firewall | setup_container_user | print_preset_dockerfile )
+      "$@"
+      ;;
+    * )
+      main "$@"
+  esac
+else
+  main
+fi
