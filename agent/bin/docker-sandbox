@@ -14,6 +14,7 @@ Usage: $SCRIPT_NAME --dockerfile FILE
            [--mount-writable HOST_DIR:CONTAINER_DIR] [--mount-readonly HOST_DIR:CONTAINER_DIR]
            [--publish [[HOST_ADDRESS:]HOST_PORT:]CONTAINER_PORT]
            [--tty]
+           [--no-cache]
            [--verbose] [--dry-run]
            COMMAND
 
@@ -38,6 +39,7 @@ Execute a command within a container defined by a Dockerfile.
                             Publish a container's port(s) to the host. If the host address is not specified,
                             the port will be bound to 127.0.0.1 by default.
   --tty                     Allocate a pseudo-TTY for the container.
+  --no-cache                Do not use cache when building the image.
   --verbose                 Output verbose logs to stderr.
   --dry-run                 Do not execute the command, just print the command to stdout.
 
@@ -58,6 +60,7 @@ main() {
   local writable_mounts=()
   local publish_ports=()
   local allocate_tty="no"
+  local no_cache="no"
   local platform=""
 
   VERBOSE="no"
@@ -95,6 +98,7 @@ main() {
         shift 2
         ;;
       --tty         ) allocate_tty="yes"; shift ;;
+      --no-cache    ) no_cache="yes"; shift ;;
       --verbose     ) VERBOSE="yes"; shift ;;
       --dry-run     ) DRY_RUN="yes"; shift ;;
       --            ) shift; continue ;;
@@ -168,6 +172,11 @@ main() {
     docker_platform_opts+=(--platform "$platform")
   fi
   
+  local docker_build_opts=()
+  if test "$no_cache" = "yes"; then
+    docker_build_opts+=(--no-cache)
+  fi
+
   local docker_run_opts=(
     --name "$CONTAINER_NAME"
     --entrypoint ""
@@ -277,14 +286,16 @@ Sandbox Configurations:
   dockerfile=${dockerfile}
   image_name=${image_name}
   image_tag=${image_tag}
-  docker_run_opts=${docker_run_opts[@]}
-  docker_exec_opts=${docker_exec_opts[@]}
+  docker_platform_opts=(${docker_platform_opts[@]})
+  docker_build_opts=(${docker_build_opts[@]})
+  docker_run_opts=(${docker_run_opts[@]})
+  docker_exec_opts=(${docker_exec_opts[@]})
   command=$@
 EOF
   )"
 
   log "Building docker image"
-  if ! run docker build "${docker_platform_opts[@]}" --tag "${image_name}:${image_tag}" - < "$dockerfile"; then
+  if ! run docker build "${docker_platform_opts[@]}" "${docker_build_opts[@]}" --tag "${image_name}:${image_tag}" - < "$dockerfile"; then
     log "Error: failed to build image"
     return 1
   fi
