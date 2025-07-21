@@ -14,6 +14,7 @@ Usage: $SCRIPT_NAME --dockerfile FILE
            [--use-volume DIRECTORIES]
            [--mount-writable HOST_DIR:CONTAINER_DIR] [--mount-readonly HOST_DIR:CONTAINER_DIR]
            [--publish [[HOST_ADDRESS:]HOST_PORT:]CONTAINER_PORT]
+           [--env-file FILE]
            [--tty]
            [--no-cache]
            [--verbose] [--dry-run]
@@ -39,6 +40,7 @@ Execute a command within a container defined by a Dockerfile.
   --publish [[HOST_ADDRESS:]HOST_PORT:]CONTAINER_PORT
                             Publish a container's port(s) to the host. If the host address is not specified,
                             the port will be bound to 127.0.0.1 by default.
+  --env-file FILE           Path to a .env file to load environment variables from.
   --tty                     Allocate a pseudo-TTY for the container.
   --no-cache                Do not use cache when building the image.
   --verbose                 Output verbose logs to stderr.
@@ -60,6 +62,7 @@ main() {
   local readonly_mounts=()
   local writable_mounts=()
   local publish_ports=()
+  local env_file=""
   local allocate_tty="no"
   local no_cache="no"
   local platform=""
@@ -96,6 +99,10 @@ main() {
         ;;
       --publish     )
         IFS=',' read -r -a publish_ports <<< "$2"
+        shift 2
+        ;;
+      --env-file    )
+        local env_file="$2"
         shift 2
         ;;
       --tty         ) allocate_tty="yes"; shift ;;
@@ -226,6 +233,10 @@ main() {
     --workdir "$container_workdir"
     --user "$host_user_id:$host_group_id"
   )
+
+  if test -n "$env_file"; then
+    docker_run_opts+=(--env-file "$env_file")
+  fi
   
   if test "$allow_write" = "yes"; then
     docker_run_opts+=(--volume "${host_project_root}:${container_project_root}")
