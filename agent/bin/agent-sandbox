@@ -83,7 +83,7 @@ RUN groupadd sandbox \
 USER sandbox
 
 # Install Node.js
-RUN curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-$(uname -m | sed 's,86_,,').tar.xz" | tar -C /sandbox/tools -xJf - \
+RUN curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-$(uname -m | sed 's,x86_64,x64,; s,aarch64,arm64,').tar.xz" | tar -C /sandbox/tools -xJf - \
     && mv /sandbox/tools/node-v${NODE_VERSION}* /sandbox/tools/node \
     && env PATH=/sandbox/tools/node/bin:$PATH npm install -g npm@latest
 ENV PATH=/sandbox/tools/node/bin:$PATH
@@ -96,6 +96,10 @@ RUN npm install -g @anthropic-ai/claude-code \
 
 ENV EDITOR="busybox vi"
 EOF
+}
+
+log() {
+  echo "[$(date "+%Y-%m-%d %H:%M:%S%z")][$(hostname)] $*"
 }
 
 main() {
@@ -165,21 +169,17 @@ main() {
     help >&2
     return 1
   fi
-  
-  log() {
-    echo "[$(date "+%Y-%m-%d %H:%M:%S%z")] $*"
-  }
 
   # save stdout, stderr
   exec 3>&1
   exec 4>&2
- 
+
   run() {
-    if test "$DRY_RUN" = "yes"; then
+    if test "$DRY_RUN" = "no"; then
+      "$@"
+    else
       echo "DRY_RUN: $*" >&3
-      return 0
     fi
-    "$@"
   }
  
   if test "$VERBOSE" = "no"; then
@@ -190,38 +190,7 @@ main() {
   # stdout to stderr
   exec 1>&2
 
-  local host_user_id
-  local host_group_id
-  host_user_id=$(id -u)
-  host_group_id=$(id -g)
-  
-  # set options
-  local host_project_root
-  local container_project_root
-  local container_workdir
-  host_project_root="$(git rev-parse --show-toplevel || pwd)"
-  container_project_root="$host_project_root"
-  container_workdir=$(pwd)
-
-  local image_name
-  local image_tag
-  image_name="${SCRIPT_NAME}--$(basename "$(pwd)")"
-  image_tag="latest"
-
-  CONTAINER_NAME="${image_name}--$(env LC_CTYPE=C tr -dc '[:alnum:]' < /dev/urandom 2> /dev/null | head -c 10 || true)"
-  NETWORK_NAME="${CONTAINER_NAME}"
-
-  local docker_platform_opts=()
-  if test -n "$platform"; then
-    docker_platform_opts+=(--platform "$platform")
-  fi
- 
-  local docker_build_opts=(--tag "$image_name:$image_tag")
-  local docker_build_context=""
-  if test -n "$dockerfile"; then
-    docker_build_opts+=(--file "$dockerfile")
-    docker_build_context=$(dirname "$dockerfile")
-  else
+  if test -z "$dockerfile"; then
     log "Dockerfile not specified, using preset."
     "$SCRIPT_PATH" print_preset_dockerfile
 
@@ -294,6 +263,39 @@ EOF
       # npm
       "registry.npmjs.org"
     )
+  fi  
+
+  local host_user_id
+  local host_group_id
+  host_user_id=$(id -u)
+  host_group_id=$(id -g)
+  
+  # set options
+  local host_project_root
+  local container_project_root
+  local container_workdir
+  host_project_root="$(git rev-parse --show-toplevel || pwd)"
+  container_project_root="$host_project_root"
+  container_workdir=$(pwd)
+
+  local image_name
+  local image_tag
+  image_name="${SCRIPT_NAME}--$(basename "$(pwd)")"
+  image_tag="latest"
+
+  CONTAINER_NAME="${image_name}--$(env LC_CTYPE=C tr -dc '[:alnum:]' < /dev/urandom 2> /dev/null | head -c 10 || true)"
+  NETWORK_NAME="${CONTAINER_NAME}"
+
+  local docker_platform_opts=()
+  if test -n "$platform"; then
+    docker_platform_opts+=(--platform "$platform")
+  fi
+ 
+  local docker_build_opts=(--tag "$image_name:$image_tag")
+  local docker_build_context=""
+  if test -n "$dockerfile"; then
+    docker_build_opts+=(--file "$dockerfile")
+    docker_build_context=$(dirname "$dockerfile")
   fi
 
   if test "$no_cache" = "yes"; then
@@ -301,6 +303,7 @@ EOF
   fi
 
   local docker_run_opts=(
+    --detach
     --name "$CONTAINER_NAME"
     --entrypoint ""
     --user 0:0
@@ -351,17 +354,17 @@ EOF
 
   # mount options
   for mount in "${readonly_mounts[@]}"; do
-    local host_dir
-    local container_dir
-    IFS=':' read -r host_dir container_dir <<< "$mount"
-    docker_run_opts+=(--mount "type=bind,source=${host_dir},target=${container_dir},readonly")
+    local host_path
+    local container_path
+    IFS=':' read -r host_path container_path <<< "$mount"
+    docker_run_opts+=(--mount "type=bind,source=$(readlink -f "$host_path"),target=${container_path},readonly")
   done
   
   for mount in "${writable_mounts[@]}"; do
-    local host_dir
-    local container_dir
-    IFS=':' read -r host_dir container_dir <<< "$mount"
-    docker_run_opts+=(--mount "type=bind,source=${host_dir},target=${container_dir}")
+    local host_path
+    local container_path
+    IFS=':' read -r host_path container_path <<< "$mount"
+    docker_run_opts+=(--mount "type=bind,source=$(readlink -f "$host_path"),target=${container_path}")
   done
 
   # publish options
@@ -414,11 +417,15 @@ EOF
   # shellcheck disable=SC2001
   log "$(cat << EOF
 Sandbox Configurations:
-  docker_platform_opts=$(echo "${docker_platform_opts[*]}" | sed 's, ,\n    ,g')
-  docker_build_opts=$(echo "${docker_build_opts[*]}" | sed 's, ,\n    ,g')
+  docker_platform_opts=
+    $(echo "${docker_platform_opts[*]}" | sed 's, ,\n    ,g')
+  docker_build_opts=
+    $(echo "${docker_build_opts[*]}" | sed 's, ,\n    ,g')
   docker_build_context=$docker_build_context
-  docker_run_opts=$(echo "${docker_run_opts[*]}" | sed 's, ,\n    ,g')
-  docker_exec_opts=$(echo "${docker_exec_opts[*]}" | sed 's, ,\n    ,g')
+  docker_run_opts=
+    $(echo "${docker_run_opts[*]}" | sed 's, ,\n    ,g')
+  docker_exec_opts=
+    $(echo "${docker_exec_opts[*]}" | sed 's, ,\n    ,g')
   command=$@
 EOF
   )"
@@ -448,11 +455,11 @@ EOF
   fi
   container_default_user_id=$(cut -d: -f1 <<< "$container_default_user_group")
   container_default_group_id=$(cut -d: -f2 <<< "$container_default_user_group")
-  echo "Container default user and group id: $container_default_user_group"
+  log "Container default user and group id: $container_default_user_group"
   
   log "Starting container."
-  run docker run --detach "${docker_platform_opts[@]}" "${docker_run_opts[@]}" "${image_name}:${image_tag}" \
-    "$CONTAINER_SCRIPT_PATH" start_dnsmasq
+  run docker run "${docker_platform_opts[@]}" "${docker_run_opts[@]}" "${image_name}:${image_tag}" \
+    "$CONTAINER_SCRIPT_PATH" start_container_dnsmasq
 
   if test "$allow_net" = "yes"; then
     log "Setting up firewall."
@@ -472,20 +479,25 @@ EOF
   run docker exec "${docker_exec_opts[@]}" "$CONTAINER_NAME" "$@"
 }
 
-start_dnsmasq() {
-  local servers=("$(grep nameserver /etc/resolv.conf | awk '{print $2}')")
+start_container_dnsmasq() {
+  local servers=()
+  IFS=$'\n' read -r -a servers < <(grep nameserver /etc/resolv.conf | awk '{print $2}')
 
   mkdir -p /sandbox/etc
   cat > /sandbox/etc/dnsmasq.conf << 'EOF'
 log-queries
 listen-address=127.0.0.1
 EOF
-
   for server in "${servers[@]}"; do
     echo "server=$server" >> /sandbox/etc/dnsmasq.conf
   done
-
   echo "nameserver 127.0.0.1" > /etc/resolv.conf
+
+  log "Starting dnsmasq."
+  log "/sandbox/etc/dnsmasq.conf"
+  cat "/sandbox/etc/dnsmasq.conf"
+  log "/etc/resolv.conf"
+  cat "/etc/resolv.conf"
 
   dnsmasq -k -C /sandbox/etc/dnsmasq.conf --log-facility /dev/stdout
 }
@@ -519,15 +531,15 @@ setup_container_firewall() {
     local domain_address_count=0
     for address in $(getent hosts "$host" | awk '{print $1}'; dig +short A "$host"); do
       if ! grep -qE "$address_pattern" <<< "$address"; then
-        echo "Warn: Ignore invalid address $address of $host" >&2
+        log "Warn: Ignore invalid address $address of $host"
         continue
       fi
 
       if test -n "$port"; then
-        echo "Allow outgoing connections to $destination $address:$port"
+        log "Allow outgoing connections to $destination $address:$port"
         addresses+=("$address:$port")
       else
-        echo "Allow outgoing connections to $destination $address"
+        log "Allow outgoing connections to $destination $address"
         addresses+=("$address")
       fi
 
@@ -600,15 +612,15 @@ setup_container_user() {
   group=$(getent group "$container_default_group_id" | cut -d: -f1 2> /dev/null || echo "")
 
   if test "$container_default_user_id" -eq 0; then
-    echo "Container default user is root, creating sandbox user/group"
+    log "Container default user is root, creating sandbox user/group"
     
     if ! getent group sandbox &> /dev/null; then
-      echo "Creating group sandbox"
+      log "Creating group sandbox"
       groupadd sandbox
     fi
     
     if ! getent passwd sandbox &> /dev/null; then
-      echo "Creating user sandbox"
+      log "Creating user sandbox"
       useradd -g sandbox -m sandbox
     fi
     
@@ -616,11 +628,11 @@ setup_container_user() {
     group="sandbox"
   fi
 
-  echo "Updating group '$group' ID to $host_group_id"
+  log "Updating group '$group' ID to $host_group_id"
   local conflicting_group
   conflicting_group=$(getent group "$host_group_id" | cut -d: -f1 2> /dev/null || echo "")
   if test -n "$conflicting_group" && test "$conflicting_group" != "$group"; then
-    echo "Resolving group ID conflict: moving group '$conflicting_group'"
+    log "Resolving group ID conflict: moving group '$conflicting_group'"
     local temp_gid
     for gid in $(seq 1000 65533); do
       if ! getent group "$gid" &> /dev/null; then
@@ -639,11 +651,11 @@ setup_container_user() {
 
   groupmod -g "$host_group_id" "$group"
 
-  echo "Updating user '$user' ID to $host_user_id:$host_group_id"
+  log "Updating user '$user' ID to $host_user_id:$host_group_id"
   local conflicting_user
   conflicting_user=$(getent passwd "$host_user_id" | cut -d: -f1 2> /dev/null || echo "")
   if test -n "$conflicting_user" && test "$conflicting_user" != "$user"; then
-    echo "Resolving user ID conflict: moving user '$conflicting_user'"
+    log "Resolving user ID conflict: moving user '$conflicting_user'"
     local temp_uid
     for uid in $(seq 1000 65533); do
       if ! getent passwd "$uid" &> /dev/null; then
@@ -666,16 +678,16 @@ setup_container_user() {
   local home_dir
   home_dir=$(getent passwd "$user" | cut -d: -f6)
   if test -n "$home_dir" && test -d "$home_dir"; then
-    echo "Updating home directory ownership: $home_dir"
+    log "Updating home directory ownership: $home_dir"
     chown "$host_user_id:$host_group_id" "$home_dir" || true
   fi
 
-  echo "User setup completed: $user ($host_user_id:$host_group_id)"
+  log "User setup completed: $user ($host_user_id:$host_group_id)"
 }
 
 if test "$#" -gt 0; then
   case "$1" in
-    start_dnsmasq | setup_container_firewall | setup_container_user | print_preset_dockerfile )
+    start_container_dnsmasq | setup_container_firewall | setup_container_user | print_preset_dockerfile )
       "$@"
       ;;
     * )
