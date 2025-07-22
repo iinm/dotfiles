@@ -2,6 +2,7 @@
 
 set -eu -o pipefail
 
+SCRIPT_VERSION="0.0.1"
 SCRIPT_PATH="${BASH_SOURCE[0]}"
 SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 CONTAINER_SCRIPT_PATH="/sandbox/bin/$SCRIPT_NAME"
@@ -246,9 +247,18 @@ main() {
   container_project_root="$host_project_root"
   container_workdir=$(pwd)
 
+  local project_id
   local image_name
   local image_tag
-  image_name="${SCRIPT_NAME}--$(basename "$(pwd)")"
+  if which shasum &> /dev/null; then
+    project_id="$(shasum -a 256 <<< "$(pwd)" | head -c 8)"
+  elif which sha256sum &> /dev/null; then
+    project_id="$(sha256sum <<< "$(pwd)" | head -c 8)"
+  else
+    echo "Error: Neither shasum nor sha256sum found. Please install one of them." >&2
+    return 1
+  fi
+  image_name="${SCRIPT_NAME}--$(basename "$(pwd)")-$project_id"
   image_tag="latest"
 
   CONTAINER_NAME="${image_name}--$(env LC_CTYPE=C tr -dc '[:alnum:]' < /dev/urandom 2> /dev/null | head -c 10 || true)"
