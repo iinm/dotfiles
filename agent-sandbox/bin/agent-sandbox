@@ -51,26 +51,19 @@ Options:
 
 Examples:
 
-  Start shell with preset configurations:
+  Start shell with preset configuration:
     $SCRIPT_NAME --tty --verbose zsh
 
-  Check preset configurations:
+  Check preset configuration:
     $SCRIPT_NAME --tty --verbose --dry-run zsh
 
-  Run Claude Code:
-    $SCRIPT_NAME --allow-write --allow-net --tty claude
-
-  Run Gemini CLI:
-    $SCRIPT_NAME --allow-write --allow-net --tty gemini
+  Start coding agent:
+    $SCRIPT_NAME --env-file sandbox/.env --allow-write --allow-net --tty claude
+    $SCRIPT_NAME --env-file sandbox/.env --allow-write --allow-net --tty gemini
+    $SCRIPT_NAME --env-file sandbox/.env --allow-write --allow-net --tty codex
 
   Run with Dockerfile:
-    $SCRIPT_NAME --dockerfile .agent/sandbox/Dockerfile --verbose --tty bash
-
-  Allow write access to project directory and network access to NPM:
-    $SCRIPT_NAME --dockerfile .agent/sandbox/Dockerfile --verbose --allow-write --allow-net registry.npmjs.org --volume node_modules npm install
-
-  Allow access to docker host port:
-    $SCRIPT_NAME --dockerfile .agent/sandbox/Dockerfile --verbose --allow-net host.docker.internal:3306 npm run test
+    $SCRIPT_NAME --dockerfile sandbox/Dockerfile.minimum --verbose --tty bash
 HELP
 }
 
@@ -262,7 +255,7 @@ main() {
   NETWORK_NAME="${CONTAINER_NAME}"
 
   if test -z "$dockerfile"; then
-    log "Dockerfile not specified, using preset."
+    log "Dockerfile not specified, using preset configuration."
 
     local platform_with_default="default"
     if test -n "$platform"; then
