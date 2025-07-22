@@ -1,1 +1,2 @@
-sandbox/.env
+.env*
+!.env.sandbox-example

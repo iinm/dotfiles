@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.3"
+SCRIPT_VERSION="0.0.4"
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
 CONTAINER_SCRIPT_PATH="/sandbox/bin/$SCRIPT_NAME"
@@ -65,10 +65,10 @@ Examples:
     $SCRIPT_NAME --allow-write --allow-net --mount-writable ~/.claude:/home/sandbox/.claude --tty --verbose claude
 
   Start Codex CLI:
-    $SCRIPT_NAME --env-file sandbox/.env --allow-write --allow-net --mount-writable ~/.codex:/home/sandbox/.codex --tty --verbose codex
+    $SCRIPT_NAME --env-file .env.sandbox --allow-write --allow-net --mount-writable ~/.codex:/home/sandbox/.codex --tty --verbose codex
 
   Start Gemini CLI:
-    $SCRIPT_NAME --env-file sandbox/.env --allow-write --allow-net --mount-writable ~/.gemini:/home/sandbox/.gemini --tty --verbose gemini
+    $SCRIPT_NAME --env-file .env.sandbox --allow-write --allow-net --mount-writable ~/.gemini:/home/sandbox/.gemini --tty --verbose gemini
 
   Install tools with mise:
     $SCRIPT_NAME --allow-net nodejs.org --tty --verbose mise install node
