@@ -9,7 +9,7 @@ CONTAINER_SCRIPT_PATH="/sandbox/bin/$SCRIPT_NAME"
 
 help() {
   cat << HELP
-$SCRIPT_NAME - Run a command in a sandboxed Docker environment
+$SCRIPT_NAME v$SCRIPT_VERSION - Run a command in a sandboxed Docker environment
 
 Usage: $SCRIPT_NAME [--dockerfile FILE]
            [--platform PLATFORM]
@@ -214,7 +214,6 @@ main() {
   
   if test "$#" -eq 0; then
     echo "Error: COMMAND is required" >&2
-    help >&2
     return 1
   fi
 
