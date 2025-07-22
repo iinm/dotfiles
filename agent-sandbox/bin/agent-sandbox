@@ -2,9 +2,9 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.2"
-SCRIPT_PATH="${BASH_SOURCE[0]}"
-SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
+SCRIPT_VERSION="0.0.3"
+SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
+SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
 CONTAINER_SCRIPT_PATH="/sandbox/bin/$SCRIPT_NAME"
 
 # Future improvements:
