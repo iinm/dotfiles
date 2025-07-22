@@ -58,10 +58,14 @@ Examples:
   Check preset configuration:
     $SCRIPT_NAME --tty --verbose --dry-run zsh
 
-  Start coding agent:
-    $SCRIPT_NAME --env-file sandbox/.env --allow-write --allow-net --tty claude
-    $SCRIPT_NAME --env-file sandbox/.env --allow-write --allow-net --tty gemini
-    $SCRIPT_NAME --env-file sandbox/.env --allow-write --allow-net --tty codex
+  Start Claude Code:
+    $SCRIPT_NAME --allow-write --allow-net --mount-writable ~/.claude:/home/sandbox/.claude --tty claude
+
+  Start Codex CLI:
+    $SCRIPT_NAME --env-file sandbox/.env --allow-write --allow-net --mount-writable ~/.codex:/home/sandbox/.codex --tty codex
+
+  Start Gemini CLI:
+    $SCRIPT_NAME --env-file sandbox/.env --allow-write --allow-net --mount-writable ~/.gemini:/home/sandbox/.gemini --tty gemini
 
   Run with Dockerfile:
     $SCRIPT_NAME --dockerfile sandbox/Dockerfile.minimum --verbose --tty bash
@@ -118,14 +122,14 @@ RUN npm install -g @anthropic-ai/claude-code \
     && npm install -g @openai/codex \
     && rm -rf /home/sandbox/.npm
 
-RUN echo 'test -L ~/.bash_history || (touch /persistent/home/.bash_history; ln -sf /persistent/home/.bash_history ~/)' >> /home/sandbox/.bashrc \
-    && echo 'test -L ~/.zsh_history || (touch /persistent/home/.zsh_history; ln -sf /persistent/home/.zsh_history ~/)' >> /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.gitconfig || (touch /persistent/home/.gitconfig; ln -sf /persistent/home/.gitconfig ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.local || (mkdir -p /persistent/home/.local/share; ln -sf /persistent/home/.local ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.claude || (mkdir -p /persistent/home/.claude; ln -sf /persistent/home/.claude ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.claude.json || (touch /persistent/home/.claude.json; ln -sf /persistent/home/.claude.json ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.gemini || (mkdir -p /persistent/home/.gemini; ln -sf /persistent/home/.gemini ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.codex || (mkdir -p /persistent/home/.codex; ln -sf /persistent/home/.codex ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local
+RUN echo 'test -L ~/.bash_history || (touch /persistent/home/.bash_history; ln -s /persistent/home/.bash_history ~/)' >> /home/sandbox/.bashrc \
+    && echo 'test -L ~/.zsh_history || (touch /persistent/home/.zsh_history; ln -s /persistent/home/.zsh_history ~/)' >> /home/sandbox/.zshrc.local \
+    && echo 'test -L ~/.gitconfig || (touch /persistent/home/.gitconfig; ln -s /persistent/home/.gitconfig ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
+    && echo 'test -L ~/.local || (mkdir -p /persistent/home/.local/share; ln -s /persistent/home/.local ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
+    && echo 'test -L ~/.claude || (mkdir -p /persistent/home/.claude; ln -s /persistent/home/.claude ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
+    && echo 'test -L ~/.claude.json || (touch /persistent/home/.claude.json; ln -s /persistent/home/.claude.json ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
+    && echo 'test -L ~/.gemini || (mkdir -p /persistent/home/.gemini; ln -s /persistent/home/.gemini ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
+    && echo 'test -L ~/.codex || (mkdir -p /persistent/home/.codex; ln -s /persistent/home/.codex ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local
 
 ENV EDITOR="busybox vi"
 ENV MISE_DATA_DIR=/persistent/mise-data
