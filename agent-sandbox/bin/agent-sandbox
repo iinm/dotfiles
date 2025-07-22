@@ -7,6 +7,9 @@ SCRIPT_PATH="${BASH_SOURCE[0]}"
 SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 CONTAINER_SCRIPT_PATH="/sandbox/bin/$SCRIPT_NAME"
 
+# Future improvements:
+# - Document preset configuration.
+# - Explain why dnsmasq is run and how to view query logs.
 help() {
   cat << HELP
 $SCRIPT_NAME v$SCRIPT_VERSION - Run a command in a sandboxed Docker environment
@@ -14,7 +17,7 @@ $SCRIPT_NAME v$SCRIPT_VERSION - Run a command in a sandboxed Docker environment
 Usage: $SCRIPT_NAME [--dockerfile FILE]
            [--platform PLATFORM]
            [--env-file FILE]
-           [--allow-write] [--allow-net [DESTINATIONS]]
+           [--allow-write] [--allow-net [DESTINATIONS|--]]
            [--volume [NAME:]CONTAINER_DIR]
            [--mount-writable HOST_DIR:CONTAINER_DIR] [--mount-readonly HOST_DIR:CONTAINER_DIR]
            [--publish [HOST_ADDRESS:]HOST_PORT:CONTAINER_PORT]
@@ -25,7 +28,7 @@ Usage: $SCRIPT_NAME [--dockerfile FILE]
 
 Options:
 
-  --dockerfile FILE         Path to the Dockerfile. If not set, a preset Dockerfile is used.
+  --dockerfile FILE         Path to the Dockerfile. If not set, a preset Dockerfile and network policy is used.
                             The container must include bash, iptables, ip, dnsmasq, and dig commands.
   --env-file FILE           Path to a .env file To load environment variables from.
   --platform                Specify the platform for image building and container execution
@@ -66,6 +69,9 @@ Examples:
 
   Start Gemini CLI:
     $SCRIPT_NAME --env-file sandbox/.env --allow-write --allow-net --mount-writable ~/.gemini:/home/sandbox/.gemini --tty --verbose gemini
+
+  Install tools with mise:
+    $SCRIPT_NAME --allow-net nodejs.org --tty --verbose mise install node
 
   Run with Dockerfile:
     $SCRIPT_NAME --dockerfile sandbox/Dockerfile.minimum --tty --verbose bash
@@ -213,7 +219,7 @@ main() {
   done
   
   if test "$#" -eq 0; then
-    echo "Error: COMMAND is required" >&2
+    help >&2
     return 1
   fi
 
@@ -269,6 +275,7 @@ main() {
 
   if test -z "$dockerfile"; then
     log "Dockerfile not specified, using preset configuration."
+    "$SCRIPT_PATH" print_preset_dockerfile
 
     local platform_with_default="default"
     if test -n "$platform"; then
@@ -282,37 +289,27 @@ main() {
       "${image_name}--home:/persistent/home"
     )
 
-    if test "$allow_net" = "yes" -a "${#allow_net_destinations[@]}" -eq 0; then
-      allow_net_destinations+=(
-        # mise
-        "mise-versions.jdx.dev"
-        "nodejs.org"
-        "dl.google.com"
+    # if test "$allow_net" = "yes" -a "${#allow_net_destinations[@]}" -eq 0; then
+    allow_net_destinations+=(
+      # mise
+      "mise-versions.jdx.dev"
 
-        # github
-        "github.com"
-        "api.github.com"
-        "raw.githubusercontent.com"
+      # Claude Code
+      "api.anthropic.com"
+      "sentry.io"
+      "statsig.anthropic.com"
+      "statsig.com"
 
-        # npm
-        "registry.npmjs.org"
+      # Gemini CLI
+      "generativelanguage.googleapis.com"
+      "oauth2.googleapis.com"
+      "cloudcode-pa.googleapis.com"
+      "play.googleapis.com"
 
-        # Claude Code
-        "api.anthropic.com"
-        "sentry.io"
-        "statsig.anthropic.com"
-        "statsig.com"
-
-        # Gemini CLI
-        "generativelanguage.googleapis.com"
-        "oauth2.googleapis.com"
-        "cloudcode-pa.googleapis.com"
-        "play.googleapis.com"
-
-        # Codex CLI
-        "api.openai.com"
-      )
-    fi
+      # Codex CLI
+      "api.openai.com"
+    )
+    # fi
   fi
 
   if test -n "$platform"; then
@@ -563,6 +560,8 @@ setup_container_volume_owner() {
   done
 }
 
+# Future improvements:
+# - Use ipset
 setup_container_firewall() {
   local destinations=("$@")
   local addresses=()
