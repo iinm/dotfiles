@@ -59,16 +59,16 @@ Examples:
     $SCRIPT_NAME --tty --verbose --dry-run zsh
 
   Start Claude Code:
-    $SCRIPT_NAME --allow-write --allow-net --mount-writable ~/.claude:/home/sandbox/.claude --tty claude
+    $SCRIPT_NAME --allow-write --allow-net --mount-writable ~/.claude:/home/sandbox/.claude --tty --verbose claude
 
   Start Codex CLI:
-    $SCRIPT_NAME --env-file sandbox/.env --allow-write --allow-net --mount-writable ~/.codex:/home/sandbox/.codex --tty codex
+    $SCRIPT_NAME --env-file sandbox/.env --allow-write --allow-net --mount-writable ~/.codex:/home/sandbox/.codex --tty --verbose codex
 
   Start Gemini CLI:
-    $SCRIPT_NAME --env-file sandbox/.env --allow-write --allow-net --mount-writable ~/.gemini:/home/sandbox/.gemini --tty gemini
+    $SCRIPT_NAME --env-file sandbox/.env --allow-write --allow-net --mount-writable ~/.gemini:/home/sandbox/.gemini --tty --verbose gemini
 
   Run with Dockerfile:
-    $SCRIPT_NAME --dockerfile sandbox/Dockerfile.minimum --verbose --tty bash
+    $SCRIPT_NAME --dockerfile sandbox/Dockerfile.minimum --tty --verbose bash
 HELP
 }
 
@@ -283,35 +283,37 @@ main() {
       "${image_name}--home:/persistent/home"
     )
 
-    allow_net_destinations+=(
-      # mise
-      "mise-versions.jdx.dev"
-      "nodejs.org"
-      "dl.google.com"
+    if test "$allow_net" = "yes" -a "${#allow_net_destinations[@]}" -eq 0; then
+      allow_net_destinations+=(
+        # mise
+        "mise-versions.jdx.dev"
+        "nodejs.org"
+        "dl.google.com"
 
-      # github
-      "github.com"
-      "api.github.com"
-      "raw.githubusercontent.com"
+        # github
+        "github.com"
+        "api.github.com"
+        "raw.githubusercontent.com"
 
-      # npm
-      "registry.npmjs.org"
+        # npm
+        "registry.npmjs.org"
 
-      # Claude Code
-      "api.anthropic.com"
-      "sentry.io"
-      "statsig.anthropic.com"
-      "statsig.com"
+        # Claude Code
+        "api.anthropic.com"
+        "sentry.io"
+        "statsig.anthropic.com"
+        "statsig.com"
 
-      # Gemini CLI
-      "generativelanguage.googleapis.com"
-      "oauth2.googleapis.com"
-      "cloudcode-pa.googleapis.com"
-      "play.googleapis.com"
+        # Gemini CLI
+        "generativelanguage.googleapis.com"
+        "oauth2.googleapis.com"
+        "cloudcode-pa.googleapis.com"
+        "play.googleapis.com"
 
-      # Codex CLI
-      "api.openai.com"
-    )
+        # Codex CLI
+        "api.openai.com"
+      )
+    fi
   fi
 
   if test -n "$platform"; then
