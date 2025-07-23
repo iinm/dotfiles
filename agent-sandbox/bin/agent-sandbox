@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.5"
+SCRIPT_VERSION="0.0.6"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -320,12 +320,21 @@ main() {
     fi
   fi
 
-  if test -n "$platform"; then
-    docker_build_opts+=(--platform "$platform")
-    docker_run_opts+=(--platform "$platform")
-  fi
- 
+  # docker options
   local docker_build_opts=(--tag "$image_name:$image_tag")
+  local docker_run_opts=(
+    --detach
+    --name "$CONTAINER_NAME"
+    --entrypoint ""
+    --user 0:0
+    --mount "type=bind,source=${MOUNTABLE_SCRIPT_PATH},target=${CONTAINER_SCRIPT_PATH},readonly"
+  )
+  local docker_exec_opts=(
+    --interactive
+    --workdir "$container_workdir"
+    --user "$host_user_id:$host_group_id"
+  )
+
   local docker_build_context=""
   if test -n "$dockerfile"; then
     docker_build_opts+=(--file "$dockerfile")
@@ -336,20 +345,11 @@ main() {
     docker_build_opts+=(--no-cache)
   fi
 
-  local docker_run_opts=(
-    --detach
-    --name "$CONTAINER_NAME"
-    --entrypoint ""
-    --user 0:0
-    --mount "type=bind,source=${MOUNTABLE_SCRIPT_PATH},target=${CONTAINER_SCRIPT_PATH},readonly"
-  )
+  if test -n "$platform"; then
+    docker_build_opts+=(--platform "$platform")
+    docker_run_opts+=(--platform "$platform")
+  fi
   
-  local docker_exec_opts=(
-    --interactive
-    --workdir "$container_workdir"
-    --user "$host_user_id:$host_group_id"
-  )
-
   if test -n "$env_file"; then
     docker_run_opts+=(--env-file "$env_file")
   fi
