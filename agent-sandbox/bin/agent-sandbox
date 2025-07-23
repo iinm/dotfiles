@@ -31,9 +31,9 @@ Usage: $SCRIPT_NAME [--dockerfile FILE]
 
 Options:
 
-  --dockerfile FILE         Path to the Dockerfile. If not set, a preset Dockerfile and network policy is used.
+  --dockerfile FILE         Path to a Dockerfile. If not set, a preset Dockerfile and network policy is used.
                             The container must include bash, iptables, ip, dnsmasq, and dig commands.
-  --env-file FILE           Path to a .env file To load environment variables from.
+  --env-file FILE           Path to a .env file to load environment variables from.
   --platform                Specify the platform for image building and container execution
                             (e.g., linux/arm64 or linux/amd64).
   --allow-write             Allow write access to the project root inside the container.
@@ -43,14 +43,14 @@ Options:
                             If no port is given, only HTTPS (443) is allowed.
   --volume [NAME:]CONTAINER_DIR
                             Mount a writable Docker volume to a container path.
-                            If NAME is not given, a volume name is generated.
+                            If NAME is not given, the volume name is generated.
   --mount-readonly HOST_DIR:CONTAINER_DIR
                             Mount a host file or directory to a container path as read-only.
   --mount-writable HOST_DIR:CONTAINER_DIR
                             Mount a host file or directory to a container path as writable.
   --publish [HOST_ADDRESS:]HOST_PORT:CONTAINER_PORT
                             Publish container port(s) to the host.
-                            If no host address is given, the port binds to 127.0.0.1 by default.
+                            If no host address is given, ports bind to 127.0.0.1 by default.
   --tty                     Allocate a pseudo-TTY for the container.
   --no-cache                Don't use cache when building the image.
   --verbose                 Output verbose logs to stderr.
