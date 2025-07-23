@@ -3,8 +3,11 @@
 set -eu -o pipefail
 
 SCRIPT_VERSION="0.0.4"
+
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
+
+MOUNTABLE_SCRIPT_PATH="$HOME/.cache/$SCRIPT_NAME/$SCRIPT_NAME"
 CONTAINER_SCRIPT_PATH="/sandbox/bin/$SCRIPT_NAME"
 
 # Future improvements:
@@ -243,6 +246,11 @@ main() {
   # stdout to stderr
   exec 1>&2
 
+  log "Copy script to mountable path: $SCRIPT_PATH -> $MOUNTABLE_SCRIPT_PATH"
+  run mkdir -p "$(dirname "$MOUNTABLE_SCRIPT_PATH")"
+  run cp -f "$SCRIPT_PATH" "$MOUNTABLE_SCRIPT_PATH"
+  chmod +x "$MOUNTABLE_SCRIPT_PATH"
+
   local host_user_id
   local host_group_id
   host_user_id=$(id -u)
@@ -333,7 +341,7 @@ main() {
     --name "$CONTAINER_NAME"
     --entrypoint ""
     --user 0:0
-    --mount "type=bind,source=${SCRIPT_PATH},target=${CONTAINER_SCRIPT_PATH},readonly"
+    --mount "type=bind,source=${MOUNTABLE_SCRIPT_PATH},target=${CONTAINER_SCRIPT_PATH},readonly"
   )
   
   local docker_exec_opts=(
