@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.6"
+SCRIPT_VERSION="0.0.7"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -10,9 +10,6 @@ SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
 MOUNTABLE_SCRIPT_PATH="$HOME/.cache/$SCRIPT_NAME/$SCRIPT_NAME"
 CONTAINER_SCRIPT_PATH="/sandbox/bin/$SCRIPT_NAME"
 
-# Future improvements:
-# - Document preset configuration.
-# - Explain why dnsmasq is run and how to view query logs.
 help() {
   cat << HELP
 $SCRIPT_NAME v$SCRIPT_VERSION - Run a command in a sandboxed Docker environment
@@ -57,7 +54,6 @@ Options:
   --dry-run                 Don't execute the command; just print it to stdout.
 
 Examples:
-
   Start shell with preset configuration:
     $SCRIPT_NAME --tty --verbose zsh
 
@@ -75,9 +71,31 @@ Examples:
 
   Install tools with mise:
     $SCRIPT_NAME --allow-net nodejs.org --tty --verbose mise install node
+    $SCRIPT_NAME --allow-net github.com,dl.google.com --tty --verbose mise install go
 
   Run with Dockerfile:
-    $SCRIPT_NAME --dockerfile sandbox/Dockerfile.minimum --tty --verbose bash
+    $SCRIPT_NAME --dockerfile Dockerfile.minimum --tty --verbose bash
+
+  Allow access to docker host:
+    $SCRIPT_NAME --dockerfile Dockerfile.minimum --allow-net host.docker.internal:3000 --tty --verbose nc -z host.docker.internal 3000
+
+Preset Configuration:
+  When --dockerfile is not specified, a preset Debian 12 image is used with:
+  - System packages: bash, zsh (with grml config), iptables, dnsmasq, curl, wget, git, tig
+  - Node.js v22.17.1 with npm
+  - mise-en-place package manager for additional runtime installations
+  - AI coding assistants: Claude Code, Gemini CLI, Codex CLI
+  - Persistent storage for shell history, git config, and AI tool configurations
+  - Default editor: busybox vi
+
+How to view DNS query log:
+  DNS queries are logged by dnsmasq and can only be viewed through Docker logs.
+  
+  # Find the container name
+  docker ps | grep $SCRIPT_NAME
+  
+  # View DNS query logs in real-time
+  docker logs -f <container-name>
 HELP
 }
 
