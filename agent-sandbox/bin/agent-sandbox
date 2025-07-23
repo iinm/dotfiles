@@ -289,27 +289,27 @@ main() {
       "${image_name}--home:/persistent/home"
     )
 
-    # if test "$allow_net" = "yes" -a "${#allow_net_destinations[@]}" -eq 0; then
-    allow_net_destinations+=(
-      # mise
-      "mise-versions.jdx.dev"
+    if test "$allow_net" = "yes"; then
+      allow_net_destinations+=(
+        # mise
+        "mise-versions.jdx.dev"
 
-      # Claude Code
-      "api.anthropic.com"
-      "sentry.io"
-      "statsig.anthropic.com"
-      "statsig.com"
+        # Claude Code
+        "api.anthropic.com"
+        "sentry.io"
+        "statsig.anthropic.com"
+        "statsig.com"
 
-      # Gemini CLI
-      "generativelanguage.googleapis.com"
-      "oauth2.googleapis.com"
-      "cloudcode-pa.googleapis.com"
-      "play.googleapis.com"
+        # Gemini CLI
+        "generativelanguage.googleapis.com"
+        "oauth2.googleapis.com"
+        "cloudcode-pa.googleapis.com"
+        "play.googleapis.com"
 
-      # Codex CLI
-      "api.openai.com"
-    )
-    # fi
+        # Codex CLI
+        "api.openai.com"
+      )
+    fi
   fi
 
   if test -n "$platform"; then
