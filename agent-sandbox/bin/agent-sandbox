@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.8"
+SCRIPT_VERSION="0.0.9"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -30,7 +30,7 @@ Usage: $SCRIPT_NAME [--dockerfile FILE]
 Options:
 
   --dockerfile FILE         Path to a Dockerfile. If not set, a preset Dockerfile and network policy is used.
-                            The container must include bash, iptables, ip, dnsmasq, and dig commands.
+                            The container must include busybox, bash, iptables, ipset, dnsmasq, and dig commands.
   --env-file FILE           Path to a .env file to load environment variables from.
   --platform                Specify the platform for image building and container execution
                             (e.g., linux/arm64 or linux/amd64).
@@ -64,12 +64,14 @@ Examples:
     $SCRIPT_NAME --tty --verbose --dry-run zsh
 
   Start Claude Code:
-    $SCRIPT_NAME --allow-write --allow-net --mount-writable ~/.claude:/home/sandbox/.claude --tty --verbose claude
+    $SCRIPT_NAME --allow-write --allow-net --mount-writable ~/.claude:/home/sandbox/.claude,~/.claude.json:/home/sandbox/.claude.json --tty --verbose claude
 
   Start Codex CLI:
+    bash -c 'read -sp "Input OpenAI API Key: " OPENAI_API_KEY; echo "OPENAI_API_KEY=\$OPENAI_API_KEY" >> .env.sandbox'
     $SCRIPT_NAME --env-file .env.sandbox --allow-write --allow-net --mount-writable ~/.codex:/home/sandbox/.codex --tty --verbose codex
 
   Start Gemini CLI:
+    bash -c 'read -sp "Input Gemini API Key: " GEMINI_API_KEY; echo "GEMINI_API_KEY=\$GEMINI_API_KEY" >> .env.sandbox'
     $SCRIPT_NAME --env-file .env.sandbox --allow-write --allow-net --mount-writable ~/.gemini:/home/sandbox/.gemini --tty --verbose gemini
 
   Install tools with mise:
@@ -80,13 +82,13 @@ Examples:
     $SCRIPT_NAME --dockerfile Dockerfile.minimum --tty --verbose bash
 
   Allow access to docker host:
-    $SCRIPT_NAME --dockerfile Dockerfile.minimum --allow-net host.docker.internal:3000 --tty --verbose nc -z host.docker.internal 3000
+    $SCRIPT_NAME --dockerfile Dockerfile.minimum --allow-net host.docker.internal:3000 --verbose busybox nc host.docker.internal 3000 < /dev/null
 
 
 Preset Configuration:
 
   When --dockerfile is not specified, a preset Debian 12 image is used with:
-  - System packages: bash, zsh (with grml config), iptables, dnsmasq, curl, wget, git, tig
+  - System packages: busybox, bash, zsh (with grml config), ripgrep, fd, dig, curl, wget, git
   - Node.js v22.17.1 with npm
   - mise-en-place package manager for additional runtime installations
   - AI coding assistants: Claude Code, Gemini CLI, Codex CLI
@@ -116,12 +118,11 @@ ARG NODE_VERSION="22.17.1"
 RUN apt update && apt install -y \
       busybox \
       bash zsh \
-      iptables ipset iproute2 dnsmasq \
-      dnsutils iputils-ping netcat-openbsd \
-      gpg \
+      ripgrep fd-find \
+      iptables ipset dnsmasq dnsutils \
       curl wget \
-      git tig \
-      xz-utils
+      git gpg \
+    && bash -c '$(which fdfind) /usr/local/bin/fd'
 
 # grml zsh config: https://grml.org/zsh/
 RUN curl -fsSL https://grml.org/console/zshrc -o /etc/skel/.zshrc \
@@ -145,14 +146,13 @@ RUN groupadd sandbox \
 USER sandbox
 
 # Install Node.js
-RUN curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-$(uname -m | sed 's,x86_64,x64,; s,aarch64,arm64,').tar.xz" | tar -C /sandbox/tools -xJf - \
+RUN curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-$(uname -m | sed 's,x86_64,x64,; s,aarch64,arm64,').tar.xz" | busybox xz -dc | tar -C /sandbox/tools -xf - \
     && mv /sandbox/tools/node-v${NODE_VERSION}* /sandbox/tools/node \
     && env PATH=/sandbox/tools/node/bin:$PATH npm install -g npm@latest
 ENV PATH=/sandbox/tools/node/bin:$PATH
 
 # Install coding agents
 RUN npm install -g @anthropic-ai/claude-code \
-    && npm install -g ccusage \
     && npm install -g @google/gemini-cli \
     && npm install -g @openai/codex \
     && rm -rf /home/sandbox/.npm
@@ -429,8 +429,9 @@ main() {
       local container_path
       IFS=':' read -r host_path container_path <<< "$mount"
       local host_abs_path="$host_path"
-      if ! grep -qE '^/' <<< "$host_path"; then
-        host_abs_path=$(readlink -f "$host_path")
+      if ! grep -qE '^/' <<< "$host_abs_path"; then
+        # shellcheck disable=SC2001
+        host_abs_path=$(readlink -f "$(sed "s,~/,$HOME/," <<< "$host_abs_path")")
       fi
       docker_run_opts+=(--mount "type=bind,source=${host_abs_path},target=${container_path},readonly,consistency=delegated")
     done
@@ -442,8 +443,9 @@ main() {
       local container_path
       IFS=':' read -r host_path container_path <<< "$mount"
       local host_abs_path="$host_path"
-      if ! grep -qE '^/' <<< "$host_path"; then
-        host_abs_path=$(readlink -f "$host_path")
+      if ! grep -qE '^/' <<< "$host_abs_path"; then
+        # shellcheck disable=SC2001
+        host_abs_path=$(readlink -f "$(sed "s,~/,$HOME/," <<< "$host_abs_path")")
       fi
       docker_run_opts+=(--mount "type=bind,source=${host_abs_path},target=${container_path},consistency=delegated")
     done
@@ -647,7 +649,7 @@ setup_container_firewall() {
   done
   
   local docker_host_address
-  docker_host_address=$(ip route | grep default | cut -d" " -f3)
+  docker_host_address=$(busybox ip route | grep default | cut -d" " -f3)
   if test -z "$docker_host_address"; then
     echo "Error: Failed to determine docker host address" >&2
     return 1
