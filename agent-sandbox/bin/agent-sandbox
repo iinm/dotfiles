@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.9"
+SCRIPT_VERSION="0.0.10"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -121,8 +121,13 @@ RUN apt update && apt install -y \
       ripgrep fd-find \
       iptables ipset dnsmasq dnsutils \
       curl wget \
-      git gpg \
-    && bash -c '$(which fdfind) /usr/local/bin/fd'
+      git gpg locales \
+    && bash -c '$(which fdfind) /usr/local/bin/fd' \
+    && echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen \
+    && echo 'ja_JP.UTF-8 UTF-8' >> /etc/locale.gen \
+    && locale-gen 
+
+ENV LANG=en_US.UTF-8
 
 # grml zsh config: https://grml.org/zsh/
 RUN curl -fsSL https://grml.org/console/zshrc -o /etc/skel/.zshrc \
