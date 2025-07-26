@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.11"
+SCRIPT_VERSION="0.0.12"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -121,7 +121,7 @@ RUN apt update && apt install -y \
       ripgrep fd-find \
       iptables ipset dnsmasq dnsutils \
       curl git gpg locales \
-    && bash -c '$(which fdfind) /usr/local/bin/fd' \
+    && bash -c 'ln -s $(which fdfind) /usr/local/bin/fd' \
     && echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen \
     && echo 'ja_JP.UTF-8 UTF-8' >> /etc/locale.gen \
     && locale-gen 
