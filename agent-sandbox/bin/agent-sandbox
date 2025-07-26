@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.10"
+SCRIPT_VERSION="0.0.11"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
