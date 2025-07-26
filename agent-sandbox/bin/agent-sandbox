@@ -131,9 +131,7 @@ RUN install -dm 755 /etc/apt/keyrings \
     && curl -fsSL https://mise.jdx.dev/gpg-key.pub | gpg --dearmor | tee /etc/apt/keyrings/mise-archive-keyring.gpg 1> /dev/null \
     && echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg arch=$(dpkg --print-architecture)] https://mise.jdx.dev/deb stable main" | tee /etc/apt/sources.list.d/mise.list \
     && apt update \
-    && apt install -y mise \
-    && echo 'eval "$(mise activate bash)"' >> /etc/skel/.bashrc \
-    && echo 'eval "$(mise activate bash)"' >> /etc/skel/.zshrc
+    && apt install -y mise
 
 # Create user
 RUN groupadd sandbox \
@@ -154,28 +152,32 @@ RUN npm install -g @anthropic-ai/claude-code \
     && npm install -g @openai/codex \
     && rm -rf /home/sandbox/.npm
 
-# Configure zsh
-# grml zsh config: https://grml.org/zsh/
-# zsh-autosuggestions: https://github.com/zsh-users/zsh-autosuggestions
-# zsh-syntax-highlighting: https://github.com/zsh-users/zsh-syntax-highlighting
+# Configure shell
+# - grml zsh config: https://grml.org/zsh/
+# - zsh-autosuggestions: https://github.com/zsh-users/zsh-autosuggestions
+# - zsh-syntax-highlighting: https://github.com/zsh-users/zsh-syntax-highlighting
 RUN curl -fsSL https://raw.githubusercontent.com/grml/grml-etc-core/refs/tags/v0.19.23/etc/zsh/zshrc -o /home/sandbox/.zshrc \
     && echo 'fc0a6642d61193fd95293fb39a561e456e240b81e9ddb8c08fc5c2ac8c31d2f4 /home/sandbox/.zshrc' > /home/sandbox/.zshrc.sha256sum \
     && sha256sum -c /home/sandbox/.zshrc.sha256sum \
     && git clone --depth 1 https://github.com/zsh-users/zsh-autosuggestions /home/sandbox/.zsh/zsh-autosuggestions \
-    && echo 'source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh' >> /home/sandbox/.zshrc \
+    && echo 'source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh' >> /home/sandbox/.zshrc.local \
     && git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting /home/sandbox/.zsh/zsh-syntax-highlighting \
-    && echo 'source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh' >> /home/sandbox/.zshrc \
-    && echo 'unsetopt HIST_SAVE_BY_COPY' >> /home/sandbox/.zshrc
+    && echo 'source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh' >> /home/sandbox/.zshrc.local \
+    && echo 'unsetopt HIST_SAVE_BY_COPY' >> /home/sandbox/.zshrc.local
 
 # Configure persistence for sandbox data (history, configs, etc.) by symlinking to /persistent/home/.
 RUN echo 'test -L ~/.bash_history || (touch /persistent/home/.bash_history; ln -s /persistent/home/.bash_history ~/)' >> /home/sandbox/.bashrc \
-    && echo 'test -L ~/.zsh_history || (touch /persistent/home/.zsh_history; ln -s /persistent/home/.zsh_history ~/)' >> /home/sandbox/.zshrc \
-    && echo 'test -L ~/.gitconfig || (touch /persistent/home/.gitconfig; ln -s /persistent/home/.gitconfig ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc \
-    && echo 'test -L ~/.local || (mkdir -p /persistent/home/.local/share; ln -s /persistent/home/.local ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc \
-    && echo 'test -L ~/.claude || (mkdir -p /persistent/home/.claude; ln -s /persistent/home/.claude ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc \
-    && echo 'test -L ~/.claude.json || (touch /persistent/home/.claude.json; ln -s /persistent/home/.claude.json ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc \
-    && echo 'test -L ~/.gemini || (mkdir -p /persistent/home/.gemini; ln -s /persistent/home/.gemini ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc \
+    && echo 'test -L ~/.zsh_history || (touch /persistent/home/.zsh_history; ln -s /persistent/home/.zsh_history ~/)' >> /home/sandbox/.zshrc.local \
+    && echo 'test -L ~/.gitconfig || (touch /persistent/home/.gitconfig; ln -s /persistent/home/.gitconfig ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
+    && echo 'test -L ~/.local || (mkdir -p /persistent/home/.local/share; ln -s /persistent/home/.local ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
+    && echo 'test -L ~/.claude || (mkdir -p /persistent/home/.claude; ln -s /persistent/home/.claude ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
+    && echo 'test -L ~/.claude.json || (touch /persistent/home/.claude.json; ln -s /persistent/home/.claude.json ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
+    && echo 'test -L ~/.gemini || (mkdir -p /persistent/home/.gemini; ln -s /persistent/home/.gemini ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
     && echo 'test -L ~/.codex || (mkdir -p /persistent/home/.codex; ln -s /persistent/home/.codex ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc
+
+# Configure mise
+RUN echo 'eval "$(mise activate zsh)"' >> /home/sandbox/.zshrc.local \
+    && echo 'eval "$(mise activate bash)"' >> /home/sandbox/.bashrc
 
 ENV LANG=en_US.UTF-8
 ENV EDITOR="busybox vi"
