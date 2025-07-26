@@ -120,23 +120,15 @@ RUN apt update && apt install -y \
       bash zsh \
       ripgrep fd-find \
       iptables ipset dnsmasq dnsutils \
-      curl wget \
-      git gpg locales \
+      curl git gpg locales \
     && bash -c '$(which fdfind) /usr/local/bin/fd' \
     && echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen \
     && echo 'ja_JP.UTF-8 UTF-8' >> /etc/locale.gen \
     && locale-gen 
 
-ENV LANG=en_US.UTF-8
-
-# grml zsh config: https://grml.org/zsh/
-RUN curl -fsSL https://grml.org/console/zshrc -o /etc/skel/.zshrc \
-    && curl -fsSL https://grml.org/console/zshrc.local -o /etc/skel/.zshrc.local \
-    && echo 'unsetopt HIST_SAVE_BY_COPY' >> /etc/skel/.zshrc.local
-
 # mise-en-place: https://mise.jdx.dev/
 RUN install -dm 755 /etc/apt/keyrings \
-    && wget -qO - https://mise.jdx.dev/gpg-key.pub | gpg --dearmor | tee /etc/apt/keyrings/mise-archive-keyring.gpg 1> /dev/null \
+    && curl -fsSL https://mise.jdx.dev/gpg-key.pub | gpg --dearmor | tee /etc/apt/keyrings/mise-archive-keyring.gpg 1> /dev/null \
     && echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg arch=$(dpkg --print-architecture)] https://mise.jdx.dev/deb stable main" | tee /etc/apt/sources.list.d/mise.list \
     && apt update \
     && apt install -y mise \
@@ -162,15 +154,21 @@ RUN npm install -g @anthropic-ai/claude-code \
     && npm install -g @openai/codex \
     && rm -rf /home/sandbox/.npm
 
-RUN echo 'test -L ~/.bash_history || (touch /persistent/home/.bash_history; ln -s /persistent/home/.bash_history ~/)' >> /home/sandbox/.bashrc \
-    && echo 'test -L ~/.zsh_history || (touch /persistent/home/.zsh_history; ln -s /persistent/home/.zsh_history ~/)' >> /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.gitconfig || (touch /persistent/home/.gitconfig; ln -s /persistent/home/.gitconfig ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.local || (mkdir -p /persistent/home/.local/share; ln -s /persistent/home/.local ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.claude || (mkdir -p /persistent/home/.claude; ln -s /persistent/home/.claude ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.claude.json || (touch /persistent/home/.claude.json; ln -s /persistent/home/.claude.json ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.gemini || (mkdir -p /persistent/home/.gemini; ln -s /persistent/home/.gemini ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.codex || (mkdir -p /persistent/home/.codex; ln -s /persistent/home/.codex ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local
+# grml zsh config: https://grml.org/zsh/
+RUN curl -fsSL https://grml.org/console/zshrc -o /home/sandbox/.zshrc \
+    && echo 'unsetopt HIST_SAVE_BY_COPY' >> /home/sandbox/.zshrc
 
+# Configure persistence for sandbox data (history, configs, etc.) by symlinking to /persistent/home/.
+RUN echo 'test -L ~/.bash_history || (touch /persistent/home/.bash_history; ln -s /persistent/home/.bash_history ~/)' >> /home/sandbox/.bashrc \
+    && echo 'test -L ~/.zsh_history || (touch /persistent/home/.zsh_history; ln -s /persistent/home/.zsh_history ~/)' >> /home/sandbox/.zshrc \
+    && echo 'test -L ~/.gitconfig || (touch /persistent/home/.gitconfig; ln -s /persistent/home/.gitconfig ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc \
+    && echo 'test -L ~/.local || (mkdir -p /persistent/home/.local/share; ln -s /persistent/home/.local ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc \
+    && echo 'test -L ~/.claude || (mkdir -p /persistent/home/.claude; ln -s /persistent/home/.claude ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc \
+    && echo 'test -L ~/.claude.json || (touch /persistent/home/.claude.json; ln -s /persistent/home/.claude.json ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc \
+    && echo 'test -L ~/.gemini || (mkdir -p /persistent/home/.gemini; ln -s /persistent/home/.gemini ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc \
+    && echo 'test -L ~/.codex || (mkdir -p /persistent/home/.codex; ln -s /persistent/home/.codex ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc
+
+ENV LANG=en_US.UTF-8
 ENV EDITOR="busybox vi"
 ENV MISE_DATA_DIR=/persistent/mise-data
 EOF
