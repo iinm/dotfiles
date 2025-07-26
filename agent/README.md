@@ -102,9 +102,11 @@ Agent loads configuration files in the following order. Settings in later files 
 ### Format
 
 ```js
+// (Optional) Sandbox environment
+// https://github.com/iinm/dotfiles/tree/main/agent-sandbox
 const sandbox = {
   command: "agent-sandbox",
-  args: ["--dockerfile", ".agent/sandbox/Dockerfile", "--volume", "node_modules"],
+  args: ["--dockerfile", ".agent/sandbox/Dockerfile", "--volume", "node_modules", "--allow-write"],
 };
 
 export default {
@@ -144,8 +146,24 @@ export default {
           input: {
             command: sandbox.command,
             args: [
-              ...sandbox.args, "--allow-net", "--allow-write",
+              // Allow access to registry.npmjs.org
+              ...sandbox.args, "--allow-net", "registry.npmjs.org",
               toolUse.input.command, ...toolUse.input.args,
+            ],
+          },
+        }),
+      },
+      // By default, run all commands in the sandbox environment
+      {
+        pattern: {
+          toolName: "exec_command",
+        },
+        rewrite: (toolUse) => ({
+          toolName: "exec_command",
+          input: {
+            command: sandbox.command,
+            args: [
+              ...sandbox.args, toolUse.input.command, ...(toolUse.input.args || []),
             ],
           },
         }),
