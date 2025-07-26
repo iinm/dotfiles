@@ -3,8 +3,9 @@ const sandbox = {
   args: [
     "--dockerfile",
     ".agent/sandbox/Dockerfile",
-    "--use-volume",
+    "--volume",
     "node_modules",
+    "--allow-write",
   ],
 };
 
@@ -29,8 +30,8 @@ export default {
             command: sandbox.command,
             args: [
               ...sandbox.args,
-              "--allow-write",
-              "--allow-net registry.npmjs.org",
+              "--allow-net",
+              "registry.npmjs.org",
               toolUse.input.command,
               ...toolUse.input.args,
             ],
@@ -40,7 +41,6 @@ export default {
       {
         pattern: {
           toolName: "exec_command",
-          input: { command: "npm", args: ["run"] },
         },
         rewrite: (toolUse) => ({
           toolName: "exec_command",
@@ -49,7 +49,7 @@ export default {
             args: [
               ...sandbox.args,
               toolUse.input.command,
-              ...toolUse.input.args,
+              ...(toolUse.input.args || []),
             ],
           },
         }),

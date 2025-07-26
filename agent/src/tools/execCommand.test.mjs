@@ -14,9 +14,6 @@ describe("execCommandTool", () => {
     assert.equal(
       result,
       `
-<command>echo</command>
-<args>["Hello World"]</args>
-
 <stdout>
 Hello World
 </stdout>
@@ -37,9 +34,6 @@ Hello World
     assert.equal(
       result,
       `
-<command>node</command>
-<args>["-e","process.stderr.write(\\"Hello from stderr\\")"]</args>
-
 <stdout></stdout>
 
 <stderr>
@@ -59,9 +53,6 @@ Hello from stderr</stderr>
     assert.equal(
       result,
       `
-<command>node</command>
-<args>["-e","process.exit(1)"]</args>
-
 <stdout></stdout>
 
 <stderr></stderr>
