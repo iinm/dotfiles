@@ -5,7 +5,7 @@ RUN apt update && apt install -y \
       iptables ipset dnsmasq dnsutils \
       ripgrep fd-find \
       git \
-    && bash -c '$(which fdfind) /usr/local/bin/fd' \
+    && bash -c 'ln -s $(which fdfind) /usr/local/bin/fd' \
     && npm install -g npm@latest
 
 USER node:node
