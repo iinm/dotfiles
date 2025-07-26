@@ -1,5 +1,7 @@
 modmap:
   - name: Global
+    device:
+      not: ['foostan Corne Keyboard', 'foostan Corne']
     remap:
       # CapsLock to Ctrl
       CapsLock: LeftCtrl
