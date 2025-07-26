@@ -1,4 +1,4 @@
-agent-sandbox v0.0.12 - Run a command in a sandboxed Docker environment
+agent-sandbox v0.0.13 - Run a command in a sandboxed Docker environment
 
 Usage: agent-sandbox [--dockerfile FILE]
            [--platform PLATFORM]
@@ -74,7 +74,7 @@ Examples:
 Preset Configuration:
 
   When --dockerfile is not specified, a preset Debian 12 image is used with:
-  - System packages: busybox, bash, zsh (with grml config), ripgrep, fd, dig, curl, wget, git
+  - System packages: busybox, bash, zsh (with grml config), ripgrep, fd, dig, curl, git
   - Node.js v22.17.1 with npm
   - mise-en-place package manager for additional runtime installations
   - AI coding assistants: Claude Code, Gemini CLI, Codex CLI

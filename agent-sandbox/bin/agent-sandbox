@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.12"
+SCRIPT_VERSION="0.0.13"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -88,7 +88,7 @@ Examples:
 Preset Configuration:
 
   When --dockerfile is not specified, a preset Debian 12 image is used with:
-  - System packages: busybox, bash, zsh (with grml config), ripgrep, fd, dig, curl, wget, git
+  - System packages: busybox, bash, zsh (with grml config), ripgrep, fd, dig, curl, git
   - Node.js v22.17.1 with npm
   - mise-en-place package manager for additional runtime installations
   - AI coding assistants: Claude Code, Gemini CLI, Codex CLI
@@ -289,7 +289,7 @@ main() {
   log "Copy script to mountable path: $SCRIPT_PATH -> $MOUNTABLE_SCRIPT_PATH"
   run mkdir -p "$(dirname "$MOUNTABLE_SCRIPT_PATH")"
   run cp -f "$SCRIPT_PATH" "$MOUNTABLE_SCRIPT_PATH"
-  chmod +x "$MOUNTABLE_SCRIPT_PATH"
+  run chmod +x "$MOUNTABLE_SCRIPT_PATH"
 
   local host_user_id
   local host_group_id
@@ -549,7 +549,7 @@ EOF
   if test "$DRY_RUN" = "no"; then
     container_default_user_group=$(docker run --rm "${image_name}:${image_tag}" bash -c 'echo $(id -u):$(id -g)')
   else
-    container_default_user_group="0:0"
+    container_default_user_group="unknown:unknown"
   fi
   container_default_user_id=$(cut -d: -f1 <<< "$container_default_user_group")
   container_default_group_id=$(cut -d: -f2 <<< "$container_default_user_group")
