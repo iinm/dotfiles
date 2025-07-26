@@ -81,8 +81,8 @@ export async function loadAgentConfig({ tmuxSessionId }) {
           config.permissions?.maxAutoApprovals ??
           merged.permissions?.maxAutoApprovals,
         rewrite: [
-          ...(merged.permissions?.rewrite ?? []),
           ...(config.permissions?.rewrite ?? []),
+          ...(merged.permissions?.rewrite ?? []),
         ],
       },
       tools: {
