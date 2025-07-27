@@ -1,19 +1,20 @@
 #!/usr/bin/env bash
 
-# TODO:
-# --env-file
-# --volume
-# --mount-readonly
-# --mount-writable
-# --publish
-# preset configuration
-
 set -eu -o pipefail
 
 SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 export PATH=$SCRIPT_DIR/bin:$PATH
 
 cd "$SCRIPT_DIR"
+
+on_exit() {
+  status=$?
+  # shellcheck disable=2046
+  kill $(jobs -p) &> /dev/null || true
+  return "$status"
+}
+
+trap 'on_exit' EXIT
 
 echo "case: --help option displays help message"
 # when/then:
@@ -53,6 +54,57 @@ out=$(agent-sandbox --dry-run --dockerfile Dockerfile.minimum touch test)
 grep -qE "DRY_RUN: docker exec .+ touch test" <<< "$out"
 # then:
 test ! -e test
+
+
+echo "case: --platform option specifies the platform for the container"
+# when:
+out=$(agent-sandbox --dry-run --dockerfile Dockerfile.minimum --platform linux/amd64 true)
+# then:
+grep -qE "DRY_RUN: docker build .+ --platform linux/amd64" <<< "$out"
+grep -qE "DRY_RUN: docker run .+ --platform linux/amd64" <<< "$out"
+
+
+echo "case: --tty option enables tty allocation"
+# when:
+out=$(agent-sandbox --dry-run --dockerfile Dockerfile.minimum --tty true)
+# then:
+grep -qE "DRY_RUN: docker exec .+ --tty" <<< "$out"
+
+
+echo "case: --no-cache option disables the cache during the image build"
+# when:
+out=$(agent-sandbox --dry-run --dockerfile Dockerfile.minimum --no-cache true)
+# then:
+grep -qE "DRY_RUN: docker build .+ --no-cache" <<< "$out"
+
+
+echo "case: --env-file option pass env file to docker run"
+# when:
+out=$(agent-sandbox --dry-run --dockerfile Dockerfile.minimum --env-file .env true)
+# then:
+grep -qE "DRY_RUN: docker run .+ --env-file .env" <<< "$out"
+
+
+echo "case: --volume option creates and mounts volume"
+# when:
+out=$(agent-sandbox --dry-run --dockerfile Dockerfile.minimum --volume bin true)
+# then:
+grep -qE " --mount type=volume,source=agent-sandbox--agent-sandbox-.+--bin,target=/.+/agent-sandbox/bin,consistency=delegated" <<< "$out"
+
+
+echo "case: --mount-* option mounts host directory"
+# when:
+out=$(agent-sandbox --dry-run --dockerfile Dockerfile.minimum --mount-readonly bin:/mnt/bin-readonly --mount-writable bin:/mnt/bin-writable true)
+# then:
+grep -qE " --mount type=bind,source=/.+/agent-sandbox/bin,target=/mnt/bin-readonly,readonly,consistency=delegated" <<< "$out"
+grep -qE " --mount type=bind,source=/.+/agent-sandbox/bin,target=/mnt/bin-writable,consistency=delegated" <<< "$out"
+
+
+echo "case: --publish option publish port to host"
+# when:
+out=$(agent-sandbox --dry-run --dockerfile Dockerfile.minimum --publish 8000:8000 true)
+# then:
+grep -qE "DRY_RUN: docker run .+ --publish 127.0.0.1:8000:8000" <<< "$out"
 
 
 echo "case: container user/group id matches host user/group id"
@@ -130,3 +182,8 @@ out=$(agent-sandbox --dockerfile Dockerfile.minimum --allow-net 0.0.0.0/0 busybo
 if lsof -i:8000 | grep -q "$nc_pid"; then
   kill "$nc_pid"
 fi
+
+
+echo "case: run basic command with preset configuration"
+# when/then:
+agent-sandbox echo hello | grep -qE "^hello$"
