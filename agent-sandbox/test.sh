@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+
+# TODO:
+# --env-file
+# --volume
+# --mount-readonly
+# --mount-writable
+# --publish
+# preset configuration
+
+set -eu -o pipefail
+
+SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
+export PATH=$SCRIPT_DIR/bin:$PATH
+
+cd "$SCRIPT_DIR"
+
+echo "case: --help option displays help message"
+# when/then:
+agent-sandbox --help | grep -qE "^Usage"
+
+
+echo "case: no arguments display help message to stderr"
+# when:
+out=$(agent-sandbox 3>&1 1>/dev/null 2>&3) || status=$?
+# then:
+test "$status" -ne 0
+grep -qE "^Usage" <<< "$out"
+
+
+echo "case: unknown option causes an error"
+# when:
+out=$(agent-sandbox --no-such-option 3>&1 1>/dev/null 2>&3) || status=$?
+# then:
+test "$status" -ne 0
+grep -qE "^Error: unknown option: --no-such-option" <<< "$out"
+
+
+echo "case: run basic command with minimum Dockerfile"
+# when/then:
+agent-sandbox --dockerfile Dockerfile.minimum echo hello | grep -qE "^hello$"
+
+
+echo "case: receive stdin"
+# when/then:
+echo hello | agent-sandbox --dockerfile Dockerfile.minimum cat | grep -qE "^hello$"
+
+
+echo "case: --dry-run option displays the command that would be executed"
+# when:
+out=$(agent-sandbox --dry-run --dockerfile Dockerfile.minimum touch test)
+# then:
+grep -qE "DRY_RUN: docker exec .+ touch test" <<< "$out"
+# then:
+test ! -e test
+
+
+echo "case: container user/group id matches host user/group id"
+# shellcheck disable=SC2016
+agent-sandbox --dockerfile Dockerfile.minimum bash -c 'echo $(id -u):$(id -g)' | grep -qE "$(id -u):$(id -g)"
+
+
+echo "case: working directory is mounted and readable"
+# when/then:
+agent-sandbox --dockerfile Dockerfile.minimum cat Dockerfile.minimum | grep -qE "FROM debian"
+
+
+echo "case: working directory is read-only by default"
+# when:
+out=$(agent-sandbox --dockerfile Dockerfile.minimum touch test 2>&1) || status=$?
+# then:
+test "$status" -ne 0
+grep -qE "Read-only file system" <<< "$out"
+
+
+echo "case: --allow-write makes working directory writable"
+# when/then:
+agent-sandbox --allow-write --dockerfile Dockerfile.minimum touch test && test -e test
+rm -f test
+
+
+echo "case: network is disabled by default"
+# given:
+nc -l -p 8000 &
+nc_pid=$!
+# when:
+out=$(agent-sandbox --dockerfile Dockerfile.minimum busybox nc -w 2 host.docker.internal < /dev/null 8000 2>&1) || status=$?
+# then:
+test "$status" -ne 0
+grep -qE "nc: bad address" <<< "$out"
+# cleanup:
+if lsof -i:8000 | grep -q "$nc_pid"; then
+  kill "$nc_pid"
+fi
+
+
+echo "case: --allow-net allows access to domain but only 443"
+# given:
+nc -l -p 8000 &> /dev/null &
+nc_pid=$!
+# when:
+out=$(agent-sandbox --dockerfile Dockerfile.minimum --allow-net host.docker.internal busybox nc -w 2 host.docker.internal 8000 < /dev/null 2>&1) || status=$?
+# then:
+grep -qE "nc: timed out" <<< "$out"
+# cleanup:
+if lsof -i:8000 | grep -q "$nc_pid"; then
+  kill "$nc_pid"
+fi
+
+
+echo "case: --allow-net allows access to host:port"
+# given:
+nc -l -p 8000 &> /dev/null &
+nc_pid=$!
+# when:
+out=$(agent-sandbox --dockerfile Dockerfile.minimum --allow-net host.docker.internal:8000 busybox nc -w 2 host.docker.internal 8000 < /dev/null 2>&1)
+# cleanup:
+if lsof -i:8000 | grep -q "$nc_pid"; then
+  kill "$nc_pid"
+fi
+
+
+echo "case: --allow-net allows access to ip range"
+# given:
+nc -l -p 8000 &> /dev/null &
+nc_pid=$!
+# when:
+out=$(agent-sandbox --dockerfile Dockerfile.minimum --allow-net 0.0.0.0/0 busybox nc -w 2 8.8.8.8 443 < /dev/null 2>&1)
+# cleanup:
+if lsof -i:8000 | grep -q "$nc_pid"; then
+  kill "$nc_pid"
+fi
