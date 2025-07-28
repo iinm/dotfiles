@@ -133,7 +133,11 @@ rm -f test
 
 echo "case: network is disabled by default"
 # given:
-nc -l -p 8000 &
+if test "$(uname)" = "Darwin"; then
+  nc -l 8000 &> /dev/null &
+else
+  nc -l -p 8000 &> /dev/null &
+fi
 nc_pid=$!
 # when:
 out=$(agent-sandbox --dockerfile Dockerfile.minimum busybox nc -w 2 host.docker.internal < /dev/null 8000 2>&1) || status=$?
@@ -148,7 +152,11 @@ fi
 
 echo "case: --allow-net allows access to domain but only 443"
 # given:
-nc -l -p 8000 &> /dev/null &
+if test "$(uname)" = "Darwin"; then
+  nc -l 8000 &> /dev/null &
+else
+  nc -l -p 8000 &> /dev/null &
+fi
 nc_pid=$!
 # when:
 out=$(agent-sandbox --dockerfile Dockerfile.minimum --allow-net host.docker.internal busybox nc -w 2 host.docker.internal 8000 < /dev/null 2>&1) || status=$?
@@ -162,7 +170,11 @@ fi
 
 echo "case: --allow-net allows access to host:port"
 # given:
-nc -l -p 8000 &> /dev/null &
+if test "$(uname)" = "Darwin"; then
+  nc -l 8000 &> /dev/null &
+else
+  nc -l -p 8000 &> /dev/null &
+fi
 nc_pid=$!
 # when:
 out=$(agent-sandbox --dockerfile Dockerfile.minimum --allow-net host.docker.internal:8000 busybox nc -w 2 host.docker.internal 8000 < /dev/null 2>&1)
@@ -174,7 +186,11 @@ fi
 
 echo "case: --allow-net allows access to ip range"
 # given:
-nc -l -p 8000 &> /dev/null &
+if test "$(uname)" = "Darwin"; then
+  nc -l 8000 &> /dev/null &
+else
+  nc -l -p 8000 &> /dev/null &
+fi
 nc_pid=$!
 # when:
 out=$(agent-sandbox --dockerfile Dockerfile.minimum --allow-net 0.0.0.0/0 busybox nc -w 2 8.8.8.8 443 < /dev/null 2>&1)
