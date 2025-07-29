@@ -1,4 +1,4 @@
-agent-sandbox v0.0.13 - Run a command in a sandboxed Docker environment
+agent-sandbox v0.0.14 - Run a command in a sandboxed Docker environment
 
 Usage: agent-sandbox [--dockerfile FILE]
            [--platform PLATFORM]
@@ -50,25 +50,31 @@ Examples:
     agent-sandbox --tty --verbose --dry-run zsh
 
   Start Claude Code:
-    agent-sandbox --allow-write --allow-net --mount-writable ~/.claude:/home/sandbox/.claude,~/.claude.json:/home/sandbox/.claude.json --tty --verbose claude
+    agent-sandbox --allow-write --allow-net --mount-writable \
+      ~/.claude:/home/sandbox/.claude,~/.claude.json:/home/sandbox/.claude.json \
+      --tty --verbose zsh -ic claude
 
   Start Codex CLI:
-    bash -c 'read -sp "Input OpenAI API Key: " OPENAI_API_KEY; echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> .env.sandbox'
-    agent-sandbox --env-file .env.sandbox --allow-write --allow-net --mount-writable ~/.codex:/home/sandbox/.codex --tty --verbose codex
+    agent-sandbox --env-file .env.sandbox --allow-write --allow-net \
+      --mount-writable ~/.codex:/home/sandbox/.codex \
+      --tty --verbose zsh -ic codex
 
   Start Gemini CLI:
-    bash -c 'read -sp "Input Gemini API Key: " GEMINI_API_KEY; echo "GEMINI_API_KEY=$GEMINI_API_KEY" >> .env.sandbox'
-    agent-sandbox --env-file .env.sandbox --allow-write --allow-net --mount-writable ~/.gemini:/home/sandbox/.gemini --tty --verbose gemini
+    agent-sandbox --env-file .env.sandbox --allow-write --allow-net \
+      --mount-writable ~/.gemini:/home/sandbox/.gemini \
+      --tty --verbose zsh -ic gemini
 
   Install tools with mise:
-    agent-sandbox --allow-net nodejs.org --tty --verbose mise install node
-    agent-sandbox --allow-net github.com,dl.google.com --tty --verbose mise install go
+    agent-sandbox --allow-net nodejs.org --verbose zsh -ic "mise install node"
+    agent-sandbox --allow-net github.com,dl.google.com zsh -ic "mise install go"
 
   Run with Dockerfile:
     agent-sandbox --dockerfile Dockerfile.minimum --tty --verbose bash
 
   Allow access to docker host:
-    agent-sandbox --dockerfile Dockerfile.minimum --allow-net host.docker.internal:3000 --verbose busybox nc host.docker.internal 3000 < /dev/null
+    agent-sandbox --dockerfile Dockerfile.minimum \
+      --allow-net host.docker.internal:3000 \
+      --verbose busybox nc host.docker.internal 3000 < /dev/null
 
 
 Preset Configuration:
@@ -80,7 +86,8 @@ Preset Configuration:
   - AI coding assistants: Claude Code, Gemini CLI, Codex CLI
   - Persistent storage for shell history, git config, and AI tool configurations
   - Default editor: busybox vi
-  - Pre-allowed network access for mise and coding agents (mise-versions.jdx.dev, api.anthropic.com, generativelanguage.googleapis.com, api.openai.com, etc.)
+  - Pre-allowed network access for mise and coding agents
+    (mise-versions.jdx.dev, api.anthropic.com, generativelanguage.googleapis.com, etc.)
 
 
 How to view DNS query log:
