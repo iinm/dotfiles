@@ -168,6 +168,7 @@ RUN curl -fsSL https://raw.githubusercontent.com/grml/grml-etc-core/refs/tags/v0
 # Configure persistence for sandbox data (history, configs, etc.) by symlinking to /persistent/home/.
 RUN echo 'test -L ~/.bash_history || (touch /persistent/home/.bash_history; ln -s /persistent/home/.bash_history ~/)' >> /home/sandbox/.bashrc \
     && echo 'test -L ~/.zsh_history || (touch /persistent/home/.zsh_history; ln -s /persistent/home/.zsh_history ~/)' >> /home/sandbox/.zshrc.local \
+    && echo 'test -L ~/.config || (mkdir -p /persistent/home/.config; ln -s /persistent/home/.config ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
     && echo 'test -L ~/.gitconfig || (touch /persistent/home/.gitconfig; ln -s /persistent/home/.gitconfig ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
     && echo 'test -L ~/.local || (mkdir -p /persistent/home/.local/share; ln -s /persistent/home/.local ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
     && echo 'test -L ~/.claude || (mkdir -p /persistent/home/.claude; ln -s /persistent/home/.claude ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
