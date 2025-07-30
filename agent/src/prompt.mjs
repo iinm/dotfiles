@@ -66,7 +66,7 @@ Follow these steps in the exact order below:
 exec_command is used to run a one-shot command without shell interpretation.
 
 - Use relative paths to refer to files and directories.
-- Use head, tail, sed, rg to read a required part of the file instead of reading the entire file.
+- Use head, tail, awk, rg to read a required part of the file instead of reading the entire file.
 
 File and directory command examples:
 - List files: { command: "ls", args: ["-alh", "path/to/directory"] }
@@ -96,10 +96,10 @@ File and directory command examples:
   - typescript: { command: "rg", args: ["-n", "^(export|const|function|class|interface|type|enum)", "file.ts"] }
 - Read lines from a file:
   - Use rg to either extract the outline or get the line numbers of lines containing a specific pattern.
-  - Get the specific lines: { command: "sed", args: ["-n", "<start>,<end>p", "file.txt"] }
+  - Get the specific lines: { command: "awk", args: ["FNR==<start>,FNR==<end>{print FNR,$0}", "file.txt"] }
     - It is recommended to read 200 lines at a time.
-    - 1st to 200th lines: { command: "sed", args: ["-n", "1,200p", "file.txt"] }
-    - 201st to 400th lines: { command: "sed", args: ["-n", "201,400p", "file.txt"] }
+    - 1st to 200th lines: { command: "awk", args: ["FNR==1,FNR==200{print FNR,$0}", "file.txt"] }
+    - 201st to 400th lines: { command: "awk", args: ["FNR==201,FNR==400{print FNR,$0}", "file.txt"] }
     - Read more lines if needed.
 
 Other command examples:

@@ -58,7 +58,7 @@ export const execCommandTool = {
                 const lineCount = stdout.split("\n").length;
                 stdoutOrMessage = [
                   `Content is too large (${stdout.length} characters, ${lineCount} lines).`,
-                  "Use head, tail, rg, or sed to read specific parts.",
+                  "Use head, tail, rg, or awk to read specific parts.",
                 ].join("\n");
               } else {
                 const filePath = await writeTmpFile(
@@ -69,7 +69,7 @@ export const execCommandTool = {
                 const lineCount = stdout.split("\n").length;
                 stdoutOrMessage = [
                   `Content is too large (${stdout.length} characters, ${lineCount} lines). Saved to ${filePath}.`,
-                  "Use head, tail, rg, or sed to read specific parts.",
+                  "Use head, tail, rg, or awk to read specific parts.",
                 ].join("\n");
               }
             }
@@ -84,7 +84,7 @@ export const execCommandTool = {
               const lineCount = stderr.split("\n").length;
               stderrOrMessage = [
                 `Content is large (${stderr.length} characters, ${lineCount} lines) and saved to ${filePath}`,
-                "Use head / tail / rg / sed to read specific parts",
+                "Use head / tail / rg / awk to read specific parts",
               ].join("\n");
             }
 

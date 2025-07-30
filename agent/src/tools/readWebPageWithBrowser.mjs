@@ -96,7 +96,7 @@ export const readWebPageWithBrowserTool = {
 
       return [
         `Content is large (${trimmedMarkdown.length} characters, ${lineCount} lines) and saved to ${filePath}`,
-        "Use rg / sed to read specific parts",
+        "Use rg / awk to read specific parts",
       ].join("\n");
     }),
 };

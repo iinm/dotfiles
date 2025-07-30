@@ -158,7 +158,7 @@ async function createMCPTools(serverName, client) {
             return [
               `Content is large (${resultString.length} characters, ${lineCount} lines) and saved to ${filePath}`,
               '- Use exec_command head ["-c", "1000"] to get content format',
-              "- Use rg / sed / jq to read specific parts",
+              "- Use rg / awk / jq to read specific parts",
             ].join("\n");
           }),
       };

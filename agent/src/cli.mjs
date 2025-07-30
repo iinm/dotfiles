@@ -11,6 +11,7 @@
 import fs from "node:fs";
 import readline from "node:readline";
 import { styleText } from "node:util";
+import { createPatch } from "diff";
 import { notify } from "./utils/notify.mjs";
 
 const PROMPT_COMMANDS = [
@@ -360,18 +361,56 @@ function formatToolUse(toolUse) {
   if (toolName === "patch_file") {
     /** @type {Partial<PatchFileInput>} */
     const patchFileInput = input;
-    const highlightedDiff = (patchFileInput.diff || "").replace(
-      /<<<<<<< SEARCH\n(.*?)\n?=======\n(.*?)\n?>>>>>>> REPLACE/gs,
-      (_match, search, replace) => {
-        return [
-          "<<<<<<< SEARCH",
-          styleText("red", search),
-          "=======",
-          styleText("green", replace),
-          ">>>>>>> REPLACE",
-        ].join("\n");
-      },
-    );
+    const diff = patchFileInput.diff || "";
+
+    /** @type {{search:string; replace:string}[]} */
+    const diffs = [];
+    /** @type {string[]} */
+    const currentSearch = [];
+    /** @type {string[]} */
+    const currentReplace = [];
+    /** @type {"search" | "replace" | undefined} */
+    let currentBlock;
+    for (const line of diff.split("\n")) {
+      if (line === "<<<<<<< SEARCH") {
+        currentBlock = "search";
+        continue;
+      }
+      if (line === "=======") {
+        currentBlock = "replace";
+        continue;
+      }
+      if (line === ">>>>>>> REPLACE") {
+        diffs.push({
+          search: currentSearch.join("\n"),
+          replace: currentReplace.join("\n"),
+        });
+        currentSearch.length = 0;
+        currentReplace.length = 0;
+        currentBlock = undefined;
+        continue;
+      }
+      if (currentBlock === "search") {
+        currentSearch.push(line);
+      }
+      if (currentBlock === "replace") {
+        currentReplace.push(line);
+      }
+    }
+
+    const highlightedDiff = diffs
+      .map(
+        ({ search, replace }) =>
+          `${createPatch(patchFileInput.filePath || "", search, replace)
+            .replace(/^-.+$/gm, (match) => styleText("red", match))
+            .replace(/^\+.+$/gm, (match) => styleText("green", match))
+            .replace(/^@@.+$/gm, (match) => styleText("gray", match))
+            .replace(/^\\ No newline at end of file$/gm, (match) =>
+              styleText("gray", match),
+            )}\n-------\n${replace}`,
+      )
+      .join("\n\n");
+
     return [
       `tool: ${toolName}`,
       `path: ${patchFileInput.filePath}`,
