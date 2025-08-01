@@ -30,10 +30,10 @@ describe("noThrowSync", () => {
   });
 
   test("throws an error if non-Error is thrown", () => {
-    assert.throws(() => {
-      noThrowSync(() => {
-        throw "string error";
-      });
-    }, /Non-Error thrown: string error/);
+    const error = noThrowSync(() => {
+      throw "string error";
+    });
+    assert(error instanceof Error);
+    assert.equal(error.message, "Non-Error thrown: string error");
   });
 });

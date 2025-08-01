@@ -10,7 +10,7 @@ export async function noThrow(task) {
     if (error instanceof Error) {
       return error;
     }
-    throw new Error(`Non-Error thrown: ${error}`);
+    return new Error(`Non-Error thrown: ${error}`);
   }
 }
 
@@ -26,6 +26,6 @@ export function noThrowSync(task) {
     if (error instanceof Error) {
       return error;
     }
-    throw new Error(`Non-Error thrown: ${error}`);
+    return new Error(`Non-Error thrown: ${error}`);
   }
 }
