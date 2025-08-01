@@ -761,7 +761,7 @@ local setup_minuet = function()
       },
 
       gemini = {
-        model = 'gemini-2.0-flash',
+        model = 'gemini-2.5-flash',
         optional = {
           generationConfig = {
             maxOutputTokens = 256,
