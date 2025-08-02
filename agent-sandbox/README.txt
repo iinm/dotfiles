@@ -1,4 +1,4 @@
-agent-sandbox v0.0.14 - Run a command in a sandboxed Docker environment
+agent-sandbox v0.0.15 - Run a command in a sandboxed Docker environment
 
 Usage: agent-sandbox [--dockerfile FILE]
            [--platform PLATFORM]
@@ -9,6 +9,7 @@ Usage: agent-sandbox [--dockerfile FILE]
            [--publish [HOST_ADDRESS:]HOST_PORT:CONTAINER_PORT]
            [--tty]
            [--no-cache]
+           [--skip-build]
            [--verbose] [--dry-run]
            COMMAND
 
@@ -36,9 +37,10 @@ Options:
                             Publish container port(s) to the host.
                             If no host address is given, ports bind to 127.0.0.1 by default.
   --tty                     Allocate a pseudo-TTY for the container.
-  --no-cache                Don't use cache when building the image.
+  --no-cache                Disables cache when building the image.
+  --skip-build              Skips building the image; assumes it already exists.
   --verbose                 Output verbose logs to stderr.
-  --dry-run                 Don't execute the command; just print it to stdout.
+  --dry-run                 Does not execute the command; just prints it to stdout.
 
 
 Examples:
