@@ -752,23 +752,16 @@ local setup_minuet = function()
     provider = 'gemini',
 
     provider_options = {
-      openai = {
-        model = 'gpt-4.1-mini',
-        optional = {
-          max_tokens = 256,
-        },
-        api_key = 'MINUET_OPENAI_API_KEY',
-      },
-
       gemini = {
         model = 'gemini-2.5-flash',
         optional = {
           generationConfig = {
             maxOutputTokens = 256,
             -- for thinking model
-            -- thinkingConfig = {
-            --   thinkingBudget = 0,
-            -- },
+            thinkingConfig = {
+              -- Dynamic thinking
+              thinkingBudget = -1,
+            },
           },
           safetySettings = {
             {
@@ -778,6 +771,14 @@ local setup_minuet = function()
           },
         },
         api_key = 'MINUET_GEMINI_API_KEY',
+      },
+
+      openai = {
+        model = 'gpt-4.1-mini',
+        optional = {
+          max_tokens = 256,
+        },
+        api_key = 'MINUET_OPENAI_API_KEY',
       },
 
       claude = {
