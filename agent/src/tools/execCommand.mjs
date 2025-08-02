@@ -63,7 +63,7 @@ export const execCommandTool = {
               } else {
                 const filePath = await writeTmpFile(
                   stdout,
-                  `exec_command-${command}`,
+                  `exec_command-${command.replaceAll("/", "-")}`,
                   "txt",
                 );
                 const lineCount = stdout.split("\n").length;
