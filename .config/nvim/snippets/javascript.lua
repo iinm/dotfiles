@@ -1,12 +1,11 @@
 return {
   s(
-    "debug",
+    "d",
     fmt(
       [[
-        console.debug("\n--- DEBUG: <description>");
-        console.debug(JSON.stringify({ <target> }, null, 2));
+        console.debug("\n--- DEBUG: ", JSON.stringify({ <target> }, null, 2));
       ]],
-      { description = i(1, ""), target = i(2, "target") },
+      { target = i(1, "target") },
       { delimiters = "<>", repeat_duplicates = true }
     )
   ),
@@ -29,14 +28,14 @@ return {
     )
   ),
   s(
-    "type-doc",
+    "type",
     fmt("/** @type {<>} */",
       { i(1, "type") },
       { delimiters = "<>", repeat_duplicates = true }
     )
   ),
   s(
-    "typedef-obj-doc",
+    "type-obj",
     fmt(
       [[
         /**
@@ -49,7 +48,7 @@ return {
     )
   ),
   s(
-    "fn-doc",
+    "type-fn",
     fmt(
       [[
         /**
@@ -62,7 +61,7 @@ return {
     )
   ),
   s(
-    "import-doc",
+    "import-type",
     fmt(
       [[
         /**
@@ -74,7 +73,7 @@ return {
     )
   ),
   s(
-    "import-add-doc",
+    "import-type-add",
     fmt(
       [[
         @import { <> } from "<>";

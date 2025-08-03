@@ -1,12 +1,11 @@
 return {
   s(
-    "debug",
+    "d",
     fmt(
       [[
-        console.debug("\n--- DEBUG: <description>");
-        console.debug(JSON.stringify({ <target> }, null, 2));
+        console.debug("\n--- DEBUG: ", JSON.stringify({ <target> }, null, 2));
       ]],
-      { description = i(1, ""), target = i(2, "target") },
+      { target = i(1, "target") },
       { delimiters = "<>", repeat_duplicates = true }
     )
   ),
