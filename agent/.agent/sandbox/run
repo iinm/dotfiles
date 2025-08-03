@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+agent-sandbox --dockerfile .agent/sandbox/Dockerfile \
+  --volume agent-sandbox--global--home-npm:/home/node/.npm \
+  --allow-write \
+  "$@"

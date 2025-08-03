@@ -1,12 +1,6 @@
 const sandbox = {
-  command: "agent-sandbox",
-  args: [
-    "--dockerfile",
-    ".agent/sandbox/Dockerfile",
-    "--volume",
-    "node_modules",
-    "--allow-write",
-  ],
+  command: ".agent/sandbox/run",
+  args: [],
 };
 
 export default {
