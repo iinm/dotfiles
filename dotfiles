@@ -358,6 +358,21 @@ return default
 EOF
   fi
 
+  local nvim_local_secrets=~/.config/nvim/lua/local_secrets.lua
+  if test -e "$nvim_local_secrets"; then
+    echo "skip: $nvim_local_secrets exists."
+  else
+    echo "run: create $nvim_local_secrets"
+    mkdir -p "$(dirname "$nvim_local_secrets")"
+    cat > "$nvim_local_secrets" << 'EOF'
+return {
+  minuet_gemini_api_key = 'FIXME',
+  minuet_openai_api_key = 'FIXME',
+  minuet_anthropic_api_key = 'FIXME',
+}
+EOF
+  fi
+
   local efm_ls_path=~/tools/bin/efm-langserver
   if $efm_ls_path -v 2> /dev/null | grep -qE "$EFM_LS_VERSION"; then
     echo "skip: efm-langserver $EFM_LS_VERSION exists."

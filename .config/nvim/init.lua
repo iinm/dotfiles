@@ -770,7 +770,9 @@ local setup_minuet = function()
             },
           },
         },
-        api_key = 'MINUET_GEMINI_API_KEY',
+        api_key = function()
+          return require_safe('local_secrets').minuet_gemini_api_key
+        end
       },
 
       openai = {
@@ -778,12 +780,16 @@ local setup_minuet = function()
         optional = {
           max_tokens = 256,
         },
-        api_key = 'MINUET_OPENAI_API_KEY',
+        api_key = function()
+          return require_safe('local_secrets').minuet_openai_api_key
+        end
       },
 
       claude = {
         model = 'claude-3-5-haiku-latest',
-        api_key = 'MINUET_ANTHROPIC_API_KEY'
+        api_key = function()
+          return require_safe('local_secrets').minuet_anthropic_api_key
+        end
       },
     },
   })

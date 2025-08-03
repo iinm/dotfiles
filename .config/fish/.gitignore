@@ -1,3 +1,2 @@
 fish_variables
-/functions/local_config.fish
-/functions/project_config.fish
+/functions/local_*
