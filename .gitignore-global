@@ -8,9 +8,3 @@
 # Intellij
 *.iml
 *.idea
-
-# agent working directory
-.agent/*
-
-# Claude Code
-.claude/settings.local.json
