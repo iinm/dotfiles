@@ -1,6 +1,6 @@
 const sandbox = {
   command: ".agent/sandbox/run",
-  args: [],
+  args: ["--skip-build"],
 };
 
 export default {
