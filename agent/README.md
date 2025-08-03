@@ -112,7 +112,7 @@ const sandbox = {
 export default {
   // Set default model used by ./bin/agent
   // See model.mjs for available models
-  // model: "gemini-flash-thinking-16k",
+  // model: "gemini-flash-thinking-24k-max",
 
   // Define patterns for tools that can be used without explicit approval
   permissions: {
