@@ -10,6 +10,7 @@ import path from "node:path";
 import { styleText } from "node:util";
 import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
 import { matchValue } from "./utils/matchValue.mjs";
+import { noThrowSync } from "./utils/noThrow.mjs";
 
 /**
  * @param {AgentConfig} config
@@ -248,10 +249,24 @@ export function createAgent({
  */
 async function callTool(toolUse, toolByName, rewriteRules) {
   const rewrite =
-    (rewriteRules || []).find((rule) => matchValue(toolUse, rule.pattern))
-      ?.rewrite || ((x) => x);
+    rewriteRules.find((rule) => matchValue(toolUse, rule.pattern))?.rewrite ||
+    ((x) => x);
 
-  const rewritedToolUse = rewrite(toolUse);
+  const rewritedToolUse = noThrowSync(() => rewrite(toolUse));
+  if (rewritedToolUse instanceof Error) {
+    return {
+      type: "tool_result",
+      toolUseId: toolUse.toolUseId,
+      toolName: toolUse.toolName,
+      content: [
+        {
+          type: "text",
+          text: `User configuration error: message=${rewritedToolUse.message}, trace=${rewritedToolUse.stack}`,
+        },
+      ],
+      isError: true,
+    };
+  }
 
   const tool = toolByName.get(rewritedToolUse.toolName);
   if (!tool) {

@@ -106,7 +106,7 @@ Agent loads configuration files in the following order. Settings in later files 
 // https://github.com/iinm/dotfiles/tree/main/agent-sandbox
 const sandbox = {
   command: "agent-sandbox",
-  args: ["--dockerfile", ".agent/sandbox/Dockerfile", "--volume", "node_modules", "--allow-write"],
+  args: ["--dockerfile", ".agent/sandbox/Dockerfile", "--allow-write", "--skip-build"],
 };
 
 export default {
@@ -136,6 +136,7 @@ export default {
 
     // Rewrite tool use
     rewrite: [
+      // Run commands in the sandbox environment
       {
         pattern: {
           toolName: "exec_command",
@@ -153,7 +154,6 @@ export default {
           },
         }),
       },
-      // By default, run all commands in the sandbox environment
       {
         pattern: {
           toolName: "exec_command",
@@ -163,6 +163,7 @@ export default {
           input: {
             command: sandbox.command,
             args: [
+              // No network access by default
               ...sandbox.args, toolUse.input.command, ...(toolUse.input.args || []),
             ],
           },
