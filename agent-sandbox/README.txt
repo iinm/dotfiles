@@ -1,4 +1,4 @@
-agent-sandbox v0.0.15 - Run a command in a sandboxed Docker environment
+agent-sandbox v0.0.16 - Run a command in a sandboxed Docker environment
 
 Usage: agent-sandbox [--dockerfile FILE]
            [--platform PLATFORM]
@@ -52,18 +52,21 @@ Examples:
     agent-sandbox --tty --verbose --dry-run zsh
 
   Start Claude Code:
-    agent-sandbox --allow-write --allow-net --mount-writable \
-      ~/.claude:/home/sandbox/.claude,~/.claude.json:/home/sandbox/.claude.json \
+    agent-sandbox --allow-write --allow-net
+      --mount-writable ~/.claude:/home/sandbox/.claude,~/.claude.json:/home/sandbox/.claude.json \
+      --mount-readonly ~/.gitconfig:/home/sandbox/.gitconfig \
       --tty --verbose zsh -ic claude
 
   Start Codex CLI:
     agent-sandbox --env-file .env.sandbox --allow-write --allow-net \
       --mount-writable ~/.codex:/home/sandbox/.codex \
+      --mount-readonly ~/.gitconfig:/home/sandbox/.gitconfig \
       --tty --verbose zsh -ic codex
 
   Start Gemini CLI:
     agent-sandbox --env-file .env.sandbox --allow-write --allow-net \
       --mount-writable ~/.gemini:/home/sandbox/.gemini \
+      --mount-readonly ~/.gitconfig:/home/sandbox/.gitconfig \
       --tty --verbose zsh -ic gemini
 
   Install tools with mise:
