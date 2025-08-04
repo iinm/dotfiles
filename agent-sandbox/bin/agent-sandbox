@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.16"
+SCRIPT_VERSION="0.0.17"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -386,8 +386,8 @@ main() {
   )
   local docker_exec_opts=(
     --interactive
-    --workdir "$container_workdir"
     --user "$host_user_id:$host_group_id"
+    --workdir "$container_workdir"
   )
 
   local docker_build_context=""
@@ -594,11 +594,23 @@ EOF
   run docker exec --user 0:0 "$CONTAINER_NAME" "$CONTAINER_SCRIPT_PATH" setup_container_user \
      "$container_default_user_id" "$container_default_group_id" \
      "$host_user_id" "$host_group_id"
-  
+
+  log "Wait for the workdir owner to match the execution user (on macOS)."
+  run docker exec --interactive --user "$host_user_id:$host_group_id" --workdir "$container_workdir" \
+    "$CONTAINER_NAME" bash -eu -s << 'EOF'
+      for _ in $(seq 10); do
+        if ls -ld . | grep -qE "$(id -un)"; then
+          exit 0
+        fi
+        sleep 0.5
+      done
+      exit 1
+EOF
+
   # restore stdout, stderr
   exec 1>&3
   exec 2>&4
-  
+
   run docker exec "${docker_exec_opts[@]}" "$CONTAINER_NAME" "$@"
 }
 

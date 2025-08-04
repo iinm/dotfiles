@@ -1,4 +1,4 @@
-agent-sandbox v0.0.16 - Run a command in a sandboxed Docker environment
+agent-sandbox v0.0.17 - Run a command in a sandboxed Docker environment
 
 Usage: agent-sandbox [--dockerfile FILE]
            [--platform PLATFORM]
