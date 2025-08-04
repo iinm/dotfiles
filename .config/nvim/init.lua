@@ -509,6 +509,7 @@ local setup_plugins = function()
   require('lazy').setup({
     -- syntax
     'nvim-treesitter/nvim-treesitter',
+    'prisma/vim-prisma',
 
     -- ui
     'sainnhe/everforest',
