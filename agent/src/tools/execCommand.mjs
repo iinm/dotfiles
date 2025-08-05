@@ -49,7 +49,7 @@ export const execCommandTool = {
               PATH: process.env.PATH,
               HOME: process.env.HOME,
             },
-            timeout: 120 * 1000,
+            timeout: 5 * 60 * 1000,
           },
           async (err, stdout, stderr) => {
             let stdoutOrMessage = stdout;
