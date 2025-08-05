@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.18"
+SCRIPT_VERSION="0.0.19"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -66,7 +66,7 @@ Examples:
     $SCRIPT_NAME --tty --verbose --dry-run zsh
 
   Start Claude Code:
-    $SCRIPT_NAME --allow-write --allow-net
+    $SCRIPT_NAME --allow-write --allow-net \\
       --mount-writable ~/.claude:/home/sandbox/.claude,~/.claude.json:/home/sandbox/.claude.json \\
       --mount-readonly ~/.gitconfig:/home/sandbox/.gitconfig \\
       --tty --verbose zsh -ic claude

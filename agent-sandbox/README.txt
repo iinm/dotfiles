@@ -1,4 +1,4 @@
-agent-sandbox v0.0.18 - Run a command in a sandboxed Docker environment
+agent-sandbox v0.0.19 - Run a command in a sandboxed Docker environment
 
 Usage: agent-sandbox [--dockerfile FILE]
            [--platform PLATFORM]
@@ -52,7 +52,7 @@ Examples:
     agent-sandbox --tty --verbose --dry-run zsh
 
   Start Claude Code:
-    agent-sandbox --allow-write --allow-net
+    agent-sandbox --allow-write --allow-net \
       --mount-writable ~/.claude:/home/sandbox/.claude,~/.claude.json:/home/sandbox/.claude.json \
       --mount-readonly ~/.gitconfig:/home/sandbox/.gitconfig \
       --tty --verbose zsh -ic claude
