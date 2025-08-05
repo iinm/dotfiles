@@ -212,6 +212,7 @@ bootstrap_darwin() {
     docker
     docker-compose
     docker-buildx
+    lazydocker
     lua-language-server
     csvq
   )
