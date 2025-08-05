@@ -136,6 +136,14 @@ export default {
 
     // Rewrite tool use
     rewrite: [
+      // Run the specified commands in the host environment
+      {
+        pattern: {
+          toolName: "exec_command",
+          input: { command: /^(gh|docker)$/ },
+        },
+        rewrite: (toolUse) => toolUse,
+      },
       // Run commands in the sandbox environment
       {
         pattern: {
