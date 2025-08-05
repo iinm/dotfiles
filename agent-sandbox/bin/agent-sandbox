@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.17"
+SCRIPT_VERSION="0.0.18"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -595,8 +595,8 @@ EOF
      "$container_default_user_id" "$container_default_group_id" \
      "$host_user_id" "$host_group_id"
 
-  log "Wait for the workdir owner to match the execution user (on macOS)."
-  run docker exec --interactive --user "$host_user_id:$host_group_id" --workdir "$container_workdir" \
+  log "Wait for the project directory owner to match the execution user (on macOS)."
+  run docker exec --interactive --user "$host_user_id:$host_group_id" --workdir "$container_project_root" \
     "$CONTAINER_NAME" bash -eu -s << 'EOF'
       for _ in $(seq 10); do
         if ls -ld . | grep -qE "$(id -un)"; then
