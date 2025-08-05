@@ -117,6 +117,11 @@ echo "case: working directory is mounted and readable"
 agent-sandbox --dockerfile Dockerfile.minimum cat Dockerfile.minimum | grep -qE "FROM debian"
 
 
+echo "case: working directory owner is sandbox user"
+# when/then:
+agent-sandbox --dockerfile Dockerfile.minimum ls -ld . | grep -qE sandbox
+
+
 echo "case: working directory is read-only by default"
 # when:
 out=$(agent-sandbox --dockerfile Dockerfile.minimum touch test 2>&1) || status=$?

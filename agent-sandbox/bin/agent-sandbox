@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.19"
+SCRIPT_VERSION="0.0.20"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -595,23 +595,29 @@ EOF
      "$container_default_user_id" "$container_default_group_id" \
      "$host_user_id" "$host_group_id"
 
-  log "Wait for the project directory owner to match the execution user (on macOS)."
-  run docker exec --interactive --user "$host_user_id:$host_group_id" --workdir "$container_project_root" \
-    "$CONTAINER_NAME" bash -eu -s << 'EOF'
-      for _ in $(seq 10); do
-        if ls -ld . | grep -qE "$(id -un)"; then
-          exit 0
-        fi
-        sleep 0.5
-      done
-      exit 1
-EOF
-
   # restore stdout, stderr
   exec 1>&3
   exec 2>&4
 
-  run docker exec "${docker_exec_opts[@]}" "$CONTAINER_NAME" "$@"
+  run docker exec "${docker_exec_opts[@]}" "$CONTAINER_NAME" \
+    "$CONTAINER_SCRIPT_PATH" container_exec "$container_project_root" "$@"
+}
+
+container_exec() {
+  local project_dir="$1"
+  shift 1
+
+  # Wait for the project directory owner to match the execution user (on colima).
+  local max_attempts=10
+  for _ in $(seq "$max_attempts"); do
+    if stat -c "%U:%G" "$project_dir" | grep -qE "$(id -un):$(id -gn)"; then
+      exec "$@"
+    fi
+    sleep 0.5
+  done
+
+  echo "Error: Could not match project directory owner after multiple attempts." >&2
+  exit 1
 }
 
 start_container_dnsmasq() {
@@ -831,7 +837,12 @@ setup_container_user() {
 
 if test "$#" -gt 0; then
   case "$1" in
-    start_container_dnsmasq | setup_container_volume_owner | setup_container_firewall | setup_container_user | print_preset_dockerfile )
+    start_container_dnsmasq \
+      | setup_container_volume_owner \
+      | setup_container_firewall \
+      | setup_container_user \
+      | print_preset_dockerfile \
+      | container_exec )
       "$@"
       ;;
     * )
