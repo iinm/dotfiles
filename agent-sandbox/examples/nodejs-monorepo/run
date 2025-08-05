@@ -13,16 +13,18 @@ options=(
 )
 
 # Create volumes for each node_modules directory
+mkdir -p node_modules
 options+=("--volume" "node_modules")
-find packages -type d -mindepth 1 -maxdepth 1 -print0 | while IFS= read -r -d '' path; do
-  options+=("--volume" "$path/node_modules")
+for path in $(find packages -type f -name package.json -maxdepth 2 | sed -E 's,package.json$,node_modules,'); do
+  mkdir -p "$path"
+  options+=("--volume" "$path")
 done
 
-# Mount original git repository when using worktree
+# Mount main worktree
 git_root=$(git rev-parse --show-toplevel)
 if test -f "$git_root/.git"; then
-  git_original_root=$(sed -E 's,^gitdir: (.+)/.git/.+,\1,' < "$git_root/.git")
-  options+=("--mount-writable" "$git_original_root:$git_original_root")
+  main_worktree_path=$(sed -E 's,^gitdir: (.+)/.git/.+,\1,' < "$git_root/.git")
+  options+=("--mount-writable" "$main_worktree_path:$main_worktree_path")
 fi
 
 agent-sandbox "${options[@]}" "$@"
