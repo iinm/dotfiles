@@ -760,8 +760,10 @@ local setup_minuet = function()
             maxOutputTokens = 256,
             -- for thinking model
             thinkingConfig = {
-              -- Dynamic thinking
-              thinkingBudget = -1,
+              -- disable thinking
+              thinkingBudget = 0,
+              -- dynamic thinking
+              -- thinkingBudget = -1,
             },
           },
           safetySettings = {
