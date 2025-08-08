@@ -56,14 +56,11 @@ export const execCommandTool = {
             if (stdout.length > OUTPUT_MAX_LENGTH) {
               const filePath = await writeTmpFile(
                 stdout,
-                `exec_command-${command.replaceAll("/", "-").replaceAll(".", "dot-")}`,
+                "exec_command",
                 "txt",
               );
               const lineCount = stdout.split("\n").length;
-              stdoutOrMessage = [
-                `Content is too large (${stdout.length} characters, ${lineCount} lines). Saved to ${filePath}.`,
-                "If reading a file (e.g. with cat or awk), use rg to get an outline or search, then show only the needed line range.",
-              ].join("\n");
+              stdoutOrMessage = `Content is too large (${stdout.length} characters, ${lineCount} lines). Saved to ${filePath}.`;
             }
 
             let stderrOrMessage = stderr;
