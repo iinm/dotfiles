@@ -1,6 +1,6 @@
 /**
- * @import { ModelInput, Message,  MessageContentToolResult, MessageContentText, AssistantMessage, MessageContentToolUse, ModelOutput, PartialMessageContent } from "../model"
- * @import { OpenAIAssistantMessage, OpenAIMessage, OpenAIMessageToolCall, OpenAIModelConfig, OpenAIToolDefinition, OpenAIStreamData, OpenAIChatCompletion, OpenAIMessageContentImage, OpenAIChatCompletionRequest } from "./openai"
+ * @import { ModelInput, Message,  MessageContentToolResult, MessageContentText, AssistantMessage, ModelOutput, PartialMessageContent } from "../model"
+ * @import { OpenAIInputImage, OpenAIInputItem, OpenAIModelConfig, OpenAIOutputItem, OpenAIRequest, OpenAIStreamEvent, OpenAIToolFunction } from "./openai"
  * @import { ToolDefinition } from "../tool"
  * @import { GenericModelProviderConfig } from "../config"
  */
@@ -29,18 +29,15 @@ export async function callOpenAIModel(
       input.tools || [],
     );
 
-    /** @type {OpenAIChatCompletionRequest} */
+    /** @type {OpenAIRequest} */
     const request = {
       ...modelConfig,
-      messages,
+      input: messages,
       tools: tools.length ? tools : undefined,
       stream: true,
-      stream_options: {
-        include_usage: true,
-      },
     };
 
-    const response = await fetch(`${baseURL}/v1/chat/completions`, {
+    const response = await fetch(`${baseURL}/v1/responses`, {
       method: "POST",
       headers: {
         ...providerConfig.customHeaders,
@@ -48,7 +45,7 @@ export async function callOpenAIModel(
         Authorization: `Bearer ${providerConfig.apiKey}`,
       },
       body: JSON.stringify(request),
-      signal: AbortSignal.timeout(120 * 1000),
+      signal: AbortSignal.timeout(5 * 60 * 1000),
     });
 
     if (response.status === 429) {
@@ -80,50 +77,46 @@ export async function callOpenAIModel(
 
     const reader = response.body.getReader();
 
-    /** @type {OpenAIStreamData[]} */
-    const dataList = [];
-    /** @type {PartialMessageContent | undefined} */
-    let partialContent;
-    for await (const data of readOpenAIStreamData(reader)) {
-      dataList.push(data);
+    /** @type {OpenAIStreamEvent[]} */
+    const streamEvents = [];
+    for await (const streamEvent of readOpenAIStreamData(reader)) {
+      streamEvents.push(streamEvent);
 
-      partialContent = convertOpenAIStreamDataToAgentPartialContent(
-        data,
-        partialContent,
-      );
-
+      const partialContent =
+        convertOpenAIStreamDataToAgentPartialContent(streamEvent);
       if (input.onPartialMessageContent && partialContent) {
         input.onPartialMessageContent(partialContent);
       }
     }
 
-    /** @type {OpenAIChatCompletion} */
-    const chatCompletion = convertOpenAIStreamDataToChatCompletion(dataList);
-    const openAIAssistantMessage = chatCompletion.choices[0].message;
+    const lastEvent = streamEvents.at(-1);
+    if (lastEvent?.type !== "response.completed") {
+      throw new Error(`OpenAI stream did not complete: ${lastEvent?.type}`);
+    }
 
     return {
       message: convertOpenAIAssistantMessageToGenericFormat(
-        openAIAssistantMessage,
+        lastEvent.response.output,
       ),
-      providerTokenUsage: chatCompletion.usage,
+      providerTokenUsage: lastEvent.response.usage,
     };
   });
 }
 
 /**
  * @param {Message[]} genericMessages
- * @returns {OpenAIMessage[]}
+ * @returns {OpenAIInputItem[]}
  */
 function convertGenericMessageToOpenAIFormat(genericMessages) {
-  /** @type {OpenAIMessage[]} */
-  const openAIMessages = [];
+  /** @type {OpenAIInputItem[]} */
+  const openAIInputItems = [];
   for (const genericMessage of genericMessages) {
     switch (genericMessage.role) {
       case "system": {
-        openAIMessages.push({
+        openAIInputItems.push({
           role: "system",
           content: genericMessage.content.map((part) => ({
-            type: "text",
+            type: "input_text",
             text: part.text,
           })),
         });
@@ -155,32 +148,31 @@ function convertGenericMessageToOpenAIFormat(genericMessages) {
                 }
               })
               .join("\n\n");
-            openAIMessages.push({
-              role: "tool",
-              tool_call_id: result.toolUseId,
-              content: toolResultContentString,
+            openAIInputItems.push({
+              type: "function_call_output",
+              call_id: result.toolUseId,
+              output: toolResultContentString,
             });
           }
 
-          /** @type {OpenAIMessageContentImage[]} */
-          const imageParts = [];
+          /** @type {OpenAIInputImage[]} */
+          const imageInputs = [];
           for (const result of toolResults) {
             for (const part of result.content) {
               if (part.type === "image") {
-                imageParts.push({
-                  type: "image_url",
-                  image_url: {
-                    url: `data:${part.mimeType};base64,${part.data}`,
-                  },
+                imageInputs.push({
+                  type: "input_image",
+                  image_url: `data:${part.mimeType};base64,${part.data}`,
+                  detail: "auto",
                 });
               }
             }
           }
 
-          if (imageParts.length) {
-            openAIMessages.push({
+          if (imageInputs.length) {
+            openAIInputItems.push({
               role: "user",
-              content: imageParts,
+              content: imageInputs,
             });
           }
         } else {
@@ -188,10 +180,10 @@ function convertGenericMessageToOpenAIFormat(genericMessages) {
           const textParts = genericMessage.content.filter(
             (part) => part.type === "text",
           );
-          openAIMessages.push({
+          openAIInputItems.push({
             role: "user",
             content: textParts.map((part) => ({
-              type: "text",
+              type: "input_text",
               text: part.text,
             })),
           });
@@ -199,152 +191,202 @@ function convertGenericMessageToOpenAIFormat(genericMessages) {
         break;
       }
       case "assistant": {
-        /** @type {MessageContentText[]} */
-        const textParts = genericMessage.content.filter(
-          (part) => part.type === "text",
+        const source = /** @type {OpenAIOutputItem[]} */ (
+          genericMessage.providerMetadata?.source
         );
-        if (textParts.length > 1) {
-          console.error(
-            `OpenAI Unsupported message format: ${JSON.stringify(genericMessage)}`,
-          );
-        }
-        const text = textParts.map((part) => part.text).join("\n");
+        openAIInputItems.push(...source);
 
-        /** @type {MessageContentToolUse[]} */
-        const toolUseParts = genericMessage.content.filter(
-          (part) => part.type === "tool_use",
-        );
-
-        /** @type {OpenAIMessageToolCall[]} */
-        const toolCalls = toolUseParts.map((part) => ({
-          id: part.toolUseId,
-          type: "function",
-          function: {
-            name: part.toolName,
-            arguments: JSON.stringify(part.input),
-          },
-        }));
-
-        openAIMessages.push({
-          role: "assistant",
-          content: text ? text : undefined,
-          tool_calls: toolCalls.length ? toolCalls : undefined,
-        });
+        // /** @type {MessageContentText[]} */
+        // const textParts = genericMessage.content.filter(
+        //   (part) => part.type === "text",
+        // );
+        // if (textParts.length > 1) {
+        //   console.error(
+        //     `OpenAI Unsupported message format: ${JSON.stringify(genericMessage)}`,
+        //   );
+        // }
+        // const text = textParts.map((part) => part.text).join("\n");
+        //
+        // /** @type {MessageContentToolUse[]} */
+        // const toolUseParts = genericMessage.content.filter(
+        //   (part) => part.type === "tool_use",
+        // );
+        //
+        // /** @type {OpenAIFunctionToolCall[]} */
+        // const toolCalls = toolUseParts.map((part) => ({
+        //   type: "function_call",
+        //   call_id: part.toolUseId,
+        //   name: part.toolName,
+        //   arguments: JSON.stringify(part.input),
+        // }));
+        //
+        // if (text) {
+        //   openAIInputItems.push({
+        //     id: "", // TODO
+        //     type: "message",
+        //     role: "assistant",
+        //     content: [
+        //       {
+        //         type: "output_text",
+        //         text,
+        //         annotations: [], // TODO
+        //       },
+        //     ],
+        //     status: "completed",
+        //   });
+        // }
+        //
+        // if (toolCalls.length) {
+        //   openAIInputItems.push(...toolCalls);
+        // }
       }
     }
   }
 
-  return openAIMessages;
+  return openAIInputItems;
 }
 
 /**
- * @param {OpenAIStreamData} data
- * @param {PartialMessageContent | undefined} partialContent
+ * @param {OpenAIOutputItem[]} openAIOutputItems
+ * @returns {AssistantMessage}
+ */
+function convertOpenAIAssistantMessageToGenericFormat(openAIOutputItems) {
+  /** @type {AssistantMessage["content"]} */
+  const content = [];
+  for (const item of openAIOutputItems) {
+    if (item.type === "reasoning") {
+      content.push({
+        type: "thinking",
+        thinking: item.summary.text,
+      });
+    }
+
+    if (item.type === "message") {
+      for (const part of item.content) {
+        if (part.type === "output_text") {
+          content.push({
+            type: "text",
+            text: part.text,
+          });
+        }
+      }
+    }
+
+    if (item.type === "function_call") {
+      content.push({
+        type: "tool_use",
+        toolUseId: item.call_id,
+        toolName: item.name,
+        input: JSON.parse(item.arguments),
+      });
+    }
+  }
+
+  return {
+    role: "assistant",
+    content,
+    providerMetadata: {
+      source: openAIOutputItems,
+    },
+  };
+}
+
+/**
+ * @param {OpenAIStreamEvent} streamEvent
  * @returns {PartialMessageContent | undefined}
  */
-function convertOpenAIStreamDataToAgentPartialContent(data, partialContent) {
-  const firstChoice = data.choices.at(0);
-  const isStart = Boolean(firstChoice?.delta.role);
-  if (isStart && firstChoice?.delta.content === "") {
+function convertOpenAIStreamDataToAgentPartialContent(streamEvent) {
+  // thinking
+  if (streamEvent.type === "response.reasoning_summary_part.added") {
     return {
-      type: "text",
+      type: "thinking",
       position: "start",
     };
   }
-  if (!isStart && firstChoice?.delta.content) {
+
+  if (streamEvent.type === "response.reasoning_summary_text.delta") {
     return {
-      type: "text",
-      content: firstChoice?.delta.content,
+      type: "thinking",
       position: "delta",
+      content: streamEvent.delta,
     };
   }
-  if (isStart && firstChoice?.delta.tool_calls) {
+
+  if (streamEvent.type === "response.reasoning_summary_text.done") {
     return {
-      type: "tool_use",
-      content: [
-        firstChoice.delta.tool_calls.at(0)?.function?.name,
-        firstChoice.delta.tool_calls.at(0)?.function?.arguments,
-      ].join(" "),
-      position: "start",
-    };
-  }
-  if (!isStart && firstChoice?.delta.tool_calls) {
-    return {
-      type: "tool_use",
-      content: firstChoice.delta.tool_calls.at(0)?.function?.arguments,
-      position: "delta",
-    };
-  }
-  if (firstChoice?.finish_reason) {
-    return {
-      type: partialContent?.type || "unknown",
+      type: "thinking",
       position: "stop",
     };
   }
-}
 
-/**
- * @param {OpenAIStreamData[]} dataList
- * @returns {OpenAIChatCompletion}
- */
-function convertOpenAIStreamDataToChatCompletion(dataList) {
-  const firstData = dataList.at(0);
-  if (!firstData) {
-    throw new Error("No data found in the stream");
-  }
-
-  const fistChoice = firstData.choices.at(0);
-  if (!fistChoice) {
-    throw new Error("No choice found in the first data");
-  }
-
-  /** @type {Partial<OpenAIChatCompletion>} */
-  const chatCompletion = {
-    ...firstData,
-    choices: [
-      {
-        index: fistChoice.index,
-        message: /** @type {OpenAIAssistantMessage} */ (fistChoice.delta),
-        finish_reason: /** @type {string} */ (fistChoice.finish_reason),
-      },
-    ],
-  };
-  for (let i = 1; i < dataList.length; i++) {
-    const data = dataList[i];
-    const firstChoice = data?.choices.at(0);
-    if (firstChoice) {
-      const delta = firstChoice.delta;
-      if (
-        "content" in delta &&
-        delta.content &&
-        chatCompletion.choices?.[0].message
-      ) {
-        chatCompletion.choices[0].message.content += delta.content;
-      }
-
-      if ("tool_calls" in delta && delta.tool_calls) {
-        for (const toolCallDelta of delta.tool_calls) {
-          const toolCall =
-            chatCompletion.choices?.[0].message.tool_calls?.[
-              toolCallDelta.index
-            ];
-          if (toolCall && toolCallDelta.function) {
-            toolCall.function.arguments += toolCallDelta.function.arguments;
-          }
-        }
-      }
-
-      if (firstChoice.finish_reason && chatCompletion.choices) {
-        chatCompletion.choices[0].finish_reason = firstChoice.finish_reason;
-      }
+  // text
+  if (streamEvent.type === "response.content_part.added") {
+    if (streamEvent.part.type === "output_text") {
+      return {
+        type: "text",
+        position: "start",
+        content: streamEvent.part.text,
+      };
     }
-
-    if (data.usage) {
-      chatCompletion.usage = data.usage;
+    if (streamEvent.part.type === "refusal") {
+      return {
+        type: "refusal",
+        position: "start",
+        content: streamEvent.part.refusal,
+      };
     }
   }
 
-  return /** @type {OpenAIChatCompletion} */ (chatCompletion);
+  if (streamEvent.type === "response.output_text.delta") {
+    return {
+      type: "text",
+      position: "delta",
+      content: streamEvent.delta,
+    };
+  }
+
+  if (streamEvent.type === "response.content_part.done") {
+    if (streamEvent.part.type === "output_text") {
+      return {
+        type: "text",
+        position: "stop",
+      };
+    }
+    if (streamEvent.part.type === "refusal") {
+      return {
+        type: "refusal",
+        position: "stop",
+      };
+    }
+  }
+
+  // tool
+  if (streamEvent.type === "response.output_item.added") {
+    if (streamEvent.item.type === "function_call") {
+      return {
+        type: "tool_use",
+        position: "start",
+        content: streamEvent.item.arguments,
+      };
+    }
+  }
+
+  if (streamEvent.type === "response.function_call_arguments.delta") {
+    return {
+      type: "tool_use",
+      position: "delta",
+      content: streamEvent.delta,
+    };
+  }
+
+  if (streamEvent.type === "response.output_item.done") {
+    if (streamEvent.item.type === "function_call") {
+      return {
+        type: "tool_use",
+        position: "stop",
+      };
+    }
+  }
 }
 
 /**
@@ -374,12 +416,10 @@ async function* readOpenAIStreamData(reader) {
       const dataEndIndex = dataEndIndices[i];
       const data = buffer.slice(dataStartIndex, dataEndIndex);
       const decodedData = new TextDecoder().decode(data);
-      if (decodedData === "data: [DONE]") {
-        break;
-      }
-      if (decodedData.startsWith("data: ")) {
-        /** @type {OpenAIStreamData} */
-        const parsedData = JSON.parse(decodedData.slice("data: ".length));
+      if (decodedData.startsWith("event: ")) {
+        const eventDate = decodedData.split("\n").slice(1).join("\n");
+        /** @type {OpenAIStreamEvent} */
+        const parsedData = JSON.parse(eventDate.slice("data: ".length));
         yield parsedData;
       }
     }
@@ -391,54 +431,18 @@ async function* readOpenAIStreamData(reader) {
 }
 
 /**
- * @param {OpenAIAssistantMessage} openAIAsistantMessage
- * @returns {AssistantMessage}
- */
-function convertOpenAIAssistantMessageToGenericFormat(openAIAsistantMessage) {
-  /** @type {AssistantMessage["content"]} */
-  const content = [];
-  if (openAIAsistantMessage.content) {
-    content.push({ type: "text", text: openAIAsistantMessage.content });
-  }
-
-  if (openAIAsistantMessage.tool_calls) {
-    for (const toolCall of openAIAsistantMessage.tool_calls) {
-      if (toolCall.type === "function") {
-        content.push({
-          type: "tool_use",
-          toolUseId: toolCall.id,
-          toolName: toolCall.function.name,
-          input: JSON.parse(toolCall.function.arguments),
-        });
-      } else {
-        throw new Error(
-          `Unsupported tool call type: ${JSON.stringify(toolCall)}`,
-        );
-      }
-    }
-  }
-
-  return {
-    role: "assistant",
-    content,
-  };
-}
-
-/**
  * @param {ToolDefinition[]} genericToolDefs
- * @returns {OpenAIToolDefinition[]}
+ * @returns {OpenAIToolFunction[]}
  */
 function convertGenericeToolDefinitionToOpenAIFormat(genericToolDefs) {
-  /** @type {OpenAIToolDefinition[]} */
+  /** @type {OpenAIToolFunction[]} */
   const openAIToolDefs = [];
   for (const toolDef of genericToolDefs) {
     openAIToolDefs.push({
       type: "function",
-      function: {
-        name: toolDef.name,
-        description: toolDef.description,
-        parameters: toolDef.inputSchema,
-      },
+      name: toolDef.name,
+      description: toolDef.description,
+      parameters: toolDef.inputSchema,
     });
   }
 

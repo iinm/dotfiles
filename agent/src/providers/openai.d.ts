@@ -1,145 +1,265 @@
 /* Model */
-export type OpenAIModelConfig =
-  | {
-      model: "gpt-4.1" | "gpt-4.1-mini" | "gpt-4.1-nano";
-      temperature?: number;
-    }
-  | {
-      model: "o3" | "o4-mini";
-      reasoning_effort?: "low" | "medium" | "high";
-    };
-
-/* Request */
-export type OpenAIChatCompletionRequest = {
-  model: string;
-  messages: OpenAIMessage[];
-  tools?: OpenAIToolDefinition[];
-  stream?: boolean;
-  temperature?: number;
-  reasoning_effort?: "low" | "medium" | "high";
-  stream_options?: {
-    include_usage: boolean;
+export type OpenAIModelConfig = {
+  model: "gpt-5" | "gpt-5-mini";
+  reasoning: {
+    effort: "low" | "medium" | "high";
+    summary: "auto" | "concise" | "detailed";
   };
 };
 
-/* Output */
-export type OpenAIChatCompletion = {
-  id: string;
-  object: string;
-  created: number;
-  model: string;
-  choices: OpenIAChatCompletionChoice[];
-  usage: OpenAIChatCompletionUsage;
+/**
+ * Request
+ * https://platform.openai.com/docs/api-reference/responses/create
+ */
+export type OpenAIRequest = OpenAIModelConfig & {
+  input: OpenAIInputItem[];
+  tools?: OpenAIToolFunction[];
+  stream?: boolean;
 };
 
-export type OpenIAChatCompletionChoice = {
-  index: number;
-  message: OpenAIAssistantMessage;
-  finish_reason: string;
+/* Input */
+export type OpenAIInputItem =
+  | OpenAIInputMessage
+  | OpenAIFunctionToolCallOutput
+  | OpenAIOutputItem;
+
+export type OpenAIInputMessage = {
+  role: "user" | "system";
+  content: OpenAIInputContent[];
 };
 
-/* Message */
-export type OpenAIMessage =
-  | OpenAISystemMessage
-  | OpenAIUserMessage
-  | OpenAIAssistantMessage
-  | OpenAIToolMessage;
+export type OpenAIInputContent = OpenAIInputText | OpenAIInputImage;
 
-export type OpenAISystemMessage = {
-  role: "system";
-  content: OpenAIMessageContentText[];
-};
-
-export type OpenAIUserMessage = {
-  role: "user";
-  content: (OpenAIMessageContentText | OpenAIMessageContentImage)[];
-};
-
-export type OpenAIAssistantMessage = {
-  role: "assistant";
-  content?: string;
-  tool_calls?: OpenAIMessageToolCall[];
-};
-
-export type OpenAIToolMessage = {
-  role: "tool";
-  content: string;
-  tool_call_id: string;
-};
-
-export type OpenAIMessageContentText = {
-  type: "text";
+export type OpenAIInputText = {
+  type: "input_text";
   text: string;
 };
 
-export type OpenAIMessageContentImage = {
-  type: "image_url";
-  image_url: {
-    url: string;
-  };
-};
-
-export type OpenAIMessageToolCall = {
-  id: string;
-  type: "function";
-  function: OpenAIToolCallFunction;
-};
-
-export type OpenAIToolCallFunction = {
-  name: string;
-  arguments: string;
-};
-
-/* Usage */
-export type OpenAIChatCompletionUsage = {
-  prompt_tokens: number;
-  completion_tokens: number;
-  total_tokens: number;
-  prompt_tokens_details: Record<string, number>;
-  completion_tokens_details: Record<string, number>;
+export type OpenAIInputImage = {
+  type: "input_image";
+  image_url: string;
+  detail: "low" | "high" | "auto";
 };
 
 /* Tool */
-export type OpenAIToolDefinition = {
+export type OpenAIToolFunction = {
   type: "function";
-  function: {
-    name: string;
-    description: string;
-    parameters: Record<string, unknown>;
+  name: string;
+  description: string;
+  parameters: Record<string, unknown>;
+};
+
+export type OpenAIFunctionToolCallOutput = {
+  type: "function_call_output";
+  call_id: string;
+  output: string;
+};
+
+/* Response */
+export type OpenAIResponse = {
+  id: string;
+  object: "response";
+  output: OpenAIOutputItem[];
+  usage: OpenAIUsage;
+};
+
+/* Output */
+export type OpenAIOutputItem =
+  | OpenAIReasoning
+  | OpenAIOutputMessage
+  | OpenAIFunctionToolCall;
+
+export type OpenAIOutputMessage = {
+  id: string;
+  type: "message";
+  role: "assistant";
+  content: OpenAIOutputContent[];
+  status: "in_progress" | "completed" | "incomplete";
+};
+
+export type OpenAIOutputContent = OpenAIOutputText | OpenAIOutputRefusal;
+
+export type OpenAIOutputText = {
+  type: "output_text";
+  text: string;
+  annotations: unknown;
+};
+
+export type OpenAIOutputRefusal = {
+  type: "refusal";
+  refusal: string;
+};
+
+export type OpenAIFunctionToolCall = {
+  type: "function_call";
+  call_id: string;
+  name: string;
+  arguments: string;
+  status?: "in_progress" | "completed" | "incomplete";
+};
+
+export type OpenAIReasoning = {
+  id: string;
+  type: "reasoning";
+  summary: { type: "summary_text"; text: string };
+};
+
+export type OpenAIUsage = {
+  input_tokens: number;
+  input_tokens_details: {
+    cached_tokens: number;
   };
+  output_tokens: number;
+  output_tokens_details: {
+    reasoning_tokens: number;
+  };
+  total_tokens: number;
 };
 
 /* Streaming Data */
-export type OpenAIStreamData = {
-  id: string;
-  object: string;
-  created: number;
-  model: string;
-  service_tier?: string;
-  system_fingerprint?: string;
-  choices: OpenAIStreamDataChoice[];
-  usage?: OpenAIChatCompletionUsage;
+export type OpenAIStreamEvent =
+  | OpenAIStreamEventResponseCreated
+  | OpenAIStreamEventResponseInProgress
+  | OpenAIStreamEventResponseCompleted
+  | OpenAIStreamEventResponseOutputItemAdded
+  | OpenAIStreamEventResponseOutputItemDone
+  | OpenAIStreamEventResponseContentPartAdded
+  | OpenAIStreamEventResponseContentPartDone
+  | OpenAIStreamEventResponseFunctionCallArgumentsDelta
+  | OpenAIStreamEventResponseFunctionCallArgumentsDone
+  | OpenAIStreamEventResponseOutputTextDelta
+  | OpenAIStreamEventResponseOutputTextDone
+  | OpenAIStreamEventReasoningSummaryPartAdded
+  | OpenAIStreamEventReasoningSummaryPartDone
+  | OpenAIStreamEventReasoningSummaryTextDelta
+  | OpenAIStreamEventReasoningSummaryTextDone;
+
+export type OpenAIStreamEventResponseCreated = {
+  type: "response.created";
+  sequence_number: number;
+  response: unknown;
 };
 
-export type OpenAIStreamDataChoice = {
-  index: number;
-  delta: OpenAIStreamDataDelta;
-  finish_reason: string;
+export type OpenAIStreamEventResponseInProgress = {
+  type: "response.in_progress";
+  sequence_number: number;
+  response: unknown;
 };
 
-export type OpenAIStreamDataDelta = {
-  role?: "assistant";
-  content?: string;
-  refusal?: unknown;
-  tool_calls?: OpenAIStreamDataToolCall[];
+export type OpenAIStreamEventResponseCompleted = {
+  type: "response.completed";
+  sequence_number: number;
+  response: OpenAIResponse;
 };
 
-export type OpenAIStreamDataToolCall = {
-  index: number;
-  id?: string;
-  type?: string;
-  function?: {
-    name?: string;
-    arguments: string;
+export type OpenAIStreamEventResponseOutputItemAdded = {
+  type: "response.output_item.added";
+  sequence_number: number;
+  output_index: number;
+  item: OpenAIOutputItem;
+};
+
+export type OpenAIStreamEventResponseOutputItemDone = {
+  type: "response.output_item.done";
+  sequence_number: number;
+  output_index: number;
+  item: OpenAIOutputItem;
+};
+
+export type OpenAIStreamEventResponseContentPartAdded = {
+  type: "response.content_part.added";
+  sequence_number: number;
+  item_id: string;
+  output_index: number;
+  content_index: number;
+  part: OpenAIOutputContent;
+};
+
+export type OpenAIStreamEventResponseContentPartDone = {
+  type: "response.content_part.done";
+  sequence_number: number;
+  item_id: string;
+  output_index: number;
+  content_index: number;
+  part: OpenAIOutputContent;
+};
+
+export type OpenAIStreamEventResponseFunctionCallArgumentsDelta = {
+  type: "response.function_call_arguments.delta";
+  sequence_number: number;
+  item_id: string;
+  output_index: number;
+  delta: string;
+  obfuscation: string;
+};
+
+export type OpenAIStreamEventResponseFunctionCallArgumentsDone = {
+  type: "response.function_call_arguments.done";
+  sequence_number: number;
+  item_id: string;
+  output_index: number;
+  arguments: string;
+};
+
+export type OpenAIStreamEventResponseOutputTextDelta = {
+  type: "response.output_text.delta";
+  sequence_number: number;
+  item_id: string;
+  output_index: number;
+  content_index: number;
+  delta: string;
+  logprobs: unknown[];
+  obfuscation: string;
+};
+
+export type OpenAIStreamEventResponseOutputTextDone = {
+  type: "response.output_text.done";
+  sequence_number: number;
+  item_id: string;
+  output_index: number;
+  content_index: number;
+  text: string;
+  logprobs: unknown[];
+};
+
+export type OpenAIStreamEventReasoningSummaryPartAdded = {
+  type: "response.reasoning_summary_part.added";
+  sequence_number: number;
+  item_id: string;
+  output_index: number;
+  summary_index: number;
+  part: {
+    type: "summary_text";
+    text: string;
   };
+};
+
+export type OpenAIStreamEventReasoningSummaryPartDone = {
+  type: "response.reasoning_summary_part.done";
+  sequence_number: number;
+  item_id: string;
+  output_index: number;
+  summary_index: number;
+  part: {
+    type: "summary_text";
+    text: string;
+  };
+};
+
+export type OpenAIStreamEventReasoningSummaryTextDelta = {
+  type: "response.reasoning_summary_text.delta";
+  sequence_number: number;
+  item_id: string;
+  output_index: number;
+  summary_index: number;
+  delta: string;
+};
+
+export type OpenAIStreamEventReasoningSummaryTextDone = {
+  type: "response.reasoning_summary_text.done";
+  sequence_number: number;
+  item_id: string;
+  output_index: number;
+  summary_index: number;
+  text: string;
 };

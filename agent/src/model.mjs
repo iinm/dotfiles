@@ -14,63 +14,55 @@ import { callOpenAIModel } from "./providers/openai.mjs";
  */
 export function createModelCaller(modelName, providers) {
   switch (modelName) {
-    case "gpt-4-1-mini":
+    case "gpt-mini-thinking-medium":
       return (input) =>
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "gpt-4.1-mini",
-            temperature: 0,
+            model: "gpt-5-mini",
+            reasoning: {
+              effort: "medium",
+              summary: "auto",
+            },
           },
           input,
         );
-    case "gpt-4-1":
+    case "gpt-mini-thinking-high":
       return (input) =>
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "gpt-4.1",
-            temperature: 0,
+            model: "gpt-5-mini",
+            reasoning: {
+              effort: "high",
+              summary: "auto",
+            },
           },
           input,
         );
-    case "o4-mini-medium":
+    case "gpt-thinking-medium":
       return (input) =>
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "o4-mini",
-            reasoning_effort: "medium",
+            model: "gpt-5-mini",
+            reasoning: {
+              effort: "medium",
+              summary: "auto",
+            },
           },
           input,
         );
-    case "o4-mini-high":
+    case "gpt-thinking-high":
       return (input) =>
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "o4-mini",
-            reasoning_effort: "high",
-          },
-          input,
-        );
-    case "o3-medium":
-      return (input) =>
-        callOpenAIModel(
-          providers?.openai ?? {},
-          {
-            model: "o3",
-            reasoning_effort: "medium",
-          },
-          input,
-        );
-    case "o3-high":
-      return (input) =>
-        callOpenAIModel(
-          providers?.openai ?? {},
-          {
-            model: "o3",
-            reasoning_effort: "high",
+            model: "gpt-5-mini",
+            reasoning: {
+              effort: "high",
+              summary: "auto",
+            },
           },
           input,
         );

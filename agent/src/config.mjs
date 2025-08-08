@@ -268,7 +268,7 @@ function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
       toolName: execCommandTool.def.name,
       input: {
         command: "awk",
-        args: [/^FNR==\d+,FNR==\d+\{print FNR,\$0\}$/, isSafeToolArg],
+        args: [/^FNR==\d+ *,FNR==\d+ *\{print FNR, *\$0\}$/, isSafeToolArg],
       },
     },
     {

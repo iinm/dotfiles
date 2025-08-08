@@ -43,6 +43,7 @@ export type AssistantMessage = {
     | MessageContentText
     | MessageContentToolUse
   )[];
+  providerMetadata?: Record<string, unknown>;
 };
 
 export type MessageContentThinking = {

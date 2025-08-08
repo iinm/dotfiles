@@ -1,5 +1,5 @@
 (async () => {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+  const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -7,36 +7,35 @@
     },
     signal: AbortSignal.timeout(120 * 1000),
     body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "user", content: "Hello" },
+      model: "gpt-5",
+      reasoning: { effort: "medium", summary: "auto" },
+      input: [
+        { role: "user", content: "1から1000までの整数の和は？" },
         // { role: "user", content: "Weather in Tokyo." },
       ],
       tools: [
         {
           type: "function",
-          function: {
-            name: "get_weather",
-            description: "Get current temperature for a given location.",
-            parameters: {
-              type: "object",
-              properties: {
-                location: {
-                  type: "string",
-                  description: "City and country e.g. Bogotá, Colombia",
-                },
+          name: "get_weather",
+          description: "Get current temperature for a given location.",
+          parameters: {
+            type: "object",
+            properties: {
+              location: {
+                type: "string",
+                description: "City and country e.g. Bogotá, Colombia",
               },
-              required: ["location"],
             },
+            required: ["location"],
           },
         },
       ],
       stream: true,
-      stream_options: {
-        include_usage: true,
-      },
     }),
   });
+
+  // console.log(await response.text());
+  // return;
 
   console.log("Response status:", response.status);
 

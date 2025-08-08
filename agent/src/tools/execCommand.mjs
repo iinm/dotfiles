@@ -54,24 +54,16 @@ export const execCommandTool = {
           async (err, stdout, stderr) => {
             let stdoutOrMessage = stdout;
             if (stdout.length > OUTPUT_MAX_LENGTH) {
-              if (["cat", "head", "tail"].includes(command)) {
-                const lineCount = stdout.split("\n").length;
-                stdoutOrMessage = [
-                  `Content is too large (${stdout.length} characters, ${lineCount} lines).`,
-                  "Use head, tail, rg, or awk to read specific parts.",
-                ].join("\n");
-              } else {
-                const filePath = await writeTmpFile(
-                  stdout,
-                  `exec_command-${command.replaceAll("/", "-").replaceAll(".", "dot-")}`,
-                  "txt",
-                );
-                const lineCount = stdout.split("\n").length;
-                stdoutOrMessage = [
-                  `Content is too large (${stdout.length} characters, ${lineCount} lines). Saved to ${filePath}.`,
-                  "Use head, tail, rg, or awk to read specific parts.",
-                ].join("\n");
-              }
+              const filePath = await writeTmpFile(
+                stdout,
+                `exec_command-${command.replaceAll("/", "-").replaceAll(".", "dot-")}`,
+                "txt",
+              );
+              const lineCount = stdout.split("\n").length;
+              stdoutOrMessage = [
+                `Content is too large (${stdout.length} characters, ${lineCount} lines). Saved to ${filePath}.`,
+                "If reading a file (e.g. with cat or awk), use rg to get an outline or search, then show only the needed line range.",
+              ].join("\n");
             }
 
             let stderrOrMessage = stderr;
