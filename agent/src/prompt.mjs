@@ -102,11 +102,18 @@ File and directory command examples:
     - 201st to 400th lines: { command: "awk", args: ["FNR==201,FNR==400{print FNR,$0}", "file.txt"] }
     - Read more lines if needed.
 
-Other command examples:
+Source code inspection examples:
+- Find a symbol:
+  - Create/Update a tags file:
+    { command: "ctags", args: ["-R", "-f", "${projectMetadataDir}/tags", "--exclude=node_modules", "."] }
+    - Exclude git-ignored files
+  - Find a symbol in the tags file: { command: "rg", args: ["-n", "^<symbol>\\t", "${projectMetadataDir}/tags"] }
+
+Other examples:
 - Get current date and time: { command: "date", args: ["+%Y-%m-%d %H:%M:%S"] }
 - Show current branch: { command: "git", args: ["branch", "--show-current"] }
 - Show staged changes: { command: "git", args: ["diff", "--staged"] }
-- View pull request on GitHub : { command: "gh", args: ["pr", "view" , "123"] }
+- View pull request on GitHub: { command: "gh", args: ["pr", "view" , "123"] }
 - For commands that require pipes or redirects: { command: "bash", args: ["-c", "fd '.+\\.mjs' | xargs wc -l"] }
 
 ### write file
