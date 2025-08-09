@@ -750,7 +750,8 @@ local setup_minuet = function()
       -- show_on_completion_menu = true,
     },
 
-    provider = 'gemini',
+    provider = 'openai',
+    request_timeout = 5,
 
     provider_options = {
       gemini = {
@@ -779,9 +780,11 @@ local setup_minuet = function()
       },
 
       openai = {
-        model = 'gpt-4.1-mini',
+        model = 'gpt-5-nano',
         optional = {
-          max_tokens = 256,
+          max_completion_tokens = 1024,
+          reasoning_effort = 'low',
+          verbosity = 'low',
         },
         api_key = function()
           return require_safe('local_secrets').minuet_openai_api_key
