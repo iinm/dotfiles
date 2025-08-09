@@ -750,10 +750,23 @@ local setup_minuet = function()
       -- show_on_completion_menu = true,
     },
 
-    provider = 'openai',
+    provider = 'openai_compatible',
     request_timeout = 5,
 
     provider_options = {
+      openai_compatible = {
+        model = 'gpt-5-nano',
+        optional = {
+          max_completion_tokens = 2048,
+          reasoning_effort = 'low',
+          verbosity = 'low',
+        },
+        end_point = require_safe('local_secrets').minuet_openai_end_point or 'https://api.openai.com/v1/chat/completions',
+        api_key = function()
+          return require_safe('local_secrets').minuet_openai_api_key
+        end
+      },
+
       gemini = {
         model = 'gemini-2.5-flash',
         optional = {
@@ -776,18 +789,6 @@ local setup_minuet = function()
         },
         api_key = function()
           return require_safe('local_secrets').minuet_gemini_api_key
-        end
-      },
-
-      openai = {
-        model = 'gpt-5-nano',
-        optional = {
-          max_completion_tokens = 1024,
-          reasoning_effort = 'low',
-          verbosity = 'low',
-        },
-        api_key = function()
-          return require_safe('local_secrets').minuet_openai_api_key
         end
       },
 
