@@ -470,13 +470,12 @@ function formatToolResult(toolResult) {
   }
 
   if (toolResult.toolName === "exec_command") {
-    const omittedContent = contentString.match(
-      /<command>(cat|head|tail|sed)<\/command>/,
-    )
-      ? "<stdout>(Output omitted)</stdout>"
-      : contentString;
-    return omittedContent
+    return contentString
       .replace(/(^<stdout>|<\/stdout>$)/gm, styleText("blue", "$1"))
+      .replace(
+        /(<truncated_output.+?>|<\/truncated_output>)/g,
+        styleText("yellow", "$1"),
+      )
       .replace(/(^<stderr>|<\/stderr>$)/gm, styleText("magenta", "$1"))
       .replace(/(^<error>|<\/error>$)/gm, styleText("red", "$1"));
   }

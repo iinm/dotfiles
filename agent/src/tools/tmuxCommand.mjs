@@ -67,25 +67,28 @@ export const tmuxCommandTool = {
           execFileOptions,
           async (err, stdout, stderr) => {
             // capture-pane の結果に空白の行が含まれることがあるためtrim する
-            const stdoutOmitted = stdout.trim().slice(-OUTPUT_MAX_LENGTH);
-            const isStdoutOmitted = stdout.trim().length > OUTPUT_MAX_LENGTH;
-            const stderrOmitted = stderr.trim().slice(-OUTPUT_MAX_LENGTH);
-            const isStderrOmitted = stderr.trim().length > OUTPUT_MAX_LENGTH;
+            const stdoutTruncated = stdout.trim().slice(-OUTPUT_MAX_LENGTH);
+            const isStdoutTruncated = stdout.trim().length > OUTPUT_MAX_LENGTH;
+            const stderrTruncated = stderr.trim().slice(-OUTPUT_MAX_LENGTH);
+            const isStderrTruncated = stderr.trim().length > OUTPUT_MAX_LENGTH;
             const result = [
-              stdoutOmitted
-                ? `<stdout>\n${isStdoutOmitted ? "(Output omitted) ..." : ""}${stdoutOmitted}\n</stdout>`
+              stdoutTruncated
+                ? `<stdout>\n${isStdoutTruncated ? "(Output truncated) ..." : ""}${stdoutTruncated}\n</stdout>`
                 : "<stdout></stdout>",
               "",
-              stderrOmitted
-                ? `<stderr>\n${isStderrOmitted ? "(Output omitted) ..." : ""}${stderrOmitted}\n</stderr>`
+              stderrTruncated
+                ? `<stderr>\n${isStderrTruncated ? "(Output truncated) ..." : ""}${stderrTruncated}\n</stderr>`
                 : "<stderr></stderr>",
             ];
             if (err) {
-              const errMessageOmitted = err.message.slice(0, OUTPUT_MAX_LENGTH);
-              const isErrMessageOmitted =
+              const errMessageTruncated = err.message.slice(
+                0,
+                OUTPUT_MAX_LENGTH,
+              );
+              const isErrMessageTruncated =
                 err.message.length > OUTPUT_MAX_LENGTH;
               result.push(
-                `\n<error>\n${err.name}: ${errMessageOmitted}${isErrMessageOmitted ? "... (Message omitted)" : ""}</error>`,
+                `\n<error>\n${err.name}: ${errMessageTruncated}${isErrMessageTruncated ? "... (Message truncated)" : ""}</error>`,
               );
             }
 
@@ -137,10 +140,10 @@ export const tmuxCommandTool = {
                   },
                 );
               });
-              const capturedOmitted = captured.slice(-OUTPUT_MAX_LENGTH);
-              const isCapturedOmitted = captured.length > OUTPUT_MAX_LENGTH;
+              const capturedTruncated = captured.slice(-OUTPUT_MAX_LENGTH);
+              const isCapturedTruncated = captured.length > OUTPUT_MAX_LENGTH;
               result.push(
-                `\n<tmux:capture-pane target="${target}"">\n${isCapturedOmitted ? "(Output omitted) ..." : ""}${capturedOmitted}\n</tmux:capture-pane>`,
+                `\n<tmux:capture-pane target="${target}"">\n${isCapturedTruncated ? "(Output truncated) ..." : ""}${capturedTruncated}\n</tmux:capture-pane>`,
               );
             }
 

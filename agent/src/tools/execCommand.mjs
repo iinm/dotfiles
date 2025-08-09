@@ -8,6 +8,7 @@ import { noThrow } from "../utils/noThrow.mjs";
 import { writeTmpFile } from "../utils/tmpfile.mjs";
 
 const OUTPUT_MAX_LENGTH = 1024 * 8;
+const OUTPUT_TRUNCATED_LENGTH = 1024 * 2;
 
 /** @type {Tool} */
 export const execCommandTool = {
@@ -60,7 +61,17 @@ export const execCommandTool = {
                 "txt",
               );
               const lineCount = stdout.split("\n").length;
-              stdoutOrMessage = `Content is too large (${stdout.length} characters, ${lineCount} lines). Saved to ${filePath}.`;
+              stdoutOrMessage = (() => {
+                const head = stdout.slice(0, OUTPUT_TRUNCATED_LENGTH);
+                const tail = stdout.slice(
+                  Math.max(stdout.length - OUTPUT_TRUNCATED_LENGTH, 0),
+                );
+                return [
+                  `Content is too large (${stdout.length} characters, ${lineCount} lines). Saved to ${filePath}.`,
+                  `<truncated_output part="start" length="${OUTPUT_TRUNCATED_LENGTH}" total_length="${stdout.length}">\n${head}\n</truncated_output>`,
+                  `<truncated_output part="end" length="${OUTPUT_TRUNCATED_LENGTH}" total_length="${stdout.length}">\n${tail}</truncated_output>\n`,
+                ].join("\n\n");
+              })();
             }
 
             let stderrOrMessage = stderr;
@@ -71,10 +82,17 @@ export const execCommandTool = {
                 "txt",
               );
               const lineCount = stderr.split("\n").length;
-              stderrOrMessage = [
-                `Content is large (${stderr.length} characters, ${lineCount} lines) and saved to ${filePath}`,
-                "Use head / tail / rg / awk to read specific parts",
-              ].join("\n");
+              stderrOrMessage = (() => {
+                const head = stderr.slice(0, OUTPUT_TRUNCATED_LENGTH);
+                const tail = stderr.slice(
+                  Math.max(stderr.length - OUTPUT_TRUNCATED_LENGTH, 0),
+                );
+                return [
+                  `Content is large (${stderr.length} characters, ${lineCount} lines) and saved to ${filePath}`,
+                  `<truncated_output part="start" length="${OUTPUT_TRUNCATED_LENGTH}" total_length="${stderr.length}">\n${head}\n</truncated_output>`,
+                  `<truncated_output part="end" length="${OUTPUT_TRUNCATED_LENGTH}" total_length="${stderr.length}">\n${tail}</truncated_output>\n`,
+                ].join("\n\n");
+              })();
             }
 
             const result = [
@@ -89,17 +107,17 @@ export const execCommandTool = {
 
             if (err) {
               // rg: 何もマッチしない場合は exit status != 0 になるので無視
-              const ignoreError = ["rg"].includes(command);
+              const ignoreError = [command, ...(args || [])].includes("rg");
               if (!ignoreError) {
                 // err.message が長過ぎる場合は先頭を表示
-                const errMessageOmitted = err.message.slice(
+                const errMessageTruncated = err.message.slice(
                   0,
-                  OUTPUT_MAX_LENGTH,
+                  OUTPUT_TRUNCATED_LENGTH,
                 );
-                const isErrMessageOmitted =
+                const isErrMessageTruncated =
                   err.message.length > OUTPUT_MAX_LENGTH;
                 result.push(
-                  `\n<error>\n${err.name}: ${errMessageOmitted}${isErrMessageOmitted ? "... (Message omitted)" : ""}</error>`,
+                  `\n<error>\n${err.name}: ${errMessageTruncated}${isErrMessageTruncated ? "... (Message truncated)" : ""}</error>`,
                 );
               }
             }
