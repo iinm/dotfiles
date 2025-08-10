@@ -75,12 +75,13 @@ Format description:
         }
         // Escape $ characters in replacement string to prevent interpretation of $& $1 $$ patterns
         const escapedReplace = replace.replace(/\$/g, "$$$$");
-        newContent =
-          replace === "" && newContent.includes(`${search}\n`)
-            ? newContent.replace(`${search}\n`, replace)
-            : replace === "" && newContent.includes(`\n${search}`)
-              ? newContent.replace(`\n${search}`, replace)
-              : newContent.replace(search, escapedReplace);
+        if (replace === "" && newContent.includes(`${search}\n`)) {
+          newContent = newContent.replace(`${search}\n`, "");
+        } else if (replace === "" && newContent.includes(`\n${search}`)) {
+          newContent = newContent.replace(`\n${search}`, "");
+        } else {
+          newContent = newContent.replace(search, escapedReplace);
+        }
       }
       fs.writeFileSync(filePath, newContent);
       return `Patched file: ${filePath}`;
