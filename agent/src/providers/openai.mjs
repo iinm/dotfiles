@@ -195,50 +195,6 @@ function convertGenericMessageToOpenAIFormat(genericMessages) {
           genericMessage.providerMetadata?.source
         );
         openAIInputItems.push(...source);
-
-        // /** @type {MessageContentText[]} */
-        // const textParts = genericMessage.content.filter(
-        //   (part) => part.type === "text",
-        // );
-        // if (textParts.length > 1) {
-        //   console.error(
-        //     `OpenAI Unsupported message format: ${JSON.stringify(genericMessage)}`,
-        //   );
-        // }
-        // const text = textParts.map((part) => part.text).join("\n");
-        //
-        // /** @type {MessageContentToolUse[]} */
-        // const toolUseParts = genericMessage.content.filter(
-        //   (part) => part.type === "tool_use",
-        // );
-        //
-        // /** @type {OpenAIFunctionToolCall[]} */
-        // const toolCalls = toolUseParts.map((part) => ({
-        //   type: "function_call",
-        //   call_id: part.toolUseId,
-        //   name: part.toolName,
-        //   arguments: JSON.stringify(part.input),
-        // }));
-        //
-        // if (text) {
-        //   openAIInputItems.push({
-        //     id: "", // TODO
-        //     type: "message",
-        //     role: "assistant",
-        //     content: [
-        //       {
-        //         type: "output_text",
-        //         text,
-        //         annotations: [], // TODO
-        //       },
-        //     ],
-        //     status: "completed",
-        //   });
-        // }
-        //
-        // if (toolCalls.length) {
-        //   openAIInputItems.push(...toolCalls);
-        // }
       }
     }
   }
