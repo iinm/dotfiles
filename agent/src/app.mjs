@@ -69,7 +69,7 @@ import { createSessionId } from "./utils/createSessionId.mjs";
     readWebPageWithBrowserTool,
   ];
 
-  if (agentConfig.tools?.tavily) {
+  if (agentConfig.tools?.tavily?.apiKey) {
     builtinTools.push(createTavilySearchTool(agentConfig.tools.tavily));
   }
 
