@@ -55,6 +55,70 @@ Follow these steps in the exact order below:
    3-1. Files referenced in the agent prompt.
    3-2. Any other files that relate to the task.
 
+## Memory Files
+
+Memory files maintain task context.
+
+- Create/Update at key checkpoints: after creating a plan, completing steps, encountering issues, or making important decisions.
+- Update existing task memory when continuing the same task.
+- Write the content in the user's language.
+
+Path: ${projectMetadataDir}/memory/<session-id>--<kebab-case-title>.md
+Create a concise, clear title (3-5 words) that represents the core task.
+
+Task Memory Format:
+<task_memory_format>
+# [title]
+
+- Timestamp: [when memory was last updated]
+- Git branch: [current branch]
+
+## Task Description
+
+[Provide a 2-5 sentence description of the task, including:
+- The specific problem or requirement
+- Any key constraints or requirements]
+
+## References
+
+[Include:
+- Links to issues, tickets, or PRs
+- Relevant source files and project documentation
+- External documentation, articles, or tools
+- Key commands or code snippets]
+
+## Plan
+
+[List concrete steps to achieve the task, including:
+- Initial analysis or research steps
+- File-level implementation details with expected changes
+- Commands for verification
+- Sub-steps]
+
+## Current Status
+
+[Document the current state with:
+- Completed steps (with brief results)
+- Current step in progress
+- Remaining steps
+- Any blockers or issues encountered]
+
+## Conclusion
+
+[Include:
+- The full solution implemented
+- How it addresses the original requirements
+- Any limitations or future improvements]
+
+## Future Notes
+
+[Include:
+- Key learnings from this task
+- Alternative approaches considered
+- Potential optimizations
+- Related tasks that might follow]
+</task_memory_format>
+
 ## Tools
 
 - Execute tools one by one.
@@ -150,70 +214,6 @@ Basic commands:
 - Get output of window before sending keys: capture-pane ["-p", "-t", "<tmux-session-id>:<window>"]
 - Send key to session: send-keys ["-t", "<tmux-session-id>:<window>", "echo hello", "Enter"]
 - Delete line: send-keys ["-t", "<tmux-session-id>:<window>, "C-a", "C-k"]
-
-## Memory Files
-
-Memory files maintain task context.
-
-- Create/Update at key checkpoints: after creating a plan, completing steps, encountering issues, or making important decisions.
-- Update existing task memory when continuing the same task.
-- Write the content in the user's language.
-
-Path: ${projectMetadataDir}/memory/<session-id>--<kebab-case-title>.md
-Create a concise, clear title (3-5 words) that represents the core task.
-
-Task Memory Format:
-<task_memory_format>
-# [title]
-
-- Timestamp: [when memory was last updated]
-- Git branch: [current branch]
-
-## Task Description
-
-[Provide a 2-5 sentence description of the task, including:
-- The specific problem or requirement
-- Any key constraints or requirements]
-
-## References
-
-[Include:
-- Links to issues, tickets, or PRs
-- Relevant source files and project documentation
-- External documentation, articles, or tools
-- Key commands or code snippets]
-
-## Plan
-
-[List concrete steps to achieve the task, including:
-- Initial analysis or research steps
-- File-level implementation details with expected changes
-- Commands for verification
-- Sub-steps]
-
-## Current Status
-
-[Document the current state with:
-- Completed steps (with brief results)
-- Current step in progress
-- Remaining steps
-- Any blockers or issues encountered]
-
-## Conclusion
-
-[Include:
-- The full solution implemented
-- How it addresses the original requirements
-- Any limitations or future improvements]
-
-## Future Notes
-
-[Include:
-- Key learnings from this task
-- Alternative approaches considered
-- Potential optimizations
-- Related tasks that might follow]
-</task_memory_format>
 
 ## Environment
 
