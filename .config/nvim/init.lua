@@ -751,14 +751,14 @@ local setup_minuet = function()
     },
 
     provider = 'openai_compatible',
-    request_timeout = 5,
+    request_timeout = 3,
 
     provider_options = {
       openai_compatible = {
-        model = 'gpt-5-nano',
+        model = 'gpt-5-mini',
         optional = {
-          max_completion_tokens = 2048,
-          reasoning_effort = 'low',
+          max_completion_tokens = 512,
+          reasoning_effort = 'minimal',
           verbosity = 'low',
         },
         end_point = require_safe('local_secrets').minuet_openai_end_point or 'https://api.openai.com/v1/chat/completions',
