@@ -35,7 +35,7 @@ import { createSessionId } from "./utils/createSessionId.mjs";
       agentConfig.mcpServers,
     )) {
       console.log(
-        styleText("blue", `Connecting to MCP server: ${serverName}...`),
+        styleText("blue", `\n⇄ Connecting to MCP server: ${serverName}...`),
       );
       const { tools, cleanup } = await connectToMCPServer(
         serverName,
