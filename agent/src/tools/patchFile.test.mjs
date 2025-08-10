@@ -171,4 +171,16 @@ $& means match, $1 means first group, $$ means literal dollar
       "$& means match, $1 means first group, $$ means literal dollar";
     assert.equal(patchedContent, expectedContent);
   });
+
+  it("rejects parent directory traversal in filePath", async () => {
+    // when: filePath contains ../
+    const result = await patchFileTool.impl({
+      filePath: "../etc/passwd",
+      diff: "",
+    });
+
+    // then: should return an Error
+    assert.ok(result instanceof Error);
+    assert.match(result.message, /must not contain parent directory traversal/);
+  });
 });

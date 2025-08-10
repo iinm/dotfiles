@@ -112,7 +112,7 @@ const sandbox = {
 export default {
   // Set default model used by ./bin/agent
   // See model.mjs for available models
-  // model: "gemini-flash-thinking-24k-max",
+  // model: "gpt-mini-thinking-high"
 
   // Define patterns for tools that can be used without explicit approval
   permissions: {
@@ -120,7 +120,7 @@ export default {
       // Allow npm run check|fix commands without confirmation
       {
         toolName: "exec_command",
-        input: { command: "npm", args: ["run", /(check|fix)/] },
+        input: { command: "npm", args: ["run", /^(check|fix)$/] },
       },
       // Allow all web searches
       { toolName: "web_search", input: { query: /./ } },

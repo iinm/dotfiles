@@ -32,6 +32,9 @@ export const writeFileTool = {
   impl: async (input) =>
     await noThrow(async () => {
       const { filePath, content } = input;
+      if (filePath.includes("../")) {
+        throw new Error("filePath must not contain parent directory traversal");
+      }
       return new Promise((resolve, reject) => {
         fs.writeFile(filePath, content, (error) => {
           if (error) {

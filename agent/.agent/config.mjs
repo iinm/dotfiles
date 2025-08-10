@@ -8,7 +8,11 @@ export default {
     allow: [
       {
         toolName: "exec_command",
-        input: { command: "npm", args: ["run", /(check|fix)/] },
+        input: { command: "npm", args: ["run", /^(check|fix)$/] },
+      },
+      {
+        toolName: "patch_file",
+        input: { fileName: /^src\// },
       },
     ],
 

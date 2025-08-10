@@ -32,4 +32,16 @@ describe("writeFileTool", () => {
     const writtenContent = fs.readFileSync(tmpFilePath, "utf8");
     assert.equal(writtenContent, "Hello World");
   });
+
+  it("rejects parent directory traversal in filePath", async () => {
+    // when: filePath contains ../
+    const result = await writeFileTool.impl({
+      filePath: "../etc/passwd",
+      content: "dummy",
+    });
+
+    // then: should return an Error
+    assert.ok(result instanceof Error);
+    assert.match(result.message, /must not contain parent directory traversal/);
+  });
 });

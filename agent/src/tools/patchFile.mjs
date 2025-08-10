@@ -34,6 +34,9 @@ export const patchFileTool = {
   impl: async (input) =>
     await noThrow(async () => {
       const { filePath, diff } = input;
+      if (filePath.includes("../")) {
+        throw new Error("filePath must not contain parent directory traversal");
+      }
       const content = fs.readFileSync(filePath, "utf8");
       const matches = Array.from(
         diff.matchAll(
