@@ -112,7 +112,7 @@ const sandbox = {
 export default {
   // Set default model used by ./bin/agent
   // See model.mjs for available models
-  // model: "gpt-mini-thinking-high"
+  // model: "gpt-mini-thinking-medium"
 
   // Define patterns for tools that can be used without explicit approval
   permissions: {
