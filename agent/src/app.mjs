@@ -11,7 +11,7 @@ import { connectToMCPServer } from "./mcp.mjs";
 import { createModelCaller } from "./model.mjs";
 import { createPrompt } from "./prompt.mjs";
 import { createToolUseApprover } from "./tool.mjs";
-import { execCommandTool } from "./tools/execCommand.mjs";
+import { createExecCommandTool } from "./tools/execCommand.mjs";
 import { patchFileTool } from "./tools/patchFile.mjs";
 import { readWebPageTool } from "./tools/readWebPage.mjs";
 import { readWebPageWithBrowserTool } from "./tools/readWebPageWithBrowser.mjs";
@@ -61,7 +61,7 @@ import { createSessionId } from "./utils/createSessionId.mjs";
   });
 
   const builtinTools = [
-    execCommandTool,
+    createExecCommandTool({ sandbox: agentConfig.sandbox }),
     writeFileTool,
     patchFileTool,
     tmuxCommandTool,

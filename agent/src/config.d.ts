@@ -1,4 +1,5 @@
 import { ToolUsePattern } from "./tool";
+import { ExecCommandSanboxConfig } from "./tools/execCommand";
 
 export type AppConfig = {
   model?: string;
@@ -7,6 +8,7 @@ export type AppConfig = {
     allow?: ToolUsePattern[];
     maxAutoApprovals?: number;
   };
+  sandbox?: ExecCommandSanboxConfig;
   tools?: {
     tavily?: {
       apiKey?: string;

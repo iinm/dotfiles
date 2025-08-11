@@ -23,39 +23,30 @@ npm install
 Create the user local configuration.
 
 ```js
-// $AGENT_ROOT(where this README file exists)/.config/config.local.mjs
-
-// (Optional) AI Gateway example:
-const customHeaders = {
-  "cf-aig-authorization": "Bearer FIXME",
-  "cf-aig-collect-log": false, // Collect token and cost metrics, but do not log the message content.
-  "cf-aig-metadata": JSON.stringify({
-    client: "agent-by-iinm",
-  }),
-};
-
-export default {
-  providers: {
-    anthropic: {
-      apiKey: "FIXME",
+// $AGENT_ROOT(where this README file exists)/.config/config.local.json
+{
+  "providers": {
+    "anthropic": {
+      "apiKey": "FIXME",
       // (Optional) AI Gateway example:
-      // baseURL: "https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/anthropic",
-      // customHeaders,
+      // "baseURL": "https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/anthropic",
+      // "customHeaders": {
+      //   "cf-aig-metadata": "{\"client\":\"agent-by-iinm\"}"
+      // }
     },
-    gemini: {
-      apiKey: "FIXME",
+    "gemini": {
+      "apiKey": "FIXME",
     },
-    openai: {
-      apiKey: "FIXME",
-    },
+    "openai": {
+      "apiKey": "FIXME",
+    }
   },
-  tools: {
-    // (Optional)
-    tavily: {
-      apiKey: "FIXME",
-    },
-  },
-};
+  "tools": {
+    "tavily": {
+      "apiKey": "(Optional) FIXME"
+    }
+  }
+}
 ```
 
 Run the agent.
@@ -79,13 +70,13 @@ Show help message.
 ```
 $AGENT_ROOT (where this README file exists)
   \__ .config
-        \__ config.mjs        # User configuration
-        \__ config.local.mjs  # User local configuration (including secrets)
+        \__ config.json        # User configuration
+        \__ config.local.json  # User local configuration (including secrets)
 
 <project-root>
   \__ $AGENT_PROJECT_METADATA_DIR (default: .agent)
-        \__ config.mjs        # Project-specific configuration
-        \__ config.local.mjs  # Project-specific local configuration (including secrets)
+        \__ config.json        # Project-specific configuration
+        \__ config.local.json  # Project-specific local configuration (including secrets)
         \__ memory/
               \__ <yyyy-mm-dd-hhmm>--<task-title>.md  # Task-specific memory files
 ```
@@ -94,126 +85,95 @@ $AGENT_ROOT (where this README file exists)
 
 Agent loads configuration files in the following order. Settings in later files will override those in earlier files.
 
-- `$AGENT_ROOT/.config/config.mjs`: User configuration for all projects.
-- `$AGENT_ROOT/.config/config.local.mjs`: User local configuration, typically for sensitive information.
-- `$AGENT_PROJECT_METADATA_DIR/config.mjs`: Project-specific configuration.
-- `$AGENT_PROJECT_METADATA_DIR/config.local.mjs`: Project-specific local configuration, typically for sensitive information or local development overrides.
+- `$AGENT_ROOT/.config/config.json`: User configuration for all projects.
+- `$AGENT_ROOT/.config/config.local.json`: User local configuration, typically for sensitive information.
+- `$AGENT_PROJECT_METADATA_DIR/config.json`: Project-specific configuration.
+- `$AGENT_PROJECT_METADATA_DIR/config.local.json`: Project-specific local configuration, typically for sensitive information or local development overrides.
 
 ### Format
 
 ```js
-// (Optional) Sandbox environment
-// https://github.com/iinm/dotfiles/tree/main/agent-sandbox
-const sandbox = {
-  command: "agent-sandbox",
-  args: ["--dockerfile", ".agent/sandbox/Dockerfile", "--allow-write", "--skip-build"],
-};
+{
+  "model": "Set default model",
 
-export default {
-  // Set default model used by ./bin/agent
-  // See model.mjs for available models
-  // model: "gpt-mini-thinking-medium"
-
-  // Define patterns for tools that can be used without explicit approval
-  permissions: {
-    allow: [
-      // Allow npm run check|fix commands without confirmation
+  "permissions": {
+    "allow": [
       {
-        toolName: "exec_command",
-        input: { command: "npm", args: ["run", /^(check|fix)$/] },
+        "toolName": "exec_command",
+        "input": { "command": "npm", "args": ["run", { regex: "^(check|fix)$" }] }
       },
-      // Allow all web searches
-      { toolName: "web_search", input: { query: /./ } },
-      // Allow specific MCP tools
       {
-        // Naming: mcp__<serverName>__<toolName>
-        toolName: /mcp__playwright__browser_.+/,
+        "toolName": "web_search",
+        "input": { "query": { regex: "." } }
       },
+      {
+        "toolName": { regex: "mcp__playwright__browser_.+" }
+      }
     ],
 
-    // The maximum number of automatic approvals.
-    maxAutoApprovals: 30, 
+    "maxAutoApprovals": 30,
 
-    // Rewrite tool use
-    rewrite: [
-      // Run the specified commands in the host environment
-      {
-        pattern: {
-          toolName: "exec_command",
-          input: { command: /^(gh|docker)$/ },
-        },
-        rewrite: (toolUse) => toolUse,
-      },
-      // Run commands in the sandbox environment
-      {
-        pattern: {
-          toolName: "exec_command",
-          input: { command: "npm", args: ["install"] },
-        },
-        rewrite: (toolUse) => ({
-          toolName: "exec_command",
-          input: {
-            command: sandbox.command,
-            args: [
-              // Allow access to registry.npmjs.org
-              ...sandbox.args, "--allow-net", "registry.npmjs.org",
-              toolUse.input.command, ...toolUse.input.args,
-            ],
+    "sandbox": {
+      "command": "agent-sandbox",
+      "args": ["--dockerfile", ".agent/sandbox/Dockerfile", "--allow-write", "--skip-build"],
+
+      "rules": [
+        {
+          "pattern": {
+            "toolName": "exec_command",
+            "input": { "command": { regex: "^(gh|docker)$" } }
           },
-        }),
-      },
-      {
-        pattern: {
-          toolName: "exec_command",
+          "mode": "unsandboxed"
         },
-        rewrite: (toolUse) => ({
-          toolName: "exec_command",
-          input: {
-            command: sandbox.command,
-            args: [
-              // No network access by default
-              ...sandbox.args, toolUse.input.command, ...(toolUse.input.args || []),
-            ],
+        {
+          "pattern": {
+            "command": "npm",
+            "args": ["install"]
           },
-        }),
-      },
-    ],
+          "mode": "sandbox",
+          "extraArgs": ["--allow-net", "registry.npmjs.org"]
+        }
+      ]
+    }
   },
 
-  // Configure MCP servers for extended functionality
-  mcpServers: {
-    perplexity: {
-      command: "npx",
-      args: ["-y", "server-perplexity-ask"],
-      env: {
-        PERPLEXITY_API_KEY: "FIXME",
-      },
-    },
-    context7: {
-      command: "npx",
-      args: ["-y", "@upstash/context7-mcp"],
-    },
-    playwright: {
-      command: "npx",
-      args: ["-y", "@playwright/mcp@latest"],
-    },
-    notion: {
-      command: "npx",
-      args: ["-y", "mcp-remote", "https://mcp.notion.com/sse"],
-      options: {
-        // enable only specified tools
-        enabledTools: ["search", "fetch"],
-      },
-    },
-    atlassian: {
-      command: "npx",
-      args: ["-y", "mcp-remote", "https://mcp.atlassian.com/v1/sse"],
-    },
+  "tools": {
+    "tavily": {
+      "apiKey": "FIXME"
+    }
   },
 
-  // Override default notification command
-  // notifyCmd: "/path/to/notification-command"
-};
+  "mcpServers": {
+    "perplexity": {
+      "command": "npx",
+      "args": ["-y", "server-perplexity-ask"],
+      "env": {
+        "PERPLEXITY_API_KEY": "FIXME"
+      }
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    },
+    "notion": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.notion.com/sse"],
+      "options": {
+        "enabledTools": ["search", "fetch"]
+      }
+    },
+    "atlassian": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.atlassian.com/v1/sse"]
+    }
+  },
+
+  "notifyCmd": "/path/to/notification-command"
+}
 ```
 
 ## Development
