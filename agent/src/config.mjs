@@ -30,10 +30,10 @@ import { tmuxCommandTool } from "./tools/tmuxCommand.mjs";
  */
 export async function loadAgentConfig({ tmuxSessionId }) {
   const paths = [
-    `${AGENT_ROOT}/.config/config.mjs`,
-    `${AGENT_ROOT}/.config/config.local.mjs`,
-    `${AGENT_PROJECT_METADATA_DIR}/config.mjs`,
-    `${AGENT_PROJECT_METADATA_DIR}/config.local.mjs`,
+    `${AGENT_ROOT}/.config/config.json`,
+    `${AGENT_ROOT}/.config/config.local.json`,
+    `${AGENT_PROJECT_METADATA_DIR}/config.json`,
+    `${AGENT_PROJECT_METADATA_DIR}/config.local.json`,
   ];
 
   /** @type {string[]} */
@@ -137,16 +137,7 @@ export async function loadConfigFile(filePath) {
     const answer = await new Promise((resolve) => {
       console.log(styleText("blue", `\nFound a config file at ${filePath}:`));
       console.log(styleText("gray", "<config>"));
-      if (filePath.endsWith(".local.mjs")) {
-        console.log(
-          styleText(
-            "yellow",
-            "Content of local config is not displayed for security reasons.",
-          ),
-        );
-      } else {
-        console.log(content);
-      }
+      console.log(content);
       console.log(styleText("gray", "</config>"));
       rl.question(
         styleText("yellow", "\nDo you want to load this file? (y/N) "),
@@ -165,8 +156,43 @@ export async function loadConfigFile(filePath) {
     await trustConfigHash(hash);
   }
 
-  const { default: config } = await import(filePath);
-  return config;
+  try {
+    const parsed = JSON.parse(content);
+    return /** @type {AppConfig} */ (evalJSONConfig(parsed));
+  } catch (err) {
+    throw new Error(`Failed to parse JSON config at ${filePath}`, {
+      cause: err,
+    });
+  }
+}
+
+/**
+ * @param {unknown} configItem
+ * @returns {unknown}
+ */
+function evalJSONConfig(configItem) {
+  if (Array.isArray(configItem)) {
+    return configItem.map((item) => evalJSONConfig(item));
+  }
+
+  if (typeof configItem === "object" && configItem !== null) {
+    if (
+      Object.keys(configItem).length === 1 &&
+      "regex" in configItem &&
+      typeof configItem.regex === "string"
+    ) {
+      return new RegExp(configItem.regex);
+    }
+
+    /** @type {Record<string,unknown>} */
+    const clone = {};
+    for (const [k, v] of Object.entries(configItem)) {
+      clone[k] = evalJSONConfig(v);
+    }
+    return clone;
+  }
+
+  return configItem;
 }
 
 /**
