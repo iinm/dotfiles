@@ -4,7 +4,7 @@ A lightweight CLI-based coding agent designed to assist with your development ta
 
 ## Safety Controls
 
-This CLI tool automatically permits certain tool executions but requires explicit approval for security-sensitive operations, such as accessing parent directories and git-ignored files. The security rules are defined in `src/config.mjs#createDefaultAllowedToolUsePatterns` within this repository.
+This CLI tool automatically permits certain tool executions but requires explicit approval for security-sensitive operations, such as accessing parent directories and git-ignored files. The security rules are defined in `src/config.mjs#createDefaultAllowedToolUsePatterns` and `src/utils/isSafeToolInput.mjs#isSafeToolInputItem` within this repository.
 
 ## Requirements
 
@@ -41,9 +41,10 @@ Create the user local configuration.
       "apiKey": "FIXME",
     }
   },
+  // Optional
   "tools": {
     "tavily": {
-      "apiKey": "(Optional) FIXME"
+      "apiKey": "FIXME"
     }
   }
 }
@@ -94,7 +95,9 @@ Agent loads configuration files in the following order. Settings in later files 
 
 ```js
 {
-  "model": "Set default model",
+  // Set default model used by ./bin/agent
+  // See model.mjs for available models
+  // "model": "gpt-mini-thinking-medium"
 
   "permissions": {
     "allow": [
@@ -104,45 +107,44 @@ Agent loads configuration files in the following order. Settings in later files 
       },
       {
         "toolName": "web_search",
-        "input": { "query": { regex: "." } }
       },
       {
         "toolName": { regex: "mcp__playwright__browser_.+" }
       }
     ],
 
+    // The maximum number of automatic approvals.
     "maxAutoApprovals": 30,
 
+    // (Optional) Sandbox environment
+    // https://github.com/iinm/dotfiles/tree/main/agent-sandbox
     "sandbox": {
       "command": "agent-sandbox",
       "args": ["--dockerfile", ".agent/sandbox/Dockerfile", "--allow-write", "--skip-build"],
 
       "rules": [
+        // Run specific commands outside the sandbox
         {
           "pattern": {
-            "toolName": "exec_command",
-            "input": { "command": { regex: "^(gh|docker)$" } }
+            "command": { regex: "^(gh|docker)$" }
           },
           "mode": "unsandboxed"
         },
+        // Run commands in the sandbox with network access
         {
           "pattern": {
             "command": "npm",
             "args": ["install"]
           },
           "mode": "sandbox",
+          // Allow access to registry.npmjs.org
           "extraArgs": ["--allow-net", "registry.npmjs.org"]
         }
       ]
     }
   },
 
-  "tools": {
-    "tavily": {
-      "apiKey": "FIXME"
-    }
-  },
-
+  // Configure MCP servers for extended functionality
   "mcpServers": {
     "perplexity": {
       "command": "npx",
@@ -150,10 +152,6 @@ Agent loads configuration files in the following order. Settings in later files 
       "env": {
         "PERPLEXITY_API_KEY": "FIXME"
       }
-    },
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"]
     },
     "playwright": {
       "command": "npx",
@@ -165,14 +163,11 @@ Agent loads configuration files in the following order. Settings in later files 
       "options": {
         "enabledTools": ["search", "fetch"]
       }
-    },
-    "atlassian": {
-      "command": "npx",
-      "args": ["-y", "mcp-remote", "https://mcp.atlassian.com/v1/sse"]
     }
   },
 
-  "notifyCmd": "/path/to/notification-command"
+  // Override default notification command
+  // "notifyCmd": "/path/to/notification-command"
 }
 ```
 
