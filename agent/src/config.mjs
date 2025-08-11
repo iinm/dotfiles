@@ -133,12 +133,9 @@ export async function loadConfigFile(filePath) {
     });
 
     const answer = await new Promise((resolve) => {
-      console.log(styleText("blue", `\nFound a config file at ${filePath}:`));
-      console.log(styleText("gray", "<config>"));
-      console.log(content);
-      console.log(styleText("gray", "</config>"));
+      console.log(styleText("blue", `\nFound a config file at ${filePath}`));
       rl.question(
-        styleText("yellow", "\nDo you want to load this file? (y/N) "),
+        styleText("yellow", "Do you want to load this file? (y/N) "),
         (ans) => {
           rl.close();
           resolve(ans);

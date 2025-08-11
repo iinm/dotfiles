@@ -27,8 +27,10 @@ import { createSessionId } from "./utils/createSessionId.mjs";
     tmuxSessionId,
   });
 
-  console.log(styleText("green", "\n⚡ Loaded configuration files"));
-  console.log(loadedConfigPath.map((p) => `  ⤷ ${p}`).join("\n"));
+  if (loadedConfigPath.length > 0) {
+    console.log(styleText("green", "\n⚡ Loaded configuration files"));
+    console.log(loadedConfigPath.map((p) => `  ⤷ ${p}`).join("\n"));
+  }
 
   /** @type {(() => Promise<void>)[]} */
   const mcpCleanups = [];
