@@ -16,7 +16,6 @@ import {
   AGENT_ROOT,
   TRUSTED_CONFIG_HASHES_DIR,
 } from "./env.mjs";
-import { execCommandTool } from "./tools/execCommand.mjs";
 import { tmuxCommandTool } from "./tools/tmuxCommand.mjs";
 import { evalJSONConfig } from "./utils/evalJSONConfig.mjs";
 
@@ -81,6 +80,7 @@ export async function loadAgentConfig({ tmuxSessionId }) {
           config.permissions?.maxAutoApprovals ??
           merged.permissions?.maxAutoApprovals,
       },
+      sandbox: config.sandbox ?? merged.sandbox,
       tools: {
         tavily: {
           ...(merged.tools?.tavily ?? {}),
@@ -205,11 +205,11 @@ function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
   return [
     // Exec command
     {
-      toolName: execCommandTool.def.name,
+      toolName: "exec_command",
       input: { command: /^(pwd|date|uname|ls|wc|cat|head|tail)$/ },
     },
     {
-      toolName: execCommandTool.def.name,
+      toolName: "exec_command",
       input: {
         command: "fd",
         /**
@@ -227,7 +227,7 @@ function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
       },
     },
     {
-      toolName: execCommandTool.def.name,
+      toolName: "exec_command",
       input: {
         command: "rg",
         /**
@@ -241,37 +241,37 @@ function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
       },
     },
     {
-      toolName: execCommandTool.def.name,
+      toolName: "exec_command",
       input: {
         command: "sed",
         args: ["-n", /^\d+(,\d+)?p$/],
       },
     },
     {
-      toolName: execCommandTool.def.name,
+      toolName: "exec_command",
       input: {
         command: "awk",
         args: [/^FNR==\d+ *,FNR==\d+ *\{print FNR, *\$0\}$/],
       },
     },
     {
-      toolName: execCommandTool.def.name,
+      toolName: "exec_command",
       input: { command: "git", args: [/^(status|diff|log|show)$/] },
     },
     {
-      toolName: execCommandTool.def.name,
+      toolName: "exec_command",
       input: { command: "git", args: ["branch", "--show-current"] },
     },
     {
-      toolName: execCommandTool.def.name,
+      toolName: "exec_command",
       input: { command: "docker", args: [/^(ps)$/] },
     },
     {
-      toolName: execCommandTool.def.name,
+      toolName: "exec_command",
       input: { command: "docker", args: ["compose", /^(ps|logs)$/] },
     },
     {
-      toolName: execCommandTool.def.name,
+      toolName: "exec_command",
       input: { command: "gh", args: ["pr", /^(view|diff)$/] },
     },
 

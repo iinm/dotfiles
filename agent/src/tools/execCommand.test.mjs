@@ -1,8 +1,10 @@
 import assert from "node:assert";
 import { describe, it } from "node:test";
-import { execCommandTool } from "./execCommand.mjs";
+import { createExecCommandTool } from "./execCommand.mjs";
 
 describe("execCommandTool", () => {
+  const execCommandTool = createExecCommandTool();
+
   it("captures stdout", async () => {
     // when:
     const result = await execCommandTool.impl({
@@ -60,6 +62,86 @@ Hello from stderr</stderr>
 <error>
 Error: Command failed: node -e process.exit(1)
 </error>
+`.trim(),
+    );
+  });
+
+  it("runs command in sandbox", async () => {
+    // given:
+    const execCommandToolWithSandbox = createExecCommandTool({
+      sandbox: {
+        command: "echo",
+        args: ["THIS_IS_SANDBOX"],
+        rules: [
+          {
+            pattern: {
+              command: "echo",
+            },
+            mode: "unsandboxed",
+          },
+          {
+            pattern: {
+              command: "target-command",
+              args: ["--target-command-arg"],
+            },
+            mode: "sandbox",
+            extraArgs: ["--sandbox-extra-arg"],
+          },
+        ],
+      },
+    });
+
+    // when: input matches unsandboxed rule
+    const result1 = await execCommandToolWithSandbox.impl({
+      command: "echo",
+      args: ["THIS_IS_NOT_SANDBOX"],
+    });
+
+    // then: run the command directly without sandboxing
+    assert.equal(
+      result1,
+      `
+<stdout>
+THIS_IS_NOT_SANDBOX
+</stdout>
+
+<stderr></stderr>
+`.trim(),
+    );
+
+    // when: input matches sandbox rule
+    const result2 = await execCommandToolWithSandbox.impl({
+      command: "target-command",
+      args: ["--target-command-arg"],
+    });
+
+    // then: run the command in sandbox with extra args
+    assert.equal(
+      result2,
+      `
+<stdout>
+THIS_IS_SANDBOX --sandbox-extra-arg target-command --target-command-arg
+</stdout>
+
+<stderr></stderr>
+`.trim(),
+    );
+
+    // when: input does not match rule
+    const result3 = await execCommandToolWithSandbox.impl({
+      command: "non-target-command",
+      args: ["--non-target-command-arg"],
+    });
+
+    // then: run the command in sandbox
+    assert.equal(
+      result3,
+      `
+<stdout>
+THIS_IS_SANDBOX non-target-command --non-target-command-arg
+</stdout>
+
+<stderr></stderr>
 `.trim(),
     );
   });
