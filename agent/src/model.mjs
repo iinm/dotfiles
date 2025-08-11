@@ -45,7 +45,7 @@ export function createModelCaller(modelName, providers) {
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "gpt-5-mini",
+            model: "gpt-5",
             reasoning: {
               effort: "medium",
               summary: "auto",
@@ -58,7 +58,7 @@ export function createModelCaller(modelName, providers) {
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "gpt-5-mini",
+            model: "gpt-5",
             reasoning: {
               effort: "high",
               summary: "auto",
