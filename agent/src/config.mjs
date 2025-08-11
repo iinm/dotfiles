@@ -26,9 +26,9 @@ import { evalJSONConfig } from "./utils/evalJSONConfig.mjs";
 
 /**
  * @param {LoadAgentConfigInput} input
- * @returns {Promise<AppConfig>}
+ * @returns {Promise<{appConfig: AppConfig, loadedConfigPath: string[]}>}
  */
-export async function loadAgentConfig({ tmuxSessionId }) {
+export async function loadAppConfig({ tmuxSessionId }) {
   const paths = [
     `${AGENT_ROOT}/.config/config.json`,
     `${AGENT_ROOT}/.config/config.local.json`,
@@ -37,7 +37,7 @@ export async function loadAgentConfig({ tmuxSessionId }) {
   ];
 
   /** @type {string[]} */
-  const loaded = [];
+  const loadedConfigPath = [];
   /** @type {AppConfig} */
   let merged = {
     model: AGENT_MODEL || AGENT_MODEL_DEFAULT,
@@ -53,7 +53,7 @@ export async function loadAgentConfig({ tmuxSessionId }) {
   for (const filePath of paths) {
     const config = await loadConfigFile(path.resolve(filePath));
     if (Object.keys(config).length) {
-      loaded.push(filePath);
+      loadedConfigPath.push(filePath);
     }
     merged = {
       model: config.model || merged.model,
@@ -95,10 +95,7 @@ export async function loadAgentConfig({ tmuxSessionId }) {
     };
   }
 
-  console.log(styleText("green", "\n⚙ Loaded configuration files:"));
-  console.log(loaded.map((p) => `• ${p}`).join("\n"));
-
-  return merged;
+  return { appConfig: merged, loadedConfigPath };
 }
 
 /**

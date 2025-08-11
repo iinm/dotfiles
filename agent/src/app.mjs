@@ -5,7 +5,7 @@
 import { styleText } from "node:util";
 import { createAgent } from "./agent.mjs";
 import { startInteractiveSession } from "./cli.mjs";
-import { loadAgentConfig } from "./config.mjs";
+import { loadAppConfig } from "./config.mjs";
 import { AGENT_PROJECT_METADATA_DIR, USER_NAME } from "./env.mjs";
 import { connectToMCPServer } from "./mcp.mjs";
 import { createModelCaller } from "./model.mjs";
@@ -23,19 +23,24 @@ import { createSessionId } from "./utils/createSessionId.mjs";
 (async () => {
   const sessionId = createSessionId();
   const tmuxSessionId = `agent-${sessionId}`;
-  const agentConfig = await loadAgentConfig({ tmuxSessionId });
+  const { appConfig, loadedConfigPath } = await loadAppConfig({
+    tmuxSessionId,
+  });
+
+  console.log(styleText("green", "\n⚡ Loaded configuration files"));
+  console.log(loadedConfigPath.map((p) => `  ⤷ ${p}`).join("\n"));
 
   /** @type {(() => Promise<void>)[]} */
   const mcpCleanups = [];
 
   /** @type {Tool[]} */
   const mcpTools = [];
-  if (agentConfig.mcpServers) {
+  if (appConfig.mcpServers) {
     for (const [serverName, serverConfig] of Object.entries(
-      agentConfig.mcpServers,
+      appConfig.mcpServers,
     )) {
       console.log(
-        styleText("blue", `\n⇄ Connecting to MCP server: ${serverName}...`),
+        styleText("blue", `\n🔌 Connecting to MCP server: ${serverName}...`),
       );
       const { tools, cleanup } = await connectToMCPServer(
         serverName,
@@ -46,7 +51,7 @@ import { createSessionId } from "./utils/createSessionId.mjs";
       console.log(
         styleText(
           "green",
-          `Successfully connected to MCP server: ${serverName} ✅`,
+          `✅ Successfully connected to MCP server: ${serverName}`,
         ),
       );
     }
@@ -61,7 +66,7 @@ import { createSessionId } from "./utils/createSessionId.mjs";
   });
 
   const builtinTools = [
-    createExecCommandTool({ sandbox: agentConfig.sandbox }),
+    createExecCommandTool({ sandbox: appConfig.sandbox }),
     writeFileTool,
     patchFileTool,
     tmuxCommandTool,
@@ -69,13 +74,13 @@ import { createSessionId } from "./utils/createSessionId.mjs";
     readWebPageWithBrowserTool,
   ];
 
-  if (agentConfig.tools?.tavily?.apiKey) {
-    builtinTools.push(createTavilySearchTool(agentConfig.tools.tavily));
+  if (appConfig.tools?.tavily?.apiKey) {
+    builtinTools.push(createTavilySearchTool(appConfig.tools.tavily));
   }
 
   const toolUseApprover = createToolUseApprover({
-    maxAutoApprovals: agentConfig.permissions?.maxAutoApprovals || 0,
-    allowedToolUses: agentConfig.permissions?.allow || [],
+    maxAutoApprovals: appConfig.permissions?.maxAutoApprovals || 0,
+    allowedToolUses: appConfig.permissions?.allow || [],
     maskAllowedInput: (toolName, input) => {
       for (const tool of builtinTools) {
         if (tool.def.name === toolName && tool.maskAllowedInput) {
@@ -87,10 +92,7 @@ import { createSessionId } from "./utils/createSessionId.mjs";
   });
 
   const { userEventEmitter, agentEventEmitter, agentCommands } = createAgent({
-    callModel: createModelCaller(
-      agentConfig.model || "",
-      agentConfig.providers,
-    ),
+    callModel: createModelCaller(appConfig.model || "", appConfig.providers),
     prompt,
     tools: [...builtinTools, ...mcpTools],
     toolUseApprover,
@@ -101,8 +103,8 @@ import { createSessionId } from "./utils/createSessionId.mjs";
     agentEventEmitter,
     agentCommands,
     sessionId,
-    modelName: agentConfig.model || "",
-    notifyCmd: agentConfig.notifyCmd || "",
+    modelName: appConfig.model || "",
+    notifyCmd: appConfig.notifyCmd || "",
     onStop: async () => {
       for (const cleanup of mcpCleanups) {
         await cleanup();

@@ -114,10 +114,11 @@ export function startInteractiveSession({
   notifyCmd,
   onStop,
 }) {
+  const cliPrompt = `${styleText(["white", "bgGray"], `\nSession: ${sessionId}, Model: ${modelName}`)}\n> `;
   const cli = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-    prompt: `${styleText(["white", "bgGray"], `\nSession: ${sessionId}, Model: ${modelName}`)}\n> `,
+    prompt: cliPrompt,
     /**
      * @param {string} line
      */
@@ -155,6 +156,9 @@ export function startInteractiveSession({
       cli.prompt();
       return;
     }
+
+    // reset prompt
+    cli.setPrompt(cliPrompt);
 
     if (["/help", "help"].includes(inputTrimmed.toLowerCase())) {
       console.log(`\n${HELP_MESSAGE}`);
@@ -245,11 +249,14 @@ export function startInteractiveSession({
   });
 
   agentEventEmitter.on("toolUseRequest", () => {
-    console.log(
-      styleText(
-        "yellow",
-        "\nApprove tool calls? (y = allow once, Y = allow in this session, or feedback)",
-      ),
+    cli.setPrompt(
+      [
+        styleText(
+          "yellow",
+          "\nApprove tool calls? (y = allow once, Y = allow in this session, or feedback)",
+        ),
+        cliPrompt,
+      ].join("\n"),
     );
   });
 
