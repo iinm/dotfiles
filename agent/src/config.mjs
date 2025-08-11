@@ -158,7 +158,8 @@ export async function loadConfigFile(filePath) {
   }
 
   try {
-    const parsed = JSON.parse(content);
+    const commentRemovedContent = content.replace(/^ *\/\/.+$/gm, "");
+    const parsed = JSON.parse(commentRemovedContent);
     return /** @type {AppConfig} */ (evalJSONConfig(parsed));
   } catch (err) {
     throw new Error(`Failed to parse JSON config at ${filePath}`, {
