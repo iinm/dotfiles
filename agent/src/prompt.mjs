@@ -131,6 +131,7 @@ exec_command is used to run a one-shot command without shell interpretation.
 
 - Use relative paths to refer to files and directories.
 - Use head, tail, awk, rg to read a required part of the file instead of reading the entire file.
+- Use commands like "bash -c" only when absolutely necessary, as they are harder to verify for security.
 
 File and directory command examples:
 - List files: { command: "ls", args: ["-alh", "path/to/directory"] }
