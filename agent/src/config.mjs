@@ -18,7 +18,6 @@ import {
 } from "./env.mjs";
 import { execCommandTool } from "./tools/execCommand.mjs";
 import { tmuxCommandTool } from "./tools/tmuxCommand.mjs";
-import { isSafeToolArg } from "./utils/isSafeToolArg.mjs";
 
 /**
  * @typedef {Object} LoadAgentConfigInput
@@ -213,17 +212,7 @@ function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
     // Exec command
     {
       toolName: execCommandTool.def.name,
-      input: { command: /^(pwd|date|uname)$/ },
-    },
-    {
-      toolName: execCommandTool.def.name,
-      input: {
-        command: /^(ls|wc|cat|head|tail)$/,
-        /**
-         * @param {unknown=} args
-         */
-        args: (args) => Array.isArray(args) && args.every(isSafeToolArg),
-      },
+      input: { command: /^(pwd|date|uname|ls|wc|cat|head|tail)$/ },
     },
     {
       toolName: execCommandTool.def.name,
@@ -236,7 +225,7 @@ function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
           Array.isArray(args) &&
           args.every(
             (arg) =>
-              isSafeToolArg(arg) &&
+              typeof arg === "string" &&
               !["-I", "-x"].includes(arg) &&
               !arg.startsWith("--no-ignore") &&
               !arg.startsWith("--exec"),
@@ -253,7 +242,7 @@ function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
         args: (args) =>
           Array.isArray(args) &&
           args.every(
-            (arg) => isSafeToolArg(arg) && !arg.startsWith("--no-ignore"),
+            (arg) => typeof arg === "string" && !arg.startsWith("--no-ignore"),
           ),
       },
     },
@@ -261,14 +250,14 @@ function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
       toolName: execCommandTool.def.name,
       input: {
         command: "sed",
-        args: ["-n", /^\d+(,\d+)?p$/, isSafeToolArg],
+        args: ["-n", /^\d+(,\d+)?p$/],
       },
     },
     {
       toolName: execCommandTool.def.name,
       input: {
         command: "awk",
-        args: [/^FNR==\d+ *,FNR==\d+ *\{print FNR, *\$0\}$/, isSafeToolArg],
+        args: [/^FNR==\d+ *,FNR==\d+ *\{print FNR, *\$0\}$/],
       },
     },
     {

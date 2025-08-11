@@ -3,6 +3,7 @@
  * @import { MessageContentToolUse } from './model'
  */
 
+import { isSafeToolInput } from "./utils/isSafeToolInput.mjs";
 import { matchValue } from "./utils/matchValue.mjs";
 
 /**
@@ -43,7 +44,7 @@ export function createToolUseApprover({
       ...allowedToolUses,
       ...state.allowedToolUseInSession,
     ]) {
-      if (matchValue(toolUse, pattern)) {
+      if (matchValue(toolUse, pattern) && isSafeToolInput(toolUse.input)) {
         return approve();
       }
     }

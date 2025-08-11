@@ -3,10 +3,38 @@ import path from "node:path";
 import { AGENT_PROJECT_METADATA_DIR } from "../env.mjs";
 
 /**
+ * @param {unknown} input
+ * @returns {boolean}
+ */
+export function isSafeToolInput(input) {
+  if (["number", "boolean", "undefined"].includes(typeof input)) {
+    return true;
+  }
+
+  if (input === null) {
+    return true;
+  }
+
+  if (typeof input === "string") {
+    return isSafeToolInputItem(input);
+  }
+
+  if (Array.isArray(input)) {
+    return input.every((item) => isSafeToolInput(item));
+  }
+
+  if (typeof input === "object") {
+    return Object.values(input).every((value) => isSafeToolInput(value));
+  }
+
+  return false;
+}
+
+/**
  * @param {unknown} arg
  * @returns {boolean}
  */
-export function isSafeToolArg(arg) {
+export function isSafeToolInputItem(arg) {
   if (typeof arg !== "string") {
     return false;
   }
