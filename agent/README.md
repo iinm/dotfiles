@@ -96,7 +96,7 @@ Agent loads configuration files in the following order. Settings in later files 
 ```js
 {
   // Set default model used by ./bin/agent
-  // See model.mjs for available models
+  // See src/model.mjs for available models
   // "model": "gpt-mini-thinking-medium"
 
   "permissions": {
