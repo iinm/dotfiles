@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      {
+        "toolName": "exec_command",
+        "input": {
+          "command": "npm",
+          "args": ["run", { "regex": "^(check|fix)$" }]
+        }
+      }
+    ]
+  },
+  "sandbox": {
+    "command": ".agent/sandbox/run",
+    "args": ["--skip-build"],
+    "rules": [
+      {
+        "pattern": {
+          "command": "npm",
+          "args": ["install"]
+        },
+        "mode": "sandbox",
+        "extraArgs": ["--allow-net", "registry.npmjs.org"]
+      }
+    ]
+  }
+}

@@ -3,5 +3,5 @@ node_modules/
 .config/
 
 .agent/*
-!.agent/config.mjs
+!.agent/config.json
 !.agent/sandbox/
