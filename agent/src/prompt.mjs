@@ -213,7 +213,7 @@ Basic commands:
 - Detect window number to send keys: list-windows ["-t", "<tmux-session-id>"]
 - Get output of window before sending keys: capture-pane ["-p", "-t", "<tmux-session-id>:<window>"]
 - Send key to session: send-keys ["-t", "<tmux-session-id>:<window>", "echo hello", "Enter"]
-- Delete line: send-keys ["-t", "<tmux-session-id>:<window>, "C-a", "C-k"]
+- Delete line: send-keys ["-t", "<tmux-session-id>:<window>", "C-a", "C-k"]
 
 ## Environment
 
