@@ -79,10 +79,6 @@ export async function loadAgentConfig({ tmuxSessionId }) {
         maxAutoApprovals:
           config.permissions?.maxAutoApprovals ??
           merged.permissions?.maxAutoApprovals,
-        rewrite: [
-          ...(config.permissions?.rewrite ?? []),
-          ...(merged.permissions?.rewrite ?? []),
-        ],
       },
       tools: {
         tavily: {

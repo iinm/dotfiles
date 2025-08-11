@@ -46,17 +46,10 @@ export type ToolUseApprover = {
   allowToolUse: (toolUse: MessageContentToolUse) => void;
 };
 
-export type ToolUseRewriteRule = {
-  pattern: ToolUsePattern;
-  rewrite: ToolUseRewriter;
-};
-
 export type ToolUsePattern = {
   toolName: string;
   input: ObjectPattern;
 };
-
-export type ToolUseRewriter = (toolUse: ToolUse) => ToolUse;
 
 export type ToolUse = {
   toolName: string;

@@ -1,7 +1,7 @@
 /**
  * @import { Agent, AgentConfig, AgentEventEmitter, UserEventEmitter } from "./agent"
  * @import { Message, MessageContentToolResult, MessageContentToolUse, PartialMessageContent } from "./model"
- * @import { Tool, ToolDefinition, ToolUseRewriteRule } from "./tool"
+ * @import { Tool, ToolDefinition } from "./tool"
  */
 
 import { EventEmitter } from "node:events";
@@ -9,20 +9,12 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { styleText } from "node:util";
 import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
-import { matchValue } from "./utils/matchValue.mjs";
-import { noThrowSync } from "./utils/noThrow.mjs";
 
 /**
  * @param {AgentConfig} config
  * @returns {Agent}
  */
-export function createAgent({
-  callModel,
-  prompt,
-  tools,
-  toolUseApprover,
-  toolUseRewriteRules,
-}) {
+export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
   /** @type {{ messages: Message[] }} */
   const state = {
     messages: [
@@ -114,9 +106,7 @@ export function createAgent({
 
         // Approved
         const toolResults = await Promise.all(
-          toolUseParts.map((toolUse) =>
-            callTool(toolUse, toolByName, toolUseRewriteRules),
-          ),
+          toolUseParts.map((toolUse) => callTool(toolUse, toolByName)),
         );
         state.messages.push({ role: "user", content: toolResults });
         agentEventEmitter.emit(
@@ -215,9 +205,7 @@ export function createAgent({
       }
 
       const toolResults = await Promise.all(
-        toolUseParts.map((toolUse) =>
-          callTool(toolUse, toolByName, toolUseRewriteRules),
-        ),
+        toolUseParts.map((toolUse) => callTool(toolUse, toolByName)),
       );
 
       state.messages.push({ role: "user", content: toolResults });
@@ -244,31 +232,10 @@ export function createAgent({
 /**
  * @param {MessageContentToolUse} toolUse
  * @param {Map<string, Tool>} toolByName
- * @param {ToolUseRewriteRule[]} rewriteRules
  * @returns {Promise<MessageContentToolResult>}
  */
-async function callTool(toolUse, toolByName, rewriteRules) {
-  const rewrite =
-    rewriteRules.find((rule) => matchValue(toolUse, rule.pattern))?.rewrite ||
-    ((x) => x);
-
-  const rewritedToolUse = noThrowSync(() => rewrite(toolUse));
-  if (rewritedToolUse instanceof Error) {
-    return {
-      type: "tool_result",
-      toolUseId: toolUse.toolUseId,
-      toolName: toolUse.toolName,
-      content: [
-        {
-          type: "text",
-          text: `User configuration error: message=${rewritedToolUse.message}, trace=${rewritedToolUse.stack}`,
-        },
-      ],
-      isError: true,
-    };
-  }
-
-  const tool = toolByName.get(rewritedToolUse.toolName);
+async function callTool(toolUse, toolByName) {
+  const tool = toolByName.get(toolUse.toolName);
   if (!tool) {
     return {
       type: "tool_result",
@@ -279,7 +246,7 @@ async function callTool(toolUse, toolByName, rewriteRules) {
     };
   }
 
-  const result = await tool.impl(rewritedToolUse.input);
+  const result = await tool.impl(toolUse.input);
   if (result instanceof Error) {
     return {
       type: "tool_result",

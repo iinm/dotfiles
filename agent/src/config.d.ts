@@ -1,4 +1,4 @@
-import { ToolUsePattern, ToolUseRewriteRule } from "./tool";
+import { ToolUsePattern } from "./tool";
 
 export type AppConfig = {
   model?: string;
@@ -6,7 +6,6 @@ export type AppConfig = {
   permissions?: {
     allow?: ToolUsePattern[];
     maxAutoApprovals?: number;
-    rewrite?: ToolUseRewriteRule[];
   };
   tools?: {
     tavily?: {

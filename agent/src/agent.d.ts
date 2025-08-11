@@ -5,7 +5,7 @@ import type {
   PartialMessageContent,
   ProviderTokenUsage,
 } from "./model";
-import type { Tool, ToolUseApprover, ToolUseRewriteRule } from "./tool";
+import type { Tool, ToolUseApprover } from "./tool";
 
 export type Agent = {
   userEventEmitter: UserEventEmitter;
@@ -41,5 +41,4 @@ export type AgentConfig = {
   prompt: string;
   tools: Tool[];
   toolUseApprover: ToolUseApprover;
-  toolUseRewriteRules: ToolUseRewriteRule[];
 };
