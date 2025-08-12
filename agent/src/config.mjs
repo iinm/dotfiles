@@ -248,8 +248,9 @@ function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
         // Supported patterns:
         // FNR==0, FNR=200 {print FNR, $0}
         // FNR==0, FNR=200 {print $0}
+        // FNR==50 {print $0}
         // NR==0, NR=200 {print NR, $0}
-        args: [/^F?NR==\d+, *F?NR==-?\d+ *\{print (F?NR, *)?\$0\}$/],
+        args: [/^F?NR==\d+(, *F?NR==-?\d+)? *\{print (F?NR, *)?\$0\}$/],
       },
     },
     {
