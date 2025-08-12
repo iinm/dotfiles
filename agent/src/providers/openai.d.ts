@@ -2,7 +2,7 @@
 export type OpenAIModelConfig = {
   model: "gpt-5" | "gpt-5-mini";
   reasoning: {
-    effort: "low" | "medium" | "high";
+    effort: "minimal" | "low" | "medium" | "high";
     summary: "auto" | "concise" | "detailed";
   };
 };
