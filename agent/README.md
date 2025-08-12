@@ -25,6 +25,10 @@ Create the user local configuration.
 ```js
 // $AGENT_ROOT(where this README file exists)/.config/config.local.json
 {
+  // Set default model used by ./bin/agent
+  // See src/model.mjs for available models
+  "model": "<model-name>",
+
   "providers": {
     "anthropic": {
       "apiKey": "FIXME",
@@ -95,10 +99,6 @@ Agent loads configuration files in the following order. Settings in later files 
 
 ```js
 {
-  // Set default model used by ./bin/agent
-  // See src/model.mjs for available models
-  // "model": "gpt-thinking-mini-medium"
-
   "permissions": {
     "allow": [
       {

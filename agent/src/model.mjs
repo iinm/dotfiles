@@ -353,6 +353,6 @@ export function createModelCaller(modelName, providers) {
         );
     }
     default:
-      throw new Error(`Invalid model: ${modelName}`);
+      throw new Error(`Invalid model: "${modelName}"`);
   }
 }

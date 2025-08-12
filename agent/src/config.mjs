@@ -10,7 +10,6 @@ import readline from "node:readline";
 import { styleText } from "node:util";
 import {
   AGENT_MODEL,
-  AGENT_MODEL_DEFAULT,
   AGENT_NOTIFY_CMD_DEFAULT,
   AGENT_PROJECT_METADATA_DIR,
   AGENT_ROOT,
@@ -40,7 +39,7 @@ export async function loadAppConfig({ tmuxSessionId }) {
   const loadedConfigPath = [];
   /** @type {AppConfig} */
   let merged = {
-    model: AGENT_MODEL || AGENT_MODEL_DEFAULT,
+    model: AGENT_MODEL,
     permissions: {
       allow: createDefaultAllowedToolUsePatterns({
         tmuxSessionId,
