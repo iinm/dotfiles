@@ -14,6 +14,19 @@ import { callOpenAIModel } from "./providers/openai.mjs";
  */
 export function createModelCaller(modelName, providers) {
   switch (modelName) {
+    case "gpt-thinking-mini-low":
+      return (input) =>
+        callOpenAIModel(
+          providers?.openai ?? {},
+          {
+            model: "gpt-5-mini",
+            reasoning: {
+              effort: "low",
+              summary: "auto",
+            },
+          },
+          input,
+        );
     case "gpt-thinking-mini-medium":
       return (input) =>
         callOpenAIModel(
@@ -35,6 +48,19 @@ export function createModelCaller(modelName, providers) {
             model: "gpt-5-mini",
             reasoning: {
               effort: "high",
+              summary: "auto",
+            },
+          },
+          input,
+        );
+    case "gpt-thinking-low":
+      return (input) =>
+        callOpenAIModel(
+          providers?.openai ?? {},
+          {
+            model: "gpt-5",
+            reasoning: {
+              effort: "low",
               summary: "auto",
             },
           },
