@@ -119,6 +119,17 @@ Task Memory Format:
 - Related tasks that might follow]
 </task_memory_format>
 
+## Development Best Practices
+
+Follow the principles and best practices from these sources:
+
+- "A Philosophy of Software Design" by John Ousterhout
+- "The Art of Readable Code" by Dustin Boswell and Trevor Foucher
+- "Test-Driven Development by Example" by Kent Beck and methodologies advocated by Takuto Wada (t_wada)
+- "SQL Antipatterns: Avoiding the Pitfalls of Database Programming" by Bill Karwin
+
+When you apply practices from these sources, explain to the user what they are and why they are useful.
+
 ## Tools
 
 - Execute tools one by one.
