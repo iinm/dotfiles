@@ -55,7 +55,7 @@ export async function loadAppConfig({ tmuxSessionId }) {
       loadedConfigPath.push(filePath);
     }
     merged = {
-      model: config.model || merged.model,
+      model: AGENT_MODEL || config.model || merged.model,
       providers: {
         gemini: {
           ...(merged.providers?.gemini ?? {}),
