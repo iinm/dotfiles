@@ -114,34 +114,34 @@ Agent loads configuration files in the following order. Settings in later files 
     ],
 
     // The maximum number of automatic approvals.
-    "maxAutoApprovals": 30,
+    "maxAutoApprovals": 30
+  },
 
-    // (Optional) Sandbox environment
-    // https://github.com/iinm/dotfiles/tree/main/agent-sandbox
-    "sandbox": {
-      "command": "agent-sandbox",
-      "args": ["--dockerfile", ".agent/sandbox/Dockerfile", "--allow-write", "--skip-build"],
+  // (Optional) Sandbox environment
+  // https://github.com/iinm/dotfiles/tree/main/agent-sandbox
+  "sandbox": {
+    "command": "agent-sandbox",
+    "args": ["--dockerfile", ".agent/sandbox/Dockerfile", "--allow-write", "--skip-build"],
 
-      "rules": [
-        // Run specific commands outside the sandbox
-        {
-          "pattern": {
-            "command": { regex: "^(gh|docker)$" }
-          },
-          "mode": "unsandboxed"
+    "rules": [
+      // Run specific commands outside the sandbox
+      {
+        "pattern": {
+          "command": { regex: "^(gh|docker)$" }
         },
-        // Run commands in the sandbox with network access
-        {
-          "pattern": {
-            "command": "npm",
-            "args": ["install"]
-          },
-          "mode": "sandbox",
-          // Allow access to registry.npmjs.org
-          "extraArgs": ["--allow-net", "registry.npmjs.org"]
-        }
-      ]
-    }
+        "mode": "unsandboxed"
+      },
+      // Run commands in the sandbox with network access
+      {
+        "pattern": {
+          "command": "npm",
+          "args": ["install"]
+        },
+        "mode": "sandbox",
+        // Allow access to registry.npmjs.org
+        "extraArgs": ["--allow-net", "registry.npmjs.org"]
+      }
+    ]
   },
 
   // Configure MCP servers for extended functionality
