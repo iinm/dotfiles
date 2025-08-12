@@ -585,9 +585,11 @@ local setup_lsp = function()
     local_config.efm_settings or {}
   )
 
+  -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md
   local servers = {
     { name = 'lua_ls',      bin = 'lua-language-server' },
     { name = 'ts_ls',       bin = 'tsserver' },
+    { name = 'eslint',      bin = 'vscode-eslint-language-server' },
     { name = 'gopls',       bin = 'gopls' },
     { name = 'terraformls', bin = 'terraform-ls' },
     {
@@ -616,7 +618,10 @@ local setup_lsp = function()
   }
 
   for _, server in ipairs(servers) do
-    if vim.fn.executable(server.bin) then
+    -- Enable only specified servers in local config
+    if local_config.lsp_servers and not vim.tbl_contains(local_config.lsp_servers, server.name) then
+      -- Skip
+    elseif vim.fn.executable(server.bin) then
       if server.config then
         vim.lsp.config(server.name, server.config)
       end
