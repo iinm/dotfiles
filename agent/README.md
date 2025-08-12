@@ -103,13 +103,13 @@ Agent loads configuration files in the following order. Settings in later files 
     "allow": [
       {
         "toolName": "exec_command",
-        "input": { "command": "npm", "args": ["run", { regex: "^(check|fix)$" }] }
+        "input": { "command": "npm", "args": ["run", { "regex": "^(check|fix)$" }] }
       },
       {
         "toolName": "web_search",
       },
       {
-        "toolName": { regex: "mcp__playwright__browser_.+" }
+        "toolName": { "regex": "mcp__playwright__browser_.+" }
       }
     ],
 
@@ -127,7 +127,7 @@ Agent loads configuration files in the following order. Settings in later files 
       // Run specific commands outside the sandbox
       {
         "pattern": {
-          "command": { regex: "^(gh|docker)$" }
+          "command": { "regex": "^(gh|docker)$" }
         },
         "mode": "unsandboxed"
       },
