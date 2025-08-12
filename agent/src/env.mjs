@@ -13,7 +13,7 @@ export const TRUSTED_CONFIG_HASHES_DIR = path.join(
 export const AGENT_PROJECT_METADATA_DIR =
   process.env.AGENT_PROJECT_METADATA_DIR || ".agent";
 
-export const AGENT_MODEL_DEFAULT = "gpt-mini-thinking-medium";
+export const AGENT_MODEL_DEFAULT = "gpt-thinking-mini-medium";
 export const AGENT_MODEL = process.env.AGENT_MODEL || "";
 
 export const AGENT_NOTIFY_CMD_DEFAULT = path.join(
