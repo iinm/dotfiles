@@ -40,11 +40,11 @@ export async function loadAppConfig({ tmuxSessionId }) {
   /** @type {AppConfig} */
   let merged = {
     model: AGENT_MODEL,
-    permissions: {
-      allow: createDefaultAllowedToolUsePatterns({
+    autoApproval: {
+      patterns: createDefaultAllowedToolUsePatterns({
         tmuxSessionId,
       }),
-      maxAutoApprovals: 30,
+      max: 30,
     },
     notifyCmd: AGENT_NOTIFY_CMD_DEFAULT,
   };
@@ -70,14 +70,12 @@ export async function loadAppConfig({ tmuxSessionId }) {
           ...(config.providers?.anthropic ?? {}),
         },
       },
-      permissions: {
-        allow: [
-          ...(merged.permissions?.allow ?? []),
-          ...(config.permissions?.allow ?? []),
+      autoApproval: {
+        patterns: [
+          ...(merged.autoApproval?.patterns ?? []),
+          ...(config.autoApproval?.patterns ?? []),
         ],
-        maxAutoApprovals:
-          config.permissions?.maxAutoApprovals ??
-          merged.permissions?.maxAutoApprovals,
+        max: config.autoApproval?.max ?? merged.autoApproval?.max,
       },
       sandbox: config.sandbox ?? merged.sandbox,
       tools: {

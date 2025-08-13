@@ -81,12 +81,12 @@ import { createSessionId } from "./utils/createSessionId.mjs";
   }
 
   const toolUseApprover = createToolUseApprover({
-    maxAutoApprovals: appConfig.permissions?.maxAutoApprovals || 0,
-    allowedToolUses: appConfig.permissions?.allow || [],
-    maskAllowedInput: (toolName, input) => {
+    max: appConfig.autoApproval?.max || 0,
+    patterns: appConfig.autoApproval?.patterns || [],
+    maskApprovedInput: (toolName, input) => {
       for (const tool of builtinTools) {
-        if (tool.def.name === toolName && tool.maskAllowedInput) {
-          return tool.maskAllowedInput(input);
+        if (tool.def.name === toolName && tool.maskApprovedInput) {
+          return tool.maskApprovedInput(input);
         }
       }
       return input;

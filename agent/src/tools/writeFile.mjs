@@ -49,7 +49,7 @@ export const writeFileTool = {
    * @param {Record<string, unknown>} input
    * @returns {Record<string, unknown>}
    */
-  maskAllowedInput: (input) => {
+  maskApprovedInput: (input) => {
     const writeFileInput = /** @type {WriteFileInput} */ (input);
     return {
       filePath: writeFileInput.filePath,

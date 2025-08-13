@@ -99,8 +99,8 @@ Agent loads configuration files in the following order. Settings in later files 
 
 ```js
 {
-  "permissions": {
-    "allow": [
+  "autoApproval": {
+    "patterns": [
       {
         "toolName": "exec_command",
         "input": { "command": "npm", "args": ["run", { "regex": "^(check|fix)$" }] }
@@ -114,7 +114,7 @@ Agent loads configuration files in the following order. Settings in later files 
     ],
 
     // The maximum number of automatic approvals.
-    "maxAutoApprovals": 30
+    "max": 30
   },
 
   // (Optional) Sandbox environment

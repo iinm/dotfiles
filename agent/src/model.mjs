@@ -1,6 +1,6 @@
 /**
  * @import { CallModel } from "./model"
- * @import { AgentModelProviders } from "./config";
+ * @import { ModelProvidersConfig } from "./config";
  */
 
 import { callAnthropicModel } from "./providers/anthropic.mjs";
@@ -9,7 +9,7 @@ import { callOpenAIModel } from "./providers/openai.mjs";
 
 /**
  * @param {string} modelName
- * @param {AgentModelProviders=} providers
+ * @param {ModelProvidersConfig=} providers
  * @returns {CallModel}
  */
 export function createModelCaller(modelName, providers) {

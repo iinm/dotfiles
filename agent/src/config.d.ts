@@ -3,10 +3,10 @@ import { ExecCommandSanboxConfig } from "./tools/execCommand";
 
 export type AppConfig = {
   model?: string;
-  providers?: AgentModelProviders;
-  permissions?: {
-    allow?: ToolUsePattern[];
-    maxAutoApprovals?: number;
+  providers?: ModelProvidersConfig;
+  autoApproval?: {
+    patterns?: ToolUsePattern[];
+    max?: number;
   };
   sandbox?: ExecCommandSanboxConfig;
   tools?: {
@@ -18,9 +18,9 @@ export type AppConfig = {
   notifyCmd?: string;
 };
 
-export type AgentModelProviders = {
-  gemini?: GenericModelProviderConfig;
+export type ModelProvidersConfig = {
   anthropic?: GenericModelProviderConfig;
+  gemini?: GenericModelProviderConfig;
   openai?: GenericModelProviderConfig;
 };
 

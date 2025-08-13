@@ -3,7 +3,7 @@ import type { MessageContentToolUse } from "./model";
 export type Tool = {
   def: ToolDefinition;
   impl: ToolImplementation;
-  maskAllowedInput?: (
+  maskApprovedInput?: (
     input: Record<string, unknown>,
   ) => Record<string, unknown>;
 };
@@ -32,10 +32,10 @@ export type StructuredToolResultContent =
     };
 
 export type ToolUseApproverConfig = {
-  allowedToolUses: ToolUsePattern[];
-  maxAutoApprovals: number;
+  patterns: ToolUsePattern[];
+  max: number;
   // Mask the input when adding a new approve pattern
-  maskAllowedInput: (
+  maskApprovedInput: (
     toolName: string,
     input: Record<string, unknown>,
   ) => Record<string, unknown>;
