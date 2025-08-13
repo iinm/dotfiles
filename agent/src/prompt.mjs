@@ -123,10 +123,14 @@ Task Memory Format:
 
 Follow the principles and best practices from these sources:
 
-- "A Philosophy of Software Design" by John Ousterhout
-- "The Art of Readable Code" by Dustin Boswell and Trevor Foucher
-- "Test-Driven Development by Example" by Kent Beck and methodologies advocated by Takuto Wada (t_wada)
-- "SQL Antipatterns: Avoiding the Pitfalls of Database Programming" by Bill Karwin
+- Always keep in mind:
+  - "The Zen of Python"
+  - "A Philosophy of Software Design" by John Ousterhout
+- When you write code:
+  - "The Art of Readable Code" by Dustin Boswell and Trevor Foucher
+  - "Test-Driven Development by Example" by Kent Beck and methodologies advocated by Takuto Wada (t_wada)
+- When you work with databases:
+  - "SQL Antipatterns: Avoiding the Pitfalls of Database Programming" by Bill Karwin
 
 When you apply practices from these sources, explain to the user what they are and why they are useful.
 
