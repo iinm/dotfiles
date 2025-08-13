@@ -741,6 +741,7 @@ local setup_treesitter = function()
 end
 
 local setup_minuet = function()
+  local local_secrets = require_safe('local_secrets')
   require('minuet').setup({
     cmp = {
       enable_auto_complete = false,
@@ -759,16 +760,11 @@ local setup_minuet = function()
     request_timeout = 3,
 
     provider_options = {
-      openai_compatible = {
-        model = 'gpt-5-mini',
-        optional = {
-          max_completion_tokens = 512,
-          reasoning_effort = 'minimal',
-          verbosity = 'low',
-        },
-        end_point = require_safe('local_secrets').minuet_openai_end_point or 'https://api.openai.com/v1/chat/completions',
+      claude = {
+        model = 'claude-3-5-haiku-latest',
+        end_point = (local_secrets.minuet_anthropic_end_point or 'https://api.anthropic.com') .. '/v1/messages',
         api_key = function()
-          return require_safe('local_secrets').minuet_openai_api_key
+          return local_secrets.minuet_anthropic_api_key
         end
       },
 
@@ -792,15 +788,23 @@ local setup_minuet = function()
             },
           },
         },
+        end_point = (local_secrets.minuet_gemini_end_point or 'https://generativelanguage.googleapis.com') ..
+            '/v1beta/models',
         api_key = function()
-          return require_safe('local_secrets').minuet_gemini_api_key
+          return local_secrets.minuet_gemini_api_key
         end
       },
 
-      claude = {
-        model = 'claude-3-5-haiku-latest',
+      openai_compatible = {
+        model = 'gpt-5-mini',
+        optional = {
+          max_completion_tokens = 512,
+          reasoning_effort = 'minimal',
+          verbosity = 'low',
+        },
+        end_point = (local_secrets.minuet_openai_end_point or 'https://api.openai.com') .. '/v1/chat/completions',
         api_key = function()
-          return require_safe('local_secrets').minuet_anthropic_api_key
+          return local_secrets.minuet_openai_api_key
         end
       },
     },
