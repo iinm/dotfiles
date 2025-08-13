@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.20"
+SCRIPT_VERSION="0.0.21"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -501,6 +501,44 @@ main() {
   if test "$allocate_tty" = "yes"; then
     docker_exec_opts+=(--tty)
   fi
+
+  local host_timezone="$(date +"%Z")"
+  if test -n "$host_timezone"; then
+    docker_run_opts+=(--env "TZ=${host_timezone}")
+  fi
+
+  on_exit() {
+    local exit_status="$?"
+  
+    if test "$VERBOSE" = "no"; then
+      exec 2> /dev/null
+    fi
+    exec 1>&2
+  
+    log "Stopping container."
+    run docker stop -t 0 "$CONTAINER_NAME" || true
+  
+    log "Removing container."
+    run docker rm -f "$CONTAINER_NAME" || true
+  
+    if docker network inspect "$NETWORK_NAME" &> /dev/null; then
+      log "Removing network."
+      run docker network rm "$NETWORK_NAME"
+    fi
+
+    exec 3>&-
+    exec 4>&-
+  
+    return "$exit_status"
+  }
+  
+  trap 'on_exit' EXIT
+
+  # shellcheck disable=SC2001
+  log "$(cat << EOF
+Sandbox Configurations:
+  docker_build_opts=
+    $(echo "${docker_build_opts[*]}" | sed 's, ,\n    ,g'))"
 
   on_exit() {
     local exit_status="$?"

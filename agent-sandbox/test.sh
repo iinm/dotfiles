@@ -78,6 +78,13 @@ out=$(agent-sandbox --dry-run --dockerfile Dockerfile.minimum --no-cache true)
 grep -qE "DRY_RUN: docker build .+ --no-cache" <<< "$out"
 
 
+echo "case: host timezone is applied to the container"
+# when:
+out=$(env TZ="Asia/Tokyo" agent-sandbox --dry-run --dockerfile Dockerfile.minimum true)
+# then:
+grep -qE "DRY_RUN: docker run .+ --env TZ=JST" <<< "$out"
+
+
 echo "case: --env-file option pass env file to docker run"
 # when:
 out=$(agent-sandbox --dry-run --dockerfile Dockerfile.minimum --env-file .env true)
