@@ -324,6 +324,11 @@ function printMessage(message) {
             console.log(formatToolResult(part));
             break;
           }
+          case "text": {
+            console.log(styleText("bold", "\nUser:"));
+            console.log(part.text);
+            break;
+          }
           default: {
             console.log(styleText("bold", "\nUnknown Message Format:"));
             console.log(JSON.stringify(part, null, 2));

@@ -70,6 +70,12 @@ Show help message.
 /help
 ```
 
+Interrupt the agent during execution with additional instructions:
+
+```sh
+./bin/agent-interrupt "Please stop and report the current progress and status"
+```
+
 ## Directory Structure
 
 ```

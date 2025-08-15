@@ -9,6 +9,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { styleText } from "node:util";
 import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
+import { consumeInterrupMessage } from "./utils/consumeInterruptMessage.mjs";
 
 /**
  * @param {AgentConfig} config
@@ -213,6 +214,18 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
         "message",
         state.messages[state.messages.length - 1],
       );
+
+      const interruptMessage = await consumeInterrupMessage();
+      if (interruptMessage) {
+        state.messages.push({
+          role: "user",
+          content: [{ type: "text", text: interruptMessage }],
+        });
+        agentEventEmitter.emit(
+          "message",
+          state.messages[state.messages.length - 1],
+        );
+      }
     }
 
     agentEventEmitter.emit("turnEnd");

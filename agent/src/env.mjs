@@ -21,4 +21,9 @@ export const AGENT_NOTIFY_CMD_DEFAULT = path.join(
   "agent-notify",
 );
 
+export const AGENT_INTERRUPT_MESSAGE_FILE_PATH = path.join(
+  AGENT_PROJECT_METADATA_DIR,
+  "interrupt-message.txt",
+);
+
 export const USER_NAME = process.env.USER || "unknown";

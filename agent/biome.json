@@ -6,6 +6,7 @@
     "useIgnoreFile": false
   },
   "files": {
+    "includes": ["**", "!.config/**"],
     "ignoreUnknown": false
   },
   "formatter": {

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+echo -e "$@" > "${AGENT_PROJECT_METADATE_DIR:-".agent"}/interrupt-message.txt"
