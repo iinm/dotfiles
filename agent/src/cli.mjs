@@ -114,6 +114,10 @@ export function startInteractiveSession({
   notifyCmd,
   onStop,
 }) {
+  const state = {
+    turn: true,
+  };
+
   const cliPrompt = `${styleText(["white", "bgGray"], `\nSession: ${sessionId}, Model: ${modelName}`)}\n> `;
   const cli = readline.createInterface({
     input: process.stdin,
@@ -151,6 +155,16 @@ export function startInteractiveSession({
 
   cli.on("line", async (input) => {
     const inputTrimmed = input.trim();
+
+    if (!state.turn) {
+      console.warn(
+        styleText(
+          "yellow",
+          `\nAgent is working. Ignore input: ${inputTrimmed}`,
+        ),
+      );
+      return;
+    }
 
     if (inputTrimmed.length === 0) {
       cli.prompt();
@@ -191,6 +205,7 @@ export function startInteractiveSession({
       console.log(styleText("gray", "</input>"));
 
       userEventEmitter.emit("userInput", fileContentOrError);
+      state.turn = false;
       return;
     }
 
@@ -221,11 +236,13 @@ export function startInteractiveSession({
         console.log(styleText("gray", "</prompt>"));
 
         userEventEmitter.emit("userInput", message);
+        state.turn = false;
         return;
       }
     }
 
     userEventEmitter.emit("userInput", inputTrimmed);
+    state.turn = false;
   });
 
   agentEventEmitter.on("partialMessageContent", (partialContent) => {
@@ -280,6 +297,7 @@ export function startInteractiveSession({
         styleText("yellow", `\nNotification error: ${err.message}`),
       );
     }
+    state.turn = true;
     cli.prompt();
   });
 
