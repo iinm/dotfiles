@@ -82,7 +82,7 @@ echo "case: host timezone is applied to the container"
 # when:
 out=$(env TZ="Asia/Tokyo" agent-sandbox --dry-run --dockerfile Dockerfile.minimum true)
 # then:
-grep -qE "DRY_RUN: docker run .+ --env TZ=JST" <<< "$out"
+grep -qE "DRY_RUN: docker run .+ --env TZ=Asia/Tokyo" <<< "$out"
 
 
 echo "case: --env-file option pass env file to docker run"

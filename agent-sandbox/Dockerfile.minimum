@@ -3,4 +3,3 @@ FROM debian:12
 RUN apt update && apt install -y \
       busybox bash \
       iptables ipset dnsmasq dnsutils
-

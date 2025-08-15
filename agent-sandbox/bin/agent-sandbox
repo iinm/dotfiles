@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.21"
+SCRIPT_VERSION="0.0.22"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -502,7 +502,15 @@ main() {
     docker_exec_opts+=(--tty)
   fi
 
-  local host_timezone="$(date +"%Z")"
+  local host_timezone
+  if test -n "${TZ:-}"; then
+    host_timezone="$TZ"
+  elif readlink /etc/localtime | grep -q "/zoneinfo/"; then
+    host_timezone="$(readlink /etc/localtime | awk -F '/' '{print $(NF-1)"/"$NF}')"
+  elif test -f /etc/localtime; then
+    host_timezone="$(cat /etc/timezone)"
+  fi
+
   if test -n "$host_timezone"; then
     docker_run_opts+=(--env "TZ=${host_timezone}")
   fi
