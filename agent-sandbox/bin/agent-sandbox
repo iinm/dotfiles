@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.23"
+SCRIPT_VERSION="0.0.24"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -122,7 +122,7 @@ HELP
 }
 
 log() {
-  echo "[$(date "+%Y-%m-%d %H:%M:%S%z")][$(hostname)] $*"
+  echo -e "[$(date "+%Y-%m-%d %H:%M:%S%z")][$(hostname)] $*"
 }
 
 main() {
@@ -198,6 +198,20 @@ main() {
       *             ) break ;;
     esac
   done
+
+  # Save arguments to generate container id
+  local sandbox_args=(
+    "$dockerfile"
+    "$allow_write"
+    "$allow_net"
+    "${allow_net_destinations[@]}"
+    "${volume_dirs[@]}"
+    "${readonly_mounts[@]}"
+    "${writable_mounts[@]}"
+    "${publish_ports[@]}"
+    "$env_file"
+    "$platform"
+  )
   
   if test "$#" -eq 0; then
     help >&2
@@ -208,14 +222,6 @@ main() {
   exec 3>&1
   exec 4>&2
 
-  run() {
-    if test "$DRY_RUN" = "no"; then
-      "$@"
-    else
-      echo "DRY_RUN: $*" >&3
-    fi
-  }
- 
   if test "$VERBOSE" = "no"; then
     # discard stderr
     exec 2> /dev/null
@@ -223,6 +229,14 @@ main() {
 
   # stdout to stderr
   exec 1>&2
+
+  run() {
+    if test "$DRY_RUN" = "no"; then
+      "$@"
+    else
+      echo "DRY_RUN: $*" >&3
+    fi
+  }
 
   log "Copy script to mountable path: $SCRIPT_PATH -> $MOUNTABLE_SCRIPT_PATH"
   run mkdir -p "$(dirname "$MOUNTABLE_SCRIPT_PATH")"
@@ -243,8 +257,6 @@ main() {
   container_workdir=$(pwd)
 
   local project_id
-  local image_name
-  local image_tag
   if which shasum &> /dev/null; then
     project_id="$(shasum -a 256 <<< "$(pwd)" | head -c 8)"
   elif which sha256sum &> /dev/null; then
@@ -253,10 +265,24 @@ main() {
     echo "Error: Neither shasum nor sha256sum found. Please install one of them." >&2
     return 1
   fi
-  image_name="${SCRIPT_NAME}--$(basename "$(pwd)")-$project_id"
+
+  IMAGE_NAME="${SCRIPT_NAME}--$(basename "$(pwd)")-$project_id"
+
+  local image_tag
   image_tag="latest"
 
-  CONTAINER_NAME="${image_name}--$(env LC_CTYPE=C tr -dc '[:alnum:]' < /dev/urandom 2> /dev/null | head -c 10 || true)"
+  local container_id
+  # container_id="$(env LC_CTYPE=C tr -dc '[:alnum:]' < /dev/urandom 2> /dev/null | head -c 10 || true)"
+  if which shasum &> /dev/null; then
+    container_id="$(shasum -a 256 <<< "${sandbox_args[@]}" | head -c 8)"
+  elif which sha256sum &> /dev/null; then
+    container_id="$(sha256sum <<< "${sandbox_args[@]}" | head -c 8)"
+  else
+    echo "Error: Neither shasum nor sha256sum found. Please install one of them." >&2
+    return 1
+  fi
+
+  CONTAINER_NAME="${IMAGE_NAME}--${container_id}"
   NETWORK_NAME="${CONTAINER_NAME}"
 
   if test -z "$dockerfile"; then
@@ -272,7 +298,7 @@ main() {
       # global persistent volume
       "${SCRIPT_NAME}--global--${platform_with_default}--mise-data:/persistent/mise-data"
       # project local persistent volume
-      "${image_name}--home:/persistent/home"
+      "${IMAGE_NAME}--home:/persistent/home"
     )
 
     if test "$allow_net" = "yes"; then
@@ -299,7 +325,7 @@ main() {
   fi
 
   # docker options
-  local docker_build_opts=(--tag "$image_name:$image_tag")
+  local docker_build_opts=(--tag "$IMAGE_NAME:$image_tag")
   local docker_run_opts=(
     --detach
     --name "$CONTAINER_NAME"
@@ -359,7 +385,7 @@ main() {
       if grep -qE ':' <<< "$dir"; then
         IFS=':' read -r volume_name mount_path <<< "$dir"
       else
-        volume_name="${image_name}--$(echo "$dir" | sed 's,/,-,g; s,\.,-dot-,g')"
+        volume_name="${IMAGE_NAME}--$(echo "$dir" | sed 's,/,-,g; s,\.,-dot-,g')"
         mount_path="$dir"
         if ! grep -qE "^/" <<< "$mount_path"; then
           if ! test -e "$dir"; then
@@ -445,18 +471,31 @@ main() {
       exec 2> /dev/null
     fi
     exec 1>&2
-  
-    log "Stopping container."
-    run docker stop -t 0 "$CONTAINER_NAME" || true
-  
-    log "Removing container."
-    run docker rm -f "$CONTAINER_NAME" || true
-  
-    if docker network inspect "$NETWORK_NAME" &> /dev/null; then
-      log "Removing network."
-      run docker network rm "$NETWORK_NAME"
-    fi
 
+    log "Cleaning up unused containers."
+    for container_name in $(docker ps -a --format '{{.Names}}' | grep -E "^$IMAGE_NAME"); do
+      log "Checking container $container_name for running processes."
+
+      local processes
+      processes="$(docker exec "$container_name" busybox ps -o pid=,user=,args= || true)"
+
+      if test -n "$processes" -a "$(grep -cvE 'dnsmasq|busybox ps' <<< "$processes" || true)" -gt 0; then
+        log "Running processes found in container. Keep the container running."
+        log "Processes:\n$processes"
+      else
+        log "Stopping container."
+        run docker stop -t 0 "$container_name" || true
+
+        log "Removing container."
+        run docker rm -f "$container_name" || true
+
+        if docker network inspect "$container_name" &> /dev/null; then
+          log "Removing network."
+          run docker network rm "$container_name"
+        fi
+      fi
+    done
+ 
     exec 3>&-
     exec 4>&-
   
@@ -479,57 +518,61 @@ Sandbox Configurations:
 EOF
   )"
 
-  if test "$skip_build" = "yes"; then
-    log "Skip building docker image."
+  if docker inspect "$CONTAINER_NAME" &> /dev/null; then
+    log "Container is already running. Reusing $CONTAINER_NAME"
   else
-    log "Building docker image."
-    if test -n "$dockerfile"; then
-      run docker build "${docker_build_opts[@]}" "$docker_build_context"
+    if test "$skip_build" = "yes"; then
+      log "Skip building docker image."
     else
-      run docker build "${docker_build_opts[@]}" - \
-        < <("$SCRIPT_PATH" print_preset_dockerfile)
+      log "Building docker image."
+      if test -n "$dockerfile"; then
+        run docker build "${docker_build_opts[@]}" "$docker_build_context"
+      else
+        run docker build "${docker_build_opts[@]}" - \
+          < <("$SCRIPT_PATH" print_preset_dockerfile)
+      fi
     fi
-  fi
 
-  if test "$allow_net" = "yes"; then
-    log "Creating network."
-    run docker network create "$NETWORK_NAME" --driver bridge \
-      -o com.docker.network.bridge.enable_ip_masquerade=true
-  fi
+    if test "$allow_net" = "yes"; then
+      log "Creating network."
+      run docker network create "$NETWORK_NAME" --driver bridge \
+        -o com.docker.network.bridge.enable_ip_masquerade=true
+    fi
 
-  log "Inspect container user and group id."
-  local container_default_user_group
-  local container_default_user_id
-  local container_default_group_id
-  if test "$DRY_RUN" = "no"; then
-    container_default_user_group=$(docker run --rm "${image_name}:${image_tag}" bash -c 'echo $(id -u):$(id -g)')
-  else
-    container_default_user_group="unknown:unknown"
-  fi
-  container_default_user_id=$(cut -d: -f1 <<< "$container_default_user_group")
-  container_default_group_id=$(cut -d: -f2 <<< "$container_default_user_group")
-  log "Container default user and group id: $container_default_user_group"
-  
-  log "Starting container."
-  run docker run "${docker_run_opts[@]}" "${image_name}:${image_tag}" \
-    "$CONTAINER_SCRIPT_PATH" start_container_dnsmasq
+    log "Inspect container user and group id."
+    local container_default_user_group
+    local container_default_user_id
+    local container_default_group_id
+    if test "$DRY_RUN" = "no"; then
+      container_default_user_group=$(docker run --rm "${IMAGE_NAME}:${image_tag}" bash -c 'echo $(id -u):$(id -g)')
+    else
+      container_default_user_group="unknown:unknown"
+    fi
+    container_default_user_id=$(cut -d: -f1 <<< "$container_default_user_group")
+    container_default_group_id=$(cut -d: -f2 <<< "$container_default_user_group")
+    log "Container default user and group id: $container_default_user_group"
 
-  if test "${#volume_mount_paths[@]}" -gt 0; then
-    log "Setting up volume ownership to match host user ($host_user_id:$host_group_id)."
-    run docker exec --user 0:0 "$CONTAINER_NAME" "$CONTAINER_SCRIPT_PATH" setup_container_volume_owner \
-      "$host_user_id" "$host_group_id" "${volume_mount_paths[@]}"
-  fi
+    log "Starting container."
+    run docker run "${docker_run_opts[@]}" "${IMAGE_NAME}:${image_tag}" \
+      "$CONTAINER_SCRIPT_PATH" start_container_dnsmasq
 
-  if test "$allow_net" = "yes"; then
-    log "Setting up firewall."
-    run docker exec --user 0:0 "$CONTAINER_NAME" \
-      "$CONTAINER_SCRIPT_PATH" setup_container_firewall "${allow_net_destinations[@]}"
+    if test "${#volume_mount_paths[@]}" -gt 0; then
+      log "Setting up volume ownership to match host user ($host_user_id:$host_group_id)."
+      run docker exec --user 0:0 "$CONTAINER_NAME" "$CONTAINER_SCRIPT_PATH" setup_container_volume_owner \
+        "$host_user_id" "$host_group_id" "${volume_mount_paths[@]}"
+    fi
+
+    if test "$allow_net" = "yes"; then
+      log "Setting up firewall."
+      run docker exec --user 0:0 "$CONTAINER_NAME" \
+        "$CONTAINER_SCRIPT_PATH" setup_container_firewall "${allow_net_destinations[@]}"
+    fi
+
+    log "Setting up container user to match host user ($host_user_id:$host_group_id) for file access."
+    run docker exec --user 0:0 "$CONTAINER_NAME" "$CONTAINER_SCRIPT_PATH" setup_container_user \
+      "$container_default_user_id" "$container_default_group_id" \
+      "$host_user_id" "$host_group_id"
   fi
-  
-  log "Setting up container user to match host user ($host_user_id:$host_group_id) for file access."
-  run docker exec --user 0:0 "$CONTAINER_NAME" "$CONTAINER_SCRIPT_PATH" setup_container_user \
-     "$container_default_user_id" "$container_default_group_id" \
-     "$host_user_id" "$host_group_id"
 
   # restore stdout, stderr
   exec 1>&3
@@ -570,7 +613,7 @@ EOF
   done
   echo "nameserver 127.0.0.1" > /etc/resolv.conf
 
-  dnsmasq -k -C /sandbox/etc/dnsmasq.conf --log-facility /dev/stdout
+  exec dnsmasq -k -C /sandbox/etc/dnsmasq.conf --log-facility /dev/stdout
 }
 
 setup_container_volume_owner() {
@@ -782,7 +825,7 @@ RUN apt update && apt install -y \
       bash zsh \
       ripgrep fd-find \
       iptables ipset dnsmasq dnsutils \
-      curl git gpg locales \
+      curl git gpg locales tmux \
     && bash -c 'ln -s $(which fdfind) /usr/local/bin/fd' \
     && echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen \
     && echo 'ja_JP.UTF-8 UTF-8' >> /etc/locale.gen \
