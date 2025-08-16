@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.24"
+SCRIPT_VERSION="0.0.25"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -204,11 +204,11 @@ main() {
     "$dockerfile"
     "$allow_write"
     "$allow_net"
-    "${allow_net_destinations[@]}"
-    "${volume_dirs[@]}"
-    "${readonly_mounts[@]}"
-    "${writable_mounts[@]}"
-    "${publish_ports[@]}"
+    "${allow_net_destinations[@]:-}"
+    "${volume_dirs[@]:-}"
+    "${readonly_mounts[@]:-}"
+    "${writable_mounts[@]:-}"
+    "${publish_ports[@]:-}"
     "$env_file"
     "$platform"
   )
