@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.25"
+SCRIPT_VERSION="0.0.26"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -25,6 +25,7 @@ Usage: $SCRIPT_NAME [--dockerfile FILE]
            [--no-cache]
            [--skip-build]
            [--verbose] [--dry-run]
+           [--idle-timeout SECONDS]
            COMMAND
 
 
@@ -55,6 +56,10 @@ Options:
   --skip-build              Skips building the image; assumes it already exists.
   --verbose                 Output verbose logs to stderr.
   --dry-run                 Does not execute the command; just prints it to stdout.
+  --idle-timeout SECONDS    Controls container reuse lifetime.
+                            After each command finishes, the container stays alive and will be reused
+                            for the specified timeout. Use 0 for one-shot (no reuse).
+                            Default: 300 seconds.
 
 
 Examples:
@@ -139,6 +144,7 @@ main() {
   local no_cache="no"
   local skip_build="no"
   local platform=""
+  local idle_timeout="300"
 
   VERBOSE="no"
   DRY_RUN="no"
@@ -193,6 +199,10 @@ main() {
       --skip-build  ) skip_build="yes"; shift ;;
       --verbose     ) VERBOSE="yes"; shift ;;
       --dry-run     ) DRY_RUN="yes"; shift ;;
+      --idle-timeout)
+        idle_timeout="$2";
+        shift 2
+        ;;
       --            ) shift; continue ;;
       --*           ) echo "Error: unknown option: $1" >&2; return 1 ;;
       *             ) break ;;
@@ -472,30 +482,8 @@ main() {
     fi
     exec 1>&2
 
-    log "Cleaning up unused containers."
-    for container_name in $(docker ps -a --format '{{.Names}}' | grep -E "^$IMAGE_NAME"); do
-      log "Checking container $container_name for running processes."
+    run cleanup_unused_containers "$IMAGE_NAME"
 
-      local processes
-      processes="$(docker exec "$container_name" busybox ps -o pid=,user=,args= || true)"
-
-      if test -n "$processes" -a "$(grep -cvE 'dnsmasq|busybox ps' <<< "$processes" || true)" -gt 0; then
-        log "Running processes found in container. Keep the container running."
-        log "Processes:\n$processes"
-      else
-        log "Stopping container."
-        run docker stop -t 0 "$container_name" || true
-
-        log "Removing container."
-        run docker rm -f "$container_name" || true
-
-        if docker network inspect "$container_name" &> /dev/null; then
-          log "Removing network."
-          run docker network rm "$container_name"
-        fi
-      fi
-    done
- 
     exec 3>&-
     exec 4>&-
   
@@ -518,7 +506,9 @@ Sandbox Configurations:
 EOF
   )"
 
-  if docker inspect "$CONTAINER_NAME" &> /dev/null; then
+  run cleanup_unused_containers "$IMAGE_NAME"
+
+  if test "$no_cache" = "no" && docker inspect "$CONTAINER_NAME" &> /dev/null; then
     log "Container is already running. Reusing $CONTAINER_NAME"
   else
     if test "$skip_build" = "yes"; then
@@ -578,8 +568,40 @@ EOF
   exec 1>&3
   exec 2>&4
 
+  # keep alive
+  run docker exec --detach --user "$host_user_id:$host_group_id" "$CONTAINER_NAME" \
+    bash -c "busybox killall sleep &> /dev/null || true; exec sleep $idle_timeout"
+
   run docker exec "${docker_exec_opts[@]}" "$CONTAINER_NAME" \
     "$CONTAINER_SCRIPT_PATH" container_exec "$container_project_root" "$@"
+}
+
+cleanup_unused_containers() {
+  local image_name="$1"
+
+  log "Cleaning up unused containers."
+  for container_name in $(docker ps -a --format '{{.Names}}' | grep -E "^$image_name"); do
+    log "Checking container $container_name for running processes."
+
+    local processes
+    processes="$(docker exec "$container_name" busybox ps -o pid=,user=,args= || true)"
+
+    if test -n "$processes" -a "$(grep -cvE 'dnsmasq|busybox ps' <<< "$processes" || true)" -gt 0; then
+      log "Running processes found in container. Keep the container running."
+      log "Processes:\n$processes"
+    else
+      log "Stopping container."
+      docker stop -t 0 "$container_name" || true
+
+      log "Removing container."
+      docker rm -f "$container_name" || true
+
+      if docker network inspect "$container_name" &> /dev/null; then
+        log "Removing network."
+        docker network rm "$container_name"
+      fi
+    fi
+  done
 }
 
 container_exec() {
@@ -587,7 +609,7 @@ container_exec() {
   shift 1
 
   # Wait for the project directory owner to match the execution user (on colima).
-  local max_attempts=10
+  local max_attempts=20
   for _ in $(seq "$max_attempts"); do
     if stat -c "%U:%G" "$project_dir" | grep -qE "$(id -un):$(id -gn)"; then
       exec "$@"
