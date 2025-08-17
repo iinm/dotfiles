@@ -196,8 +196,12 @@ File and directory command examples:
   - typescript: { command: "rg", args: ["-n", "^(export|const|function|class|interface|type|enum)", "file.ts"] }
 - Read lines from a file:
   - Use rg to either extract the outline or get the line numbers of lines containing a specific pattern.
-  - Use awk to get the specific lines with line numbers: { command: "awk", args: ["FNR==<start>,FNR==<end>{print FNR,$0}", "file.txt"] }
+  - Use awk to get the specific lines with line numbers
+    - Always use this format: { command: "awk", args: ["FNR==<start>,FNR==<end>{print FNR,$0}", "file.txt"] }
     - Read at most 200 lines at a time.
+      - 1st to 200th lines: { command: "awk", args: ["FNR==1,FNR==200{print FNR,$0}", "file.txt"] }
+      - 201st to 400th lines: { command: "awk", args: ["FNR==201,FNR==400{print FNR,$0}", "file.txt"] }
+      - ...
     - Adjust the line range if the output is too large and truncated.
 
 Examples:
