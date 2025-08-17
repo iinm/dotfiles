@@ -126,9 +126,13 @@ Task Memory Format:
 
 ## Considerations
 
-[### Topic 1
+[Document important considerations, decisions, and findings during the task.]
+
+### Topic 1
+
 ### Topic 2
-...]
+
+...
 
 ## Conclusion
 
@@ -137,9 +141,11 @@ Task Memory Format:
 - How it addresses the original requirements
 - Any limitations or future improvements]
 
-[### Topic 1
+### Topic 1
+
 ### Topic 2
-...]
+
+...
 
 ## Future Notes
 
