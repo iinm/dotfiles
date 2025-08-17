@@ -4,7 +4,7 @@ RUN apt update && apt install -y \
       busybox bash \
       iptables ipset dnsmasq dnsutils \
       ripgrep fd-find \
-      git \
+      git tmux \
     && bash -c 'ln -s $(which fdfind) /usr/local/bin/fd' \
     && npm install -g npm@latest
 

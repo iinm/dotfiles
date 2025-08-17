@@ -16,7 +16,7 @@ import { patchFileTool } from "./tools/patchFile.mjs";
 import { readWebPageTool } from "./tools/readWebPage.mjs";
 import { readWebPageWithBrowserTool } from "./tools/readWebPageWithBrowser.mjs";
 import { createTavilySearchTool } from "./tools/tavilySearch.mjs";
-import { tmuxCommandTool } from "./tools/tmuxCommand.mjs";
+import { createTmuxCommandTool } from "./tools/tmuxCommand.mjs";
 import { writeFileTool } from "./tools/writeFile.mjs";
 import { createSessionId } from "./utils/createSessionId.mjs";
 
@@ -71,7 +71,7 @@ import { createSessionId } from "./utils/createSessionId.mjs";
     createExecCommandTool({ sandbox: appConfig.sandbox }),
     writeFileTool,
     patchFileTool,
-    tmuxCommandTool,
+    createTmuxCommandTool({ sandbox: appConfig.sandbox }),
     readWebPageTool,
     readWebPageWithBrowserTool,
   ];

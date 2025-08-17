@@ -15,7 +15,6 @@ import {
   AGENT_ROOT,
   TRUSTED_CONFIG_HASHES_DIR,
 } from "./env.mjs";
-import { tmuxCommandTool } from "./tools/tmuxCommand.mjs";
 import { evalJSONConfig } from "./utils/evalJSONConfig.mjs";
 
 /**
@@ -274,13 +273,13 @@ function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
 
     // Tmux command
     {
-      toolName: tmuxCommandTool.def.name,
+      toolName: "tmux_command",
       input: {
         command: /^(list-sessions|list-windows)$/,
       },
     },
     {
-      toolName: tmuxCommandTool.def.name,
+      toolName: "tmux_command",
       input: {
         command: "capture-pane",
         args: [
@@ -294,7 +293,7 @@ function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
       },
     },
     {
-      toolName: tmuxCommandTool.def.name,
+      toolName: "tmux_command",
       input: {
         command: /^(new-session|new)$/,
         args: ["-d", "-s", tmuxSessionId],
