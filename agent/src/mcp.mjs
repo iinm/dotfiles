@@ -9,7 +9,7 @@ import { noThrow } from "./utils/noThrow.mjs";
 import { writeTmpFile } from "./utils/tmpfile.mjs";
 
 /**
- * @typedef {Object} StartMCPServrResult
+ * @typedef {Object} SetupMCPServrResult
  * @property {Tool[]} tools
  * @property {() => Promise<void>} cleanup
  */
@@ -17,12 +17,12 @@ import { writeTmpFile } from "./utils/tmpfile.mjs";
 /**
  * @param {string} serverName
  * @param {MCPServerConfig} serverConfig
- * @returns {Promise<StartMCPServrResult>}
+ * @returns {Promise<SetupMCPServrResult>}
  */
-export async function connectToMCPServer(serverName, serverConfig) {
+export async function setupMCPServer(serverName, serverConfig) {
   const { options, ...params } = serverConfig;
 
-  const mcpClient = await createMCPClient({
+  const mcpClient = await startMCPServer({
     serverName,
     params,
   });
@@ -51,7 +51,7 @@ export async function connectToMCPServer(serverName, serverConfig) {
  * @param {MCPClientOptions} options - The options for the client.
  * @returns {Promise<Client>} - The MCP client.
  */
-async function createMCPClient(options) {
+async function startMCPServer(options) {
   const mcpClient = await import("@modelcontextprotocol/sdk/client/index.js");
   const mcpClientStdio = await import(
     "@modelcontextprotocol/sdk/client/stdio.js"

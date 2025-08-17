@@ -7,7 +7,7 @@ import { createAgent } from "./agent.mjs";
 import { startInteractiveSession } from "./cli.mjs";
 import { loadAppConfig } from "./config.mjs";
 import { AGENT_PROJECT_METADATA_DIR, USER_NAME } from "./env.mjs";
-import { connectToMCPServer } from "./mcp.mjs";
+import { setupMCPServer } from "./mcp.mjs";
 import { createModelCaller } from "./model.mjs";
 import { createPrompt } from "./prompt.mjs";
 import { createToolUseApprover } from "./tool.mjs";
@@ -44,10 +44,7 @@ import { createSessionId } from "./utils/createSessionId.mjs";
       console.log(
         styleText("blue", `\n🔌 Connecting to MCP server: ${serverName}...`),
       );
-      const { tools, cleanup } = await connectToMCPServer(
-        serverName,
-        serverConfig,
-      );
+      const { tools, cleanup } = await setupMCPServer(serverName, serverConfig);
       mcpTools.push(...tools);
       mcpCleanups.push(cleanup);
       console.log(
