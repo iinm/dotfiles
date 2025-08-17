@@ -75,12 +75,14 @@ Follow these steps in the exact order below:
 
 ## Memory Files
 
-Memory files maintain task context.
+Regularly write the current status to memory files to enable task resumption, as conversation and tool call history are not persistent.
 
-- Create/Update at key checkpoints: after creating a plan, completing steps, encountering issues, or making important decisions.
-- Update existing task memory when continuing the same task.
 - Write the content in the user's language.
+- Create/Update at key checkpoints:
+  - After every 5-6 actions.
+  - After creating a plan, completing steps, encountering issues, or making important decisions.
 - For very simple tasks that can be completed in a few actions, skip creating a memory file.
+- Update existing task memory when continuing the same task.
 
 Path: ${projectMetadataDir}/memory/<session-id>--<kebab-case-title>.md
 Create a concise, clear title (3-5 words) that represents the core task.
@@ -179,8 +181,8 @@ File and directory command examples:
 - Read lines from a file:
   - Use rg to either extract the outline or get the line numbers of lines containing a specific pattern.
   - Get the specific lines: { command: "awk", args: ["FNR==<start>,FNR==<end>{print FNR,$0}", "file.txt"] }
-    - Read at most 200 lines at a time: { command: "awk", args: ["FNR==1,FNR==200{print FNR,$0}", "file.txt"] }
-    - Read more lines if needed.
+    - Read at most 200 lines at a time.
+    - Adjust the line range if the output is too large and truncated.
 
 Examples:
 - Get current date and time: { command: "date", args: ["+%Y-%m-%d %H:%M:%S"] }
