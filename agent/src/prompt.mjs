@@ -75,7 +75,7 @@ Follow these steps in the exact order below:
 
 ## Memory Files
 
-Regularly write the current status to memory files to enable task resumption, as conversation and tool call history are not persistent.
+Periodically record the current state in comprehensive memory files to allow task continuation, as neither conversation nor tool call history persists.
 
 - Write the content in the user's language.
 - Create/Update at key checkpoints:
