@@ -80,7 +80,7 @@ Periodically record the current state in comprehensive memory files to allow tas
 - Write the content in the user's language.
 - Create/Update at key checkpoints:
   - After every 5-6 actions.
-  - After creating a plan, completing steps, encountering issues, or making important decisions.
+  - After creating/updating a plan, completing steps, encountering issues, or making important decisions.
 - For very simple tasks that can be completed in a few actions, skip creating a memory file.
 - Update existing task memory when continuing the same task.
 
