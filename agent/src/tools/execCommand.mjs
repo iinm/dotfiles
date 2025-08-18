@@ -9,7 +9,7 @@ import { noThrow } from "../utils/noThrow.mjs";
 import { writeTmpFile } from "../utils/tmpfile.mjs";
 
 const OUTPUT_MAX_LENGTH = 1024 * 8;
-const OUTPUT_TRUNCATED_LENGTH = 1024 * 4;
+const OUTPUT_TRUNCATED_LENGTH = 1024 * 2;
 
 /**
  * @param {ExecCommandConfig=} config
@@ -71,10 +71,13 @@ export function createExecCommandTool(config) {
                 const lineCount = stdout.split("\n").length;
                 stdoutOrMessage = (() => {
                   const head = stdout.slice(0, OUTPUT_TRUNCATED_LENGTH);
-                  // Show only the beginning: displaying the tail can cause the LLM to mistakenly believe it has read the entire output.
+                  const tail = stdout.slice(
+                    Math.max(stdout.length - OUTPUT_TRUNCATED_LENGTH, 0),
+                  );
                   return [
                     `Content is too large (${stdout.length} characters, ${lineCount} lines). Saved to ${filePath}.`,
                     `<truncated_output part="start" length="${OUTPUT_TRUNCATED_LENGTH}" total_length="${stdout.length}">\n${head}\n</truncated_output>`,
+                    `<truncated_output part="end" length="${OUTPUT_TRUNCATED_LENGTH}" total_length="${stdout.length}">\n${tail}</truncated_output>\n`,
                   ].join("\n\n");
                 })();
               }
