@@ -120,7 +120,7 @@ Agent loads configuration files in the following order. Settings in later files 
     ],
 
     // The maximum number of automatic approvals.
-    "max": 30
+    "max": 50
   },
 
   // (Optional) Sandbox environment

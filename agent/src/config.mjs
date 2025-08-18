@@ -43,7 +43,7 @@ export async function loadAppConfig({ tmuxSessionId }) {
       patterns: createDefaultAllowedToolUsePatterns({
         tmuxSessionId,
       }),
-      max: 30,
+      max: 50,
     },
     notifyCmd: AGENT_NOTIFY_CMD_DEFAULT,
   };
