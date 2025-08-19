@@ -590,7 +590,6 @@ local setup_lsp = function()
   local servers = {
     { name = 'lua_ls',      bin = 'lua-language-server' },
     { name = 'ts_ls',       bin = 'tsserver' },
-    { name = 'eslint',      bin = 'vscode-eslint-language-server' },
     { name = 'gopls',       bin = 'gopls' },
     { name = 'terraformls', bin = 'terraform-ls' },
     {
@@ -616,6 +615,8 @@ local setup_lsp = function()
         settings = efm_settings,
       }
     }
+    -- Disabled because it uses a lot of memory depending on the project.
+    -- { name = 'eslint',      bin = 'vscode-eslint-language-server' },
   }
 
   for _, server in ipairs(servers) do
