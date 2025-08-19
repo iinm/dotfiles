@@ -1,6 +1,7 @@
 node_modules/
 .cache/
 .config/
+tmp/
 
 .agent/*
 !.agent/config.json

@@ -18,7 +18,8 @@ describe("patchFileTool", () => {
 
   it("patches a file", async () => {
     // given:
-    const tmpFilePath = `/tmp/patchFileTest-${generateRandomString()}.txt`;
+    const tmpFilePath = `tmp/patchFileTest-${generateRandomString()}.txt`;
+    fs.mkdirSync("tmp", { recursive: true });
     const initialContent = [
       "Hello World",
       "This is a test file content 1.",
@@ -60,7 +61,8 @@ This is a test file content updated 3.
 
   it("removes header content", async () => {
     // given:
-    const tmpFilePath = `/tmp/patchFileTest-${generateRandomString()}.txt`;
+    const tmpFilePath = `tmp/patchFileTest-${generateRandomString()}.txt`;
+    fs.mkdirSync("tmp", { recursive: true });
     const initialContent = [
       "Hello World",
       "This is a test file content 1.",
@@ -92,7 +94,8 @@ Hello World
 
   it("removes footer content", async () => {
     // given:
-    const tmpFilePath = `/tmp/patchFileTest-${generateRandomString()}.txt`;
+    const tmpFilePath = `tmp/patchFileTest-${generateRandomString()}.txt`;
+    fs.mkdirSync("tmp", { recursive: true });
     const initialContent = [
       "Hello World",
       "This is a test file content 1.",
@@ -124,7 +127,8 @@ This is a test file content 3.
 
   it("handles special characters in replacement string", async () => {
     // given:
-    const tmpFilePath = `/tmp/patchFileTest-${generateRandomString()}.txt`;
+    const tmpFilePath = `tmp/patchFileTest-${generateRandomString()}.txt`;
+    fs.mkdirSync("tmp", { recursive: true });
     const initialContent = "Hello World\nThis is a test.";
     fs.writeFileSync(tmpFilePath, initialContent);
     cleanups.push(async () => fs.unlinkSync(tmpFilePath));
@@ -149,7 +153,8 @@ Price: $100 & 50% off $& special $1 deal $$
 
   it("handles dollar signs in replacement string", async () => {
     // given:
-    const tmpFilePath = `/tmp/patchFileTest-${generateRandomString()}.txt`;
+    const tmpFilePath = `tmp/patchFileTest-${generateRandomString()}.txt`;
+    fs.mkdirSync("tmp", { recursive: true });
     const initialContent = "Original text here";
     fs.writeFileSync(tmpFilePath, initialContent);
     cleanups.push(async () => fs.unlinkSync(tmpFilePath));
@@ -181,6 +186,9 @@ $& means match, $1 means first group, $$ means literal dollar
 
     // then: should return an Error
     assert.ok(result instanceof Error);
-    assert.match(result.message, /must not contain parent directory traversal/);
+    assert.match(
+      result.message,
+      /filePath must be within the current working directory/,
+    );
   });
 });

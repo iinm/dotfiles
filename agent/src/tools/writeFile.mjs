@@ -4,6 +4,7 @@
  */
 
 import fs from "node:fs";
+import path from "node:path";
 import { noThrow } from "../utils/noThrow.mjs";
 
 /** @type {Tool} */
@@ -32,9 +33,14 @@ export const writeFileTool = {
   impl: async (input) =>
     await noThrow(async () => {
       const { filePath, content } = input;
-      if (filePath.includes("../")) {
-        throw new Error("filePath must not contain parent directory traversal");
+
+      const absFilePath = path.resolve(filePath);
+      if (!absFilePath.startsWith(process.cwd() + path.sep)) {
+        throw new Error(
+          "filePath must be within the current working directory",
+        );
       }
+
       return new Promise((resolve, reject) => {
         fs.writeFile(filePath, content, (error) => {
           if (error) {

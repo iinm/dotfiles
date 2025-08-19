@@ -18,7 +18,8 @@ describe("writeFileTool", () => {
 
   it("writes to a file", async () => {
     // given:
-    const tmpFilePath = `/tmp/writeFileTest-${generateRandomString()}.txt`;
+    const tmpFilePath = `tmp/writeFileTest-${generateRandomString()}.txt`;
+    fs.mkdirSync("tmp", { recursive: true });
     cleanups.push(async () => fs.unlinkSync(tmpFilePath));
 
     // when:
@@ -42,6 +43,9 @@ describe("writeFileTool", () => {
 
     // then: should return an Error
     assert.ok(result instanceof Error);
-    assert.match(result.message, /must not contain parent directory traversal/);
+    assert.match(
+      result.message,
+      /filePath must be within the current working directory/,
+    );
   });
 });
