@@ -118,7 +118,15 @@ export function startInteractiveSession({
     turn: true,
   };
 
-  const cliPrompt = `${styleText(["white", "bgGray"], `\nSession: ${sessionId}, Model: ${modelName}`)}\n> `;
+  const cliPrompt = [
+    "",
+    styleText(["cyanBright", "bgGray"], "▌") +
+      styleText(
+        ["white", "bgGray"],
+        `Session: ${sessionId}, Model: ${modelName} `,
+      ),
+    "> ",
+  ].join("\n");
   const cli = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
