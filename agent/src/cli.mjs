@@ -99,6 +99,7 @@ File Input Syntax:
  * @property {string} sessionId
  * @property {string} modelName
  * @property {string} notifyCmd
+ * @property {boolean} sandbox
  * @property {() => Promise<void>} onStop
  */
 
@@ -112,6 +113,7 @@ export function startInteractiveSession({
   sessionId,
   modelName,
   notifyCmd,
+  sandbox,
   onStop,
 }) {
   const state = {
@@ -123,7 +125,7 @@ export function startInteractiveSession({
     styleText(["cyanBright", "bgGray"], "▌") +
       styleText(
         ["white", "bgGray"],
-        `Session: ${sessionId}, Model: ${modelName} `,
+        `Session: ${sessionId}, Model: ${modelName}, Sandbox: ${sandbox ? "on" : "off"} `,
       ),
     "> ",
   ].join("\n");

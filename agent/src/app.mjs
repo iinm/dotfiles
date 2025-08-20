@@ -115,6 +115,7 @@ import { createSessionId } from "./utils/createSessionId.mjs";
     sessionId,
     modelName: appConfig.model || "",
     notifyCmd: appConfig.notifyCmd || "",
+    sandbox: Boolean(appConfig.sandbox),
     onStop: async () => {
       for (const cleanup of mcpCleanups) {
         await cleanup();
