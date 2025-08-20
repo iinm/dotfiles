@@ -4,7 +4,7 @@ set -eu -o pipefail
 
 options=(
   --dockerfile Dockerfile
-  # --env-file .env
+  --env-file env
   # Use shared volume for package cache
   --volume agent-sandbox--global--home-npm:/home/node/.npm
   # --volume agent-sandbox--global--home-cache-yarn:/home/node/.cache/yarn
@@ -13,9 +13,7 @@ options=(
 )
 
 # Create volumes for each node_modules directory
-mkdir -p node_modules
-options+=("--volume" "node_modules")
-for path in $(find packages -type f -name package.json -maxdepth 2 | sed -E 's,package.json$,node_modules,'); do
+for path in $(fd package.json | sed -E 's,package.json$,node_modules,'); do
   mkdir -p "$path"
   options+=("--volume" "$path")
 done
