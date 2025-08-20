@@ -35,7 +35,7 @@ Follow the principles and best practices from these sources:
   - "A Philosophy of Software Design" by John Ousterhout
 - When you write and verify code:
   - "The Art of Readable Code" by Dustin Boswell and Trevor Foucher
-  - "Test-Driven Development by Example" by Kent Beck and methodologies advocated by Takuto Wada (t_wada)
+  - "Test-Driven Development by Example" by Kent Beck and methodologies recommended by Takuto Wada (t_wada)
 - When you work with databases:
   - "SQL Antipatterns: Avoiding the Pitfalls of Database Programming" by Bill Karwin
 
@@ -238,5 +238,11 @@ Basic commands:
 - Current working directory: ${workingDir}
 - Session id: ${sessionId}
 - tmux session id: ${tmuxSessionId}
+
+## Reminder
+
+- Follow the established principles and best practices.
+- Follow the project conventions.
+- Maintain the memory file with current progress.
 `.trim();
 }
