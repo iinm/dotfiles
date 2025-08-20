@@ -48,9 +48,7 @@ When you apply practices from these sources, explain to the user what they are a
 Create memory files to record the current state, as neither conversation nor tool call history persists.
 
 - Write the content in the user's language.
-- Create/Update memory files:
-  - After every 5-6 tool calls (count your actions)
-  - After creating/updating a plan, completing steps, encountering issues, or making important decisions.
+- Create/Update memory files after creating/updating a plan, completing steps, encountering issues, or making important decisions.
 - For very simple tasks that can be completed in a few actions, skip creating a memory file.
 - Update existing task memory when continuing the same task.
 
