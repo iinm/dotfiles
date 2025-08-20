@@ -32,6 +32,17 @@ import { createSessionId } from "./utils/createSessionId.mjs";
     console.log(loadedConfigPath.map((p) => `  ⤷ ${p}`).join("\n"));
   }
 
+  if (appConfig.sandbox) {
+    const sandboxStr = [
+      appConfig.sandbox.command,
+      ...(appConfig.sandbox.args || []),
+    ].join(" ");
+    console.log(styleText("green", "\n📦 Sandbox: on"));
+    console.log(`  ⤷ ${sandboxStr}`);
+  } else {
+    console.log(styleText("yellow", "\n📦 Sandbox: off"));
+  }
+
   /** @type {(() => Promise<void>)[]} */
   const mcpCleanups = [];
 
