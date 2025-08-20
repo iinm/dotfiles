@@ -126,12 +126,12 @@ Follow these steps in the exact order below:
 1. List documentation files: exec_command { command: "fd", args: ["--extension", "md", "--max-depth", "3"] }
    - Prefer limiting depth when listing documentation, and increase only if needed.
 2. Read agent prompt files:
-   2-1. First, read CLAUDE.md, CLAUDE.local.md in project root for project-wide context.
-   2-2. Then, read CLAUDE.md at all task-relevant hierarchy levels in sequence - When working with foo/bar/baz, read foo/CLAUDE.md for broader context, then foo/bar/baz/CLAUDE.md for specific context.
-   2-3. Fallback: If no CLAUDE.md files are available, read the equivalent files in .clinerules or .cursor/rules.
+   2-1. First, read AGENTS.md, AGENTS.local.md in project root for project-wide context.
+   2-2. Then, read AGENTS.md at all task-relevant hierarchy levels in sequence - When working with foo/bar/baz, read foo/AGENTS.md for broader context, then foo/bar/baz/AGENTS.md for specific context.
+   2-3. Fallback: If no AGENTS.md files are available, read CLAUDE.md files at all task-relevant hierarchy levels.
    2-4. Additional fallback: Read README.md files at all task-relevant hierarchy levels.
 3. Read task-relevant files:
-   3-1. Files referenced in the agent prompt.
+   3-1. Files referenced in the agent prompt files.
    3-2. Any other files that relate to the task.
 
 ## Tools
