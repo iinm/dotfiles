@@ -117,14 +117,11 @@ Write the memory content in the user's language.
 
 ## Project Knowledge Discovery
 
-When working inside a project repository, gather project-specific knowledge.
-
-- Skip when the working directory is the user's home directory.
-- Skip when the user asks general questions.
+When working with project files, gather project-specific knowledge.
 
 Follow these steps in the exact order below:
 1. List documentation files: exec_command { command: "fd", args: ["--extension", "md", "--hidden", "--max-depth", "3"] }
-   - Prefer limiting depth when listing documentation, and increase only if needed.
+   - Limit depth when listing documentation.
 2. Read agent prompt files:
    2-1. First, read AGENTS.md, AGENTS.local.md in project root for project-wide context.
    2-2. Then, read AGENTS.md at all task-relevant hierarchy levels in sequence - When working with foo/bar/baz, read foo/AGENTS.md for broader context, then foo/bar/baz/AGENTS.md for specific context.
