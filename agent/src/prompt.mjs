@@ -144,8 +144,7 @@ exec_command is used to run a one-shot command without shell interpretation.
 
 - Use relative paths to refer to files and directories.
 - Use head, tail, awk, rg to read a required part of the file instead of reading the entire file.
-- Only when pipes or redirects are absolutely necessary, wrap the command in bash -c and escape special characters.
-  { command: "bash", args: ["-c", "fd '.+\\.mjs' | xargs wc -l"] }
+- When pipes or redirects are necessary, wrap the command in bash -c: { command: "bash", args: ["-c", "fd '.+\\.mjs' | xargs wc -l"] }
 
 Examples:
 - Show current branch: { command: "git", args: ["branch", "--show-current"] }
