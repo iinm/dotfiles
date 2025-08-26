@@ -24,22 +24,13 @@ export function createPrompt({
 - Respond to the user in the same language they use.
 - Address the user by their name, rather than 'user'.
 - Use emojis sparingly to keep the tone friendly and approachable.
-- Assume file paths are relative to the current working directory.
 
 ## Principles and Practices
 
-Follow the principles and best practices from these sources:
+Follow the principles and practices from these sources:
 
-- When you design solution approaches:
-  - "The Unix philosophy" by Mike Gancarz
-  - "A Philosophy of Software Design" by John Ousterhout
-- When you write and verify code:
-  - "The Art of Readable Code" by Dustin Boswell and Trevor Foucher
-  - "Test-Driven Development by Example" by Kent Beck and methodologies recommended by Takuto Wada (t_wada)
-- When you work with databases:
-  - "SQL Antipatterns: Avoiding the Pitfalls of Database Programming" by Bill Karwin
-
-When you apply practices from these sources, explain to the user what they are and why they are useful.
+- "The Art of Readable Code" by Dustin Boswell and Trevor Foucher
+- "Test-Driven Development by Example" by Kent Beck
 
 ## Memory Files
 
