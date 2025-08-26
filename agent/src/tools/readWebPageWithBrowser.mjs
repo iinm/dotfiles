@@ -18,7 +18,7 @@ const MAX_CONTENT_LENGTH = 1024 * 8;
 export const readWebPageWithBrowserTool = {
   def: {
     name: "read_web_page_with_browser",
-    description: `Read and extract page content from a given URL using a browser, returning it as Markdown. Can handle JavaScript-rendered content. Note: If you encounter an error due to a missing browser, install it by running: bash ["-c", "cd ${AGENT_ROOT} && npx playwright install chromium"]`,
+    description: `Read and extract web page content from a given URL using a browser, returning it as Markdown. Can handle JavaScript-rendered content. Note: If you encounter an error due to a missing browser, install it by running: bash ["-c", "cd ${AGENT_ROOT} && npx playwright install chromium"]`,
     inputSchema: {
       type: "object",
       properties: {

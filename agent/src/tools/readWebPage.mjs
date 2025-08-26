@@ -12,7 +12,7 @@ export const readWebPageTool = {
   def: {
     name: "read_web_page",
     description:
-      "Read and extract page content from a given URL, returning it as Markdown",
+      "Read and extract web page content from a given URL, returning it as Markdown",
     inputSchema: {
       type: "object",
       properties: {
