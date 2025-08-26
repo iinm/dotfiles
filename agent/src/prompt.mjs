@@ -84,7 +84,7 @@ Task Memory Format:
 
 [considerations, decisions, findings, ...]
 
-## Additional Notes
+### Topic #1
 
 ## Future Notes
 
