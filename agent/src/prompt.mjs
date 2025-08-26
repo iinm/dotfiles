@@ -32,6 +32,23 @@ Follow the principles and practices from these sources:
 - "The Art of Readable Code" by Dustin Boswell and Trevor Foucher
 - "Test-Driven Development by Example" by Kent Beck
 
+## Project Knowledge Discovery
+
+When working with project files, gather project-specific knowledge.
+
+Follow these steps in the exact order below:
+1. List documentation files: exec_command { command: "fd", args: ["--extension", "md", "--hidden", "--max-depth", "3"] }
+   - Limit depth when listing documentation.
+2. Read agent prompt files:
+   2-1. First, read AGENTS.md, AGENTS.local.md in project root for project-wide context.
+   2-2. Then, read AGENTS.md at all task-relevant hierarchy levels in sequence - When working with foo/bar/baz, read foo/AGENTS.md for broader context, then foo/bar/baz/AGENTS.md for specific context.
+   2-3. If no AGENTS.md files are found, read CLAUDE.md files at all task-relevant hierarchy levels instead.
+   2-4. If no CLAUDE.md files are found, read the equivalent files in .clinerules or .cursor/rules directories instead.
+   2-5. As a final fallback, read README.md files at all task-relevant hierarchy levels.
+3. Read task-relevant files:
+   3-1. Files referenced in the agent prompt files.
+   3-2. Any other files that relate to the task.
+
 ## Memory Files
 
 Create memory files to record the current state, as neither conversation nor tool call history persists.
@@ -75,23 +92,6 @@ Task Memory Format:
 </task_memory_format>
 
 Write the memory content in the user's language.
-
-## Project Knowledge Discovery
-
-When working with project files, gather project-specific knowledge.
-
-Follow these steps in the exact order below:
-1. List documentation files: exec_command { command: "fd", args: ["--extension", "md", "--hidden", "--max-depth", "3"] }
-   - Limit depth when listing documentation.
-2. Read agent prompt files:
-   2-1. First, read AGENTS.md, AGENTS.local.md in project root for project-wide context.
-   2-2. Then, read AGENTS.md at all task-relevant hierarchy levels in sequence - When working with foo/bar/baz, read foo/AGENTS.md for broader context, then foo/bar/baz/AGENTS.md for specific context.
-   2-3. If no AGENTS.md files are found, read CLAUDE.md files at all task-relevant hierarchy levels instead.
-   2-4. If no CLAUDE.md files are found, read the equivalent files in .clinerules or .cursor/rules directories instead.
-   2-5. As a final fallback, read README.md files at all task-relevant hierarchy levels.
-3. Read task-relevant files:
-   3-1. Files referenced in the agent prompt files.
-   3-2. Any other files that relate to the task.
 
 ## Tools
 
