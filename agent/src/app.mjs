@@ -12,9 +12,9 @@ import { createModelCaller } from "./model.mjs";
 import { createPrompt } from "./prompt.mjs";
 import { createToolUseApprover } from "./tool.mjs";
 import { createExecCommandTool } from "./tools/execCommand.mjs";
+import { fetchWebPageTool } from "./tools/fetchWebPage.mjs";
+import { fetchWebPageWithBrowserTool } from "./tools/fetchWebPageWithBrowser.mjs";
 import { patchFileTool } from "./tools/patchFile.mjs";
-import { readWebPageTool } from "./tools/readWebPage.mjs";
-import { readWebPageWithBrowserTool } from "./tools/readWebPageWithBrowser.mjs";
 import { createTavilySearchTool } from "./tools/tavilySearch.mjs";
 import { createTmuxCommandTool } from "./tools/tmuxCommand.mjs";
 import { writeFileTool } from "./tools/writeFile.mjs";
@@ -80,8 +80,8 @@ import { createSessionId } from "./utils/createSessionId.mjs";
     writeFileTool,
     patchFileTool,
     createTmuxCommandTool({ sandbox: appConfig.sandbox }),
-    readWebPageTool,
-    readWebPageWithBrowserTool,
+    fetchWebPageTool,
+    fetchWebPageWithBrowserTool,
   ];
 
   if (appConfig.tools?.tavily?.apiKey) {
