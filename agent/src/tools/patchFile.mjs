@@ -100,7 +100,7 @@ Format description:
    * @param {Record<string, unknown>} input
    * @returns {Record<string, unknown>}
    */
-  maskApprovedInput: (input) => {
+  maskApprovalInput: (input) => {
     const patchFileInput = /** @type {PatchFileInput} */ (input);
     return {
       filePath: patchFileInput.filePath,

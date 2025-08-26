@@ -91,10 +91,10 @@ import { createSessionId } from "./utils/createSessionId.mjs";
   const toolUseApprover = createToolUseApprover({
     max: appConfig.autoApproval?.max || 0,
     patterns: appConfig.autoApproval?.patterns || [],
-    maskApprovedInput: (toolName, input) => {
+    maskApprovalInput: (toolName, input) => {
       for (const tool of builtinTools) {
-        if (tool.def.name === toolName && tool.maskApprovedInput) {
-          return tool.maskApprovedInput(input);
+        if (tool.def.name === toolName && tool.maskApprovalInput) {
+          return tool.maskApprovalInput(input);
         }
       }
       return input;
