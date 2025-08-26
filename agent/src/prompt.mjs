@@ -50,58 +50,28 @@ Task Memory Format:
 
 ## Task Description
 
-[Provide a 2-5 sentence description of the task, including:
-- The specific problem or requirement
-- Any key constraints or requirements]
+[issues, requirements, constraints, ...]
 
-## References
+## Context
 
-[Include:
-- Links to issues, tickets, or PRs
-- Relevant source files and project documentation
-- External documentation, articles, or tools
-- Key commands or code snippets]
+[docs, source files, commands, ...]
 
-## Plan
+## Steps
 
-[List concrete steps to achieve the task, including:
-- Initial analysis or research steps
-- File-level implementation details with expected changes
-- Commands for verification
-- Sub-steps]
+- [x] Completed step
+  - [x] Completed sub-step
+- [ ] In Progress step
+- [ ] Next step
 
-## Current Status
+## Notes
 
-[Document the current state with:
-- Completed steps (with brief results)
-- Current step in progress
-- Remaining steps
-- Any blockers or issues encountered]
+[considerations, decisions, findings, ...]
 
-## Considerations
-
-[Document important considerations, decisions, and findings during the task.]
-
-### Consideration Details #1
-
-### Consideration Details #2
-
-## Conclusion
-
-[Include:
-- The full solution implemented
-- How it addresses the original requirements
-- Any limitations or future improvements]
-
-### Solution Details #1
-
-### Solution Details #2
+## Additional Notes
 
 ## Future Notes
 
-[Include:
-- Key learnings from this task
-- Related tasks that might follow]
+[key learnings, limitations, improvements, ...]
 </task_memory_format>
 
 Write the memory content in the user's language.
@@ -231,6 +201,6 @@ Basic commands:
 
 - Follow the established principles and best practices.
 - Follow the project conventions.
-- Maintain the memory file with current progress.
+- Keep the memory file up-to-date.
 `.trim();
 }
