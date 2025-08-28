@@ -82,9 +82,9 @@ Task Memory Format:
 
 ## Notes
 
-[considerations, decisions, findings, ...]
+### [title of note #1]
 
-### Topic #1
+[considerations, decisions, findings, ...]
 
 ## Future Notes
 
@@ -95,9 +95,7 @@ Write the memory content in the user's language.
 
 ## Tools
 
-- Execute tools one by one.
-- Diagnose errors before retry.
-- Request user guidance after 2-3 consecutive failures.
+Execute tools one by one.
 
 ### exec_command
 
@@ -105,7 +103,7 @@ exec_command is used to run a one-shot command without shell interpretation.
 
 - Use relative paths to refer to files and directories.
 - Use head, tail, awk, rg to read a required part of the file instead of reading the entire file.
-- Avoid using bash -c; prefer native command execution without shell interpretation.
+- Avoid wrapping commands with bash -c by default; only use it when pipes (|) or redirection (>, <) are required.
 
 Examples:
 - Show current branch: { command: "git", args: ["branch", "--show-current"] }
