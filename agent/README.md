@@ -9,7 +9,7 @@ This CLI tool automatically permits certain tool executions but requires explici
 ## Requirements
 
 - Node.js 22 or later
-- Anthropic API key, OpenAI API key, or Gemini API key
+- LLM Provider API keys
 - (Optional) Tavily API key
 
 ## Quick Start
@@ -42,6 +42,9 @@ Create the user local configuration.
       "apiKey": "FIXME",
     },
     "openai": {
+      "apiKey": "FIXME",
+    },
+    "xai": {
       "apiKey": "FIXME",
     }
   },
