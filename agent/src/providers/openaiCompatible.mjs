@@ -1,5 +1,5 @@
 /**
- * @import { ModelInput, Message,  MessageContentToolResult, MessageContentText, AssistantMessage, MessageContentToolUse, ModelOutput, PartialMessageContent, MessageContentThinking } from "../model"
+ * @import { ModelInput, Message,  MessageContentToolResult, MessageContentText, AssistantMessage, ModelOutput, PartialMessageContent } from "../model"
  * @import { OpenAIAssistantMessage, OpenAIMessage, OpenAIMessageToolCall, OpenAIModelConfig, OpenAIToolDefinition, OpenAIStreamData, OpenAIChatCompletion, OpenAIMessageContentImage, OpenAIChatCompletionRequest } from "./openaiCompatible"
  * @import { ToolDefinition } from "../tool"
  * @import { GenericModelProviderConfig } from "../config"
@@ -154,6 +154,9 @@ function convertOpenAIAssistantMessageToGenericFormat(openAIAsistantMessage) {
   return {
     role: "assistant",
     content,
+    providerMetadata: {
+      originalMessage: openAIAsistantMessage,
+    },
   };
 }
 
@@ -246,49 +249,11 @@ function convertGenericMessageToOpenAIFormat(genericMessages) {
         break;
       }
       case "assistant": {
-        /** @type {MessageContentThinking[]} */
-        const thinkingParts = genericMessage.content.filter(
-          (part) => part.type === "thinking",
+        openAIMessages.push(
+          /** @type {OpenAIMessage} */(
+            genericMessage.providerMetadata?.originalMessage
+          ),
         );
-        if (thinkingParts.length > 1) {
-          console.error(
-            `OpenAI Unsupported message format: ${JSON.stringify(genericMessage)}`,
-          );
-        }
-        const thinking = thinkingParts.map((part) => part.thinking).join("\n");
-
-        /** @type {MessageContentText[]} */
-        const textParts = genericMessage.content.filter(
-          (part) => part.type === "text",
-        );
-        if (textParts.length > 1) {
-          console.error(
-            `OpenAI Unsupported message format: ${JSON.stringify(genericMessage)}`,
-          );
-        }
-        const text = textParts.map((part) => part.text).join("\n");
-
-        /** @type {MessageContentToolUse[]} */
-        const toolUseParts = genericMessage.content.filter(
-          (part) => part.type === "tool_use",
-        );
-
-        /** @type {OpenAIMessageToolCall[]} */
-        const toolCalls = toolUseParts.map((part) => ({
-          id: part.toolUseId,
-          type: "function",
-          function: {
-            name: part.toolName,
-            arguments: JSON.stringify(part.input),
-          },
-        }));
-
-        openAIMessages.push({
-          role: "assistant",
-          reasoning_content: thinking ? thinking : undefined,
-          content: text ? text : undefined,
-          tool_calls: toolCalls.length ? toolCalls : undefined,
-        });
       }
     }
   }

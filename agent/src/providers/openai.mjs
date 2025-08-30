@@ -192,7 +192,7 @@ function convertGenericMessageToOpenAIFormat(genericMessages) {
       }
       case "assistant": {
         const source = /** @type {OpenAIOutputItem[]} */ (
-          genericMessage.providerMetadata?.source
+          genericMessage.providerMetadata?.originalMessage
         );
         openAIInputItems.push(...source);
       }
@@ -242,7 +242,7 @@ function convertOpenAIAssistantMessageToGenericFormat(openAIOutputItems) {
     role: "assistant",
     content,
     providerMetadata: {
-      source: openAIOutputItems,
+      originalMessage: openAIOutputItems,
     },
   };
 }

@@ -43,7 +43,11 @@ export type AssistantMessage = {
     | MessageContentText
     | MessageContentToolUse
   )[];
-  providerMetadata?: Record<string, unknown>;
+  providerMetadata?: {
+    /** Original message from the provider */
+    originalMessage?: unknown;
+    [key: string]: unknown;
+  };
 };
 
 export type MessageContentThinking = {
