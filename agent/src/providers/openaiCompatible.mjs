@@ -117,50 +117,6 @@ export async function callOpenAICompatibleModel(
 }
 
 /**
- * @param {OpenAIAssistantMessage} openAIAsistantMessage
- * @returns {AssistantMessage}
- */
-function convertOpenAIAssistantMessageToGenericFormat(openAIAsistantMessage) {
-  /** @type {AssistantMessage["content"]} */
-  const content = [];
-  if (openAIAsistantMessage.reasoning_content) {
-    content.push({
-      type: "thinking",
-      thinking: openAIAsistantMessage.reasoning_content,
-    });
-  }
-
-  if (openAIAsistantMessage.content) {
-    content.push({ type: "text", text: openAIAsistantMessage.content });
-  }
-
-  if (openAIAsistantMessage.tool_calls) {
-    for (const toolCall of openAIAsistantMessage.tool_calls) {
-      if (toolCall.type === "function") {
-        content.push({
-          type: "tool_use",
-          toolUseId: toolCall.id,
-          toolName: toolCall.function.name,
-          input: JSON.parse(toolCall.function.arguments),
-        });
-      } else {
-        throw new Error(
-          `Unsupported tool call type: ${JSON.stringify(toolCall)}`,
-        );
-      }
-    }
-  }
-
-  return {
-    role: "assistant",
-    content,
-    providerMetadata: {
-      originalMessage: openAIAsistantMessage,
-    },
-  };
-}
-
-/**
  * @param {Message[]} genericMessages
  * @returns {OpenAIMessage[]}
  */
@@ -262,65 +218,68 @@ function convertGenericMessageToOpenAIFormat(genericMessages) {
 }
 
 /**
- * @param {OpenAIStreamData} data
- * @param {PartialMessageContent | undefined} previousPartialContent
- * @returns {PartialMessageContent[]}
+ * @param {ToolDefinition[]} genericToolDefs
+ * @returns {OpenAIToolDefinition[]}
  */
-function convertOpenAIStreamDataToAgentPartialContent(
-  data,
-  previousPartialContent,
-) {
-  /** @type {PartialMessageContent[]} */
-  const partialContents = [];
-  const firstChoice = data.choices.at(0);
+function convertGenericeToolDefinitionToOpenAIFormat(genericToolDefs) {
+  /** @type {OpenAIToolDefinition[]} */
+  const openAIToolDefs = [];
+  for (const toolDef of genericToolDefs) {
+    openAIToolDefs.push({
+      type: "function",
+      function: {
+        name: toolDef.name,
+        description: toolDef.description,
+        parameters: toolDef.inputSchema,
+      },
+    });
+  }
 
-  if (firstChoice?.delta.reasoning_content) {
-    partialContents.push({
+  return openAIToolDefs;
+}
+
+/**
+ * @param {OpenAIAssistantMessage} openAIAsistantMessage
+ * @returns {AssistantMessage}
+ */
+function convertOpenAIAssistantMessageToGenericFormat(openAIAsistantMessage) {
+  /** @type {AssistantMessage["content"]} */
+  const content = [];
+  if (openAIAsistantMessage.reasoning_content) {
+    content.push({
       type: "thinking",
-      content: firstChoice?.delta.reasoning_content,
-      position: previousPartialContent?.type === "thinking" ? "delta" : "start",
+      thinking: openAIAsistantMessage.reasoning_content,
     });
   }
 
-  if (firstChoice?.delta.content) {
-    partialContents.push({
-      type: "text",
-      content: firstChoice.delta.content,
-      position: previousPartialContent?.type === "text" ? "delta" : "start",
-    });
+  if (openAIAsistantMessage.content) {
+    content.push({ type: "text", text: openAIAsistantMessage.content });
   }
 
-  if (firstChoice?.delta.tool_calls) {
-    partialContents.push({
-      type: "tool_use",
-      content: [
-        firstChoice.delta.tool_calls.at(0)?.function?.name,
-        firstChoice.delta.tool_calls.at(0)?.function?.arguments,
-      ].join(" "),
-      position: previousPartialContent?.type === "tool_use" ? "delta" : "start",
-    });
+  if (openAIAsistantMessage.tool_calls) {
+    for (const toolCall of openAIAsistantMessage.tool_calls) {
+      if (toolCall.type === "function") {
+        content.push({
+          type: "tool_use",
+          toolUseId: toolCall.id,
+          toolName: toolCall.function.name,
+          input: JSON.parse(toolCall.function.arguments),
+        });
+      } else {
+        throw new Error(
+          `Unsupported tool call type: ${JSON.stringify(toolCall)}`,
+        );
+      }
+    }
   }
 
-  if (firstChoice?.finish_reason) {
-    partialContents.push({
-      type: previousPartialContent?.type || "unknown",
-      position: "stop",
-    });
-  }
-
-  if (
-    partialContents.length &&
-    previousPartialContent &&
-    partialContents[0].position !== "stop" &&
-    partialContents[0].type !== previousPartialContent.type
-  ) {
-    partialContents.unshift({
-      type: previousPartialContent.type,
-      position: "stop",
-    });
-  }
-
-  return partialContents;
+  return {
+    role: "assistant",
+    content,
+    providerMetadata: {
+      originalMessage: openAIAsistantMessage,
+    },
+  };
 }
 
 /**
@@ -403,6 +362,68 @@ function convertOpenAIStreamDataToChatCompletion(dataList) {
 }
 
 /**
+ * @param {OpenAIStreamData} data
+ * @param {PartialMessageContent | undefined} previousPartialContent
+ * @returns {PartialMessageContent[]}
+ */
+function convertOpenAIStreamDataToAgentPartialContent(
+  data,
+  previousPartialContent,
+) {
+  /** @type {PartialMessageContent[]} */
+  const partialContents = [];
+  const firstChoice = data.choices.at(0);
+
+  if (firstChoice?.delta.reasoning_content) {
+    partialContents.push({
+      type: "thinking",
+      content: firstChoice?.delta.reasoning_content,
+      position: previousPartialContent?.type === "thinking" ? "delta" : "start",
+    });
+  }
+
+  if (firstChoice?.delta.content) {
+    partialContents.push({
+      type: "text",
+      content: firstChoice.delta.content,
+      position: previousPartialContent?.type === "text" ? "delta" : "start",
+    });
+  }
+
+  if (firstChoice?.delta.tool_calls) {
+    partialContents.push({
+      type: "tool_use",
+      content: [
+        firstChoice.delta.tool_calls.at(0)?.function?.name,
+        firstChoice.delta.tool_calls.at(0)?.function?.arguments,
+      ].join(" "),
+      position: previousPartialContent?.type === "tool_use" ? "delta" : "start",
+    });
+  }
+
+  if (firstChoice?.finish_reason) {
+    partialContents.push({
+      type: previousPartialContent?.type || "unknown",
+      position: "stop",
+    });
+  }
+
+  if (
+    partialContents.length &&
+    previousPartialContent &&
+    partialContents[0].position !== "stop" &&
+    partialContents[0].type !== previousPartialContent.type
+  ) {
+    partialContents.unshift({
+      type: previousPartialContent.type,
+      position: "stop",
+    });
+  }
+
+  return partialContents;
+}
+
+/**
  * @param {ReadableStreamDefaultReader<Uint8Array>} reader
  */
 async function* readOpenAIStreamData(reader) {
@@ -443,25 +464,4 @@ async function* readOpenAIStreamData(reader) {
       buffer = buffer.slice(dataEndIndices[dataEndIndices.length - 1] + 2);
     }
   }
-}
-
-/**
- * @param {ToolDefinition[]} genericToolDefs
- * @returns {OpenAIToolDefinition[]}
- */
-function convertGenericeToolDefinitionToOpenAIFormat(genericToolDefs) {
-  /** @type {OpenAIToolDefinition[]} */
-  const openAIToolDefs = [];
-  for (const toolDef of genericToolDefs) {
-    openAIToolDefs.push({
-      type: "function",
-      function: {
-        name: toolDef.name,
-        description: toolDef.description,
-        parameters: toolDef.inputSchema,
-      },
-    });
-  }
-
-  return openAIToolDefs;
 }

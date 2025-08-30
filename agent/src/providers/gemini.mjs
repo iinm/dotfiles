@@ -452,52 +452,92 @@ function convertGenericToolDefinitionToGeminiFormat(tools) {
 }
 
 /**
- * @param {ReadableStreamDefaultReader<Uint8Array>} reader
- * @returns {AsyncGenerator<GeminiGeneratedContent>}
+ * @param {GeminiGeneratedContent} content
+ * @returns {AssistantMessage | GeminiNoCandidateError}
  */
-async function* readGeminiStreamContents(reader) {
-  let buffer = new Uint8Array();
+function convertGeminiAssistantMessageToGenericFormat(content) {
+  const candidate = content.candidates?.at(0);
+  if (!candidate) {
+    return new GeminiNoCandidateError(
+      `No candidates found: content=${JSON.stringify(content)}`,
+    );
+  }
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-
-    buffer = new Uint8Array([...buffer, ...value]);
-
-    const carriageReturn = "\r".charCodeAt(0);
-    const lineFeed = "\n".charCodeAt(0);
-
-    const dataEndIndices = [];
-    for (let i = 0; i < buffer.length - 3; i++) {
-      if (
-        buffer[i] === carriageReturn &&
-        buffer[i + 1] === lineFeed &&
-        buffer[i + 2] === carriageReturn &&
-        buffer[i + 3] === lineFeed
-      ) {
-        dataEndIndices.push(i);
+  /** @type {AssistantMessage["content"]} */
+  const assistantMessageContent = [];
+  for (const part of candidate.content.parts || []) {
+    if ("text" in part) {
+      if (part.thought) {
+        // thought summary
+        assistantMessageContent.push({
+          type: "thinking",
+          thinking: part.text,
+        });
+      } else {
+        assistantMessageContent.push({
+          type: "text",
+          text: part.text,
+          providerMetadata: part.thoughtSignature
+            ? { thoughtSignature: part.thoughtSignature }
+            : undefined,
+        });
       }
     }
-
-    for (let i = 0; i < dataEndIndices.length; i++) {
-      const dataStartIndex = i === 0 ? 0 : dataEndIndices[i - 1] + 4;
-      const dataEndIndex = dataEndIndices[i];
-      const data = buffer.slice(dataStartIndex, dataEndIndex);
-      const decodedData = new TextDecoder().decode(data);
-
-      if (decodedData.startsWith("data: {")) {
-        /** @type {GeminiGeneratedContent} */
-        const parsedData = JSON.parse(decodedData.slice("data: ".length));
-        yield parsedData;
-      }
-    }
-
-    if (dataEndIndices.length) {
-      buffer = buffer.slice(dataEndIndices[dataEndIndices.length - 1] + 4);
+    if ("functionCall" in part) {
+      assistantMessageContent.push({
+        type: "tool_use",
+        toolUseId: part.functionCall.name,
+        toolName: part.functionCall.name,
+        input: part.functionCall.args,
+        providerMetadata: part.thoughtSignature
+          ? { thoughtSignature: part.thoughtSignature }
+          : undefined,
+      });
     }
   }
+
+  return {
+    role: "assistant",
+    content: assistantMessageContent,
+  };
+}
+
+/**
+ * @param {GeminiGeneratedContent[]} events
+ * @returns {GeminiGeneratedContent}
+ */
+function convertGeminiStreamContentsToContent(events) {
+  const firstContent = events.at(0);
+  if (!firstContent) {
+    throw new Error("No content found");
+  }
+
+  /** @type {GeminiGeneratedContent} */
+  const mergedContent = {
+    ...firstContent,
+    // avoid side effects of mutating the original object
+    candidates: (firstContent.candidates || []).map((candidate) => ({
+      ...candidate,
+      content: {
+        ...candidate.content,
+        parts: [...(candidate.content.parts || [])],
+      },
+    })),
+  };
+
+  for (let i = 1; i < events.length; i++) {
+    const event = events[i];
+    if (event.candidates?.length) {
+      const candidate = event.candidates.at(0);
+      if (candidate?.content.parts?.length) {
+        mergedContent.candidates?.[0].content.parts?.push(
+          ...candidate.content.parts,
+        );
+      }
+    }
+  }
+
+  return mergedContent;
 }
 
 /**
@@ -563,44 +603,6 @@ function convertGeminiStreamContentToAgentPartialContents(
   return partialMessageContents;
 }
 
-/**
- * @param {GeminiGeneratedContent[]} events
- * @returns {GeminiGeneratedContent}
- */
-function convertGeminiStreamContentsToContent(events) {
-  const firstContent = events.at(0);
-  if (!firstContent) {
-    throw new Error("No content found");
-  }
-
-  /** @type {GeminiGeneratedContent} */
-  const mergedContent = {
-    ...firstContent,
-    // avoid side effects of mutating the original object
-    candidates: (firstContent.candidates || []).map((candidate) => ({
-      ...candidate,
-      content: {
-        ...candidate.content,
-        parts: [...(candidate.content.parts || [])],
-      },
-    })),
-  };
-
-  for (let i = 1; i < events.length; i++) {
-    const event = events[i];
-    if (event.candidates?.length) {
-      const candidate = event.candidates.at(0);
-      if (candidate?.content.parts?.length) {
-        mergedContent.candidates?.[0].content.parts?.push(
-          ...candidate.content.parts,
-        );
-      }
-    }
-  }
-
-  return mergedContent;
-}
-
 class GeminiNoCandidateError extends Error {
   /**
    * @param {string} message
@@ -612,52 +614,50 @@ class GeminiNoCandidateError extends Error {
 }
 
 /**
- * @param {GeminiGeneratedContent} content
- * @returns {AssistantMessage | GeminiNoCandidateError}
+ * @param {ReadableStreamDefaultReader<Uint8Array>} reader
+ * @returns {AsyncGenerator<GeminiGeneratedContent>}
  */
-function convertGeminiAssistantMessageToGenericFormat(content) {
-  const candidate = content.candidates?.at(0);
-  if (!candidate) {
-    return new GeminiNoCandidateError(
-      `No candidates found: content=${JSON.stringify(content)}`,
-    );
-  }
+async function* readGeminiStreamContents(reader) {
+  let buffer = new Uint8Array();
 
-  /** @type {AssistantMessage["content"]} */
-  const assistantMessageContent = [];
-  for (const part of candidate.content.parts || []) {
-    if ("text" in part) {
-      if (part.thought) {
-        // thought summary
-        assistantMessageContent.push({
-          type: "thinking",
-          thinking: part.text,
-        });
-      } else {
-        assistantMessageContent.push({
-          type: "text",
-          text: part.text,
-          providerMetadata: part.thoughtSignature
-            ? { thoughtSignature: part.thoughtSignature }
-            : undefined,
-        });
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
+
+    buffer = new Uint8Array([...buffer, ...value]);
+
+    const carriageReturn = "\r".charCodeAt(0);
+    const lineFeed = "\n".charCodeAt(0);
+
+    const dataEndIndices = [];
+    for (let i = 0; i < buffer.length - 3; i++) {
+      if (
+        buffer[i] === carriageReturn &&
+        buffer[i + 1] === lineFeed &&
+        buffer[i + 2] === carriageReturn &&
+        buffer[i + 3] === lineFeed
+      ) {
+        dataEndIndices.push(i);
       }
     }
-    if ("functionCall" in part) {
-      assistantMessageContent.push({
-        type: "tool_use",
-        toolUseId: part.functionCall.name,
-        toolName: part.functionCall.name,
-        input: part.functionCall.args,
-        providerMetadata: part.thoughtSignature
-          ? { thoughtSignature: part.thoughtSignature }
-          : undefined,
-      });
+
+    for (let i = 0; i < dataEndIndices.length; i++) {
+      const dataStartIndex = i === 0 ? 0 : dataEndIndices[i - 1] + 4;
+      const dataEndIndex = dataEndIndices[i];
+      const data = buffer.slice(dataStartIndex, dataEndIndex);
+      const decodedData = new TextDecoder().decode(data);
+
+      if (decodedData.startsWith("data: {")) {
+        /** @type {GeminiGeneratedContent} */
+        const parsedData = JSON.parse(decodedData.slice("data: ".length));
+        yield parsedData;
+      }
+    }
+
+    if (dataEndIndices.length) {
+      buffer = buffer.slice(dataEndIndices[dataEndIndices.length - 1] + 4);
     }
   }
-
-  return {
-    role: "assistant",
-    content: assistantMessageContent,
-  };
 }

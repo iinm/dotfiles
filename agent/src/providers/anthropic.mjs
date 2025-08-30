@@ -207,48 +207,54 @@ function convertGenericMessageToAnthropicFormat(genericMessages) {
 }
 
 /**
- * @param {AnthropicStreamEvent} event
- * @param {PartialMessageContent | undefined} previousPartialContent
- * @returns {PartialMessageContent | undefined}
+ * @param {ToolDefinition[]} genericToolDefs
+ * @returns {AnthropicToolDefinition[]}
  */
-function convertAnthropicStreamEventToAgentPartialContent(
-  event,
-  previousPartialContent,
-) {
-  switch (event.type) {
-    case "content_block_start":
-      return {
-        type: event.content_block.type,
-        position: "start",
-      };
-    case "content_block_delta":
-      switch (event.delta.type) {
-        case "text_delta":
-          return {
-            type: "text",
-            content: event.delta.text,
-            position: "delta",
-          };
-        case "thinking_delta":
-          return {
-            type: "thinking",
-            content: event.delta.thinking,
-            position: "delta",
-          };
-        case "input_json_delta":
-          return {
-            type: "tool_use",
-            content: event.delta.partial_json,
-            position: "delta",
-          };
-      }
-      break;
-    case "content_block_stop":
-      return {
-        type: previousPartialContent?.type || "unknown",
-        position: "stop",
-      };
+function convertGenericToolDefinitionToAnthropicFormat(genericToolDefs) {
+  /** @type {AnthropicToolDefinition[]} */
+  const anthropicToolDefs = [];
+  for (const tool of genericToolDefs) {
+    anthropicToolDefs.push({
+      name: tool.name,
+      description: tool.description,
+      input_schema: tool.inputSchema,
+    });
   }
+  return anthropicToolDefs;
+}
+
+/**
+ * @param {AnthropicAssistantMessage} anthropicAssistantMessage
+ * @returns {AssistantMessage}
+ */
+function convertAnthropicAssistantMessageToGenericFormat(
+  anthropicAssistantMessage,
+) {
+  /** @type {AssistantMessage["content"]} */
+  const content = [];
+  for (const part of anthropicAssistantMessage.content) {
+    if (part.type === "thinking") {
+      content.push({
+        type: "thinking",
+        thinking: part.thinking,
+        providerMetadata: { signature: part.signature },
+      });
+    } else if (part.type === "text") {
+      content.push({ type: "text", text: part.text });
+    } else if (part.type === "tool_use") {
+      content.push({
+        type: "tool_use",
+        toolUseId: part.id,
+        toolName: part.name,
+        input: part.input,
+      });
+    }
+  }
+
+  return {
+    role: "assistant",
+    content,
+  };
 }
 
 /**
@@ -327,95 +333,48 @@ function convertAnthropicStreamEventsToChatCompletion(events) {
 }
 
 /**
- * @param {ReadableStreamDefaultReader<Uint8Array>} reader
+ * @param {AnthropicStreamEvent} event
+ * @param {PartialMessageContent | undefined} previousPartialContent
+ * @returns {PartialMessageContent | undefined}
  */
-async function* readAnthropicStreamEvents(reader) {
-  let buffer = new Uint8Array();
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-
-    buffer = new Uint8Array([...buffer, ...value]);
-
-    const lineFeed = "\n".charCodeAt(0);
-    const eventEndIndices = [];
-    for (let i = 0; i < buffer.length - 1; i++) {
-      if (buffer[i] === lineFeed && buffer[i + 1] === lineFeed) {
-        eventEndIndices.push(i);
-      }
-    }
-
-    for (let i = 0; i < eventEndIndices.length; i++) {
-      const eventStartIndex = i === 0 ? 0 : eventEndIndices[i - 1] + 2;
-      const eventEndIndex = eventEndIndices[i];
-      const event = buffer.slice(eventStartIndex, eventEndIndex);
-      const decodedEvent = new TextDecoder().decode(event);
-      const data = decodedEvent.split("\n").at(-1);
-      if (data?.startsWith("data: ")) {
-        /** @type {AnthropicStreamEvent} */
-        const parsedData = JSON.parse(data.slice("data: ".length));
-        yield parsedData;
-      }
-    }
-
-    if (eventEndIndices.length) {
-      buffer = buffer.slice(eventEndIndices[eventEndIndices.length - 1] + 2);
-    }
-  }
-}
-
-/**
- * @param {AnthropicAssistantMessage} anthropicAssistantMessage
- * @returns {AssistantMessage}
- */
-function convertAnthropicAssistantMessageToGenericFormat(
-  anthropicAssistantMessage,
+function convertAnthropicStreamEventToAgentPartialContent(
+  event,
+  previousPartialContent,
 ) {
-  /** @type {AssistantMessage["content"]} */
-  const content = [];
-  for (const part of anthropicAssistantMessage.content) {
-    if (part.type === "thinking") {
-      content.push({
-        type: "thinking",
-        thinking: part.thinking,
-        providerMetadata: { signature: part.signature },
-      });
-    } else if (part.type === "text") {
-      content.push({ type: "text", text: part.text });
-    } else if (part.type === "tool_use") {
-      content.push({
-        type: "tool_use",
-        toolUseId: part.id,
-        toolName: part.name,
-        input: part.input,
-      });
-    }
+  switch (event.type) {
+    case "content_block_start":
+      return {
+        type: event.content_block.type,
+        position: "start",
+      };
+    case "content_block_delta":
+      switch (event.delta.type) {
+        case "text_delta":
+          return {
+            type: "text",
+            content: event.delta.text,
+            position: "delta",
+          };
+        case "thinking_delta":
+          return {
+            type: "thinking",
+            content: event.delta.thinking,
+            position: "delta",
+          };
+        case "input_json_delta":
+          return {
+            type: "tool_use",
+            content: event.delta.partial_json,
+            position: "delta",
+          };
+      }
+      break;
+    case "content_block_stop":
+      return {
+        type: previousPartialContent?.type || "unknown",
+        position: "stop",
+      };
   }
-
-  return {
-    role: "assistant",
-    content,
-  };
-}
-
-/**
- * @param {ToolDefinition[]} genericToolDefs
- * @returns {AnthropicToolDefinition[]}
- */
-function convertGenericToolDefinitionToAnthropicFormat(genericToolDefs) {
-  /** @type {AnthropicToolDefinition[]} */
-  const anthropicToolDefs = [];
-  for (const tool of genericToolDefs) {
-    anthropicToolDefs.push({
-      name: tool.name,
-      description: tool.description,
-      input_schema: tool.inputSchema,
-    });
-  }
-  return anthropicToolDefs;
 }
 
 /**
@@ -455,4 +414,45 @@ function enableContextCaching(messages) {
   });
 
   return /** @type {AnthropicMessage[]} */ (contextCachingEnabledMessages);
+}
+
+/**
+ * @param {ReadableStreamDefaultReader<Uint8Array>} reader
+ */
+async function* readAnthropicStreamEvents(reader) {
+  let buffer = new Uint8Array();
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
+
+    buffer = new Uint8Array([...buffer, ...value]);
+
+    const lineFeed = "\n".charCodeAt(0);
+    const eventEndIndices = [];
+    for (let i = 0; i < buffer.length - 1; i++) {
+      if (buffer[i] === lineFeed && buffer[i + 1] === lineFeed) {
+        eventEndIndices.push(i);
+      }
+    }
+
+    for (let i = 0; i < eventEndIndices.length; i++) {
+      const eventStartIndex = i === 0 ? 0 : eventEndIndices[i - 1] + 2;
+      const eventEndIndex = eventEndIndices[i];
+      const event = buffer.slice(eventStartIndex, eventEndIndex);
+      const decodedEvent = new TextDecoder().decode(event);
+      const data = decodedEvent.split("\n").at(-1);
+      if (data?.startsWith("data: ")) {
+        /** @type {AnthropicStreamEvent} */
+        const parsedData = JSON.parse(data.slice("data: ".length));
+        yield parsedData;
+      }
+    }
+
+    if (eventEndIndices.length) {
+      buffer = buffer.slice(eventEndIndices[eventEndIndices.length - 1] + 2);
+    }
+  }
 }

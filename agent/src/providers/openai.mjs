@@ -203,6 +203,25 @@ function convertGenericMessageToOpenAIFormat(genericMessages) {
 }
 
 /**
+ * @param {ToolDefinition[]} genericToolDefs
+ * @returns {OpenAIToolFunction[]}
+ */
+function convertGenericeToolDefinitionToOpenAIFormat(genericToolDefs) {
+  /** @type {OpenAIToolFunction[]} */
+  const openAIToolDefs = [];
+  for (const toolDef of genericToolDefs) {
+    openAIToolDefs.push({
+      type: "function",
+      name: toolDef.name,
+      description: toolDef.description,
+      parameters: toolDef.inputSchema,
+    });
+  }
+
+  return openAIToolDefs;
+}
+
+/**
  * @param {OpenAIOutputItem[]} openAIOutputItems
  * @returns {AssistantMessage}
  */
@@ -384,23 +403,4 @@ async function* readOpenAIStreamData(reader) {
       buffer = buffer.slice(dataEndIndices[dataEndIndices.length - 1] + 2);
     }
   }
-}
-
-/**
- * @param {ToolDefinition[]} genericToolDefs
- * @returns {OpenAIToolFunction[]}
- */
-function convertGenericeToolDefinitionToOpenAIFormat(genericToolDefs) {
-  /** @type {OpenAIToolFunction[]} */
-  const openAIToolDefs = [];
-  for (const toolDef of genericToolDefs) {
-    openAIToolDefs.push({
-      type: "function",
-      name: toolDef.name,
-      description: toolDef.description,
-      parameters: toolDef.inputSchema,
-    });
-  }
-
-  return openAIToolDefs;
 }
