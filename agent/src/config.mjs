@@ -220,7 +220,9 @@ function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
           args.every(
             (arg) =>
               typeof arg === "string" &&
-              !arg.match(/^(--no-ignore|-I|--exec|-x|--exec-batch|-X|)(=.+)?$/),
+              !arg.match(
+                /^(--unrestricted|-u|--no-ignore|-I|--exec|-x|--exec-batch|-X)(=.+)?$/,
+              ),
           ),
       },
     },
@@ -234,7 +236,9 @@ function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
         args: (args) =>
           Array.isArray(args) &&
           args.every(
-            (arg) => typeof arg === "string" && !arg.match(/^(--no-ignore)/),
+            (arg) =>
+              typeof arg === "string" &&
+              !arg.match(/^(--unrestricted|-u|--no-ignore)(=.+)?$/),
           ),
       },
     },
