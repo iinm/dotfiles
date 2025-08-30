@@ -200,7 +200,7 @@ async function trustConfigHash(hash) {
  * @param {CreateAllowedToolUsePatternsInput} input
  * @returns {ToolUsePattern[]}
  */
-function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
+export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
   /** @type {ToolUsePattern[]} */
   return [
     // Exec command
