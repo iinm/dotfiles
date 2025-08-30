@@ -22,6 +22,7 @@ export type ModelProvidersConfig = {
   anthropic?: GenericModelProviderConfig;
   gemini?: GenericModelProviderConfig;
   openai?: GenericModelProviderConfig;
+  xai?: GenericModelProviderConfig;
 };
 
 export type GenericModelProviderConfig = {

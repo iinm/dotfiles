@@ -46,6 +46,11 @@ export async function loadAppConfig({ tmuxSessionId }) {
       max: 50,
     },
     notifyCmd: AGENT_NOTIFY_CMD_DEFAULT,
+    providers: {
+      xai: {
+        baseURL: "https://api.x.ai",
+      },
+    },
   };
 
   for (const filePath of paths) {
@@ -67,6 +72,10 @@ export async function loadAppConfig({ tmuxSessionId }) {
         anthropic: {
           ...(merged.providers?.anthropic ?? {}),
           ...(config.providers?.anthropic ?? {}),
+        },
+        xai: {
+          ...(merged.providers?.xai ?? {}),
+          ...(config.providers?.xai ?? {}),
         },
       },
       autoApproval: {

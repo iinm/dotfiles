@@ -6,6 +6,7 @@
 import { callAnthropicModel } from "./providers/anthropic.mjs";
 import { createCacheEnabledGeminiModelCaller } from "./providers/gemini.mjs";
 import { callOpenAIModel } from "./providers/openai.mjs";
+import { callOpenAICompatibleModel } from "./providers/openaiCompatible.mjs";
 
 /**
  * @param {string} modelName
@@ -352,6 +353,15 @@ export function createModelCaller(modelName, providers) {
           input,
         );
     }
+    case "grok-code":
+      return (input) =>
+        callOpenAICompatibleModel(
+          providers?.xai ?? {},
+          {
+            model: "grok-code-fast-1",
+          },
+          input,
+        );
     default:
       throw new Error(`Invalid model: "${modelName}"`);
   }
