@@ -121,6 +121,7 @@ export type OpenAIStreamEvent =
   | OpenAIStreamEventResponseCreated
   | OpenAIStreamEventResponseInProgress
   | OpenAIStreamEventResponseCompleted
+  | OpenAIStreamEventResponseFailed
   | OpenAIStreamEventResponseOutputItemAdded
   | OpenAIStreamEventResponseOutputItemDone
   | OpenAIStreamEventResponseContentPartAdded
@@ -150,6 +151,12 @@ export type OpenAIStreamEventResponseCompleted = {
   type: "response.completed";
   sequence_number: number;
   response: OpenAIResponse;
+};
+
+export type OpenAIStreamEventResponseFailed = {
+  type: "response.failed";
+  sequence_number: number;
+  error: unknown;
 };
 
 export type OpenAIStreamEventResponseOutputItemAdded = {

@@ -91,10 +91,14 @@ export async function callOpenAIModel(
 
     const lastEvent = streamEvents.at(-1);
     if (lastEvent?.type !== "response.completed") {
+      const lastEventTrimmed =
+        lastEvent?.type === "response.failed"
+          ? { type: lastEvent.type, error: lastEvent.error }
+          : lastEvent;
       console.error(
         styleText(
           "yellow",
-          `OpenAI stream did not complete: ${JSON.stringify(lastEvent)}. Retry in ${retryInterval} seconds...`,
+          `OpenAI stream did not complete: ${JSON.stringify(lastEventTrimmed)}. Retry in ${retryInterval} seconds...`,
         ),
       );
       await new Promise((resolve) => setTimeout(resolve, retryInterval * 1000));
