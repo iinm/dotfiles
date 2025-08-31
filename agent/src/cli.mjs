@@ -567,8 +567,8 @@ function parseFileMention(fileMentionString) {
   const [, filePath, startLine, endLine] = match;
   return {
     filePath,
-    startLine: startLine ? Number.parseInt(startLine) : undefined,
-    endLine: endLine ? Number.parseInt(endLine) : undefined,
+    startLine: startLine ? Number.parseInt(startLine, 10) : undefined,
+    endLine: endLine ? Number.parseInt(endLine, 10) : undefined,
   };
 }
 
