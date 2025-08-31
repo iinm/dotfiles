@@ -11,15 +11,15 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.17.1",
+    "@modelcontextprotocol/sdk": "^1.17.4",
     "@mozilla/readability": "^0.6.0",
     "diff": "^8.0.2",
     "jsdom": "^26.1.0",
     "puppeteer": "^24.17.1",
-    "turndown": "^7.2.0"
+    "turndown": "^7.2.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.1.3",
+    "@biomejs/biome": "^2.2.2",
     "@types/jsdom": "^21.1.7",
     "@types/node": "^22.15.21",
     "@types/turndown": "^5.0.5",
