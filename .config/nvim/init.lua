@@ -640,6 +640,7 @@ local setup_lsp = function()
       { file = '%.lua$',  client = 'lua_ls' },
       { file = '%.xml$',  client = 'lemminx' },
       { file = '%.js$',   client = 'efm' },
+      { file = '%.mjs$',  client = 'efm' },
       { file = '%.ts$',   client = 'efm' },
       { file = '%.jsx$',  client = 'efm' },
       { file = '%.tsx$',  client = 'efm' },
