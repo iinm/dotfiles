@@ -116,7 +116,7 @@ The agent loads configuration files in the following order. Settings in later fi
 - `$AGENT_PROJECT_METADATA_DIR/config.json`: Project-specific configuration.
 - `$AGENT_PROJECT_METADATA_DIR/config.local.json`: Project-specific local configuration, typically for sensitive information or local development overrides.
 
-### Format
+### Example
 
 ```js
 {
