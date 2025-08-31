@@ -48,15 +48,15 @@ export async function callOpenAIModel(
       signal: AbortSignal.timeout(5 * 60 * 1000),
     });
 
+    const retryInterval = Math.min(2 * 2 ** retryCount, 16);
     if (response.status === 429) {
-      const interval = Math.min(2 * 2 ** retryCount, 16);
       console.error(
         styleText(
           "yellow",
-          `OpenAI rate limit exceeded. Retry in ${interval} seconds...`,
+          `OpenAI rate limit exceeded. Retry in ${retryInterval} seconds...`,
         ),
       );
-      await new Promise((resolve) => setTimeout(resolve, interval * 1000));
+      await new Promise((resolve) => setTimeout(resolve, retryInterval * 1000));
       return callOpenAIModel(
         providerConfig,
         modelConfig,
@@ -91,7 +91,19 @@ export async function callOpenAIModel(
 
     const lastEvent = streamEvents.at(-1);
     if (lastEvent?.type !== "response.completed") {
-      throw new Error(`OpenAI stream did not complete: ${lastEvent?.type}`);
+      console.error(
+        styleText(
+          "yellow",
+          `OpenAI stream did not complete: ${JSON.stringify(lastEvent)}. Retry in ${retryInterval} seconds...`,
+        ),
+      );
+      await new Promise((resolve) => setTimeout(resolve, retryInterval * 1000));
+      return callOpenAIModel(
+        providerConfig,
+        modelConfig,
+        input,
+        retryCount + 1,
+      );
     }
 
     return {
