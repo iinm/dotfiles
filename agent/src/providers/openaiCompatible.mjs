@@ -366,14 +366,14 @@ function convertOpenAIStreamDataToChatCompletion(dataList) {
 
       if (delta.tool_calls) {
         for (const toolCallDelta of delta.tool_calls) {
-          const toolCall = message.tool_calls?.[toolCallDelta.index];
+          const toolCall = message.tool_calls?.find(
+            (tc) => tc.id === toolCallDelta.id,
+          );
           if (!toolCall) {
             if (!message.tool_calls) {
               message.tool_calls = [];
             }
-            /** @type {OpenAIMessageToolCall[]} */ (message.tool_calls).splice(
-              toolCallDelta.index,
-              0,
+            /** @type {OpenAIMessageToolCall[]} */ (message.tool_calls).push(
               /** @type {OpenAIMessageToolCall} */
               (toolCallDelta),
             );
