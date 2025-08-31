@@ -38,7 +38,6 @@ export type ToolUseApproverConfig = {
   /**
    * Mask the input before auto-approval checks and recording.
    * Return a redacted object (e.g., keep only necessary fields) that will be used for:
-   * - pattern matching
    * - safety validation via isSafeToolInput
    * - storing per-session allowed tool-use patterns
    */
