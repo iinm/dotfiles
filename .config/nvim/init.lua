@@ -202,6 +202,7 @@ local setup_keymap = function()
   })
 
   -- git
+  vim.keymap.set('n', '<leader>gs', ':<C-u>Git<CR>')
   vim.keymap.set('n', '<leader>gf', ':<C-u>Git fetch --prune<CR>')
   vim.keymap.set('n', '<leader>gc', ':<C-u>Git checkout<Space>')
   vim.keymap.set('n', '<leader>gp', ':<C-u>Git pull origin <C-r>=FugitiveHead()<CR><CR>')
