@@ -405,37 +405,14 @@ function formatToolUse(toolUse) {
 
     /** @type {{search:string; replace:string}[]} */
     const diffs = [];
-    /** @type {string[]} */
-    const currentSearch = [];
-    /** @type {string[]} */
-    const currentReplace = [];
-    /** @type {"search" | "replace" | undefined} */
-    let currentBlock;
-    for (const line of diff.split("\n")) {
-      if (line === "<<<<<<< SEARCH") {
-        currentBlock = "search";
-        continue;
-      }
-      if (line === "=======") {
-        currentBlock = "replace";
-        continue;
-      }
-      if (line === ">>>>>>> REPLACE") {
-        diffs.push({
-          search: currentSearch.join("\n"),
-          replace: currentReplace.join("\n"),
-        });
-        currentSearch.length = 0;
-        currentReplace.length = 0;
-        currentBlock = undefined;
-        continue;
-      }
-      if (currentBlock === "search") {
-        currentSearch.push(line);
-      }
-      if (currentBlock === "replace") {
-        currentReplace.push(line);
-      }
+    const matches = Array.from(
+      diff.matchAll(
+        /<<<<<<< SEARCH\n(.*?)\n?=======\n(.*?)\n?>>>>>>> REPLACE/gs,
+      ),
+    );
+    for (const match of matches) {
+      const [_, search, replace] = match;
+      diffs.push({ search, replace });
     }
 
     const highlightedDiff = diffs
