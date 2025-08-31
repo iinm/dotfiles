@@ -4,7 +4,7 @@ import { AGENT_INTERRUPT_MESSAGE_FILE_PATH } from "../env.mjs";
 /**
  * @returns {Promise<string | undefined>}
  */
-export async function consumeInterrupMessage() {
+export async function consumeInterruptMessage() {
   try {
     const content = await fs.promises.readFile(
       AGENT_INTERRUPT_MESSAGE_FILE_PATH,
