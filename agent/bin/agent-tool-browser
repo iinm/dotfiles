@@ -3,9 +3,9 @@
 (async () => {
   const { FETCH_WEB_PAGE_WITH_BROWSER_TOOL_USER_DATA_DIR } = await import("../src/tools/fetchWebPageWithBrowser.mjs");
 
-  const { chromium } = await import("playwright");
-  await chromium.launchPersistentContext(
-    FETCH_WEB_PAGE_WITH_BROWSER_TOOL_USER_DATA_DIR,
-    { headless: false }
-  );
+  const puppeteer = (await import("puppeteer")).default;
+  await puppeteer.launch({
+    headless: false,
+    userDataDir: FETCH_WEB_PAGE_WITH_BROWSER_TOOL_USER_DATA_DIR,
+  });
 })();

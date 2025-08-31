@@ -20,7 +20,7 @@
           "args": ["install"]
         },
         "mode": "sandbox",
-        "extraArgs": ["--allow-net", "registry.npmjs.org"]
+        "extraArgs": ["--allow-net", "0.0.0.0/0"]
       }
     ]
   }

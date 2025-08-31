@@ -3,7 +3,7 @@
  */
 
 import path from "node:path";
-import { AGENT_CACHE_DIR, AGENT_ROOT } from "../env.mjs";
+import { AGENT_CACHE_DIR } from "../env.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
 import { writeTmpFile } from "../utils/tmpfile.mjs";
 
@@ -18,7 +18,8 @@ const MAX_CONTENT_LENGTH = 1024 * 8;
 export const fetchWebPageWithBrowserTool = {
   def: {
     name: "fetch_web_page_with_browser",
-    description: `Fetch and extract web page content from a given URL using a browser, returning it as Markdown. Can handle JavaScript-rendered content. Note: If you encounter an error due to a missing browser, install it by running: bash ["-c", "cd ${AGENT_ROOT} && npx playwright install chromium"]`,
+    description:
+      "Fetch and extract web page content from a given URL using a browser (via Puppeteer), returning it as Markdown. Can handle JavaScript-rendered content.",
     inputSchema: {
       type: "object",
       properties: {
@@ -36,33 +37,35 @@ export const fetchWebPageWithBrowserTool = {
    */
   impl: async (input) =>
     await noThrow(async () => {
-      const { chromium } = await import("playwright");
+      const puppeteer = (await import("puppeteer")).default;
       const { Readability } = await import("@mozilla/readability");
       const { JSDOM } = await import("jsdom");
       const TurndownService = (await import("turndown")).default;
 
-      const context = await chromium.launchPersistentContext(
-        FETCH_WEB_PAGE_WITH_BROWSER_TOOL_USER_DATA_DIR,
-        {
-          headless: true,
-        },
-      );
+      const browser = await puppeteer.launch({
+        headless: true,
+        // Persist profile to speed up repeated visits and keep cookies/localStorage
+        userDataDir: FETCH_WEB_PAGE_WITH_BROWSER_TOOL_USER_DATA_DIR,
+      });
 
       /** @type {string | undefined} */
       let html;
       try {
-        const page = await context.newPage();
-        await page.goto(input.url);
+        const page = await browser.newPage();
         try {
-          await page.waitForLoadState("networkidle", { timeout: 10000 });
+          await page.goto(input.url, {
+            waitUntil: "networkidle0",
+            timeout: 30_000,
+          });
         } catch (_timeoutError) {
           console.warn(
             "Network idle timeout, proceeding with current page state",
           );
         }
         html = await page.content();
+        await page.close();
       } finally {
-        await context.close();
+        await browser.close();
       }
 
       const dom = new JSDOM(html, { url: input.url });
