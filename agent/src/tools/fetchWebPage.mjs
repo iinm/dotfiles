@@ -12,7 +12,7 @@ export const fetchWebPageTool = {
   def: {
     name: "fetch_web_page",
     description:
-      "Fetch and extract web page content from a given URL, returning it as Markdown",
+      "Fetch and extract web page content from a given URL, returning it as Markdown.",
     inputSchema: {
       type: "object",
       properties: {
