@@ -4,12 +4,12 @@ A lightweight CLI-based coding agent designed to assist with your development ta
 
 ## Safety Controls
 
-This CLI tool automatically permits certain tool executions but requires explicit approval for security-sensitive operations, such as accessing parent directories and git-ignored files. The security rules are defined in `src/config.mjs#createDefaultAllowedToolUsePatterns` and `src/utils/isSafeToolInput.mjs#isSafeToolInputItem` within this repository.
+This CLI tool automatically permits certain tool executions but requires explicit approval for security-sensitive operations, such as accessing parent directories and git-ignored files. The security rules are defined in `src/config.mjs#createDefaultAllowedToolUsePatterns` and `src/utils/isSafeToolInput.mjs` within this repository.
 
 ## Requirements
 
 - Node.js 22 or later
-- LLM Provider API keys
+- API keys for LLM providers
 - (Optional) Tavily API key
 
 ## Quick Start
@@ -79,6 +79,18 @@ Interrupt the agent during execution with additional instructions:
 ./bin/agent-interrupt "Please stop and report the current progress and status"
 ```
 
+## Available Tools
+
+The agent can use the following tools to assist with tasks:
+
+- **exec_command**: Run a command without shell interpretation.
+- **write_file**: Write a file.
+- **patch_file**: Patch a file.
+- **tmux_command**: Run a tmux command.
+- **fetch_web_page**: Fetch and extract web page content from a given URL, returning it as Markdown.
+- **fetch_web_page_with_browser**: Fetch and extract web page content from a given URL using a browser, returning it as Markdown. Can handle JavaScript-rendered content.
+- **web_search**: Search the web for information (requires Tavily API key).
+
 ## Directory Structure
 
 ```
@@ -117,6 +129,7 @@ Agent loads configuration files in the following order. Settings in later files 
       {
         "toolName": "web_search",
       },
+      // MCP Tool naming convention: mcp__<serverName>__<toolName>
       {
         "toolName": { "regex": "mcp__playwright__browser_.+" }
       }
@@ -189,5 +202,5 @@ npm run check
 # Fix lint errors
 npm run fix
 # or
-npm run fix-unsafe
+npm run fix -- --unsafe
 ```
