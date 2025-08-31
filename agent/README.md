@@ -4,7 +4,7 @@ A lightweight CLI-based coding agent designed to assist with your development ta
 
 ## Safety Controls
 
-This CLI tool automatically permits certain tool executions but requires explicit approval for security-sensitive operations, such as accessing parent directories and git-ignored files. The security rules are defined in `src/config.mjs#createDefaultAllowedToolUsePatterns` and `src/utils/isSafeToolInput.mjs` within this repository.
+This CLI tool automatically allows the execution of certain tools but requires explicit approval for security-sensitive operations, such as accessing parent directories and git-ignored files. The security rules are defined in `src/config.mjs#createDefaultAllowedToolUsePatterns` and `src/utils/isSafeToolInput.mjs` within this repository.
 
 ## Requirements
 
@@ -20,7 +20,7 @@ Install the dependencies.
 npm install
 ```
 
-Create the user local configuration.
+Create the configuration.
 
 ```js
 // $AGENT_ROOT(where this README file exists)/.config/config.local.json
@@ -67,13 +67,13 @@ Run the agent.
 ./bin/agent-<model>
 ```
 
-Show help message.
+Display the help message.
 
 ```
 /help
 ```
 
-Interrupt the agent during execution with additional instructions:
+Interrupt the agent while it's running by providing additional instructions:
 
 ```sh
 ./bin/agent-interrupt "Please stop and report the current progress and status"
@@ -109,7 +109,7 @@ $AGENT_ROOT (where this README file exists)
 
 ## Configuration
 
-Agent loads configuration files in the following order. Settings in later files will override those in earlier files.
+The agent loads configuration files in the following order. Settings in later files will override those in earlier files.
 
 - `$AGENT_ROOT/.config/config.json`: User configuration for all projects.
 - `$AGENT_ROOT/.config/config.local.json`: User local configuration, typically for sensitive information.
