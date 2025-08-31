@@ -93,7 +93,10 @@ export async function callOpenAIModel(
     if (lastEvent?.type !== "response.completed") {
       const lastEventTrimmed =
         lastEvent?.type === "response.failed"
-          ? { type: lastEvent.type, error: lastEvent.error }
+          ? {
+              type: lastEvent.type,
+              response: { error: lastEvent.response.error },
+            }
           : lastEvent;
       console.error(
         styleText(

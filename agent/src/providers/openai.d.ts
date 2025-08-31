@@ -156,7 +156,9 @@ export type OpenAIStreamEventResponseCompleted = {
 export type OpenAIStreamEventResponseFailed = {
   type: "response.failed";
   sequence_number: number;
-  error: unknown;
+  response: {
+    error: unknown;
+  };
 };
 
 export type OpenAIStreamEventResponseOutputItemAdded = {
