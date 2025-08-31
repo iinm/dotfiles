@@ -89,7 +89,7 @@ The agent can use the following tools to assist with tasks:
 - **tmux_command**: Run a tmux command.
 - **fetch_web_page**: Fetch and extract web page content from a given URL, returning it as Markdown.
 - **fetch_web_page_with_browser**: Fetch and extract web page content from a given URL using a browser, returning it as Markdown. Can handle JavaScript-rendered content.
-- **web_search**: Search the web for information (requires Tavily API key).
+- **search_web**: Search the web for information (requires Tavily API key).
 
 ## Directory Structure
 
@@ -127,7 +127,7 @@ The agent loads configuration files in the following order. Settings in later fi
         "input": { "command": "npm", "args": ["run", { "regex": "^(check|fix)$" }] }
       },
       {
-        "toolName": "web_search",
+        "toolName": "search_web",
       },
       // MCP Tool naming convention: mcp__<serverName>__<toolName>
       {

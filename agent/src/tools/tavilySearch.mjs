@@ -12,7 +12,7 @@ import { noThrow } from "../utils/noThrow.mjs";
 export function createTavilySearchTool(config) {
   return {
     def: {
-      name: "web_search",
+      name: "search_web",
       description: "Search the web for information",
       inputSchema: {
         type: "object",

@@ -445,7 +445,7 @@ function formatToolUse(toolUse) {
     ].join("\n");
   }
 
-  if (toolName === "web_search") {
+  if (toolName === "search_web") {
     /** @type {Partial<TavilySearchInput>} */
     const tavilySearchInput = input;
     return [`tool: ${toolName}`, `query: ${tavilySearchInput.query}`].join(
