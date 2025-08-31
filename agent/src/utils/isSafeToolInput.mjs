@@ -57,7 +57,7 @@ export function isSafeToolInputItem(arg) {
     return true;
   }
 
-  // Allow access to Claude code custom commands.
+  // Allow access to Claude code configurations.
   const claudeCodeConfigAbsPath = path.resolve(".claude");
   if (
     absPath === claudeCodeConfigAbsPath ||
