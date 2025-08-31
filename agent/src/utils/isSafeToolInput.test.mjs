@@ -44,9 +44,6 @@ describe("isSafeToolInput", () => {
 
 describe("isSafeToolInputItem", () => {
   const testCases = [
-    // Invalid types
-    { desc: "number type", arg: 123, expected: false },
-
     // Non-path
     { desc: "command option", arg: "-l", expected: true },
 
@@ -57,7 +54,7 @@ describe("isSafeToolInputItem", () => {
       expected: true,
     },
     {
-      desc: "file in claude code command directory",
+      desc: "file in claude code config directory",
       arg: ".claude/commands/foo",
       expected: true,
     },
@@ -72,6 +69,11 @@ describe("isSafeToolInputItem", () => {
     {
       desc: "parent directory traversal",
       arg: "../parent-file",
+      expected: false,
+    },
+    {
+      desc: "parent directory traversal; start with safe path",
+      arg: `${AGENT_PROJECT_METADATA_DIR}/../../parent-file`,
       expected: false,
     },
     { desc: "git ignored file", arg: "node_modules", expected: false },

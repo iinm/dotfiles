@@ -11,10 +11,6 @@ export function isSafeToolInput(input) {
     return true;
   }
 
-  if (input === null) {
-    return true;
-  }
-
   if (typeof input === "string") {
     return isSafeToolInputItem(input);
   }
@@ -24,6 +20,9 @@ export function isSafeToolInput(input) {
   }
 
   if (typeof input === "object") {
+    if (input === null) {
+      return true;
+    }
     return Object.values(input).every((value) => isSafeToolInput(value));
   }
 
@@ -31,31 +30,10 @@ export function isSafeToolInput(input) {
 }
 
 /**
- * @param {unknown} arg
+ * @param {string} arg
  * @returns {boolean}
  */
 export function isSafeToolInputItem(arg) {
-  if (typeof arg !== "string") {
-    return false;
-  }
-
-  // Exceptions:
-  // Allow access to agent project metadata directory.
-  if (
-    arg === AGENT_PROJECT_METADATA_DIR ||
-    arg.startsWith(`${AGENT_PROJECT_METADATA_DIR}${path.sep}`)
-  ) {
-    return true;
-  }
-  // Allow access to Claude code custom commands.
-  const claudeCodeCommandsDir = path.join(".claude", "commands");
-  if (
-    arg === claudeCodeCommandsDir ||
-    arg.startsWith(`${claudeCodeCommandsDir}${path.sep}`)
-  ) {
-    return true;
-  }
-
   // Note: An argument can be a command option (e.g., '-l').
   // It will then create an absolute path like `/path/to/project/-l`.
   const absPath = path.resolve(arg);
@@ -67,6 +45,25 @@ export function isSafeToolInputItem(arg) {
     !absPath.startsWith(`${workingDir}${path.sep}`)
   ) {
     return false;
+  }
+
+  // Exceptions:
+  // Allow access to agent project metadata directory.
+  const projectMetadataDirAbsPath = path.resolve(AGENT_PROJECT_METADATA_DIR);
+  if (
+    absPath === projectMetadataDirAbsPath ||
+    absPath.startsWith(`${projectMetadataDirAbsPath}${path.sep}`)
+  ) {
+    return true;
+  }
+
+  // Allow access to Claude code custom commands.
+  const claudeCodeConfigAbsPath = path.resolve(".claude");
+  if (
+    absPath === claudeCodeConfigAbsPath ||
+    absPath.startsWith(`${claudeCodeConfigAbsPath}${path.sep}`)
+  ) {
+    return true;
   }
 
   // Deny git ignored files (which may contain sensitive information or should not be accessed)
