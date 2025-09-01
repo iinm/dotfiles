@@ -41,14 +41,11 @@ export const writeFileTool = {
         );
       }
 
-      return new Promise((resolve, reject) => {
-        fs.writeFile(filePath, content, (error) => {
-          if (error) {
-            reject(error);
-          }
-          resolve(`Wrote to file: ${filePath}`);
-        });
-      });
+      // Ensure the destination directory exists before writing
+      const dir = path.dirname(absFilePath);
+      await fs.promises.mkdir(dir, { recursive: true });
+      await fs.promises.writeFile(absFilePath, content, "utf8");
+      return `Wrote to file: ${filePath}`;
     }),
 
   /**

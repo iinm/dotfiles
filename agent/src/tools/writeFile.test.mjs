@@ -18,9 +18,10 @@ describe("writeFileTool", () => {
 
   it("writes to a file", async () => {
     // given:
-    const tmpFilePath = `tmp/writeFileTest-${generateRandomString()}.txt`;
-    fs.mkdirSync("tmp", { recursive: true });
-    cleanups.push(async () => fs.unlinkSync(tmpFilePath));
+    const tmpFilePath = `tmp/writeFileTest/writeFileTest-${generateRandomString()}.txt`;
+    cleanups.push(async () =>
+      fs.rmdirSync("tmp/writeFileTest", { recursive: true }),
+    );
 
     // when:
     const result = await writeFileTool.impl({
