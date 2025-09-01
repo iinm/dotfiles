@@ -72,6 +72,11 @@ describe("isSafeToolInputItem", () => {
       expected: false,
     },
     {
+      desc: "agent config file",
+      arg: `${AGENT_PROJECT_METADATA_DIR}/config.mjs`,
+      expected: false,
+    },
+    {
       desc: "parent directory traversal; start with safe path",
       arg: `${AGENT_PROJECT_METADATA_DIR}/../../parent-file`,
       expected: false,

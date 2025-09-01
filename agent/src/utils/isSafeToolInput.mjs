@@ -49,19 +49,16 @@ export function isSafeToolInputItem(arg) {
 
   // Exceptions:
   // Allow access to agent project metadata directory.
-  const projectMetadataDirAbsPath = path.resolve(AGENT_PROJECT_METADATA_DIR);
+  const agentMemoryDir = path.resolve(
+    path.join(AGENT_PROJECT_METADATA_DIR, "memory"),
+  );
+  const agentTempDir = path.resolve(
+    path.join(AGENT_PROJECT_METADATA_DIR, "tmp"),
+  );
   if (
-    absPath === projectMetadataDirAbsPath ||
-    absPath.startsWith(`${projectMetadataDirAbsPath}${path.sep}`)
-  ) {
-    return true;
-  }
-
-  // Allow access to Claude code configurations.
-  const claudeCodeConfigAbsPath = path.resolve(".claude");
-  if (
-    absPath === claudeCodeConfigAbsPath ||
-    absPath.startsWith(`${claudeCodeConfigAbsPath}${path.sep}`)
+    [agentMemoryDir, agentTempDir].includes(absPath) ||
+    absPath.startsWith(`${agentMemoryDir}${path.sep}`) ||
+    absPath.startsWith(`${agentTempDir}${path.sep}`)
   ) {
     return true;
   }
