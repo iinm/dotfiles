@@ -103,8 +103,8 @@ $AGENT_ROOT (where this README file exists)
   \__ $AGENT_PROJECT_METADATA_DIR (default: .agent)
         \__ config.json        # Project-specific configuration
         \__ config.local.json  # Project-specific local configuration (including secrets)
-        \__ memory/
-              \__ <yyyy-mm-dd-hhmm>--<task-title>.md  # Task-specific memory files
+        \__ memory/            # Task-specific memory files
+        \__ tmp/               # Temporary files
 ```
 
 ## Configuration
@@ -126,6 +126,10 @@ The agent loads configuration files in the following order. Settings in later fi
         "toolName": "exec_command",
         "input": { "command": "npm", "args": ["run", { "regex": "^(check|fix)$" }] }
       },
+      {
+        "toolName": { "regex": "^(write_file|patch_file)$" },
+        "input": { "filePath": { "regex": "^\\.agent/memory/.+\\.md$" } }
+      }
       {
         "toolName": "search_web",
       },

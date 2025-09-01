@@ -7,6 +7,10 @@
           "command": "npm",
           "args": ["run", { "regex": "^(check|fix)$" }]
         }
+      },
+      {
+        "toolName": { "regex": "^(write_file|patch_file)$" },
+        "input": { "filePath": { "regex": "^\\.agent/memory/.+\\.md$" } }
       }
     ]
   },
