@@ -58,7 +58,7 @@ Create a commit.
     `.trim(),
   },
   {
-    command: "/project-knowledge-discovery",
+    command: "/project.knowledge-discovery",
     prompt: () => "Run project knowledge discovery process.",
   },
 ];
@@ -80,7 +80,7 @@ Commands:
   /memory.resume               - Load a previously saved task memory
   /commit                      - Create a commit message based on staged changes
   /commit.by-user              - Create a commit without Co-authored-by
-  /project-knowledge-discovery - Start project knowledge discovery process
+  /project.knowledge-discovery - Start project knowledge discovery process
   /clear                       - Clear conversation
   /resume                      - Resume conversation after an LLM provider error
   /debug.dump                  - Save current messages to a JSON file
