@@ -12,8 +12,8 @@ import fs from "node:fs";
 import readline from "node:readline";
 import { styleText } from "node:util";
 import { createPatch } from "diff";
-import { notify } from "./utils/notify.mjs";
 import { consumeInterruptMessage } from "./utils/consumeInterruptMessage.mjs";
+import { notify } from "./utils/notify.mjs";
 
 const PROMPT_COMMANDS = [
   {
@@ -58,7 +58,7 @@ Create a commit.
     `.trim(),
   },
   {
-    command: "/remind.project-knowledge-discovery",
+    command: "/project-knowledge-discovery",
     prompt: () => "Run project knowledge discovery process.",
   },
 ];
@@ -69,22 +69,22 @@ const SLASH_COMMANDS = [
   ...PROMPT_COMMANDS.map(({ command }) => command),
   "/clear",
   "/resume",
-  "/messages.dump",
-  "/messages.load",
+  "/debug.dump",
+  "/debug.load",
 ];
 
 const HELP_MESSAGE = `
 Commands:
-  /help                               - Display this help message
-  /memory.save                        - Save the current task state to memory
-  /memory.resume                      - Load a previously saved task memory
-  /commit                             - Create a commit message based on staged changes
-  /commit.by-user                     - Create a commit without Co-authored-by
-  /remind.project-knowledge-discovery - Start project knowledge discovery process
-  /clear                              - Clear conversation
-  /resume                             - Resume conversation after an LLM provider error
-  /messages.dump                      - Save current messages to a JSON file
-  /messages.load                      - Load messages from a JSON file
+  /help                        - Display this help message
+  /memory.save                 - Save the current task state to memory
+  /memory.resume               - Load a previously saved task memory
+  /commit                      - Create a commit message based on staged changes
+  /commit.by-user              - Create a commit without Co-authored-by
+  /project-knowledge-discovery - Start project knowledge discovery process
+  /clear                       - Clear conversation
+  /resume                      - Resume conversation after an LLM provider error
+  /debug.dump                  - Save current messages to a JSON file
+  /debug.load                  - Load messages from a JSON file
 
 File Input Syntax:
   @path/to/file     - Read content from a file
@@ -229,13 +229,13 @@ export function startInteractiveSession({
       return;
     }
 
-    if (inputTrimmed.toLowerCase() === "/messages.dump") {
+    if (inputTrimmed.toLowerCase() === "/debug.dump") {
       await agentCommands.dumpMessages();
       cli.prompt();
       return;
     }
 
-    if (inputTrimmed.toLowerCase() === "/messages.load") {
+    if (inputTrimmed.toLowerCase() === "/debug.load") {
       await agentCommands.loadMessages();
       cli.prompt();
       return;
