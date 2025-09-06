@@ -13,6 +13,7 @@ import readline from "node:readline";
 import { styleText } from "node:util";
 import { createPatch } from "diff";
 import { notify } from "./utils/notify.mjs";
+import { consumeInterruptMessage } from "./utils/consumeInterruptMessage.mjs";
 
 const PROMPT_COMMANDS = [
   {
@@ -183,6 +184,9 @@ export function startInteractiveSession({
 
     // reset prompt
     cli.setPrompt(cliPrompt);
+
+    // clear interrupt message
+    await consumeInterruptMessage();
 
     if (["/help", "help"].includes(inputTrimmed.toLowerCase())) {
       console.log(`\n${HELP_MESSAGE}`);
