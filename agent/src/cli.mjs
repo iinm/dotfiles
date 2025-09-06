@@ -21,16 +21,6 @@ const PROMPT_COMMANDS = [
     prompt: () => "Save task memory",
   },
   {
-    command: "/memory.resume",
-    prompt: () =>
-      `
-Load task memory and resume work.
-- Display available task memory files with numbers and prompt the user to select one by number.
-  - Wait for user selection before reading memory contents.
-- Read the content of the selected memory file after the user selects it.
-    `.trim(),
-  },
-  {
     command: "/commit",
     /**
      * @param {{modelName: string}} args
@@ -77,7 +67,6 @@ const HELP_MESSAGE = `
 Commands:
   /help                        - Display this help message
   /memory.save                 - Save the current task state to memory
-  /memory.resume               - Load a previously saved task memory
   /commit                      - Create a commit message based on staged changes
   /commit.by-user              - Create a commit without Co-authored-by
   /project.knowledge-discovery - Start project knowledge discovery process
