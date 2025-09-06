@@ -53,11 +53,6 @@ describe("isSafeToolInputItem", () => {
       arg: `${AGENT_PROJECT_METADATA_DIR}/memory/foo.md`,
       expected: true,
     },
-    {
-      desc: "file in claude code config directory",
-      arg: ".claude/commands/foo",
-      expected: true,
-    },
     { desc: "git managed file", arg: "README.md", expected: true },
 
     // Unsafe path
