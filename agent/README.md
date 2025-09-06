@@ -1,6 +1,6 @@
 # Agent
 
-A lightweight CLI-based coding agent designed to assist with your development tasks.
+A lightweight CLI-based coding agent.
 
 ## Safety Controls
 
@@ -101,10 +101,11 @@ $AGENT_ROOT (where this README file exists)
 
 <project-root>
   \__ $AGENT_PROJECT_METADATA_DIR (default: .agent)
-        \__ config.json        # Project-specific configuration
-        \__ config.local.json  # Project-specific local configuration (including secrets)
-        \__ memory/            # Task-specific memory files
-        \__ tmp/               # Temporary files
+        \__ config.json            # Project-specific configuration
+        \__ config.local.json      # Project-specific local configuration (including secrets)
+        \__ memory/                # Task-specific memory files
+        \__ tmp/                   # Temporary files
+        \__ interrupt-message.txt  # Interrupt message consumed by the agent
 ```
 
 ## Configuration
@@ -112,9 +113,9 @@ $AGENT_ROOT (where this README file exists)
 The agent loads configuration files in the following order. Settings in later files will override those in earlier files.
 
 - `$AGENT_ROOT/.config/config.json`: User configuration for all projects.
-- `$AGENT_ROOT/.config/config.local.json`: User local configuration, typically for sensitive information.
+- `$AGENT_ROOT/.config/config.local.json`: User local configuration, typically for API keys.
 - `$AGENT_PROJECT_METADATA_DIR/config.json`: Project-specific configuration.
-- `$AGENT_PROJECT_METADATA_DIR/config.local.json`: Project-specific local configuration, typically for sensitive information or local development overrides.
+- `$AGENT_PROJECT_METADATA_DIR/config.local.json`: Project-specific local configuration, typically for API keys or local development overrides.
 
 ### Example
 
@@ -143,7 +144,7 @@ The agent loads configuration files in the following order. Settings in later fi
     "max": 50
   },
 
-  // (Optional) Sandbox environment
+  // (Optional) Sandbox environment for the exec_command and tmux_command tools
   // https://github.com/iinm/dotfiles/tree/main/agent-sandbox
   "sandbox": {
     "command": "agent-sandbox",
@@ -187,6 +188,7 @@ The agent loads configuration files in the following order. Settings in later fi
       "command": "npx",
       "args": ["-y", "mcp-remote", "https://mcp.notion.com/sse"],
       "options": {
+        // Enable only specific tools (optional - if not specified, all tools are enabled)
         "enabledTools": ["search", "fetch"]
       }
     }
