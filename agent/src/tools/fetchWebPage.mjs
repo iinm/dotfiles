@@ -34,7 +34,9 @@ export const fetchWebPageTool = {
       const { JSDOM } = await import("jsdom");
       const TurndownService = (await import("turndown")).default;
 
-      const response = await fetch(input.url);
+      const response = await fetch(input.url, {
+        signal: AbortSignal.timeout(30 * 1000),
+      });
       const html = await response.text();
       const dom = new JSDOM(html, { url: input.url });
       const reader = new Readability(dom.window.document);
