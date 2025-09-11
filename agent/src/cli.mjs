@@ -17,7 +17,7 @@ import { notify } from "./utils/notify.mjs";
 
 const PROMPT_COMMANDS = [
   {
-    command: "/memory.save",
+    command: "/save",
     prompt: () => "Save task memory",
   },
   {
@@ -48,7 +48,7 @@ Create a commit.
     `.trim(),
   },
   {
-    command: "/project.knowledge-discovery",
+    command: "/discover",
     prompt: () => "Run project knowledge discovery process.",
   },
 ];
@@ -57,23 +57,21 @@ Create a commit.
 const SLASH_COMMANDS = [
   "/help",
   ...PROMPT_COMMANDS.map(({ command }) => command),
-  "/clear",
-  "/resume",
+  "/debug.resume",
   "/debug.dump",
   "/debug.load",
 ];
 
 const HELP_MESSAGE = `
 Commands:
-  /help                        - Display this help message
-  /memory.save                 - Save the current task state to memory
-  /commit                      - Create a commit message based on staged changes
-  /commit.co-authored          - Create a commit with Co-authored-by
-  /project.knowledge-discovery - Start project knowledge discovery process
-  /clear                       - Clear conversation
-  /resume                      - Resume conversation after an LLM provider error
-  /debug.dump                  - Save current messages to a JSON file
-  /debug.load                  - Load messages from a JSON file
+  /help               - Display this help message
+  /save               - Save the current task state to memory
+  /commit             - Create a commit message based on staged changes
+  /commit.co-authored - Create a commit with Co-authored-by
+  /discover           - Start project knowledge discovery process
+  /debug.resume       - Resume conversation after an LLM provider error
+  /debug.dump         - Save current messages to a JSON file
+  /debug.load         - Load messages from a JSON file
 
 File Input Syntax:
   @path/to/file     - Read content from a file
@@ -209,12 +207,6 @@ export function startInteractiveSession({
 
       userEventEmitter.emit("userInput", fileContentOrError);
       state.turn = false;
-      return;
-    }
-
-    if (inputTrimmed.toLowerCase() === "/clear") {
-      agentCommands.clearMessages();
-      cli.prompt();
       return;
     }
 

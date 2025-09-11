@@ -14,7 +14,6 @@ export type Agent = {
 };
 
 export type AgentCommands = {
-  clearMessages: () => void;
   dumpMessages: () => Promise<void>;
   loadMessages: () => Promise<void>;
 };

@@ -40,14 +40,6 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
   /** @type {ToolDefinition[]} */
   const toolDefs = tools.map(({ def }) => def);
 
-  /**
-   * Clear all messages except the system prompt
-   */
-  function clearMessages() {
-    // Keep only the system message (first message)
-    state.messages.splice(1);
-  }
-
   async function dumpMessages() {
     const filePath = path.join(AGENT_PROJECT_METADATA_DIR, "messages.json");
     try {
@@ -130,7 +122,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
           content: [{ type: "text", text: input }],
         });
       }
-    } else if (input.toLowerCase() === "/resume") {
+    } else if (input.toLowerCase() === "/debug.resume") {
       // Resume the conversation stopped by rate limit, etc.
     } else {
       // No pending tool call
@@ -235,7 +227,6 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
     userEventEmitter,
     agentEventEmitter,
     agentCommands: {
-      clearMessages,
       dumpMessages,
       loadMessages,
     },
