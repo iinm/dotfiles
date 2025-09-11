@@ -22,6 +22,17 @@ const PROMPT_COMMANDS = [
   },
   {
     command: "/commit",
+    prompt: () =>
+      `
+Create a commit.
+- Understand the staged changes: exec_command { command: "git", args: ["diff", "--staged"] }
+- Check the commit message format: exec_command { command: "git", args: ["log", "--no-merges", "--oneline", "-n", "10"] }
+- Create a concise and descriptive commit message that follows the project's commit convention.
+- Create a commit: exec_command { command: "git", args: ["commit", "-m", "<commit message>"] }
+    `.trim(),
+  },
+  {
+    command: "/commit.co-authored",
     /**
      * @param {{modelName: string}} args
      * @returns {string}
@@ -34,17 +45,6 @@ Create a commit.
 - Create a concise and descriptive commit message that follows the project's commit convention.
 - Use this exact format to include Co-authored-by information:
   exec_command: { command: "git", args: ["commit", "-m", "<commit message>", "-m", "", "-m", "Co-authored-by: Agent by iinm <agent-by-iinm+${modelName}@localhost>"] }
-    `.trim(),
-  },
-  {
-    command: "/commit.by-user",
-    prompt: () =>
-      `
-Create a commit.
-- Understand the staged changes: exec_command { command: "git", args: ["diff", "--staged"] }
-- Check the commit message format: exec_command { command: "git", args: ["log", "--no-merges", "--oneline", "-n", "10"] }
-- Create a concise and descriptive commit message that follows the project's commit convention.
-- Create a commit: exec_command { command: "git", args: ["commit", "-m", "<commit message>"] }
     `.trim(),
   },
   {
@@ -68,7 +68,7 @@ Commands:
   /help                        - Display this help message
   /memory.save                 - Save the current task state to memory
   /commit                      - Create a commit message based on staged changes
-  /commit.by-user              - Create a commit without Co-authored-by
+  /commit.co-authored          - Create a commit with Co-authored-by
   /project.knowledge-discovery - Start project knowledge discovery process
   /clear                       - Clear conversation
   /resume                      - Resume conversation after an LLM provider error
