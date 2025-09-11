@@ -13,6 +13,11 @@ export const TRUSTED_CONFIG_HASHES_DIR = path.join(
 export const AGENT_PROJECT_METADATA_DIR =
   process.env.AGENT_PROJECT_METADATA_DIR || ".agent";
 
+export const MESSAGES_DUMP_FILE_PATH = path.join(
+  AGENT_PROJECT_METADATA_DIR,
+  "messages.json",
+);
+
 export const AGENT_MODEL = process.env.AGENT_MODEL || "";
 
 export const AGENT_NOTIFY_CMD_DEFAULT = path.join(

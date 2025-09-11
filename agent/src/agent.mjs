@@ -6,9 +6,8 @@
 
 import { EventEmitter } from "node:events";
 import fs from "node:fs/promises";
-import path from "node:path";
 import { styleText } from "node:util";
-import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
+import { MESSAGES_DUMP_FILE_PATH } from "./env.mjs";
 import { consumeInterruptMessage } from "./utils/consumeInterruptMessage.mjs";
 
 /**
@@ -41,7 +40,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
   const toolDefs = tools.map(({ def }) => def);
 
   async function dumpMessages() {
-    const filePath = path.join(AGENT_PROJECT_METADATA_DIR, "messages.json");
+    const filePath = MESSAGES_DUMP_FILE_PATH;
     try {
       await fs.writeFile(filePath, JSON.stringify(state.messages, null, 2));
       console.log(`Messages dumped to ${filePath}`);
@@ -58,7 +57,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
   }
 
   async function loadMessages() {
-    const filePath = path.join(AGENT_PROJECT_METADATA_DIR, "messages.json");
+    const filePath = MESSAGES_DUMP_FILE_PATH;
     try {
       const data = await fs.readFile(filePath, "utf-8");
       const loadedMessages = JSON.parse(data);
