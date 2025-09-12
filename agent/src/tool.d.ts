@@ -33,7 +33,7 @@ export type StructuredToolResultContent =
 
 export type ToolUseApproverConfig = {
   patterns: ToolUsePattern[];
-  max: number;
+  maxApprovals: number;
 
   /**
    * Mask the input before auto-approval checks and recording.
@@ -50,6 +50,7 @@ export type ToolUseApproverConfig = {
 export type ToolUseApprover = {
   isAllowedToolUse: (toolUse: MessageContentToolUse) => boolean;
   allowToolUse: (toolUse: MessageContentToolUse) => void;
+  resetApprovalCount: () => void;
 };
 
 export type ToolUsePattern = {

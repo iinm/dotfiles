@@ -10,26 +10,19 @@ import { matchValue } from "./utils/matchValue.mjs";
  * @param {ToolUseApproverConfig} config
  * @returns {ToolUseApprover}
  */
-export function createToolUseApprover({ patterns, max, maskApprovalInput }) {
+export function createToolUseApprover({
+  patterns,
+  maxApprovals: max,
+  maskApprovalInput,
+}) {
   const state = {
-    approveCount: 0,
+    approvalCount: 0,
     /** @type {ToolUsePattern[]} */
     allowedToolUseInSession: [],
   };
 
-  const approve = () => {
-    state.approveCount += 1;
-    if (state.approveCount <= max) {
-      return true;
-    }
-
-    state.approveCount = 0;
-    return false;
-  };
-
-  const reject = () => {
-    state.approveCount = 0;
-    return false;
+  const resetApproveCount = () => {
+    state.approvalCount = 0;
   };
 
   /**
@@ -41,10 +34,11 @@ export function createToolUseApprover({ patterns, max, maskApprovalInput }) {
         matchValue(toolUse, pattern) &&
         isSafeToolInput(maskApprovalInput(toolUse.toolName, toolUse.input))
       ) {
-        return approve();
+        state.approvalCount += 1;
+        return state.approvalCount <= max;
       }
     }
-    return reject();
+    return false;
   };
 
   /**
@@ -60,5 +54,6 @@ export function createToolUseApprover({ patterns, max, maskApprovalInput }) {
   return {
     isAllowedToolUse,
     allowToolUse,
+    resetApprovalCount: resetApproveCount,
   };
 }

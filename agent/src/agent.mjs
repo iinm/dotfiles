@@ -80,6 +80,8 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
   }
 
   userEventEmitter.on("userInput", async (input) => {
+    toolUseApprover.resetApprovalCount();
+
     const lastMessage = state.messages.at(-1);
 
     if (lastMessage?.content.some((part) => part.type === "tool_use")) {

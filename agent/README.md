@@ -141,7 +141,7 @@ The agent loads configuration files in the following order. Settings in later fi
     ],
 
     // The maximum number of automatic approvals.
-    "max": 50
+    "maxApprovals": 50
   },
 
   // (Optional) Sandbox environment for the exec_command and tmux_command tools

@@ -6,7 +6,7 @@ export type AppConfig = {
   providers?: ModelProvidersConfig;
   autoApproval?: {
     patterns?: ToolUsePattern[];
-    max?: number;
+    maxApprovals?: number;
   };
   sandbox?: ExecCommandSanboxConfig;
   tools?: {

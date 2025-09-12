@@ -89,7 +89,7 @@ import { createSessionId } from "./utils/createSessionId.mjs";
   }
 
   const toolUseApprover = createToolUseApprover({
-    max: appConfig.autoApproval?.max || 0,
+    maxApprovals: appConfig.autoApproval?.maxApprovals || 0,
     patterns: appConfig.autoApproval?.patterns || [],
     maskApprovalInput: (toolName, input) => {
       for (const tool of builtinTools) {

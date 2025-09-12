@@ -43,7 +43,7 @@ export async function loadAppConfig({ tmuxSessionId }) {
       patterns: createDefaultAllowedToolUsePatterns({
         tmuxSessionId,
       }),
-      max: 50,
+      maxApprovals: 50,
     },
     notifyCmd: AGENT_NOTIFY_CMD_DEFAULT,
     providers: {
@@ -83,7 +83,9 @@ export async function loadAppConfig({ tmuxSessionId }) {
           ...(merged.autoApproval?.patterns ?? []),
           ...(config.autoApproval?.patterns ?? []),
         ],
-        max: config.autoApproval?.max ?? merged.autoApproval?.max,
+        maxApprovals:
+          config.autoApproval?.maxApprovals ??
+          merged.autoApproval?.maxApprovals,
       },
       sandbox: config.sandbox ?? merged.sandbox,
       tools: {
