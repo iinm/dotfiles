@@ -152,7 +152,7 @@ else
 fi
 nc_pid=$!
 # when:
-out=$(agent-sandbox --dockerfile Dockerfile.minimum --keep-alive 0 busybox nc -w 2 host.docker.internal < /dev/null 8000 2>&1) || status=$?
+out=$(agent-sandbox --dockerfile Dockerfile.minimum --keep-alive 0 busybox nc -w 2 host.docker.internal 8000 < /dev/null 2>&1) || status=$?
 # then:
 test "$status" -ne 0
 grep -qE "nc: bad address" <<< "$out"
