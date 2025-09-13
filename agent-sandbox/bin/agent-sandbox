@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.30"
+SCRIPT_VERSION="0.0.31"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -220,7 +220,7 @@ main() {
         shift 2
         ;;
       --            ) shift; continue ;;
-      --*           ) echo "Error: unknown option: $1" >&2; return 1 ;;
+      --*           ) echo "Error: Unknown option: $1" >&2; return 1 ;;
       *             ) break ;;
     esac
   done
@@ -621,7 +621,7 @@ cleanup_idle_containers() {
 
   log "Cleaning up networks."
   for network_name in $(docker network ls --format '{{.Name}}' --filter "name=^$image_name"); do
-    log "Checking network $network_name is used."
+    log "Checking if network $network_name is used."
     # Note: network_name = container_name
     if ! docker inspect --type container "$network_name" &> /dev/null; then
       log "Removing network."
@@ -705,7 +705,7 @@ setup_container_firewall() {
     local domain_address_count=0
     for address in $(getent hosts "$host" | awk '{print $1}'; dig +short A "$host"); do
       if ! grep -qE "$address_pattern" <<< "$address"; then
-        log "Warn: Ignore invalid address $address of $host"
+        log "Warning: Ignoring invalid address $address of $host"
         continue
       fi
 
@@ -789,7 +789,7 @@ setup_container_user() {
   group=$(getent group "$container_default_group_id" | cut -d: -f1 2> /dev/null || echo "")
 
   if test "$container_default_user_id" -eq 0; then
-    log "Container default user is root, creating sandbox user/group"
+    log "Container's default user is root, creating sandbox user/group"
     
     if ! getent group sandbox &> /dev/null; then
       log "Creating group sandbox"
