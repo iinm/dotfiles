@@ -103,9 +103,10 @@ $AGENT_ROOT (where this README file exists)
   \__ $AGENT_PROJECT_METADATA_DIR (default: .agent)
         \__ config.json            # Project-specific configuration
         \__ config.local.json      # Project-specific local configuration (including secrets)
-        \__ memory/                # Task-specific memory files
-        \__ tmp/                   # Temporary files
         \__ interrupt-message.txt  # Interrupt message consumed by the agent
+        \__ memory/                # Task-specific memory files
+        \__ instructions.md        # (Example) Task-specific instructions
+        \__ sandbox/               # (Example) Sandbox configuration
 ```
 
 ## Configuration
