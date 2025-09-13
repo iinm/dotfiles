@@ -74,9 +74,9 @@ Commands:
   /debug.load         - Load messages from a JSON file
 
 File Input Syntax:
-  @path/to/file     - Read content from a file
-  @path/to/file:N   - Read line N from a file
-  @path/to/file:N-M - Read lines N to M from a file
+  !path/to/file     - Read content from a file
+  !path/to/file:N   - Read line N from a file
+  !path/to/file:N-M - Read lines N to M from a file
 `.trim();
 
 /**
@@ -182,7 +182,7 @@ export function startInteractiveSession({
     }
 
     // Handle file reading when message starts with @
-    if (inputTrimmed.startsWith("@")) {
+    if (inputTrimmed.startsWith("!")) {
       const fileMention = parseFileMention(inputTrimmed);
       if (fileMention instanceof Error) {
         console.log(styleText("red", `\n${fileMention.message}`));
@@ -543,10 +543,10 @@ function formatProviderTokenUsage(usage) {
  * @returns {{filePath: string, startLine?: number, endLine?: number} | Error}
  */
 function parseFileMention(fileMentionString) {
-  const match = fileMentionString.match(/^@([^:]+)(?::(\d+)(?:-(\d+))?)?$/);
+  const match = fileMentionString.match(/^!([^:]+)(?::(\d+)(?:-(\d+))?)?$/);
   if (!match) {
     return new Error(
-      "Invalid format. Use: @path/to/file[:line] or @path/to/file[:start-end]",
+      "Invalid format. Use: !path/to/file[:line] or !path/to/file[:start-end]",
     );
   }
   const [, filePath, startLine, endLine] = match;
