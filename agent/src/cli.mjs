@@ -8,12 +8,12 @@
  * @import { TavilySearchInput } from "./tools/tavilySearch"
  */
 
-import fs from "node:fs";
 import readline from "node:readline";
 import { styleText } from "node:util";
 import { createPatch } from "diff";
 import { consumeInterruptMessage } from "./utils/consumeInterruptMessage.mjs";
 import { notify } from "./utils/notify.mjs";
+import { readFileRange } from "./utils/readFileRange.mjs";
 
 const PROMPT_COMMANDS = [
   {
@@ -189,7 +189,7 @@ export function startInteractiveSession({
         cli.prompt();
         return;
       }
-      const fileContentOrError = readFileContent(
+      const fileContentOrError = await readFileRange(
         fileMention.filePath,
         fileMention.startLine,
         fileMention.endLine,
@@ -555,44 +555,4 @@ function parseFileMention(fileMentionString) {
     startLine: startLine ? Number.parseInt(startLine, 10) : undefined,
     endLine: endLine ? Number.parseInt(endLine, 10) : undefined,
   };
-}
-
-/**
- * @param {string} filePath
- * @param {number=} startLine
- * @param {number=} endLine
- * @returns {string | Error}
- */
-function readFileContent(filePath, startLine, endLine) {
-  if (!fs.existsSync(filePath)) {
-    return new Error(`File not found: ${filePath}`);
-  }
-
-  let fileContent;
-  try {
-    fileContent = fs.readFileSync(filePath, "utf-8");
-  } catch (error) {
-    return new Error(
-      `Error reading file: ${error instanceof Error ? error.message : String(error)}`,
-    );
-  }
-
-  const lines = fileContent.split("\n");
-
-  if (startLine) {
-    const start = startLine;
-    const end = endLine ? endLine : start;
-
-    if (
-      start < 1 ||
-      start > lines.length ||
-      end < start ||
-      end > lines.length
-    ) {
-      return new Error(`Invalid line range. File has ${lines.length} lines.`);
-    }
-
-    return lines.slice(start - 1, end).join("\n");
-  }
-  return fileContent;
 }
