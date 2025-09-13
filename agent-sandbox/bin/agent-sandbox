@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.31"
+SCRIPT_VERSION="0.0.32"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -119,9 +119,8 @@ Examples:
 
 Preset Configuration:
 
-  When --dockerfile is not specified, a preset Debian 12 image is used with:
+  When --dockerfile is not specified, a preset Node.js LTS image is used with:
   - System packages: busybox, bash, zsh (with grml config), ripgrep, fd, dig, curl, git
-  - Node.js v22.17.1 with npm
   - mise-en-place package manager for additional runtime installations
   - AI coding assistants: Claude Code, Gemini CLI, Codex CLI
   - Persistent storage for shell history, git config, and AI tool configurations
@@ -864,9 +863,7 @@ setup_container_user() {
 
 print_preset_dockerfile() {
   cat << 'EOF'
-FROM debian:12
-
-ARG NODE_VERSION="22.17.1"
+FROM node:lts
 
 RUN apt update && apt install -y \
       busybox \
@@ -877,7 +874,8 @@ RUN apt update && apt install -y \
     && bash -c 'ln -s $(which fdfind) /usr/local/bin/fd' \
     && echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen \
     && echo 'ja_JP.UTF-8 UTF-8' >> /etc/locale.gen \
-    && locale-gen 
+    && locale-gen \
+    && npm install -g npm@latest
 
 # mise-en-place: https://mise.jdx.dev/
 RUN install -dm 755 /etc/apt/keyrings \
@@ -892,12 +890,8 @@ RUN groupadd sandbox \
     && mkdir -p /sandbox/tools && chown sandbox:sandbox /sandbox/tools
 
 USER sandbox
-
-# Install Node.js
-RUN curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-$(uname -m | sed 's,x86_64,x64,; s,aarch64,arm64,').tar.xz" | busybox xz -dc | tar -C /sandbox/tools -xf - \
-    && mv /sandbox/tools/node-v${NODE_VERSION}* /sandbox/tools/node \
-    && env PATH=/sandbox/tools/node/bin:$PATH npm install -g npm@latest
-ENV PATH=/sandbox/tools/node/bin:$PATH
+ENV NPM_CONFIG_PREFIX=/sandbox/tools/npm-global
+ENV PATH=/sandbox/tools/npm-global/bin:$PATH
 
 # Install coding agents
 RUN npm install -g @anthropic-ai/claude-code \
