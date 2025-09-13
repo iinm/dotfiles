@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.29"
+SCRIPT_VERSION="0.0.30"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -524,7 +524,7 @@ EOF
 
   run cleanup_idle_containers "$IMAGE_NAME"
 
-  if test "$no_cache" = "no" && docker ps | grep -q "$CONTAINER_NAME"; then
+  if test "$no_cache" = "no" && docker inspect --type container "$CONTAINER_NAME" &> /dev/null; then
     log "Container is already running. Reusing $CONTAINER_NAME"
   else
     if test "$skip_build" = "yes"; then
@@ -623,7 +623,7 @@ cleanup_idle_containers() {
   for network_name in $(docker network ls --format '{{.Name}}' --filter "name=^$image_name"); do
     log "Checking network $network_name is used."
     # Note: network_name = container_name
-    if test -z "$(docker ps -a --format '{{.Names}}' --filter "name=$network_name")"; then
+    if ! docker inspect --type container "$network_name" &> /dev/null; then
       log "Removing network."
       docker network rm "$network_name"
     fi
