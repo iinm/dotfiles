@@ -218,6 +218,8 @@ agent-sandbox echo hello | grep -qE "^hello$"
 
 
 echo "case: remove network if it fails to start container"
-agent-sandbox --dockerfile Dockerfile.minimum --env-file no-such-file --keep-alive 0 --allow-net --verbose true \
-  2>&1 \
-  | grep -qE "Removing network"
+# when:
+out=$(agent-sandbox --dockerfile Dockerfile.minimum --env-file no-such-file --keep-alive 0 --allow-net --verbose true 2>&1) || status=$?
+# then:
+test "$status" -ne 0
+grep -qE "Removing network" <<< "$out"
