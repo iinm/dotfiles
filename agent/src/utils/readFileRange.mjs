@@ -1,12 +1,10 @@
 import fs from "node:fs/promises";
 
 /**
- * @param {string} filePath
- * @param {number=} startLine
- * @param {number=} endLine
+ * @param {{filePath: string, startLine?: number, endLine?: number}} fileRange
  * @returns {Promise<string | Error>}
  */
-export async function readFileRange(filePath, startLine, endLine) {
+export async function readFileRange({ filePath, startLine, endLine }) {
   /** @type {string} */
   let fileContent;
   try {
@@ -24,7 +22,9 @@ export async function readFileRange(filePath, startLine, endLine) {
     const end = endLine ? endLine : start;
 
     if (!(1 <= start && start <= end && end <= lines.length)) {
-      return new Error(`Invalid line range. File has ${lines.length} lines.`);
+      return new Error(
+        `Invalid line range. File ${filePath} has ${lines.length} lines.`,
+      );
     }
 
     return lines.slice(start - 1, end).join("\n");

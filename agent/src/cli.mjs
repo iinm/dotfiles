@@ -12,7 +12,9 @@ import readline from "node:readline";
 import { styleText } from "node:util";
 import { createPatch } from "diff";
 import { consumeInterruptMessage } from "./utils/consumeInterruptMessage.mjs";
+import { loadUserMessageContext } from "./utils/loadUserMessageContext.mjs";
 import { notify } from "./utils/notify.mjs";
+import { parseFileRange } from "./utils/parseFileRange.mjs";
 import { readFileRange } from "./utils/readFileRange.mjs";
 
 const PROMPT_COMMANDS = [
@@ -77,7 +79,17 @@ File Input Syntax:
   !path/to/file     - Read content from a file
   !path/to/file:N   - Read line N from a file
   !path/to/file:N-M - Read lines N to M from a file
+
+Context References (within file contents):
+  @path/to/file     - Reference content from another file
+  @path/to/file:N   - Reference line N from another file
+  @path/to/file:N-M - Reference lines N to M from another file
+
+Example: !README.md containing "@src/main.js:1-10" will include both README.md
+content and lines 1-10 from src/main.js
 `.trim();
+
+const MAX_DISPLAY_OUTPUT_LENGTH = 1024;
 
 /**
  * @typedef {object} CliOptions
@@ -183,29 +195,49 @@ export function startInteractiveSession({
 
     // Handle file reading when message starts with @
     if (inputTrimmed.startsWith("!")) {
-      const fileMention = parseFileMention(inputTrimmed);
-      if (fileMention instanceof Error) {
-        console.log(styleText("red", `\n${fileMention.message}`));
+      const fileRange = parseFileRange(inputTrimmed.slice(1));
+      if (fileRange instanceof Error) {
+        console.log(styleText("red", `\n${fileRange.message}`));
         cli.prompt();
         return;
       }
-      const fileContentOrError = await readFileRange(
-        fileMention.filePath,
-        fileMention.startLine,
-        fileMention.endLine,
-      );
 
-      if (fileContentOrError instanceof Error) {
-        console.log(styleText("red", `\n${fileContentOrError.message}`));
+      const fileContent = await readFileRange(fileRange);
+      if (fileContent instanceof Error) {
+        console.log(styleText("red", `\n${fileContent.message}`));
+        cli.prompt();
+        return;
+      }
+
+      const messageWithContext = await loadUserMessageContext(fileContent);
+      if (messageWithContext instanceof Error) {
+        console.log(styleText("red", `\n${messageWithContext.message}`));
         cli.prompt();
         return;
       }
 
       console.log(styleText("gray", "\n<input>"));
-      console.log(fileContentOrError);
+      console.log(
+        messageWithContext.replace(
+          /(\n?<context.+?>)(.+?)(<\/context>\n?)/gs,
+          (_, start, content, end) => {
+            return [
+              styleText("green", start),
+              content.length > MAX_DISPLAY_OUTPUT_LENGTH
+                ? [
+                    content.slice(0, MAX_DISPLAY_OUTPUT_LENGTH),
+                    styleText("yellow", "... (Output truncated for display)"),
+                    "\n",
+                  ].join("")
+                : content,
+              styleText("green", end),
+            ].join("");
+          },
+        ),
+      );
       console.log(styleText("gray", "</input>"));
 
-      userEventEmitter.emit("userInput", fileContentOrError);
+      userEventEmitter.emit("userInput", messageWithContext);
       state.turn = false;
       return;
     }
@@ -487,12 +519,15 @@ function formatToolResult(toolResult) {
       .replace(/(^<stdout>|<\/stdout>$)/gm, styleText("blue", "$1"))
       .replace(/(^<stderr>|<\/stderr>$)/gm, styleText("magenta", "$1"))
       .replace(/(^<error>|<\/error>$)/gm, styleText("red", "$1"))
-      .replace(/(^<tmux.*?>|<\/tmux:.*?>$)/gm, styleText("green", "$1"));
+      .replace(/(^<tmux:.*?>|<\/tmux:.*?>$)/gm, styleText("green", "$1"));
   }
 
-  const maxLength = 1024;
-  if (contentString.length > maxLength) {
-    return `${contentString.slice(0, maxLength)}... (Content omitted)`;
+  if (contentString.length > MAX_DISPLAY_OUTPUT_LENGTH) {
+    return [
+      contentString.slice(0, MAX_DISPLAY_OUTPUT_LENGTH),
+      styleText("yellow", "... (Output truncated for display)"),
+      "\n",
+    ].join("");
   }
 
   return contentString;
@@ -536,23 +571,4 @@ function formatProviderTokenUsage(usage) {
   }
 
   return styleText("gray", outputLines.join("\n"));
-}
-
-/**
- * @param {string} fileMentionString
- * @returns {{filePath: string, startLine?: number, endLine?: number} | Error}
- */
-function parseFileMention(fileMentionString) {
-  const match = fileMentionString.match(/^!([^:]+)(?::(\d+)(?:-(\d+))?)?$/);
-  if (!match) {
-    return new Error(
-      "Invalid format. Use: !path/to/file[:line] or !path/to/file[:start-end]",
-    );
-  }
-  const [, filePath, startLine, endLine] = match;
-  return {
-    filePath,
-    startLine: startLine ? Number.parseInt(startLine, 10) : undefined,
-    endLine: endLine ? Number.parseInt(endLine, 10) : undefined,
-  };
 }
