@@ -85,7 +85,7 @@ Context References (within file contents):
   @path/to/file:N   - Reference line N from another file
   @path/to/file:N-M - Reference lines N to M from another file
 
-Example: !instruction.md containing "@src/main.js:1-10" will include both instruction.md
+Example: !instructions.md containing "@src/main.js:1-10" will include both instructions.md
 content and lines 1-10 from src/main.js
 `.trim();
 
