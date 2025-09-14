@@ -202,6 +202,7 @@ Basic commands:
 
 - Follow the established principles and best practices.
 - Follow the project conventions.
-- Keep the memory file up-to-date.
+- Follow the tool usage guidelines.
+- Keep the memory file up to date.
 `.trim();
 }
