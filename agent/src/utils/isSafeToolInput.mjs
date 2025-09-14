@@ -47,6 +47,14 @@ export function isSafeToolInputItem(arg) {
     return false;
   }
 
+  // Disallow unneeded parent directory reference
+  // Example:
+  // - When write_file to ^safe-dir/.+ is allowed
+  // - Access to safe-dir/../unsafe-path should be disallowed
+  if (arg.includes("..")) {
+    return false;
+  }
+
   // Exceptions:
   // Allow access to agent project metadata directory.
   const agentMemoryDir = path.resolve(
