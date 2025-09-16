@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import fs from "node:fs";
+import fs from "node:fs/promises";
 import { afterEach, describe, it } from "node:test";
 import { writeFileTool } from "./writeFile.mjs";
 
@@ -19,8 +19,8 @@ describe("writeFileTool", () => {
   it("writes to a file", async () => {
     // given:
     const tmpFilePath = `tmp/writeFileTest/writeFileTest-${generateRandomString()}.txt`;
-    cleanups.push(async () =>
-      fs.rmdirSync("tmp/writeFileTest", { recursive: true }),
+    cleanups.push(
+      async () => await fs.rmdir("tmp/writeFileTest", { recursive: true }),
     );
 
     // when:
@@ -31,7 +31,7 @@ describe("writeFileTool", () => {
 
     // then:
     assert.equal(result, `Wrote to file: ${tmpFilePath}`);
-    const writtenContent = fs.readFileSync(tmpFilePath, "utf8");
+    const writtenContent = await fs.readFile(tmpFilePath, "utf8");
     assert.equal(writtenContent, "Hello World");
   });
 

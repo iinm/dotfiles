@@ -3,7 +3,7 @@
  * @import { PatchFileInput } from './patchFile'
  */
 
-import fs from "node:fs";
+import fs from "node:fs/promises";
 import path from "node:path";
 import { noThrow } from "../utils/noThrow.mjs";
 
@@ -43,7 +43,7 @@ export const patchFileTool = {
         );
       }
 
-      const content = fs.readFileSync(filePath, "utf8");
+      const content = await fs.readFile(filePath, "utf8");
       const matches = Array.from(
         diff.matchAll(
           /<<<<<<< SEARCH\n(.*?)\n?=======\n(.*?)\n?>>>>>>> REPLACE/gs,
@@ -92,7 +92,7 @@ Format description:
           newContent = newContent.replace(search, escapedReplace);
         }
       }
-      fs.writeFileSync(filePath, newContent);
+      await fs.writeFile(filePath, newContent);
       return `Patched file: ${filePath}`;
     }),
 

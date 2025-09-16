@@ -3,7 +3,7 @@
  * @import { WriteFileInput } from './writeFile'
  */
 
-import fs from "node:fs";
+import fs from "node:fs/promises";
 import path from "node:path";
 import { noThrow } from "../utils/noThrow.mjs";
 
@@ -43,8 +43,8 @@ export const writeFileTool = {
 
       // Ensure the destination directory exists before writing
       const dir = path.dirname(absFilePath);
-      await fs.promises.mkdir(dir, { recursive: true });
-      await fs.promises.writeFile(absFilePath, content, "utf8");
+      await fs.mkdir(dir, { recursive: true });
+      await fs.writeFile(absFilePath, content, "utf8");
       return `Wrote to file: ${filePath}`;
     }),
 

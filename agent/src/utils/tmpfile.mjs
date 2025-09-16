@@ -1,4 +1,4 @@
-import fs from "node:fs";
+import fs from "node:fs/promises";
 import path from "node:path";
 import { AGENT_PROJECT_METADATA_DIR } from "../env.mjs";
 
@@ -22,8 +22,8 @@ export async function writeTmpFile(content, name, extension = "txt") {
   const filePath = path.join(tmpDir, fileName);
 
   // Ensure tmp directory exists
-  await fs.promises.mkdir(tmpDir, { recursive: true });
-  await fs.promises.writeFile(filePath, content, "utf8");
+  await fs.mkdir(tmpDir, { recursive: true });
+  await fs.writeFile(filePath, content, "utf8");
 
   return filePath;
 }

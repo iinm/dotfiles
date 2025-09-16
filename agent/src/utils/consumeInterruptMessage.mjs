@@ -1,4 +1,4 @@
-import fs from "node:fs";
+import fs from "node:fs/promises";
 import { AGENT_INTERRUPT_MESSAGE_FILE_PATH } from "../env.mjs";
 
 /**
@@ -6,11 +6,11 @@ import { AGENT_INTERRUPT_MESSAGE_FILE_PATH } from "../env.mjs";
  */
 export async function consumeInterruptMessage() {
   try {
-    const content = await fs.promises.readFile(
+    const content = await fs.readFile(
       AGENT_INTERRUPT_MESSAGE_FILE_PATH,
       "utf8",
     );
-    await fs.promises.unlink(AGENT_INTERRUPT_MESSAGE_FILE_PATH);
+    await fs.unlink(AGENT_INTERRUPT_MESSAGE_FILE_PATH);
 
     if (content.trim() === "") {
       return undefined;
