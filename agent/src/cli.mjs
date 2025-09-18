@@ -210,11 +210,6 @@ export function startInteractiveSession({
       }
 
       const messageWithContext = await loadUserMessageContext(fileContent);
-      if (messageWithContext instanceof Error) {
-        console.log(styleText("red", `\n${messageWithContext.message}`));
-        cli.prompt();
-        return;
-      }
 
       console.log(styleText("gray", "\n<input>"));
       console.log(
