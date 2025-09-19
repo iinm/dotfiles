@@ -202,7 +202,7 @@ Basic commands:
 
 - Follow the established principles and best practices.
 - Follow the project conventions.
-- Follow the tool usage guidelines.
+- Follow the tool usage guidelines. Avoid unnecessary use of "bash -c" and follow the command examples.
 - Keep the memory file up to date.
 `.trim();
 }
