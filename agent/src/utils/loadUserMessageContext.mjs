@@ -1,12 +1,14 @@
 import { styleText } from "node:util";
 import { parseFileRange } from "./parseFileRange.mjs";
 import { readFileRange } from "./readFileRange.mjs";
+import path from "node:path";
 
 /**
  * @param {string} message
  * @returns {Promise<string>}
  */
 export async function loadUserMessageContext(message) {
+  const workingDir = process.cwd();
   const lines = message.split("\n");
 
   /** @type {string[]} */
@@ -20,6 +22,17 @@ export async function loadUserMessageContext(message) {
             styleText(
               "yellow",
               `Failed to parse context reference ${segment}: ${fileRange}`,
+            ),
+          );
+          continue;
+        }
+
+        const absPath = path.resolve(fileRange.filePath);
+        if (!absPath.startsWith(workingDir)) {
+          console.warn(
+            styleText(
+              "yellow",
+              `Refusing to load context from outside working directory: ${absPath}`,
             ),
           );
           continue;
