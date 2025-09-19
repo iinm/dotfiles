@@ -297,15 +297,15 @@ local setup_commands = function()
     callback = function()
       local lsp_utils = require('lsp_utils')
       local lsp_commands = {
-        { 'LspRename',                function() vim.lsp.buf.rename() end,                                  {} },
-        { 'LspFormat',                function() vim.lsp.buf.format({ async = false }) end,                 {} },
-        { 'LspTypeDefinition',        function() vim.lsp.buf.type_definition() end,                         {} },
-        { 'LspDeclaration',           function() vim.lsp.buf.declaration() end,                             {} },
-        { 'LspImplementation',        function() vim.lsp.buf.implementation() end,                          {} },
-        { 'LspIncomingCall',          function() vim.lsp.buf.incoming_calls() end,                          {} },
-        { 'LspOutgoingCall',          function() vim.lsp.buf.outgoing_calls() end,                          {} },
-        { 'LspIncomingCallRecursive', function() lsp_utils.lsp_call_hierarchy_recursive('incoming', 4) end, {} },
-        { 'LspOutgoingCallRecursive', function() lsp_utils.lsp_call_hierarchy_recursive('outgoing', 2) end, {} },
+        { 'Rename',                function() vim.lsp.buf.rename() end,                                  {} },
+        { 'Format',                function() vim.lsp.buf.format({ async = false }) end,                 {} },
+        { 'TypeDefinition',        function() vim.lsp.buf.type_definition() end,                         {} },
+        { 'Declaration',           function() vim.lsp.buf.declaration() end,                             {} },
+        { 'Implementation',        function() vim.lsp.buf.implementation() end,                          {} },
+        { 'IncomingCall',          function() vim.lsp.buf.incoming_calls() end,                          {} },
+        { 'OutgoingCall',          function() vim.lsp.buf.outgoing_calls() end,                          {} },
+        { 'IncomingCallRecursive', function() lsp_utils.lsp_call_hierarchy_recursive('incoming', 4) end, {} },
+        { 'OutgoingCallRecursive', function() lsp_utils.lsp_call_hierarchy_recursive('outgoing', 2) end, {} },
       }
       for _, command in ipairs(lsp_commands) do
         vim.api.nvim_create_user_command(table.unpack(command))
