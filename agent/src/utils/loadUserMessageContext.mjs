@@ -1,7 +1,7 @@
+import path from "node:path";
 import { styleText } from "node:util";
 import { parseFileRange } from "./parseFileRange.mjs";
 import { readFileRange } from "./readFileRange.mjs";
-import path from "node:path";
 
 /**
  * @param {string} message
