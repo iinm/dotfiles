@@ -340,6 +340,15 @@ export function createModelCaller(modelName, providers) {
           input,
         );
     }
+    case "grok-fast":
+      return (input) =>
+        callOpenAICompatibleModel(
+          providers?.xai ?? {},
+          {
+            model: "grok-4-fast-reasoning",
+          },
+          input,
+        );
     case "grok-code":
       return (input) =>
         callOpenAICompatibleModel(
