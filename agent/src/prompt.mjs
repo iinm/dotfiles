@@ -29,8 +29,9 @@ export function createPrompt({
 
 Follow the principles and practices from these sources:
 
-- "The Art of Readable Code" by Dustin Boswell and Trevor Foucher
+- "A Philosophy of Software Design" by John Ousterhout
 - "Test-Driven Development by Example" by Kent Beck
+- "The Art of Readable Code" by Dustin Boswell and Trevor Foucher
 
 ## Project Knowledge Discovery
 
