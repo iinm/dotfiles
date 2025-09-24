@@ -1,6 +1,6 @@
 /* Model */
 export type OpenAIModelConfig = {
-  model: "gpt-5" | "gpt-5-mini";
+  model: "gpt-5" | "gpt-5-codex" | "gpt-5-mini";
   reasoning: {
     effort: "minimal" | "low" | "medium" | "high";
     summary: "auto" | "concise" | "detailed";

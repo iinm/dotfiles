@@ -93,6 +93,46 @@ export function createModelCaller(modelName, providers) {
           },
           input,
         );
+    case "gpt-codex-low":
+      return (input) =>
+        callOpenAIModel(
+          providers?.openai ?? {},
+          {
+            model: "gpt-5-codex",
+            reasoning: {
+              effort: "low",
+              summary: "auto",
+            },
+          },
+          input,
+        );
+    case "gpt-codex-medium":
+      return (input) =>
+        callOpenAIModel(
+          providers?.openai ?? {},
+          {
+            model: "gpt-5-codex",
+            reasoning: {
+              effort: "medium",
+              summary: "auto",
+            },
+          },
+          input,
+        );
+    case "gpt-codex-high":
+      return (input) =>
+        callOpenAIModel(
+          providers?.openai ?? {},
+          {
+            model: "gpt-5-codex",
+            reasoning: {
+              effort: "high",
+              summary: "auto",
+            },
+          },
+          input,
+        );
+
     case "claude-haiku":
       return (input) =>
         callAnthropicModel(
