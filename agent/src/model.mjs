@@ -144,20 +144,6 @@ export function createModelCaller(modelName, providers) {
           },
           input,
         );
-    case "claude-sonnet-thinking-2k":
-      return (input) =>
-        callAnthropicModel(
-          providers?.anthropic ?? {},
-          {
-            model: "claude-sonnet-4-0",
-            max_tokens: 1024 * 16,
-            thinking: {
-              type: "enabled",
-              budget_tokens: 2024,
-            },
-          },
-          input,
-        );
     case "claude-sonnet-thinking-8k":
       return (input) =>
         callAnthropicModel(
@@ -168,6 +154,20 @@ export function createModelCaller(modelName, providers) {
             thinking: {
               type: "enabled",
               budget_tokens: 1024 * 8,
+            },
+          },
+          input,
+        );
+    case "claude-sonnet-thinking-16k":
+      return (input) =>
+        callAnthropicModel(
+          providers?.anthropic ?? {},
+          {
+            model: "claude-sonnet-4-0",
+            max_tokens: 1024 * 32,
+            thinking: {
+              type: "enabled",
+              budget_tokens: 1024 * 16,
             },
           },
           input,
@@ -211,7 +211,7 @@ export function createModelCaller(modelName, providers) {
           input,
         );
     }
-    case "gemini-flash-thinking-4k": {
+    case "gemini-flash-thinking-8k": {
       const model = "gemini-2.5-flash";
       const modelCaller = createCacheEnabledGeminiModelCaller(
         providers?.gemini ?? {},
@@ -224,10 +224,10 @@ export function createModelCaller(modelName, providers) {
             requestConfig: {
               generationConfig: {
                 temperature: 0,
-                maxOutputTokens: 1024 * 8,
+                maxOutputTokens: 1024 * 16,
                 thinkingConfig: {
                   includeThoughts: true,
-                  thinkingBudget: 1024 * 4,
+                  thinkingBudget: 1024 * 8,
                 },
               },
             },
@@ -308,7 +308,7 @@ export function createModelCaller(modelName, providers) {
           input,
         );
     }
-    case "gemini-pro-thinking-2k": {
+    case "gemini-pro-thinking-8k": {
       const model = "gemini-2.5-pro";
       const modelCaller = createCacheEnabledGeminiModelCaller(
         providers?.gemini ?? {},
@@ -321,10 +321,10 @@ export function createModelCaller(modelName, providers) {
             requestConfig: {
               generationConfig: {
                 temperature: 0,
-                maxOutputTokens: 1024 * 8,
+                maxOutputTokens: 1024 * 16,
                 thinkingConfig: {
                   includeThoughts: true,
-                  thinkingBudget: 1024 * 2,
+                  thinkingBudget: 1024 * 8,
                 },
               },
             },
@@ -332,7 +332,7 @@ export function createModelCaller(modelName, providers) {
           input,
         );
     }
-    case "gemini-pro-thinking-8k": {
+    case "gemini-pro-thinking-16k": {
       const model = "gemini-2.5-pro";
       const modelCaller = createCacheEnabledGeminiModelCaller(
         providers?.gemini ?? {},
@@ -348,7 +348,7 @@ export function createModelCaller(modelName, providers) {
                 maxOutputTokens: 1024 * 32,
                 thinkingConfig: {
                   includeThoughts: true,
-                  thinkingBudget: 1024 * 8,
+                  thinkingBudget: 1024 * 16,
                 },
               },
             },

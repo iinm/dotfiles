@@ -74,7 +74,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
       }
     } catch (error) {
       if (error instanceof Error) {
-        console.error(`Error dumping messages: ${error.message}`);
+        console.error(`Error loading messages: ${error.message}`);
       }
     }
   }
