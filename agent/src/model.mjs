@@ -149,7 +149,7 @@ export function createModelCaller(modelName, providers) {
         callAnthropicModel(
           providers?.anthropic ?? {},
           {
-            model: "claude-sonnet-4-20250514",
+            model: "claude-sonnet-4-0",
             max_tokens: 1024 * 16,
             thinking: {
               type: "enabled",
@@ -163,7 +163,7 @@ export function createModelCaller(modelName, providers) {
         callAnthropicModel(
           providers?.anthropic ?? {},
           {
-            model: "claude-sonnet-4-20250514",
+            model: "claude-sonnet-4-0",
             max_tokens: 1024 * 16,
             thinking: {
               type: "enabled",
@@ -177,7 +177,7 @@ export function createModelCaller(modelName, providers) {
         callAnthropicModel(
           providers?.anthropic ?? {},
           {
-            model: "claude-sonnet-4-20250514",
+            model: "claude-sonnet-4-0",
             max_tokens: 1000 * 64,
             thinking: {
               type: "enabled",
