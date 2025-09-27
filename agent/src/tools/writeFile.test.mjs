@@ -20,7 +20,7 @@ describe("writeFileTool", () => {
     // given:
     const tmpFilePath = `tmp/writeFileTest/writeFileTest-${generateRandomString()}.txt`;
     cleanups.push(
-      async () => await fs.rmdir("tmp/writeFileTest", { recursive: true }),
+      async () => await fs.rm("tmp/writeFileTest", { recursive: true }),
     );
 
     // when:
