@@ -105,7 +105,6 @@ $AGENT_ROOT (where this README file exists)
         \__ config.local.json      # Project-specific local configuration (including secrets)
         \__ interrupt-message.txt  # Interrupt message consumed by the agent
         \__ memory/                # Task-specific memory files
-        \__ instructions.md        # (Example) Task-specific instructions
         \__ sandbox/               # (Example) Sandbox configuration
 ```
 
