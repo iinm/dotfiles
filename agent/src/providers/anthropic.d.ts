@@ -1,6 +1,6 @@
 /* Model */
 export type AnthropicModelConfig = {
-  model: "claude-3-5-haiku-latest" | "claude-sonnet-4-0";
+  model: "claude-3-5-haiku-latest" | "claude-sonnet-4-5";
   max_tokens: number;
 
   temperature?: number;
