@@ -198,9 +198,11 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
         break;
       }
 
-      const toolResults = await Promise.all(
-        toolUseParts.map((toolUse) => callTool(toolUse, toolByName)),
-      );
+      /** @type {MessageContentToolResult[]} */
+      const toolResults = [];
+      for (const toolUse of toolUseParts) {
+        toolResults.push(await callTool(toolUse, toolByName));
+      }
 
       state.messages.push({ role: "user", content: toolResults });
       agentEventEmitter.emit(
