@@ -25,13 +25,11 @@ export function createExecCommandTool(config) {
         type: "object",
         properties: {
           command: {
-            description:
-              "The executable name or path (e.g., 'ls', 'awk', '/usr/bin/node')",
+            description: "The executable name or path",
             type: "string",
           },
           args: {
-            description:
-              "Array of arguments to pass to the command. Each argument must be a separate string.",
+            description: "Array of arguments to pass to the command",
             type: "array",
             items: {
               type: "string",
