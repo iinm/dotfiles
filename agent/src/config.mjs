@@ -248,7 +248,7 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
       toolName: "exec_command",
       input: {
         command: "sed",
-        args: ["-n", /^\d+(,\d+)?p$/],
+        args: ["-n", /^\d+(,\d+)?(p|l)$/],
       },
     },
     {

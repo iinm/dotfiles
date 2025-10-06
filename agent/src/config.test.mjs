@@ -172,12 +172,23 @@ describe("createDefaultAllowedToolUsePatterns", () => {
       isApproved: false,
     },
     {
-      desc: "sed read-only command should be allowed",
+      desc: "sed read-only command (-n 1,10p) should be allowed",
       toolUse: {
         toolName: "exec_command",
         input: {
           command: "sed",
           args: ["-n", "1,10p", "file.txt"],
+        },
+      },
+      isApproved: true,
+    },
+    {
+      desc: "sed read-only command (-n 1,10l) should be allowed",
+      toolUse: {
+        toolName: "exec_command",
+        input: {
+          command: "sed",
+          args: ["-n", "1,10l", "file.txt"],
         },
       },
       isApproved: true,
