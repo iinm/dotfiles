@@ -53,7 +53,7 @@ export async function callAnthropicModel(
       signal: AbortSignal.timeout(120 * 1000),
     });
 
-    if (response.status === 429) {
+    if (response.status === 429 || response.status >= 500) {
       const interval = Math.min(2 * 2 ** retryCount, 16);
       console.error(
         styleText(

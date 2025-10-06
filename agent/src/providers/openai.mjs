@@ -49,7 +49,7 @@ export async function callOpenAIModel(
     });
 
     const retryInterval = Math.min(2 * 2 ** retryCount, 16);
-    if (response.status === 429) {
+    if (response.status === 429 || response.status >= 500) {
       console.error(
         styleText(
           "yellow",
