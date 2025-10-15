@@ -133,14 +133,45 @@ export function createModelCaller(modelName, providers) {
           input,
         );
 
-    case "claude-haiku":
+    case "claude-haiku-thinking-8k":
       return (input) =>
         callAnthropicModel(
           providers?.anthropic ?? {},
           {
-            model: "claude-3-5-haiku-latest",
-            max_tokens: 1024 * 8,
-            temperature: 0,
+            model: "claude-haiku-4-5",
+            max_tokens: 1024 * 16,
+            thinking: {
+              type: "enabled",
+              budget_tokens: 1024 * 8,
+            },
+          },
+          input,
+        );
+    case "claude-haiku-thinking-16k":
+      return (input) =>
+        callAnthropicModel(
+          providers?.anthropic ?? {},
+          {
+            model: "claude-haiku-4-5",
+            max_tokens: 1024 * 32,
+            thinking: {
+              type: "enabled",
+              budget_tokens: 1024 * 16,
+            },
+          },
+          input,
+        );
+    case "claude-haiku-thinking-32k-max":
+      return (input) =>
+        callAnthropicModel(
+          providers?.anthropic ?? {},
+          {
+            model: "claude-haiku-4-5",
+            max_tokens: 1000 * 64,
+            thinking: {
+              type: "enabled",
+              budget_tokens: 1024 * 32,
+            },
           },
           input,
         );
