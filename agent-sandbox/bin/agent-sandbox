@@ -624,7 +624,7 @@ cleanup_idle_containers() {
     # Note: network_name = container_name
     if ! docker inspect --type container "$network_name" &> /dev/null; then
       log "Removing network."
-      docker network rm "$network_name"
+      docker network rm "$network_name" || true
     fi
   done
 }
