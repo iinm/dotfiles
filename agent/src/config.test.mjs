@@ -62,6 +62,17 @@ describe("createDefaultAllowedToolUsePatterns", () => {
       isApproved: true,
     },
     {
+      desc: "awk with known args pattern should be allowed",
+      toolUse: {
+        toolName: "exec_command",
+        input: {
+          command: "awk",
+          args: ['FNR==10, FNR==-1 {print FNR" " $0}', "file.txt"],
+        },
+      },
+      isApproved: true,
+    },
+    {
       desc: "awk with unknown args pattern should not be allowed",
       toolUse: {
         toolName: "exec_command",
