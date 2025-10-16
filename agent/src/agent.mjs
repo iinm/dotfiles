@@ -189,6 +189,32 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
         break;
       }
 
+      // Validate tool use
+      const unknownToolNames = toolUseParts
+        .filter((toolUse) => !toolByName.has(toolUse.toolName))
+        .map(({ toolName }) => toolName);
+      if (unknownToolNames.length) {
+        /** @type {MessageContentToolResult[]} */
+        const toolResults = toolUseParts.map((toolUse) => ({
+          type: "tool_result",
+          toolUseId: toolUse.toolUseId,
+          toolName: toolUse.toolName,
+          content: [{ type: "text", text: "Tool call rejected" }],
+          isError: true,
+        }));
+        state.messages.push({ role: "user", content: toolResults });
+        state.messages.push({
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `System: Tool not found ${unknownToolNames.join(", ")}. Check the tool name.`,
+            },
+          ],
+        });
+        continue;
+      }
+
       // Auto approve tool use
       const isAllToolUseApproved = toolUseParts.every(
         toolUseApprover.isAllowedToolUse,
