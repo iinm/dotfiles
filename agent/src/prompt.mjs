@@ -115,7 +115,7 @@ Examples:
 File and directory command examples:
 - List files: { command: "ls", args: ["-alh", "path/to/directory"] }
 - Find files: { command: "fd", args: ["<regex>", "path/to/directory"] }
-  - Note: Use fd instead of find command.
+  - Use fd instead of find command.
   - Options:
     - --type <type>: f for file, d for directory
     - --max-depth <N>
@@ -123,7 +123,7 @@ File and directory command examples:
   - List directories to get project structure: { command: "fd", args: [".", "path/to/directory/", "--max-depth", "3", "--type", "d", "--hidden"] }
     "." means "match all"
 - Search for a string in files: { command: "rg", args: ["-n", "<regex>", "./"] }
-  - Note: Use rg instead of grep command.
+  - Use rg instead of grep command.
   - Directory or file must be specified.
   - Escape special regex characters with a backslash.
   - Options:
@@ -201,7 +201,7 @@ Basic commands:
 ## Reminder
 
 - Follow the established principles, best practices, and project conventions.
-- Follow the tool usage guidelines. Avoid unnecessary use of "bash -c" and execute commands like awk exactly as shown in the examples.
+- Follow the tool usage guidelines. Avoid unnecessary use of "bash -c" and execute commands like fd, rg, and awk exactly as shown in the examples.
 - Keep the memory file up to date.
 `.trim();
 }
