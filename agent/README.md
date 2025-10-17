@@ -106,6 +106,7 @@ $AGENT_ROOT (where this README file exists)
         \__ interrupt-message.txt  # Interrupt message consumed by the agent
         \__ memory/                # Task-specific memory files
         \__ sandbox/               # (Example) Sandbox configuration
+        \__ instructions.md        # (Example) Task-specific instructions
 ```
 
 ## Configuration
