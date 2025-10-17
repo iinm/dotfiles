@@ -208,10 +208,16 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
           content: [
             {
               type: "text",
-              text: `System: Tool not found ${unknownToolNames.join(", ")}. Check the tool name.`,
+              text: `System: Tool not found ${unknownToolNames.join(", ")}. Available tools: ${[...toolByName.keys()].join(",")}`,
             },
           ],
         });
+        console.error(
+          styleText(
+            "yellow",
+            `\nRejected unknown tool use: ${unknownToolNames.join(", ")}`,
+          ),
+        );
         continue;
       }
 
