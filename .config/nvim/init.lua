@@ -777,12 +777,12 @@ local setup_minuet = function()
       -- show_on_completion_menu = true,
     },
 
-    provider = 'gemini',
+    provider = 'claude',
     request_timeout = 3,
 
     provider_options = {
       claude = {
-        model = 'claude-3-5-haiku-latest',
+        model = 'claude-haiku-4-5',
         end_point = (local_secrets.minuet_anthropic_end_point or 'https://api.anthropic.com') .. '/v1/messages',
         api_key = function()
           return local_secrets.minuet_anthropic_api_key
