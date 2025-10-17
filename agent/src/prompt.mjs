@@ -180,6 +180,7 @@ Format description:
 
 tmux_command is used to manage daemon processes (e.g., HTTP servers) and interactive processes (e.g., Node.js interpreters).
 
+- Only use when the user explicitly requests it.
 - Use the provided tmux session id to run commands.
 - If it's not available, create a new session with the given tmux session id.
 - Use relative paths to refer to files and directories.
