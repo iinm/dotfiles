@@ -212,20 +212,18 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>gb', ':<C-u>Git blame<CR>')
   vim.keymap.set('n', '<leader>gl', ':<C-u>Git log %<CR>')
 
-  -- luasnip
-  local ls = require('luasnip')
-
-  vim.keymap.set({ "i", "s" }, "<C-f>", function()
-    if ls.jumpable(1) then
-      ls.jump(1)
-    end
-  end, { silent = true })
-
-  vim.keymap.set({ "i", "s" }, "<C-b>", function()
-    if ls.jumpable(1) then
-      ls.jump(-1)
-    end
-  end, { silent = true })
+  -- luasnip (configured via blink)
+  -- local ls = require('luasnip')
+  -- vim.keymap.set({ "i", "s" }, "<C-f>", function()
+  --   if ls.jumpable(1) then
+  --     ls.jump(1)
+  --   end
+  -- end, { silent = true })
+  -- vim.keymap.set({ "i", "s" }, "<C-b>", function()
+  --   if ls.jumpable(1) then
+  --     ls.jump(-1)
+  --   end
+  -- end, { silent = true })
 
   -- minuet
   vim.keymap.set({ "i", "s" }, "<C-l>", function()
@@ -692,8 +690,8 @@ local setup_blink_cmp = function()
       ['<C-p>'] = { 'select_prev', 'fallback_to_mappings' },
       ['<C-n>'] = { 'select_next', 'fallback_to_mappings' },
 
-      ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
-      ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+      ['<C-b>'] = { 'snippet_backward', 'scroll_documentation_up', 'fallback' },
+      ['<C-f>'] = { 'snippet_forward', 'scroll_documentation_down', 'fallback' },
 
       -- Avoid conflict with Minuet
       -- ['<Tab>'] = { 'snippet_forward', 'fallback' },
