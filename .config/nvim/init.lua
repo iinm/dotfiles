@@ -776,7 +776,7 @@ local setup_minuet = function()
       -- show_on_completion_menu = true,
     },
 
-    provider = 'claude',
+    provider = 'gemini',
     request_timeout = 3,
 
     provider_options = {
