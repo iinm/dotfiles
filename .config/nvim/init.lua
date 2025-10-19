@@ -239,13 +239,12 @@ end
 local setup_commands = function()
   local window_utils = require('window_utils')
   local commands = {
-    { 'Buffers',              'call Buffers()',                                         {} },
-    { 'Oldfiles',             function() vim.fn['Oldfiles']({ only_cwd = true }) end,   {} },
-    { 'OldfilesGlobal',       function() vim.fn['Oldfiles']() end,                      {} },
-    { 'Outline',              'call Outline()',                                         {} },
-    { 'CloseTerms',           function() window_utils.close_terms() end,                {} },
-    { 'ToggleHighlightColor', function() require("nvim-highlight-colors").toggle() end, {} },
-    { 'Diagnostics',          function() vim.diagnostic.setloclist() end,               {} },
+    { 'Buffers',        'call Buffers()',                                       {} },
+    { 'Oldfiles',       function() vim.fn['Oldfiles']({ only_cwd = true }) end, {} },
+    { 'OldfilesGlobal', function() vim.fn['Oldfiles']() end,                    {} },
+    { 'Outline',        'call Outline()',                                       {} },
+    { 'CloseTerms',     function() window_utils.close_terms() end,              {} },
+    { 'Diagnostics',    function() vim.diagnostic.setloclist() end,             {} },
     { 'CopyContext', function(opts)
       -- file explorer -> copy path
       if vim.bo.filetype == 'oil' then
@@ -500,7 +499,6 @@ local setup_plugins = function()
 
     -- ui
     'sainnhe/everforest',
-    'stevearc/dressing.nvim',
 
     -- fuzzy finder
     'junegunn/fzf',
@@ -534,7 +532,6 @@ local setup_plugins = function()
     'windwp/nvim-autopairs',
     'bullets-vim/bullets.vim',
     'Almo7aya/openingh.nvim',
-    'brenoprata10/nvim-highlight-colors',
   })
 end
 
@@ -814,7 +811,6 @@ local setup_others = function()
   vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
   require('nvim-autopairs').setup()
   require("nvim-surround").setup()
-  require('dressing').setup()
 end
 
 setup_options()
