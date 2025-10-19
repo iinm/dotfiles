@@ -8,7 +8,7 @@ local function lsp_call_hierarchy_recursive(direction, max_depth)
   -- callback argument type: https://github.com/neovim/neovim/blob/master/runtime/lua/vim/lsp/_meta.lua
   lsp.buf_request_all(0, 'textDocument/prepareCallHierarchy', params, function(results)
     local first_result = nil
-    for _, result in ipairs(results) do
+    for _, result in pairs(results) do
       if result.err then
         vim.notify('Error during prepareCallHierarchy: ' .. vim.inspect(result.err), vim.log.levels.WARN)
       end
@@ -51,9 +51,14 @@ local function lsp_call_hierarchy_recursive(direction, max_depth)
         pending_requests = pending_requests - 1
 
         local first_call_result = nil
-        for _, call_result in ipairs(call_results) do
-          if call_results.err then
-            vim.notify('Error while tracing call hierarchy: : ', vim.inspect(call_result.err), vim.log.levels.wARN)
+        for _, call_result in pairs(call_results) do
+          if call_result.err then
+            local message = call_result.err.message
+            local is_method_not_supported = type(message) == 'string'
+                and message:lower():find('method not supported', 1, true) == 1
+            if not is_method_not_supported then
+              vim.notify('Error while tracing call hierarchy: ' .. vim.inspect(call_result.err), vim.log.levels.WARN)
+            end
           end
           if call_result.result then
             first_call_result = call_result.result
