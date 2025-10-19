@@ -565,10 +565,16 @@ local setup_lsp = function()
   -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md
   local servers = {
     { name = 'lua_ls',      bin = 'lua-language-server' },
+    -- npm install -g typescript typescript-language-server
     { name = 'ts_ls',       bin = 'tsserver' },
+    -- go install golang.org/x/tools/gopls@latest
     { name = 'gopls',       bin = 'gopls' },
+    -- brew install hashicorp/tap/terraform-ls
     { name = 'terraformls', bin = 'terraform-ls' },
+    -- npm install -g @prisma/language-server
     { name = 'prismals',    bin = 'prisma-language-server' },
+    -- https://github.com/redhat-developer/vscode-xml/releases
+    -- xattr -d com.apple.quarantine lemminx
     {
       name = 'lemminx',
       bin = 'lemminx',
