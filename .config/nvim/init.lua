@@ -508,9 +508,12 @@ local setup_plugins = function()
   vim.opt.rtp:prepend(lazypath)
 
   require('lazy').setup({
+    -- dependencies
+    -- required by minuet-ai
+    'nvim-lua/plenary.nvim',
+
     -- syntax
     'nvim-treesitter/nvim-treesitter',
-    'prisma/vim-prisma',
 
     -- ui
     'sainnhe/everforest',
@@ -530,16 +533,6 @@ local setup_plugins = function()
     'previm/previm',
     'tyru/open-browser.vim',
 
-    -- utilities
-    'tpope/vim-sleuth',
-    'tpope/vim-fugitive',
-    'easymotion/vim-easymotion',
-    'kylechui/nvim-surround',
-    'windwp/nvim-autopairs',
-    'bullets-vim/bullets.vim',
-    'Almo7aya/openingh.nvim',
-    'brenoprata10/nvim-highlight-colors',
-
     -- lsp
     'neovim/nvim-lspconfig',
 
@@ -554,8 +547,15 @@ local setup_plugins = function()
       dependencies = { "rafamadriz/friendly-snippets" },
     },
 
-    -- required by minuet-ai
-    'nvim-lua/plenary.nvim',
+    -- utilities
+    'tpope/vim-sleuth',
+    'tpope/vim-fugitive',
+    'easymotion/vim-easymotion',
+    'kylechui/nvim-surround',
+    'windwp/nvim-autopairs',
+    'bullets-vim/bullets.vim',
+    'Almo7aya/openingh.nvim',
+    'brenoprata10/nvim-highlight-colors',
   })
 end
 
@@ -753,6 +753,7 @@ local setup_treesitter = function()
       'mermaid',
       'fish',
       'graphql',
+      'prisma',
       -- Disabled due to instability
       -- 'terraform',
     },
