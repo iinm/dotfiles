@@ -568,6 +568,7 @@ local setup_lsp = function()
     { name = 'ts_ls',       bin = 'tsserver' },
     { name = 'gopls',       bin = 'gopls' },
     { name = 'terraformls', bin = 'terraform-ls' },
+    { name = 'prismals',    bin = 'prisma-language-server' },
     {
       name = 'lemminx',
       bin = 'lemminx',
