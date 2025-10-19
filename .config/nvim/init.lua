@@ -212,19 +212,6 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>gb', ':<C-u>Git blame<CR>')
   vim.keymap.set('n', '<leader>gl', ':<C-u>Git log %<CR>')
 
-  -- luasnip (configured via blink)
-  -- local ls = require('luasnip')
-  -- vim.keymap.set({ "i", "s" }, "<C-f>", function()
-  --   if ls.jumpable(1) then
-  --     ls.jump(1)
-  --   end
-  -- end, { silent = true })
-  -- vim.keymap.set({ "i", "s" }, "<C-b>", function()
-  --   if ls.jumpable(1) then
-  --     ls.jump(-1)
-  --   end
-  -- end, { silent = true })
-
   -- minuet
   vim.keymap.set({ "i", "s" }, "<C-l>", function()
     if vim.fn.mode() == 'i' then
@@ -285,10 +272,6 @@ local setup_commands = function()
   for _, command in ipairs(commands) do
     vim.api.nvim_create_user_command(table.unpack(command))
   end
-
-  vim.api.nvim_create_user_command('EditSnippets', function()
-    require("luasnip.loaders").edit_snippet_files()
-  end, {})
 
   vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('UserLspCommandConfig', {}),
@@ -541,11 +524,7 @@ local setup_plugins = function()
     'milanglacier/minuet-ai.nvim',
 
     -- snippets
-    {
-      "L3MON4D3/LuaSnip",
-      version = "v2.*",
-      dependencies = { "rafamadriz/friendly-snippets" },
-    },
+    'rafamadriz/friendly-snippets',
 
     -- utilities
     'tpope/vim-sleuth',
@@ -708,7 +687,6 @@ local setup_blink_cmp = function()
         auto_show_delay_ms = 200,
       },
     },
-    snippets = { preset = 'luasnip' },
     cmdline = {
       keymap = {
         preset = 'none',
@@ -837,7 +815,6 @@ local setup_others = function()
   require('nvim-autopairs').setup()
   require("nvim-surround").setup()
   require('dressing').setup()
-  require("luasnip.loaders.from_lua").load({ paths = vim.fn.stdpath('config') .. '/snippets' })
 end
 
 setup_options()

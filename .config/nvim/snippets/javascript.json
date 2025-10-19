@@ -1,0 +1,60 @@
+{
+  "debug": {
+    "prefix": "d",
+    "body": [
+      "console.debug(\"\\n--- DEBUG: \", JSON.stringify({ ${1:target} }, null, 2));"
+    ]
+  },
+  "err-custom": {
+    "prefix": "err-custom",
+    "body": [
+      "export class ${1:ErrorName} extends Error {",
+      "  /**",
+      "   * @param {string} message",
+      "   */",
+      "  constructor(message) {",
+      "    super(message);",
+      "    this.name = \"${1}\";",
+      "  }",
+      "}"
+    ]
+  },
+  "type": {
+    "prefix": "type",
+    "body": [
+      "/** @type {${1:type}} */"
+    ]
+  },
+  "type-obj": {
+    "prefix": "type-obj",
+    "body": [
+      "/**",
+      " * @typedef {Object} ${1:TypeName}",
+      " * @property {${2:propType}} ${3:propName}",
+      " */"
+    ]
+  },
+  "type-fn": {
+    "prefix": "type-fn",
+    "body": [
+      "/**",
+      " * @param {${1:paramType}} ${2:paramNmae}",
+      " * @returns {${3:returnType}}",
+      " */"
+    ]
+  },
+  "import-type": {
+    "prefix": "import-type",
+    "body": [
+      "/**",
+      " * @import { ${1:prop} } from \"${2:path}\";",
+      " */"
+    ]
+  },
+  "import-type-add": {
+    "prefix": "import-type-add",
+    "body": [
+      "@import { ${1:prop} } from \"${2:path}\";"
+    ]
+  }
+}
