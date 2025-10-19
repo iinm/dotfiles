@@ -37,7 +37,7 @@ Follow the principles and practices from these sources:
 When working with project files, gather project-specific knowledge.
 
 Follow these steps in the exact order below:
-1. List documentation files: exec_command { command: "fd", args: ["--extension", "md", "--hidden", "--max-depth", "3"] }
+1. List documentation files: { command: "fd", args: ["--extension", "md", "--hidden", "--max-depth", "3"] }
    - Limit depth when listing documentation.
 2. Read agent prompt files:
    2-1. First, read AGENTS.md, AGENTS.local.md in project root for project-wide context.
