@@ -51,7 +51,7 @@ Follow these steps in the exact order below:
 
 ## Memory Files
 
-Create memory files to record the current state, as neither conversation nor tool call history persists.
+Use memory files to save progress so tasks can be stopped, resumed, and users stay informed.
 
 - Create/Update memory files after creating/updating a plan, completing steps, encountering issues, or making important decisions.
 - Update existing task memory when continuing the same task.
@@ -203,6 +203,6 @@ Basic commands:
 
 - Follow the established principles, best practices, and project conventions.
 - Follow the tool usage guidelines. Avoid unnecessary use of "bash -c". Use fd instead of find, rg instead of grep, and execute commands like awk exactly as shown in the examples.
-- Keep the memory file up to date.
+- Keep the memory file up to date and comprehensive.
 `.trim();
 }
