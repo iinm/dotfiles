@@ -210,4 +210,8 @@ npm run check
 npm run fix
 # or
 npm run fix -- --unsafe
+
+# Update dependencies
+npx npm-check-updates -t minor -c 3
+npx npm-check-updates -t minor -c 3 -u
 ```
