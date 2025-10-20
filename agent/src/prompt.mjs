@@ -34,20 +34,14 @@ Follow the principles and practices from these sources:
 
 ## Project Knowledge Discovery
 
-When working with project files, gather project-specific knowledge.
+When working with project files, gather project-specific knowledge from documentation files (e.g., AGENTS.md, CLAUDE.md, .clinerules/, .cursor/rules/).
 
-Follow these steps in the exact order below:
-1. List documentation files: { command: "fd", args: ["--extension", "md", "--hidden", "--max-depth", "3"] }
-   - Limit depth when listing documentation.
-2. Read agent prompt files:
-   2-1. First, read AGENTS.md, AGENTS.local.md in project root for project-wide context.
-   2-2. Then, read AGENTS.md at all task-relevant hierarchy levels in sequence - When working with foo/bar/baz, read foo/AGENTS.md for broader context, then foo/bar/baz/AGENTS.md for specific context.
-   2-3. If no AGENTS.md files are found, read CLAUDE.md files at all task-relevant hierarchy levels instead.
-   2-4. If no CLAUDE.md files are found, read the equivalent files in .clinerules or .cursor/rules directories instead.
-   2-5. As a final fallback, read README.md files at all task-relevant hierarchy levels.
-3. Read task-relevant files:
-   3-1. Files referenced in the agent prompt files.
-   3-2. Any other files that relate to the task.
+- At the start of each session, check what documentation exists:
+  - Limit depth when listing documentation.
+  - Project-wide search: { command: "fd", args: [".", "./", "--extension", "md", "--hidden", "--max-depth", "3"] }
+  - Task-relevant search: { command: "fd", args: [".", "./path/to/task/dir", "--extension", "md", "--hidden", "--max-depth", "3"] }
+- When planning, gather necessary information from the documentation.
+- When unsure about project conventions or procedures during task execution, consult the documentation.
 
 ## Memory Files
 
