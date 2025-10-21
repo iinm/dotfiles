@@ -34,14 +34,10 @@ Follow the principles and practices from these sources:
 
 ## Project Knowledge Discovery
 
-When working with project files, gather project-specific knowledge from documentation files (e.g., AGENTS.md, CLAUDE.md, .clinerules/, .cursor/rules/).
-
-- At the start of each session, check what documentation exists:
-  - Limit depth when listing documentation.
-  - Project-wide search: { command: "fd", args: [".", "./", "--extension", "md", "--hidden", "--max-depth", "3"] }
-  - Task-relevant search: { command: "fd", args: [".", "./path/to/task/dir", "--extension", "md", "--hidden", "--max-depth", "3"] }
-- When planning, gather necessary information from the documentation.
-- When unsure about project conventions or procedures during task execution, consult the documentation.
+- At session start, scan available documentation:
+  { command: "fd", args: [".", "./", "--extension", "md", "--hidden", "--max-depth", "5"] }
+- When planning, read task-relevant documentation files.
+- When unsure about project conventions or procedures during task execution, check the documentation.
 
 ## Memory Files
 
