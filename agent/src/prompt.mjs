@@ -32,13 +32,6 @@ Follow the principles and practices from these sources:
 - "Test-Driven Development by Example" by Kent Beck
 - "The Art of Readable Code" by Dustin Boswell and Trevor Foucher
 
-## Project Knowledge Discovery
-
-- At session start, scan available documentation:
-  { command: "fd", args: [".", "./", "--extension", "md", "--hidden", "--max-depth", "5"] }
-- When planning, read task-relevant documentation files.
-- When unsure about project conventions or procedures during task execution, check the documentation.
-
 ## Memory Files
 
 Use memory files to save progress so tasks can be stopped, resumed, and users stay informed.

@@ -49,10 +49,6 @@ Create a commit.
   exec_command: { command: "git", args: ["commit", "-m", "<commit message>", "-m", "", "-m", "Co-authored-by: Agent by iinm <agent-by-iinm+${modelName}@localhost>"] }
     `.trim(),
   },
-  {
-    command: "/discover",
-    prompt: () => "Run project knowledge discovery process.",
-  },
 ];
 
 // Define available slash commands for tab completion
@@ -70,7 +66,6 @@ Commands:
   /save               - Save the current task state to memory
   /commit             - Create a commit message based on staged changes
   /commit.co-authored - Create a commit with Co-authored-by
-  /discover           - Start project knowledge discovery process
   /debug.resume       - Resume conversation after an LLM provider error
   /debug.dump         - Save current messages to a JSON file
   /debug.load         - Load messages from a JSON file
