@@ -10,7 +10,11 @@ function dir_history
   function j
     # compaction
     set -l tmpfile (mktemp)
-    cat "$DIRECTORY_HISTORY_FILE" | tac | awk '!a[$0]++' | tac > "$tmpfile"
+    if test (uname) = 'Darwin'; and not type --quiet tac
+      cat "$DIRECTORY_HISTORY_FILE" | tail -r | awk '!a[$0]++' | tail -r > "$tmpfile"
+    else
+      cat "$DIRECTORY_HISTORY_FILE" | tac | awk '!a[$0]++' | tac > "$tmpfile"
+    end
     mv -f "$tmpfile" "$DIRECTORY_HISTORY_FILE"
     rm -f "$tmpfile"
 

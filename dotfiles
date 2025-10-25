@@ -206,7 +206,6 @@ bootstrap_darwin() {
     fd
     fzf
     jq
-    gawk
     shellcheck
     colima
     docker
