@@ -57,10 +57,8 @@ export const fetchWebPageWithBrowserTool = {
             waitUntil: "networkidle0",
             timeout: 30_000,
           });
-        } catch (_timeoutError) {
-          console.warn(
-            "Network idle timeout, proceeding with current page state",
-          );
+        } catch (err) {
+          console.warn(`Failed to navigate to ${input.url}: ${err}`);
         }
         html = await page.content();
         await page.close();
