@@ -13,7 +13,17 @@ export async function loadUserMessageContext(message) {
 
   /** @type {string[]} */
   const contexts = [];
+  /** @type {string[]} */
+  const processedLines = [];
   for (const line of lines) {
+    const imagePath = parseImageReference(line);
+    if (imagePath) {
+      processedLines.push(`image:${imagePath}`);
+      continue;
+    }
+
+    processedLines.push(line);
+
     for (const segment of line.split(" ")) {
       if (segment.startsWith("@")) {
         const fileRange = parseFileRange(segment.slice(1));
@@ -60,5 +70,24 @@ ${fileContent}
     }
   }
 
-  return [message, ...contexts].join("\n\n");
+  const processedMessage = processedLines.join("\n");
+  return [processedMessage, ...contexts].join("\n\n");
+}
+
+/**
+ * @param {string} line
+ * @returns {string | null}
+ */
+function parseImageReference(line) {
+  const quotedMatch = line.match(/^\s*@'(.+\.png)'\s*$/u);
+  if (quotedMatch) {
+    return quotedMatch[1];
+  }
+
+  const escapedMatch = line.match(/^\s*@((?:\\ |[^ ])+\.png)\s*$/u);
+  if (escapedMatch) {
+    return escapedMatch[1].replace(/\\ /g, " ");
+  }
+
+  return null;
 }
