@@ -11,6 +11,10 @@
       {
         "toolName": { "regex": "^(write_file|patch_file)$" },
         "input": { "filePath": { "regex": "^\\.agent/memory/.+\\.md$" } }
+      },
+      {
+        "toolName": { "regex": "^(write_file|patch_file)$" },
+        "input": { "filePath": { "regex": "^src/" } }
       }
     ]
   },
