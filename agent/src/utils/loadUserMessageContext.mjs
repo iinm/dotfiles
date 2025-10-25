@@ -16,6 +16,7 @@ export async function loadUserMessageContext(message) {
   /** @type {string[]} */
   const processedLines = [];
   for (const line of lines) {
+    // Warning: Image input is not yet supported; it only recognizes paths here.
     const imagePath = parseImageReference(line);
     if (imagePath) {
       processedLines.push(`image:${imagePath}`);
