@@ -103,11 +103,3 @@ export const fetchWebPageWithBrowserTool = {
       ].join("\n");
     }),
 };
-
-// Playground
-// (async () => {
-//   const input = {
-//     url: "https://devin.ai/agents101",
-//   };
-//   console.log(await fetchWebPageWithBrowserTool.impl(input));
-// })();
