@@ -23,7 +23,7 @@ describe("loadUserMessageContext", () => {
     // then:
     assert.deepStrictEqual(result, [
       {
-        text: "[Image #1]",
+        text: `[Image #1:${spacedImagePath}]`,
         type: "text",
       },
       {
@@ -52,7 +52,7 @@ describe("loadUserMessageContext", () => {
     // then:
     assert.deepStrictEqual(result, [
       {
-        text: "[Image #1]",
+        text: `[Image #1:${quotedImagePath}]`,
         type: "text",
       },
       {
@@ -81,7 +81,7 @@ describe("loadUserMessageContext", () => {
     // then:
     assert.deepStrictEqual(result, [
       {
-        text: "[Image #1]",
+        text: `[Image #1:${jpegImagePath}]`,
         type: "text",
       },
       {
@@ -115,7 +115,7 @@ describe("loadUserMessageContext", () => {
       {
         text: [
           "@README.md:1-2",
-          "[Image #1]",
+          `[Image #1:${imagePath}]`,
           "",
           '<context location="README.md:1-2">',
           "# Agent",

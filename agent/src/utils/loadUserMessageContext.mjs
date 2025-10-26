@@ -36,7 +36,7 @@ export async function loadUserMessageContext(message) {
   const imageContents = [];
   let imageIndex = 0;
   for (const line of lines) {
-    const imagePath = parseImageReference(line);
+    const imagePath = detectImageReference(line);
     if (imagePath) {
       const imageContent = await loadImageContent(imagePath);
       if (imageContent instanceof Error) {
@@ -51,57 +51,58 @@ export async function loadUserMessageContext(message) {
       }
 
       imageIndex += 1;
-      processedLines.push(`[Image #${imageIndex}]`);
+      processedLines.push(`[Image #${imageIndex}:${imagePath}]`);
       imageContents.push(imageContent);
       continue;
     }
 
     processedLines.push(line);
 
-    for (const segment of line.split(" ")) {
-      if (segment.startsWith("@")) {
-        const fileRange = parseFileRange(segment.slice(1));
-        if (fileRange instanceof Error) {
-          console.warn(
-            styleText(
-              "yellow",
-              `Failed to parse context reference ${segment}: ${fileRange}`,
-            ),
-          );
-          continue;
-        }
+    const contextReference = detectContextReference(line);
+    if (!contextReference) {
+      continue;
+    }
 
-        const absPath = path.resolve(fileRange.filePath);
-        if (!absPath.startsWith(workingDir)) {
-          console.warn(
-            styleText(
-              "yellow",
-              `Refusing to load context from outside working directory: ${absPath}`,
-            ),
-          );
-          continue;
-        }
+    const fileRange = parseFileRange(contextReference);
+    if (fileRange instanceof Error) {
+      console.warn(
+        styleText(
+          "yellow",
+          `Failed to parse context reference ${contextReference}: ${fileRange}`,
+        ),
+      );
+      continue;
+    }
 
-        const fileContent = await readFileRange(fileRange);
-        if (fileContent instanceof Error) {
-          console.warn(
-            styleText(
-              "yellow",
-              `Failed to load context from ${segment}: ${fileContent}`,
-            ),
-          );
-          continue;
-        }
+    const absPath = path.resolve(fileRange.filePath);
+    if (!absPath.startsWith(workingDir)) {
+      console.warn(
+        styleText(
+          "yellow",
+          `Refusing to load context from outside working directory: ${absPath}`,
+        ),
+      );
+      continue;
+    }
 
-        contexts.push(
-          `
-<context location="${segment.slice(1)}">
+    const fileContent = await readFileRange(fileRange);
+    if (fileContent instanceof Error) {
+      console.warn(
+        styleText(
+          "yellow",
+          `Failed to load context from ${contextReference}: ${fileContent}`,
+        ),
+      );
+      continue;
+    }
+
+    contexts.push(
+      `
+<context location="${contextReference}">
 ${fileContent}
 </context>
-          `.trim(),
-        );
-      }
-    }
+      `.trim(),
+    );
   }
 
   const processedMessage = processedLines.join("\n");
@@ -118,7 +119,7 @@ ${fileContent}
  * @param {string} line
  * @returns {string | null}
  */
-function parseImageReference(line) {
+function detectImageReference(line) {
   const quotedMatch = line.match(/^\s*@'(.+)'\s*$/u);
   if (quotedMatch) {
     const candidatePath = quotedMatch[1];
@@ -132,6 +133,15 @@ function parseImageReference(line) {
   }
 
   return null;
+}
+
+/**
+ * @param {string} line
+ * @returns {string | null}
+ */
+function detectContextReference(line) {
+  const match = line.match(/(^|\s)@(\S+)/u);
+  return match ? match[2] : null;
 }
 
 /**
