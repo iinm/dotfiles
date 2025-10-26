@@ -100,7 +100,7 @@ describe("loadUserMessageContext", () => {
     const imagePath = path.join(tempDir, "context image.png");
     await copyFile(sourceImagePath, imagePath);
     const message = [
-      "@README.md:1-2",
+      "- @README.md:1-2",
       `@${imagePath.replace(/ /gu, "\\ ")}`,
     ].join("\n");
     const expectedImageData = await readFile(imagePath, {
@@ -114,7 +114,7 @@ describe("loadUserMessageContext", () => {
     assert.deepStrictEqual(result, [
       {
         text: [
-          "@README.md:1-2",
+          "- @README.md:1-2",
           `[Image #1:${imagePath}]`,
           "",
           '<context location="README.md:1-2">',

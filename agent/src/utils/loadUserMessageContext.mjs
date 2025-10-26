@@ -60,51 +60,53 @@ export async function loadUserMessageContext(message) {
 
     processedLines.push(line);
 
-    const contextReference = detectContextReference(line);
-    if (!contextReference) {
-      continue;
-    }
+    for (const part of line.split(" ")) {
+      const contextReference = detectContextReference(part);
+      if (!contextReference) {
+        continue;
+      }
 
-    const fileRange = parseFileRange(contextReference);
-    if (fileRange instanceof Error) {
-      console.warn(
-        styleText(
-          "yellow",
-          `Failed to parse context reference ${contextReference}: ${fileRange}`,
-        ),
-      );
-      continue;
-    }
+      const fileRange = parseFileRange(contextReference);
+      if (fileRange instanceof Error) {
+        console.warn(
+          styleText(
+            "yellow",
+            `Failed to parse context reference ${contextReference}: ${fileRange}`,
+          ),
+        );
+        continue;
+      }
 
-    const absPath = path.resolve(fileRange.filePath);
-    if (!absPath.startsWith(workingDir)) {
-      console.warn(
-        styleText(
-          "yellow",
-          `Refusing to load context from outside working directory: ${absPath}`,
-        ),
-      );
-      continue;
-    }
+      const absPath = path.resolve(fileRange.filePath);
+      if (!absPath.startsWith(workingDir)) {
+        console.warn(
+          styleText(
+            "yellow",
+            `Refusing to load context from outside working directory: ${absPath}`,
+          ),
+        );
+        continue;
+      }
 
-    const fileContent = await readFileRange(fileRange);
-    if (fileContent instanceof Error) {
-      console.warn(
-        styleText(
-          "yellow",
-          `Failed to load context from ${contextReference}: ${fileContent}`,
-        ),
-      );
-      continue;
-    }
+      const fileContent = await readFileRange(fileRange);
+      if (fileContent instanceof Error) {
+        console.warn(
+          styleText(
+            "yellow",
+            `Failed to load context from ${contextReference}: ${fileContent}`,
+          ),
+        );
+        continue;
+      }
 
-    contexts.push(
-      `
+      contexts.push(
+        `
 <context location="${contextReference}">
 ${fileContent}
 </context>
       `.trim(),
-    );
+      );
+    }
   }
 
   const processedMessage = processedLines.join("\n");
