@@ -15,9 +15,6 @@ const SUPPORTED_IMAGE_EXTENSIONS = [
   ".jpeg",
   ".gif",
   ".webp",
-  ".bmp",
-  ".tif",
-  ".tiff",
 ];
 
 /**
