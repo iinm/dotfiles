@@ -1,3 +1,7 @@
+/**
+ * @import { MessageContentText, MessageContentImage } from "../model";
+ */
+
 import path from "node:path";
 import { styleText } from "node:util";
 import { parseFileRange } from "./parseFileRange.mjs";
@@ -5,7 +9,7 @@ import { readFileRange } from "./readFileRange.mjs";
 
 /**
  * @param {string} message
- * @returns {Promise<string>}
+ * @returns {Promise<(MessageContentText | MessageContentImage)[]>}
  */
 export async function loadUserMessageContext(message) {
   const workingDir = process.cwd();
@@ -72,7 +76,7 @@ ${fileContent}
   }
 
   const processedMessage = processedLines.join("\n");
-  return [processedMessage, ...contexts].join("\n\n");
+  return [{ type: "text", text: [processedMessage, ...contexts].join("\n\n") }];
 }
 
 /**

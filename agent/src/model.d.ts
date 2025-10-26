@@ -33,7 +33,11 @@ export type SystemMessage = {
 
 export type UserMessage = {
   role: "user";
-  content: (MessageContentText | MessageContentToolResult)[];
+  content: (
+    | MessageContentText
+    | MessageContentImage
+    | MessageContentToolResult
+  )[];
 };
 
 export type AssistantMessage = {

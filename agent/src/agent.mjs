@@ -90,8 +90,13 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
         (part) => part.type === "tool_use",
       );
       // Pending tool call
-      if (input.toLowerCase().match(/^(yes|y|ｙ)$/i)) {
-        if (input.match(/^(YES|Y)$/)) {
+      if (
+        input.length === 1 &&
+        input[0].type === "text" &&
+        input[0].text.toLocaleLowerCase().match(/^(yes|y|ｙ)$/i)
+      ) {
+        // if (input.toLowerCase().match(/^(yes|y|ｙ)$/i)) {
+        if (input[0].text.match(/^(YES|Y)$/)) {
           // Allow tool use
           for (const toolUse of toolUseParts) {
             toolUseApprover.allowToolUse(toolUse);
@@ -120,16 +125,20 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
         state.messages.push({ role: "user", content: toolResults });
         state.messages.push({
           role: "user",
-          content: [{ type: "text", text: input }],
+          content: input,
         });
       }
-    } else if (input.toLowerCase() === "/debug.resume") {
+    } else if (
+      input.length === 1 &&
+      input[0].type === "text" &&
+      input[0].text.toLowerCase() === "/debug.resume"
+    ) {
       // Resume the conversation stopped by rate limit, etc.
     } else {
       // No pending tool call
       state.messages.push({
         role: "user",
-        content: [{ type: "text", text: input }],
+        content: input,
       });
     }
 

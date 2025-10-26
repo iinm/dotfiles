@@ -207,24 +207,29 @@ export function startInteractiveSession({
       const messageWithContext = await loadUserMessageContext(fileContent);
 
       console.log(styleText("gray", "\n<input>"));
-      console.log(
-        messageWithContext.replace(
-          /(\n?<context.+?>)(.+?)(<\/context>\n?)/gs,
-          (_, start, content, end) => {
-            return [
-              styleText("green", start),
-              content.length > MAX_DISPLAY_OUTPUT_LENGTH
-                ? [
-                    content.slice(0, MAX_DISPLAY_OUTPUT_LENGTH),
-                    styleText("yellow", "... (Output truncated for display)"),
-                    "\n",
-                  ].join("")
-                : content,
-              styleText("green", end),
-            ].join("");
-          },
-        ),
-      );
+      for (const content of messageWithContext) {
+        if (content.type !== "text") {
+          continue;
+        }
+        console.log(
+          content.text.replace(
+            /(\n?<context.+?>)(.+?)(<\/context>\n?)/gs,
+            (_, start, content, end) => {
+              return [
+                styleText("green", start),
+                content.length > MAX_DISPLAY_OUTPUT_LENGTH
+                  ? [
+                      content.slice(0, MAX_DISPLAY_OUTPUT_LENGTH),
+                      styleText("yellow", "... (Output truncated for display)"),
+                      "\n",
+                    ].join("")
+                  : content,
+                styleText("green", end),
+              ].join("");
+            },
+          ),
+        );
+      }
       console.log(styleText("gray", "</input>"));
 
       userEventEmitter.emit("userInput", messageWithContext);
@@ -252,13 +257,13 @@ export function startInteractiveSession({
         console.log(message);
         console.log(styleText("gray", "</prompt>"));
 
-        userEventEmitter.emit("userInput", message);
+        userEventEmitter.emit("userInput", [{ type: "text", text: message }]);
         state.turn = false;
         return;
       }
     }
 
-    userEventEmitter.emit("userInput", inputTrimmed);
+    userEventEmitter.emit("userInput", [{ type: "text", text: inputTrimmed }]);
     state.turn = false;
   });
 

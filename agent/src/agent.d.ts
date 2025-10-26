@@ -2,6 +2,8 @@ import type { EventEmitter } from "node:events";
 import type {
   CallModel,
   Message,
+  MessageContentImage,
+  MessageContentText,
   PartialMessageContent,
   ProviderTokenUsage,
 } from "./model";
@@ -19,7 +21,7 @@ export type AgentCommands = {
 };
 
 type UserEventMap = {
-  userInput: [string];
+  userInput: [(MessageContentText | MessageContentImage)[]];
 };
 
 export type UserEventEmitter = EventEmitter<UserEventMap>;
