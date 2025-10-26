@@ -136,72 +136,83 @@ function convertGenericMessageToOpenAIFormat(genericMessages) {
         break;
       }
       case "user": {
-        if (
-          genericMessage.content.some((part) => part.type === "tool_result")
-        ) {
-          /** @type {MessageContentToolResult[]} */
-          const toolResults = genericMessage.content.filter(
-            (part) => part.type === "tool_result",
-          );
+        const toolResults = genericMessage.content.filter(
+          (part) => part.type === "tool_result",
+        );
+        const userContentParts = genericMessage.content.filter(
+          (part) => part.type === "text" || part.type === "image",
+        );
 
-          let imageIndex = 0;
-          for (const result of toolResults) {
-            const toolResultContentString = result.content
-              .map((part) => {
-                switch (part.type) {
-                  case "text":
-                    return part.text;
-                  case "image":
-                    imageIndex += 1;
-                    return `(Image [${imageIndex}] omitted. See next message from user.)`;
-                  default:
-                    throw new Error(
-                      `Unsupported content part: ${JSON.stringify(part)}`,
-                    );
-                }
-              })
-              .join("\n\n");
-            openAIMessages.push({
-              role: "tool",
-              tool_call_id: result.toolUseId,
-              content: toolResultContentString,
-            });
+        // Tool Results
+        let imageIndex = 0;
+        for (const result of toolResults) {
+          const toolResultContentString = result.content
+            .map((part) => {
+              switch (part.type) {
+                case "text":
+                  return part.text;
+                case "image":
+                  imageIndex += 1;
+                  return `(Image [${imageIndex}] omitted. See next message from user.)`;
+                default:
+                  throw new Error(
+                    `Unsupported content part: ${JSON.stringify(part)}`,
+                  );
+              }
+            })
+            .join("\n\n");
+          openAIMessages.push({
+            role: "tool",
+            tool_call_id: result.toolUseId,
+            content: toolResultContentString,
+          });
+        }
+
+        /** @type {OpenAIMessageContentImage[]} */
+        const imageParts = [];
+        for (const result of toolResults) {
+          for (const part of result.content) {
+            if (part.type === "image") {
+              imageParts.push({
+                type: "image_url",
+                image_url: {
+                  url: `data:${part.mimeType};base64,${part.data}`,
+                },
+              });
+            }
           }
+        }
 
-          /** @type {OpenAIMessageContentImage[]} */
-          const imageParts = [];
-          for (const result of toolResults) {
-            for (const part of result.content) {
+        if (imageParts.length) {
+          openAIMessages.push({
+            role: "user",
+            content: imageParts,
+          });
+        }
+
+        // User Input Parts
+        if (userContentParts.length) {
+          openAIMessages.push({
+            role: "user",
+            content: userContentParts.map((part) => {
+              if (part.type === "text") {
+                return { type: "text", text: part.text };
+              }
               if (part.type === "image") {
-                imageParts.push({
+                return {
                   type: "image_url",
                   image_url: {
                     url: `data:${part.mimeType};base64,${part.data}`,
                   },
-                });
+                };
               }
-            }
-          }
-
-          if (imageParts.length) {
-            openAIMessages.push({
-              role: "user",
-              content: imageParts,
-            });
-          }
-        } else {
-          /** @type {MessageContentText[]} */
-          const textParts = genericMessage.content.filter(
-            (part) => part.type === "text",
-          );
-          openAIMessages.push({
-            role: "user",
-            content: textParts.map((part) => ({
-              type: "text",
-              text: part.text,
-            })),
+              throw new Error(
+                `Unsupported content part: ${JSON.stringify(part)}`,
+              );
+            }),
           });
         }
+
         break;
       }
       case "assistant": {
