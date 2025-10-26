@@ -8,14 +8,19 @@ import { styleText } from "node:util";
 import { parseFileRange } from "./parseFileRange.mjs";
 import { readFileRange } from "./readFileRange.mjs";
 
+/** @type {ReadonlyMap<string, string>} */
+const IMAGE_MIME_TYPES = new Map([
+  [".png", "image/png"],
+  [".jpg", "image/jpeg"],
+  [".jpeg", "image/jpeg"],
+  [".gif", "image/gif"],
+  [".webp", "image/webp"],
+]);
+
 /** @type {readonly string[]} */
-const SUPPORTED_IMAGE_EXTENSIONS = [
-  ".png",
-  ".jpg",
-  ".jpeg",
-  ".gif",
-  ".webp",
-];
+const SUPPORTED_IMAGE_EXTENSIONS = Object.freeze(
+  Array.from(IMAGE_MIME_TYPES.keys()),
+);
 
 /**
  * @param {string} message
@@ -180,23 +185,7 @@ async function loadImageContent(imagePath) {
  */
 function inferMimeType(filePath) {
   const extension = path.extname(filePath).toLowerCase();
+  const mimeType = IMAGE_MIME_TYPES.get(extension);
 
-  switch (extension) {
-    case ".png":
-      return "image/png";
-    case ".jpg":
-    case ".jpeg":
-      return "image/jpeg";
-    case ".gif":
-      return "image/gif";
-    case ".webp":
-      return "image/webp";
-    case ".bmp":
-      return "image/bmp";
-    case ".tif":
-    case ".tiff":
-      return "image/tiff";
-    default:
-      return "application/octet-stream";
-  }
+  return mimeType ?? "application/octet-stream";
 }
