@@ -17,144 +17,91 @@ const IMAGE_MIME_TYPES = new Map([
   [".webp", "image/webp"],
 ]);
 
-/** @type {readonly string[]} */
-const SUPPORTED_IMAGE_EXTENSIONS = Object.freeze(
-  Array.from(IMAGE_MIME_TYPES.keys()),
-);
-
 /**
  * @param {string} message
  * @returns {Promise<(MessageContentText | MessageContentImage)[]>}
  */
 export async function loadUserMessageContext(message) {
   const workingDir = process.cwd();
-  const lines = message.split("\n");
 
+  /** @type {string[]} */
+  const text = [];
   /** @type {string[]} */
   const contexts = [];
-  /** @type {string[]} */
-  const processedLines = [];
   /** @type {MessageContentImage[]} */
-  const imageContents = [];
-  let imageIndex = 0;
-  for (const line of lines) {
-    const imagePath = detectImageReference(line);
-    if (imagePath) {
-      const imageContent = await loadImageContent(imagePath);
+  const images = [];
+
+  let cursor = 0;
+  for (const match of message.matchAll(
+    /(^|\s)@(?:'([^']+)'|((?:\\ |[^\s])+))/g,
+  )) {
+    if (cursor < match.index) {
+      text.push(message.slice(cursor, match.index));
+    }
+    cursor = match.index + match[0].length;
+    const [entireMatch, leading, quoted, escaped] = match;
+    const reference = quoted ?? escaped.replace(/\\ /g, " ");
+
+    const ext = path.extname(reference).toLowerCase();
+    if (IMAGE_MIME_TYPES.has(ext)) {
+      const imageContent = await loadImageContent(reference);
       if (imageContent instanceof Error) {
-        console.warn(
-          styleText(
-            "yellow",
-            `Failed to load image from ${imagePath}: ${imageContent.message}`,
-          ),
-        );
-        processedLines.push(line);
+        warn(`Failed to load image from ${reference}: ${imageContent.message}`);
+        text.push(entireMatch);
         continue;
       }
-
-      imageIndex += 1;
-      processedLines.push(`[Image #${imageIndex}:${imagePath}]`);
-      imageContents.push(imageContent);
+      images.push(imageContent);
+      text.push(`${leading}[Image #${images.length}:${reference}]`);
       continue;
     }
 
-    processedLines.push(line);
-
-    for (const part of line.split(" ")) {
-      const contextReference = detectContextReference(part);
-      if (!contextReference) {
-        continue;
-      }
-
-      const fileRange = parseFileRange(contextReference);
-      if (fileRange instanceof Error) {
-        console.warn(
-          styleText(
-            "yellow",
-            `Failed to parse context reference ${contextReference}: ${fileRange}`,
-          ),
-        );
-        continue;
-      }
-
-      const absPath = path.resolve(fileRange.filePath);
-      if (!absPath.startsWith(workingDir)) {
-        console.warn(
-          styleText(
-            "yellow",
-            `Refusing to load context from outside working directory: ${absPath}`,
-          ),
-        );
-        continue;
-      }
-
-      const fileContent = await readFileRange(fileRange);
-      if (fileContent instanceof Error) {
-        console.warn(
-          styleText(
-            "yellow",
-            `Failed to load context from ${contextReference}: ${fileContent}`,
-          ),
-        );
-        continue;
-      }
-
-      contexts.push(
-        `
-<context location="${contextReference}">
-${fileContent}
-</context>
-      `.trim(),
-      );
+    const contextSnippet = await loadContextSnippet(reference, workingDir);
+    if (contextSnippet) {
+      contexts.push(contextSnippet);
     }
+    text.push(entireMatch);
   }
 
-  const processedMessage = processedLines.join("\n");
-  /** @type {MessageContentText} */
-  const textContent = {
-    type: "text",
-    text: [processedMessage, ...contexts].join("\n\n"),
-  };
+  if (cursor < message.length) {
+    text.push(message.slice(cursor));
+  }
 
-  return [textContent, ...imageContents];
+  return [
+    { type: "text", text: [text.join(""), ...contexts].join("\n\n") },
+    ...images,
+  ];
 }
 
 /**
- * @param {string} line
- * @returns {string | null}
+ * @param {string} reference
+ * @param {string} workingDir
+ * @returns {Promise<string | null>}
  */
-function detectImageReference(line) {
-  const quotedMatch = line.match(/^\s*@'(.+)'\s*$/u);
-  if (quotedMatch) {
-    const candidatePath = quotedMatch[1];
-    return isSupportedImagePath(candidatePath) ? candidatePath : null;
+async function loadContextSnippet(reference, workingDir) {
+  const fileRange = parseFileRange(reference);
+  if (fileRange instanceof Error) {
+    warn(`Failed to parse context reference ${reference}: ${fileRange}`);
+    return null;
   }
 
-  const escapedMatch = line.match(/^\s*@((?:\\ |[^ ])+)\s*$/u);
-  if (escapedMatch) {
-    const candidatePath = escapedMatch[1].replace(/\\ /g, " ");
-    return isSupportedImagePath(candidatePath) ? candidatePath : null;
+  const absolutePath = path.resolve(fileRange.filePath);
+  const relativePath = path.relative(workingDir, absolutePath);
+  if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
+    warn(
+      `Refusing to load context from outside working directory: ${absolutePath}`,
+    );
+    return null;
   }
 
-  return null;
-}
+  const fileContent = await readFileRange(fileRange);
+  if (fileContent instanceof Error) {
+    warn(`Failed to load context from ${reference}: ${fileContent}`);
+    return null;
+  }
 
-/**
- * @param {string} line
- * @returns {string | null}
- */
-function detectContextReference(line) {
-  const match = line.match(/(^|\s)@(\S+)/u);
-  return match ? match[2] : null;
-}
-
-/**
- * @param {string} filePath
- * @returns {boolean}
- */
-function isSupportedImagePath(filePath) {
-  const extension = path.extname(filePath).toLowerCase();
-  return SUPPORTED_IMAGE_EXTENSIONS.includes(extension);
+  return [`<context location="${reference}">`, fileContent, "</context>"].join(
+    "\n",
+  );
 }
 
 /**
@@ -166,11 +113,10 @@ async function loadImageContent(imagePath) {
 
   try {
     const data = await readFile(absolutePath);
-    const mimeType = inferMimeType(absolutePath);
     return {
       type: "image",
       data: data.toString("base64"),
-      mimeType,
+      mimeType: inferMimeType(absolutePath),
     };
   } catch (error) {
     if (error instanceof Error) {
@@ -188,6 +134,19 @@ async function loadImageContent(imagePath) {
 function inferMimeType(filePath) {
   const extension = path.extname(filePath).toLowerCase();
   const mimeType = IMAGE_MIME_TYPES.get(extension);
+  if (!mimeType) {
+    throw new Error(
+      `Unsupported image extension: ${extension} (file: ${filePath})`,
+    );
+  }
 
-  return mimeType ?? "application/octet-stream";
+  return mimeType;
+}
+
+/**
+ * @param {string} message
+ * @returns {void}
+ */
+function warn(message) {
+  console.warn(styleText("yellow", message));
 }

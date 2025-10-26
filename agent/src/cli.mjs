@@ -75,12 +75,12 @@ File Input Syntax:
   !path/to/file:N   - Read line N from a file
   !path/to/file:N-M - Read lines N to M from a file
 
-References (use within file input content):
+References (use within input content):
   @path/to/file     - Reference content from another file
   @path/to/file:N   - Reference line N from another file
   @path/to/file:N-M - Reference lines N to M from another file
 
-Image Attachments (use within file input content):
+Image Attachments (use within input content):
   @path/to/image.png      - Attach an image (png, jpg, jpeg, gif, webp)
   @'path/with spaces.png' - Quote paths that include spaces
   @path/with\\ spaces.png  - Escape spaces with a backslash
@@ -206,33 +206,11 @@ export function startInteractiveSession({
         return;
       }
 
-      const messageWithContext = await loadUserMessageContext(fileContent);
-
-      console.log(styleText("gray", "\n<input>"));
-      for (const content of messageWithContext) {
-        if (content.type !== "text") {
-          continue;
-        }
-        console.log(
-          content.text.replace(
-            /(\n?<context.+?>)(.+?)(<\/context>\n?)/gs,
-            (_, start, content, end) => {
-              return [
-                styleText("green", start),
-                content.length > MAX_DISPLAY_OUTPUT_LENGTH
-                  ? [
-                      content.slice(0, MAX_DISPLAY_OUTPUT_LENGTH),
-                      styleText("yellow", "... (Output truncated for display)"),
-                      "\n",
-                    ].join("")
-                  : content,
-                styleText("green", end),
-              ].join("");
-            },
-          ),
-        );
-      }
+      console.log(styleText("gray", `\n<input>${fileContent}\n</input>`));
+      console.log(fileContent);
       console.log(styleText("gray", "</input>"));
+
+      const messageWithContext = await loadUserMessageContext(fileContent);
 
       userEventEmitter.emit("userInput", messageWithContext);
       state.turn = false;
@@ -265,7 +243,8 @@ export function startInteractiveSession({
       }
     }
 
-    userEventEmitter.emit("userInput", [{ type: "text", text: inputTrimmed }]);
+    const messageWithContext = await loadUserMessageContext(inputTrimmed);
+    userEventEmitter.emit("userInput", messageWithContext);
     state.turn = false;
   });
 
