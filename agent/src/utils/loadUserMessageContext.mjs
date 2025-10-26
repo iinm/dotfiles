@@ -36,7 +36,6 @@ export async function loadUserMessageContext(message) {
   const imageContents = [];
   let imageIndex = 0;
   for (const line of lines) {
-    // Warning: Image input is not yet supported; it only recognizes paths here.
     const imagePath = parseImageReference(line);
     if (imagePath) {
       const imageContent = await loadImageContent(imagePath);

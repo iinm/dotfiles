@@ -347,34 +347,34 @@ function convertGenericMessageToGeminiFormat(messages) {
         const toolUseResults = message.content.filter(
           (part) => part.type === "tool_result",
         );
-        const userTextParts = message.content.filter(
-          (part) => part.type === "text",
+        const userContentParts = message.content.filter(
+          (part) => part.type === "text" || part.type === "image",
         );
 
         /** @type {GeminiContent[]} */
-        for (const part of toolUseResults) {
+        for (const toolResult of toolUseResults) {
           geminiContents.push({
             role: "user",
             parts: [
               {
                 functionResponse: {
-                  name: part.toolName,
+                  name: toolResult.toolName,
                   response: {
-                    name: part.toolName,
-                    content: part.content.map((contentPart) => {
-                      switch (contentPart.type) {
+                    name: toolResult.toolName,
+                    content: toolResult.content.map((part) => {
+                      switch (part.type) {
                         case "text":
-                          return { text: contentPart.text };
+                          return { text: part.text };
                         case "image":
                           return {
                             inline_data: {
-                              mime_type: contentPart.mimeType,
-                              data: contentPart.data,
+                              mime_type: part.mimeType,
+                              data: part.data,
                             },
                           };
                         default:
                           throw new Error(
-                            `Unsupported content: ${JSON.stringify(contentPart)}`,
+                            `Unsupported content part: ${JSON.stringify(part)}`,
                           );
                       }
                     }),
@@ -384,10 +384,26 @@ function convertGenericMessageToGeminiFormat(messages) {
             ],
           });
         }
-        for (const part of userTextParts) {
+
+        if (userContentParts.length) {
           geminiContents.push({
             role: "user",
-            parts: [{ text: part.text }],
+            parts: userContentParts.map((part) => {
+              if (part.type === "text") {
+                return { text: part.text };
+              }
+              if (part.type === "image") {
+                return {
+                  inline_data: {
+                    mime_type: part.mimeType,
+                    data: part.data,
+                  },
+                };
+              }
+              throw new Error(
+                `Unsupported content part: ${JSON.stringify(part)}`,
+              );
+            }),
           });
         }
 

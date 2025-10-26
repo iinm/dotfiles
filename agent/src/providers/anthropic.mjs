@@ -129,7 +129,9 @@ function convertGenericMessageToAnthropicFormat(genericMessages) {
             if (part.type === "text") {
               return { type: "text", text: part.text };
             }
-            throw new Error(`Unknown message part type: ${part}`);
+            throw new Error(
+              `Unsupported content part: ${JSON.stringify(part)}`,
+            );
           }),
         });
         break;
@@ -140,6 +142,16 @@ function convertGenericMessageToAnthropicFormat(genericMessages) {
           content: genericMessage.content.map((part) => {
             if (part.type === "text") {
               return { type: "text", text: part.text };
+            }
+            if (part.type === "image") {
+              return {
+                type: "image",
+                source: {
+                  type: "base64",
+                  media_type: part.mimeType,
+                  data: part.data,
+                },
+              };
             }
             if (part.type === "tool_result") {
               return {
@@ -159,13 +171,17 @@ function convertGenericMessageToAnthropicFormat(genericMessages) {
                         },
                       };
                     default:
-                      throw new Error(`Unsupported content: ${contentPart}`);
+                      throw new Error(
+                        `Unsupported content part: ${JSON.stringify(contentPart)}`,
+                      );
                   }
                 }),
                 is_error: part.isError,
               };
             }
-            throw new Error(`Unknown message part type: ${part}`);
+            throw new Error(
+              `Unsupported content part: ${JSON.stringify(part)}`,
+            );
           }),
         });
         break;

@@ -142,71 +142,80 @@ function convertGenericMessageToOpenAIFormat(genericMessages) {
         break;
       }
       case "user": {
-        if (
-          genericMessage.content.some((part) => part.type === "tool_result")
-        ) {
-          /** @type {MessageContentToolResult[]} */
-          const toolResults = genericMessage.content.filter(
-            (part) => part.type === "tool_result",
-          );
+        const toolResults = genericMessage.content.filter(
+          (part) => part.type === "tool_result",
+        );
+        const userContentParts = genericMessage.content.filter(
+          (part) => part.type === "text" || part.type === "image",
+        );
 
-          let imageIndex = 0;
-          for (const result of toolResults) {
-            const toolResultContentString = result.content
-              .map((part) => {
-                switch (part.type) {
-                  case "text":
-                    return part.text;
-                  case "image":
-                    imageIndex += 1;
-                    return `(Image [${imageIndex}] omitted. See next message from user.)`;
-                  default:
-                    throw new Error(
-                      `Unsupported content part: ${JSON.stringify(part)}`,
-                    );
-                }
-              })
-              .join("\n\n");
-            openAIInputItems.push({
-              type: "function_call_output",
-              call_id: result.toolUseId,
-              output: toolResultContentString,
-            });
-          }
-
-          /** @type {OpenAIInputImage[]} */
-          const imageInputs = [];
-          for (const result of toolResults) {
-            for (const part of result.content) {
-              if (part.type === "image") {
-                imageInputs.push({
-                  type: "input_image",
-                  image_url: `data:${part.mimeType};base64,${part.data}`,
-                  detail: "auto",
-                });
+        // Tool Results
+        let imageIndex = 0;
+        for (const result of toolResults) {
+          const toolResultContentString = result.content
+            .map((part) => {
+              switch (part.type) {
+                case "text":
+                  return part.text;
+                case "image":
+                  imageIndex += 1;
+                  return `(Image [${imageIndex}] omitted. See next message from user.)`;
+                default:
+                  throw new Error(
+                    `Unsupported content part: ${JSON.stringify(part)}`,
+                  );
               }
-            }
-          }
-
-          if (imageInputs.length) {
-            openAIInputItems.push({
-              role: "user",
-              content: imageInputs,
-            });
-          }
-        } else {
-          /** @type {MessageContentText[]} */
-          const textParts = genericMessage.content.filter(
-            (part) => part.type === "text",
-          );
+            })
+            .join("\n\n");
           openAIInputItems.push({
-            role: "user",
-            content: textParts.map((part) => ({
-              type: "input_text",
-              text: part.text,
-            })),
+            type: "function_call_output",
+            call_id: result.toolUseId,
+            output: toolResultContentString,
           });
         }
+
+        /** @type {OpenAIInputImage[]} */
+        const imageInputs = [];
+        for (const result of toolResults) {
+          for (const part of result.content) {
+            if (part.type === "image") {
+              imageInputs.push({
+                type: "input_image",
+                image_url: `data:${part.mimeType};base64,${part.data}`,
+                detail: "auto",
+              });
+            }
+          }
+        }
+
+        if (imageInputs.length) {
+          openAIInputItems.push({
+            role: "user",
+            content: imageInputs,
+          });
+        }
+
+        // User Input Parts
+        if (userContentParts.length) {
+          openAIInputItems.push({
+            role: "user",
+            content: userContentParts.map((part) => {
+              if (part.type === "text") {
+                return { type: "input_text", text: part.text };
+              }
+              if (part.type === "image") {
+                return {
+                  type: "input_image",
+                  image_url: `data:${part.mimeType};base64,${part.data}`,
+                };
+              }
+              throw new Error(
+                `Unsupported content part: ${JSON.stringify(part)}`,
+              );
+            }),
+          });
+        }
+
         break;
       }
       case "assistant": {

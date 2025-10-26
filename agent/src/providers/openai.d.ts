@@ -38,7 +38,7 @@ export type OpenAIInputText = {
 export type OpenAIInputImage = {
   type: "input_image";
   image_url: string;
-  detail: "low" | "high" | "auto";
+  detail?: "low" | "high" | "auto";
 };
 
 /* Tool */

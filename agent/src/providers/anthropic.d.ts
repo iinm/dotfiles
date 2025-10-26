@@ -51,7 +51,11 @@ export type AnthropicSystemMessage = {
 
 export type AnthropicUserMessage = {
   role: "user";
-  content: (AnthropicMessageContentText | AnthropicMessageContentToolResult)[];
+  content: (
+    | AnthropicMessageContentText
+    | AnthropicMessageContentImage
+    | AnthropicMessageContentToolResult
+  )[];
 };
 
 export type AnthropicAssistantMessage = {

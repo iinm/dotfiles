@@ -65,7 +65,7 @@ export type GeminiModelContent = {
 
 export type GeminiUserContent = {
   role: "user";
-  parts: GeminiContentPartText[];
+  parts: (GeminiContentPartText | GeminiContentPartInlineData)[];
 };
 
 export type GeminiFunctionContent = {
