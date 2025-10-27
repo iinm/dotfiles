@@ -206,7 +206,7 @@ export function startInteractiveSession({
         return;
       }
 
-      console.log(styleText("gray", `\n<input>${fileContent}\n</input>`));
+      console.log(styleText("gray", "\n<input>"));
       console.log(fileContent);
       console.log(styleText("gray", "</input>"));
 
