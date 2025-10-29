@@ -4,5 +4,19 @@
     "body": [
       "console.debug(\"\\n--- DEBUG: \", JSON.stringify({ ${1:target} }, null, 2));"
     ]
+  },
+  "err-custom": {
+    "prefix": "err-custom",
+    "body": [
+      "export class ${1:ErrorName} extends Error {",
+      "  /**",
+      "   * @param {string} message",
+      "   */",
+      "  constructor(message: string) {",
+      "    super(message);",
+      "    this.name = \"${1}\";",
+      "  }",
+      "}"
+    ]
   }
 }
