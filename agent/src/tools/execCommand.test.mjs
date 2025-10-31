@@ -85,7 +85,7 @@ Error: Command failed: node -e process.exit(1)
               args: ["--target-command-arg"],
             },
             mode: "sandbox",
-            extraArgs: ["--sandbox-extra-arg"],
+            additionalArgs: ["--sandbox-additional-arg"],
           },
         ],
       },
@@ -115,12 +115,12 @@ THIS_IS_NOT_SANDBOX
       args: ["--target-command-arg"],
     });
 
-    // then: run the command in sandbox with extra args
+    // then: run the command in sandbox with additional args
     assert.equal(
       result2,
       `
 <stdout>
-THIS_IS_SANDBOX --sandbox-extra-arg target-command --target-command-arg
+THIS_IS_SANDBOX --sandbox-additional-arg target-command --target-command-arg
 </stdout>
 
 <stderr></stderr>

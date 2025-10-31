@@ -167,7 +167,7 @@ The agent loads configuration files in the following order. Settings in later fi
         },
         "mode": "sandbox",
         // Allow access to registry.npmjs.org
-        "extraArgs": ["--allow-net", "registry.npmjs.org"]
+        "additionalArgs": ["--allow-net", "registry.npmjs.org"]
       }
     ]
   },

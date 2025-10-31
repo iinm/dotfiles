@@ -16,6 +16,6 @@ export type ExecCommandSanboxConfig = {
       args?: string[];
     };
     mode: "sandbox" | "unsandboxed";
-    extraArgs?: string[];
+    additionalArgs?: string[];
   }[];
 };

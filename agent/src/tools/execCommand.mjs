@@ -157,7 +157,7 @@ function rewriteInputForSandbox(input, sandbox) {
     command: sandbox.command,
     args: [
       ...(sandbox.args || []),
-      ...(matchedRule?.extraArgs || []),
+      ...(matchedRule?.additionalArgs || []),
       input.command,
       ...(input.args || []),
     ],
