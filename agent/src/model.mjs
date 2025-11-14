@@ -15,51 +15,12 @@ import { callOpenAICompatibleModel } from "./providers/openaiCompatible.mjs";
  */
 export function createModelCaller(modelName, providers) {
   switch (modelName) {
-    case "gpt-thinking-mini-low":
-      return (input) =>
-        callOpenAIModel(
-          providers?.openai ?? {},
-          {
-            model: "gpt-5-mini",
-            reasoning: {
-              effort: "low",
-              summary: "auto",
-            },
-          },
-          input,
-        );
-    case "gpt-thinking-mini-medium":
-      return (input) =>
-        callOpenAIModel(
-          providers?.openai ?? {},
-          {
-            model: "gpt-5-mini",
-            reasoning: {
-              effort: "medium",
-              summary: "auto",
-            },
-          },
-          input,
-        );
-    case "gpt-thinking-mini-high":
-      return (input) =>
-        callOpenAIModel(
-          providers?.openai ?? {},
-          {
-            model: "gpt-5-mini",
-            reasoning: {
-              effort: "high",
-              summary: "auto",
-            },
-          },
-          input,
-        );
     case "gpt-thinking-low":
       return (input) =>
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "gpt-5",
+            model: "gpt-5.1",
             reasoning: {
               effort: "low",
               summary: "auto",
@@ -72,7 +33,7 @@ export function createModelCaller(modelName, providers) {
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "gpt-5",
+            model: "gpt-5.1",
             reasoning: {
               effort: "medium",
               summary: "auto",
@@ -85,7 +46,7 @@ export function createModelCaller(modelName, providers) {
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "gpt-5",
+            model: "gpt-5.1",
             reasoning: {
               effort: "high",
               summary: "auto",
@@ -98,7 +59,7 @@ export function createModelCaller(modelName, providers) {
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "gpt-5-codex",
+            model: "gpt-5.1-codex",
             reasoning: {
               effort: "low",
               summary: "auto",
@@ -111,7 +72,7 @@ export function createModelCaller(modelName, providers) {
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "gpt-5-codex",
+            model: "gpt-5.1-codex",
             reasoning: {
               effort: "medium",
               summary: "auto",
@@ -124,7 +85,7 @@ export function createModelCaller(modelName, providers) {
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "gpt-5-codex",
+            model: "gpt-5.1-codex",
             reasoning: {
               effort: "high",
               summary: "auto",
@@ -132,7 +93,45 @@ export function createModelCaller(modelName, providers) {
           },
           input,
         );
-
+    case "gpt-codex-mini-low":
+      return (input) =>
+        callOpenAIModel(
+          providers?.openai ?? {},
+          {
+            model: "gpt-5.1-codex-mini",
+            reasoning: {
+              effort: "low",
+              summary: "auto",
+            },
+          },
+          input,
+        );
+    case "gpt-codex-mini-medium":
+      return (input) =>
+        callOpenAIModel(
+          providers?.openai ?? {},
+          {
+            model: "gpt-5.1-codex-mini",
+            reasoning: {
+              effort: "medium",
+              summary: "auto",
+            },
+          },
+          input,
+        );
+    case "gpt-codex-mini-high":
+      return (input) =>
+        callOpenAIModel(
+          providers?.openai ?? {},
+          {
+            model: "gpt-5.1-codex-mini",
+            reasoning: {
+              effort: "high",
+              summary: "auto",
+            },
+          },
+          input,
+        );
     case "claude-haiku-thinking-8k":
       return (input) =>
         callAnthropicModel(
