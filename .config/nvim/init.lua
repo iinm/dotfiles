@@ -759,7 +759,7 @@ local setup_minuet = function()
       -- show_on_completion_menu = true,
     },
 
-    provider = 'gemini',
+    provider = 'openai',
     request_timeout = 3,
 
     provider_options = {
@@ -798,7 +798,7 @@ local setup_minuet = function()
         end
       },
 
-      openai_compatible = {
+      openai = {
         model = 'gpt-5-mini',
         optional = {
           max_completion_tokens = 512,
