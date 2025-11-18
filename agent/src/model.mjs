@@ -314,7 +314,7 @@ export function createModelCaller(modelName, providers) {
         );
     }
     case "gemini-pro-thinking": {
-      const model = "gemini-2.5-pro";
+      const model = "gemini-3-pro-preview";
       const modelCaller = createCacheEnabledGeminiModelCaller(
         providers?.gemini ?? {},
         { model },
@@ -339,7 +339,7 @@ export function createModelCaller(modelName, providers) {
         );
     }
     case "gemini-pro-thinking-8k": {
-      const model = "gemini-2.5-pro";
+      const model = "gemini-3-pro-preview";
       const modelCaller = createCacheEnabledGeminiModelCaller(
         providers?.gemini ?? {},
         { model },
@@ -363,7 +363,7 @@ export function createModelCaller(modelName, providers) {
         );
     }
     case "gemini-pro-thinking-16k": {
-      const model = "gemini-2.5-pro";
+      const model = "gemini-3-pro-preview";
       const modelCaller = createCacheEnabledGeminiModelCaller(
         providers?.gemini ?? {},
         { model },
@@ -387,7 +387,7 @@ export function createModelCaller(modelName, providers) {
         );
     }
     case "gemini-pro-thinking-32k-max": {
-      const model = "gemini-2.5-pro";
+      const model = "gemini-3-pro-preview";
       const modelCaller = createCacheEnabledGeminiModelCaller(
         providers?.gemini ?? {},
         { model },
