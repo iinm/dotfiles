@@ -10,15 +10,15 @@
     "fix": "npx @biomejs/biome check --fix"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.21.1",
+    "@modelcontextprotocol/sdk": "^1.22.0",
     "@mozilla/readability": "^0.6.0",
     "diff": "^8.0.2",
-    "jsdom": "^27.1.0",
-    "puppeteer": "^24.29.1",
+    "jsdom": "^27.2.0",
+    "puppeteer": "^24.30.0",
     "turndown": "^7.2.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.5",
+    "@biomejs/biome": "^2.3.6",
     "@types/jsdom": "^27.0.0",
     "@types/node": "^22.19.1",
     "@types/turndown": "^5.0.6",
