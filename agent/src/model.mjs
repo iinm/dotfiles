@@ -415,7 +415,7 @@ export function createModelCaller(modelName, providers) {
         callOpenAICompatibleModel(
           providers?.xai ?? {},
           {
-            model: "grok-4-fast-reasoning",
+            model: "grok-4-1-fast-reasoning",
           },
           input,
         );
