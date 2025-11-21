@@ -10,7 +10,11 @@ export type GeminiModelConfig = {
 
 // https://ai.google.dev/api/generate-content
 export type GeminiGenerationConfig = {
-  temperature: number;
+  /**
+   * If less than 1, it tends to cause loops in Gemini 3.
+   * https://ai.google.dev/gemini-api/docs/troubleshooting?hl=ja#repetitive-tokens
+   */
+  temperature?: number;
   maxOutputTokens?: number;
   thinkingConfig?: {
     includeThoughts: boolean;

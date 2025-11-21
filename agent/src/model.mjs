@@ -228,7 +228,6 @@ export function createModelCaller(modelName, providers) {
             model,
             requestConfig: {
               generationConfig: {
-                temperature: 0,
                 maxOutputTokens: 1024 * 48,
                 thinkingConfig: {
                   includeThoughts: true,
@@ -253,7 +252,6 @@ export function createModelCaller(modelName, providers) {
             model,
             requestConfig: {
               generationConfig: {
-                temperature: 0,
                 maxOutputTokens: 1024 * 16,
                 thinkingConfig: {
                   includeThoughts: true,
@@ -277,7 +275,6 @@ export function createModelCaller(modelName, providers) {
             model,
             requestConfig: {
               generationConfig: {
-                temperature: 0,
                 maxOutputTokens: 1024 * 32,
                 thinkingConfig: {
                   includeThoughts: true,
@@ -301,7 +298,6 @@ export function createModelCaller(modelName, providers) {
             model,
             requestConfig: {
               generationConfig: {
-                temperature: 0,
                 maxOutputTokens: 1024 * 48,
                 thinkingConfig: {
                   includeThoughts: true,
@@ -325,7 +321,6 @@ export function createModelCaller(modelName, providers) {
             model,
             requestConfig: {
               generationConfig: {
-                temperature: 0,
                 maxOutputTokens: 1024 * 64,
                 thinkingConfig: {
                   includeThoughts: true,
@@ -350,7 +345,6 @@ export function createModelCaller(modelName, providers) {
             model,
             requestConfig: {
               generationConfig: {
-                temperature: 0,
                 maxOutputTokens: 1024 * 16,
                 thinkingConfig: {
                   includeThoughts: true,
@@ -374,7 +368,6 @@ export function createModelCaller(modelName, providers) {
             model,
             requestConfig: {
               generationConfig: {
-                temperature: 0,
                 maxOutputTokens: 1024 * 32,
                 thinkingConfig: {
                   includeThoughts: true,
@@ -398,7 +391,6 @@ export function createModelCaller(modelName, providers) {
             model,
             requestConfig: {
               generationConfig: {
-                temperature: 0,
                 maxOutputTokens: 1024 * 64,
                 thinkingConfig: {
                   includeThoughts: true,
