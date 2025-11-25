@@ -174,16 +174,16 @@ The agent loads configuration files in the following order. Settings in later fi
 
   // Configure MCP servers for extended functionality
   "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest", "--isolated"]
+    },
     "perplexity": {
       "command": "npx",
       "args": ["-y", "server-perplexity-ask"],
       "env": {
         "PERPLEXITY_API_KEY": "FIXME"
       }
-    },
-    "playwright": {
-      "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest"]
     },
     "notion": {
       "command": "npx",
