@@ -216,6 +216,48 @@ export function createModelCaller(modelName, providers) {
           },
           input,
         );
+    case "claude-opus-thinking-8k":
+      return (input) =>
+        callAnthropicModel(
+          providers?.anthropic ?? {},
+          {
+            model: "claude-opus-4-5",
+            max_tokens: 1024 * 16,
+            thinking: {
+              type: "enabled",
+              budget_tokens: 1024 * 8,
+            },
+          },
+          input,
+        );
+    case "claude-opus-thinking-16k":
+      return (input) =>
+        callAnthropicModel(
+          providers?.anthropic ?? {},
+          {
+            model: "claude-opus-4-5",
+            max_tokens: 1024 * 32,
+            thinking: {
+              type: "enabled",
+              budget_tokens: 1024 * 16,
+            },
+          },
+          input,
+        );
+    case "claude-opus-thinking-32k-max":
+      return (input) =>
+        callAnthropicModel(
+          providers?.anthropic ?? {},
+          {
+            model: "claude-opus-4-5",
+            max_tokens: 1000 * 64,
+            thinking: {
+              type: "enabled",
+              budget_tokens: 1024 * 32,
+            },
+          },
+          input,
+        );
     case "gemini-flash-thinking": {
       const model = "gemini-2.5-flash";
       const modelCaller = createCacheEnabledGeminiModelCaller(
