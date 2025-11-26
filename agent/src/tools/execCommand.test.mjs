@@ -66,6 +66,24 @@ Error: Command failed: node -e process.exit(1)
     );
   });
 
+  it("prevents hanging commands by closing stdin", async () => {
+    // when:
+    const result = await execCommandTool.impl({
+      command: "cat",
+      args: [],
+    });
+
+    // then:
+    assert.equal(
+      result,
+      `
+<stdout></stdout>
+
+<stderr></stderr>
+`.trim(),
+    );
+  });
+
   it("runs command in sandbox", async () => {
     // given:
     const execCommandToolWithSandbox = createExecCommandTool({

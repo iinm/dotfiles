@@ -50,7 +50,7 @@ export function createExecCommandTool(config) {
           ? rewriteInputForSandbox(input, config.sandbox)
           : input;
         return new Promise((resolve, _reject) => {
-          execFile(
+          const child = execFile(
             command,
             args,
             {
@@ -134,6 +134,7 @@ export function createExecCommandTool(config) {
               return resolve(result.join("\n"));
             },
           );
+          child.stdin?.end();
         });
       }),
   };
