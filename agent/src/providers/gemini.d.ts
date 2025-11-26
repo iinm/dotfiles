@@ -18,8 +18,14 @@ export type GeminiGenerationConfig = {
   maxOutputTokens?: number;
   thinkingConfig?: {
     includeThoughts: boolean;
-    thinkingBudget?: number;
-  };
+  } & (
+    | {
+        thinkingBudget?: number;
+      }
+    | {
+        thinkingLevel?: "low" | "medium" | "high";
+      }
+  );
 };
 
 export type GeminiSafetySetting = {
