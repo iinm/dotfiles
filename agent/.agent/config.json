@@ -15,6 +15,9 @@
       {
         "toolName": { "regex": "^(write_file|patch_file)$" },
         "input": { "filePath": { "regex": "^src/" } }
+      },
+      {
+        "toolName": "ask_google"
       }
     ]
   },
