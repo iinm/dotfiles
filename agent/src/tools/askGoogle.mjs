@@ -59,6 +59,7 @@ export function createAskGoogleTool(config) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(data),
+          signal: AbortSignal.timeout(120 * 1000),
         });
 
         if (!response.ok) {
