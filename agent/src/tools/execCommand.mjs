@@ -40,6 +40,16 @@ export function createExecCommandTool(config) {
       },
     },
 
+    validateInput: (input) => {
+      if (typeof input.command !== "string") {
+        return new Error("command must be a string");
+      }
+      if (input.args && !Array.isArray(input.args)) {
+        return new Error("args must be an array of strings");
+      }
+      return;
+    },
+
     /**
      * @param {ExecCommandInput} input
      * @returns {Promise<string | Error>}

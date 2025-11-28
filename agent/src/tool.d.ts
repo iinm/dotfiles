@@ -3,6 +3,7 @@ import type { MessageContentToolUse } from "./model";
 export type Tool = {
   def: ToolDefinition;
   impl: ToolImplementation;
+  validateInput?: (input: Record<string, unknown>) => Error | undefined;
   maskApprovalInput?: (
     input: Record<string, unknown>,
   ) => Record<string, unknown>;

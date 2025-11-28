@@ -294,6 +294,19 @@ async function callTool(toolUse, toolByName) {
     };
   }
 
+  if (tool.validateInput) {
+    const validateInputResult = tool.validateInput(toolUse.input);
+    if (validateInputResult instanceof Error) {
+      return {
+        type: "tool_result",
+        toolUseId: toolUse.toolUseId,
+        toolName: toolUse.toolName,
+        content: [{ type: "text", text: validateInputResult.message }],
+        isError: true,
+      };
+    }
+  }
+
   const result = await tool.impl(toolUse.input);
   if (result instanceof Error) {
     return {
