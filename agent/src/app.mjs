@@ -11,6 +11,7 @@ import { setupMCPServer } from "./mcp.mjs";
 import { createModelCaller } from "./model.mjs";
 import { createPrompt } from "./prompt.mjs";
 import { createToolUseApprover } from "./tool.mjs";
+import { createAskGoogleTool } from "./tools/askGoogle.mjs";
 import { createExecCommandTool } from "./tools/execCommand.mjs";
 import { fetchWebPageTool } from "./tools/fetchWebPage.mjs";
 import { fetchWebPageWithBrowserTool } from "./tools/fetchWebPageWithBrowser.mjs";
@@ -86,6 +87,14 @@ import { createSessionId } from "./utils/createSessionId.mjs";
 
   if (appConfig.tools?.tavily?.apiKey) {
     builtinTools.push(createTavilySearchTool(appConfig.tools.tavily));
+  }
+
+  if (appConfig.tools?.askGoogle?.geminiApiKey) {
+    builtinTools.push(
+      createAskGoogleTool({
+        geminiApiKey: appConfig.tools.askGoogle.geminiApiKey,
+      }),
+    );
   }
 
   const toolUseApprover = createToolUseApprover({

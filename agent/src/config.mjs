@@ -93,6 +93,10 @@ export async function loadAppConfig({ tmuxSessionId }) {
           ...(merged.tools?.tavily ?? {}),
           ...(config.tools?.tavily ?? {}),
         },
+        askGoogle: {
+          ...(merged.tools?.askGoogle ?? {}),
+          ...(config.tools?.askGoogle ?? {}),
+        },
       },
       mcpServers: {
         ...(merged.mcpServers ?? {}),

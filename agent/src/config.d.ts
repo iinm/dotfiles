@@ -13,6 +13,9 @@ export type AppConfig = {
     tavily?: {
       apiKey?: string;
     };
+    askGoogle?: {
+      geminiApiKey?: string;
+    };
   };
   mcpServers?: Record<string, MCPServerConfig>;
   notifyCmd?: string;
