@@ -52,6 +52,9 @@ Create the configuration.
   "tools": {
     "tavily": {
       "apiKey": "FIXME"
+    },
+    "askGoogle": {
+      "geminiApiKey": "FIXME"
     }
   }
 }
@@ -90,6 +93,7 @@ The agent can use the following tools to assist with tasks:
 - **fetch_web_page**: Fetch and extract web page content from a given URL, returning it as Markdown.
 - **fetch_web_page_with_browser**: Fetch and extract web page content from a given URL using a browser, returning it as Markdown. Can handle JavaScript-rendered content.
 - **search_web**: Search the web for information (requires Tavily API key).
+- **ask_google**: Ask Google a question using natural language (requires Gemini API key).
 
 ## Directory Structure
 
@@ -133,11 +137,11 @@ The agent loads configuration files in the following order. Settings in later fi
         "input": { "filePath": { "regex": "^\\.agent/memory/.+\\.md$" } }
       }
       {
-        "toolName": "search_web",
+        "toolName": "ask_google",
       },
       // MCP Tool naming convention: mcp__<serverName>__<toolName>
       {
-        "toolName": { "regex": "mcp__playwright__browser_.+" }
+        "toolName": { "regex": "mcp__chrome_devtools__.+" }
       }
     ],
 
@@ -174,7 +178,7 @@ The agent loads configuration files in the following order. Settings in later fi
 
   // Configure MCP servers for extended functionality
   "mcpServers": {
-    "chrome-devtools": {
+    "chrome_devtools": {
       "command": "npx",
       "args": ["-y", "chrome-devtools-mcp@latest", "--isolated"]
     },
