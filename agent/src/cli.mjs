@@ -376,7 +376,7 @@ function formatToolUse(toolUse) {
     const execCommandInput = input;
     return [
       `tool: ${toolName}`,
-      `commnad: ${execCommandInput.command}`,
+      `commnad: ${JSON.stringify(execCommandInput.command)}`,
       `args: ${JSON.stringify(execCommandInput.args)}`,
     ].join("\n");
   }
@@ -446,7 +446,9 @@ function formatToolUse(toolUse) {
     );
   }
 
-  return JSON.stringify(toolUse, null, 2);
+  const { providerMetadata: _, ...filteredToolUse } = toolUse;
+
+  return JSON.stringify(filteredToolUse, null, 2);
 }
 
 /**
