@@ -191,10 +191,10 @@ The agent loads configuration files in the following order. Settings in later fi
     },
     "notion": {
       "command": "npx",
-      "args": ["-y", "mcp-remote", "https://mcp.notion.com/sse"],
+      "args": ["-y", "mcp-remote", "https://mcp.notion.com/mcp"],
       "options": {
         // Enable only specific tools (optional - if not specified, all tools are enabled)
-        "enabledTools": ["search", "fetch"]
+        "enabledTools": ["notion-search", "notion-fetch"]
       }
     }
   },
