@@ -8,6 +8,8 @@
 import { noThrow } from "./utils/noThrow.mjs";
 import { writeTmpFile } from "./utils/tmpfile.mjs";
 
+const OUTPUT_MAX_LENGTH = 1024 * 8;
+
 /**
  * @typedef {Object} SetupMCPServrResult
  * @property {Tool[]} tools
@@ -147,7 +149,7 @@ async function createMCPTools(serverName, client) {
 
             const resultString = contentStrings.join("\n\n") || resultStringRaw;
 
-            if (resultString.length <= 1024 * 8) {
+            if (resultString.length <= OUTPUT_MAX_LENGTH) {
               return resultString;
             }
 
