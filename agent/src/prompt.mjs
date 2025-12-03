@@ -102,6 +102,7 @@ exec_command is used to run a one-shot command without shell interpretation.
 Examples:
 - Show current branch: { command: "git", args: ["branch", "--show-current"] }
 - View pull request on GitHub: { command: "gh", args: ["pr", "view" , "123"] }
+- Query JSON files: { command: "jq", args: ["<filter>", "file.json"] }
 
 File and directory command examples:
 - List files: { command: "ls", args: ["-alh", "path/to/directory"] }

@@ -149,18 +149,32 @@ async function createMCPTools(serverName, client) {
 
             const resultString = contentStrings.join("\n\n") || resultStringRaw;
 
-            if (resultString.length <= OUTPUT_MAX_LENGTH) {
-              return resultString;
+            /** @type {string} */
+            let formmatted = resultString;
+            let fileExtension = "txt";
+
+            try {
+              const parsed = JSON.parse(resultString);
+              formmatted = JSON.stringify(parsed, null, 2);
+              fileExtension = "json";
+            } catch {
+              // not JSON
             }
 
-            const filePath = await writeTmpFile(resultString, tool.name, "txt");
+            if (formmatted.length <= OUTPUT_MAX_LENGTH) {
+              return formmatted;
+            }
 
-            const lineCount = resultString.split("\n").length;
+            const filePath = await writeTmpFile(
+              formmatted,
+              tool.name,
+              fileExtension,
+            );
+            const lineCount = formmatted.split("\n").length;
 
             return [
               `Content is large (${resultString.length} characters, ${lineCount} lines) and saved to ${filePath}`,
-              '- Use exec_command head ["-c", "1000"] to get content format',
-              "- Use rg / awk / jq to read specific parts",
+              "Use exec_command tool to find relevant parts.",
             ].join("\n");
           }),
       };
