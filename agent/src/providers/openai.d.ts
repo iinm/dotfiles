@@ -2,7 +2,7 @@
 export type OpenAIModelConfig = {
   model: string;
   reasoning: {
-    effort: "minimal" | "low" | "medium" | "high";
+    effort: "minimal" | "low" | "medium" | "high" | "xhigh";
     summary: "auto" | "concise" | "detailed";
   };
 };
