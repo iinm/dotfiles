@@ -285,7 +285,7 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
     },
     {
       toolName: "exec_command",
-      input: { command: "gh", args: ["pr", /^(view|diff)$/] },
+      input: { command: "gh", args: [/^(pr|issue)$/, /^(view|diff)$/] },
     },
 
     // Tmux command
