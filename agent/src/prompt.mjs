@@ -46,6 +46,7 @@ Use memory files to save progress so tasks can be stopped, resumed, and users st
 
 - Create/Update memory files after creating/updating a plan, completing steps, encountering issues, or making important decisions.
 - Update existing task memory when continuing the same task.
+- Write the memory content in the user's language.
 - For very simple tasks that can be completed in a few actions, skip creating a memory file.
 
 Path: ${projectMetadataDir}/memory/<session-id>--<kebab-case-title>.md
@@ -81,8 +82,6 @@ Task Memory Format:
 
 [key learnings, limitations, improvements, ...]
 </task_memory_format>
-
-Write the memory content in the user's language.
 
 ## Tools
 
