@@ -20,7 +20,7 @@ export function createModelCaller(modelName, providers) {
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "gpt-5.1",
+            model: "gpt-5.2",
             reasoning: {
               effort: "low",
               summary: "auto",
@@ -33,7 +33,7 @@ export function createModelCaller(modelName, providers) {
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "gpt-5.1",
+            model: "gpt-5.2",
             reasoning: {
               effort: "medium",
               summary: "auto",
@@ -46,9 +46,22 @@ export function createModelCaller(modelName, providers) {
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "gpt-5.1",
+            model: "gpt-5.2",
             reasoning: {
               effort: "high",
+              summary: "auto",
+            },
+          },
+          input,
+        );
+    case "gpt-thinking-xhigh":
+      return (input) =>
+        callOpenAIModel(
+          providers?.openai ?? {},
+          {
+            model: "gpt-5.2",
+            reasoning: {
+              effort: "xhigh",
               summary: "auto",
             },
           },
