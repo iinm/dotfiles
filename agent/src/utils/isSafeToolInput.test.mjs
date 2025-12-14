@@ -1,7 +1,11 @@
 import assert from "node:assert";
-import { describe, it } from "node:test";
+import { symlink, mkdir, rm } from "node:fs/promises";
+import path from "node:path";
+import { after, before, describe, it } from "node:test";
 import { AGENT_PROJECT_METADATA_DIR } from "../env.mjs";
 import { isSafeToolInput, isSafeToolInputItem } from "./isSafeToolInput.mjs";
+
+const TEMP_DIR = path.resolve("tmp/is-safe-tool-input");
 
 describe("isSafeToolInput", () => {
   const safePath = "README.md";
@@ -43,6 +47,17 @@ describe("isSafeToolInput", () => {
 });
 
 describe("isSafeToolInputItem", () => {
+  const tmpSymlink = path.resolve(TEMP_DIR, "tmp");
+
+  before(async () => {
+    await mkdir(TEMP_DIR, { recursive: true });
+    await symlink("/tmp", tmpSymlink);
+  });
+
+  after(async () => {
+    await rm(TEMP_DIR, { recursive: true });
+  });
+
   const testCases = [
     // Non-path
     { desc: "command option", arg: "-l", expected: true },
@@ -64,6 +79,11 @@ describe("isSafeToolInputItem", () => {
     {
       desc: "parent directory traversal",
       arg: "../parent-file",
+      expected: false,
+    },
+    {
+      desc: "symlink to outside the project directory",
+      arg: tmpSymlink,
       expected: false,
     },
     {

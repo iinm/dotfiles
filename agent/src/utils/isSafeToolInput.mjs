@@ -1,6 +1,8 @@
 import { execFileSync } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import { AGENT_PROJECT_METADATA_DIR } from "../env.mjs";
+import { noThrowSync } from "./noThrow.mjs";
 
 /**
  * @param {unknown} input
@@ -34,18 +36,7 @@ export function isSafeToolInput(input) {
  * @returns {boolean}
  */
 export function isSafeToolInputItem(arg) {
-  // Note: An argument can be a command option (e.g., '-l').
-  // It will then create an absolute path like `/path/to/project/-l`.
-  const absPath = path.resolve(arg);
-
-  // Disallow paths outside the project directory.
   const workingDir = process.cwd();
-  if (
-    absPath !== workingDir &&
-    !absPath.startsWith(`${workingDir}${path.sep}`)
-  ) {
-    return false;
-  }
 
   // Disallow unneeded parent directory reference
   // Example:
@@ -54,6 +45,10 @@ export function isSafeToolInputItem(arg) {
   if (arg.includes("..")) {
     return false;
   }
+
+  // Note: An argument can be a command option (e.g., '-l').
+  // It will then create an absolute path like `/path/to/project/-l`.
+  const absPath = path.resolve(arg);
 
   // Exceptions:
   // Allow access to agent project metadata directory.
@@ -69,6 +64,29 @@ export function isSafeToolInputItem(arg) {
     absPath.startsWith(`${agentTempDir}${path.sep}`)
   ) {
     return true;
+  }
+
+  // Disallow paths outside the project directory.
+  const realPathResult = noThrowSync(() => fs.realpathSync(absPath));
+  const realPath =
+    typeof realPathResult === "string"
+      ? realPathResult
+      : realPathResult instanceof Error &&
+          "path" in realPathResult &&
+          typeof realPathResult.path === "string"
+        ? realPathResult.path
+        : realPathResult;
+
+  if (realPath instanceof Error) {
+    console.error(`realpath failed for ${arg}: ${realPath}`);
+    return false;
+  }
+
+  if (
+    realPath !== workingDir &&
+    !realPath.startsWith(`${workingDir}${path.sep}`)
+  ) {
+    return false;
   }
 
   // Deny git ignored files (which may contain sensitive information or should not be accessed)

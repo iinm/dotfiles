@@ -1,13 +1,17 @@
 import assert from "node:assert";
-import { copyFile, mkdir, readFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, rm } from "node:fs/promises";
 import path from "node:path";
-import { describe, it } from "node:test";
+import { after, describe, it } from "node:test";
 import { loadUserMessageContext } from "./loadUserMessageContext.mjs";
 
 const SOURCE_IMAGE_PATH = path.resolve("src/utils/test/iinm.png");
 const TEMP_DIR = path.resolve("tmp/load-user-message-context");
 
 describe("loadUserMessageContext", () => {
+  after(async () => {
+    await rm(TEMP_DIR, { recursive: true });
+  });
+
   it("should convert escaped-space image references", async () => {
     // given:
     const { imagePath, imageData } = await prepareImage("sample image.png");
