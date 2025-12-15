@@ -257,14 +257,14 @@ local setup_commands = function()
         local range_start = opts.line1
         local range_end = opts.line2
         if range_start == range_end then
-          vim.fn.setreg('+', vim.fn.expand('%') .. ':' .. range_start)
+          vim.fn.setreg('+', vim.fn.expand('%:.') .. ':' .. range_start)
         else
-          vim.fn.setreg('+', vim.fn.expand('%') .. ':' .. range_start .. '-' .. range_end)
+          vim.fn.setreg('+', vim.fn.expand('%:.') .. ':' .. range_start .. '-' .. range_end)
         end
         return
       end
       -- normal mode -> copy path
-      vim.fn.setreg('+', vim.fn.expand('%'))
+      vim.fn.setreg('+', vim.fn.expand('%:.'))
     end, { range = true } },
   }
 
