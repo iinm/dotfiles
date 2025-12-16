@@ -4,8 +4,8 @@ set -eu -o pipefail
 
 this_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Remove running container
-"$this_dir/run" --verbose --keep-alive 0 true
-
-# Setup
+# Setup container
 "$this_dir/run" --verbose --allow-net 0.0.0.0/0 --keep-alive 0 npm install
+
+# Setup host
+npm install
