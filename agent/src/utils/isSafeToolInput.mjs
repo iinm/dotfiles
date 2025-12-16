@@ -38,17 +38,17 @@ export function isSafeToolInput(input) {
 export function isSafeToolInputItem(arg) {
   const workingDir = process.cwd();
 
-  // Disallow unneeded parent directory reference
-  // Example:
-  // - When write_file to ^safe-dir/.+ is allowed
-  // - Access to safe-dir/../unsafe-path should be disallowed
-  if (arg.includes("..")) {
-    return false;
-  }
-
   // Note: An argument can be a command option (e.g., '-l').
   // It will then create an absolute path like `/path/to/project/-l`.
   const absPath = path.resolve(arg);
+
+  // Disallow any input that contains ".." even if it resolves inside the working directory
+  // Example:
+  // - When write_file is allowed for ^safe-dir/.+
+  // - "safe-dir/../unsafe-path" should be disallowed
+  if (absPath.startsWith(`${workingDir}${path.sep}`) && arg.includes("..")) {
+    return false;
+  }
 
   // Exceptions:
   // Allow access to agent project metadata directory.
@@ -66,7 +66,7 @@ export function isSafeToolInputItem(arg) {
     return true;
   }
 
-  // Disallow paths outside the project directory.
+  // Disallow paths outside the working directory
   const realPathResult = noThrowSync(() => fs.realpathSync(absPath));
   const realPath =
     typeof realPathResult === "string"
