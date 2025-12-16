@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import { symlink, mkdir, rm } from "node:fs/promises";
+import { mkdir, rm, symlink } from "node:fs/promises";
 import path from "node:path";
 import { after, before, describe, it } from "node:test";
 import { AGENT_PROJECT_METADATA_DIR } from "../env.mjs";
