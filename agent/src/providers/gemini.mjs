@@ -1,6 +1,6 @@
 /**
  * @import { ModelInput, Message, AssistantMessage, ModelOutput, PartialMessageContent, ProviderTokenUsage } from "../model";
- * @import { GeminiCachedContents, GeminiContent, GeminiContentPartFunctionCall, GeminiContentPartText, GeminiCreateCachedContentInput as GeminiCreateCachedContentInput, GeminiFunctionContent, GeminiGenerateContentInput, GeminiGeneratedContent, GeminiModelConfig, GeminiModelContent, GeminiSystemContent, GeminiToolDefinition, GeminiUserContent } from "./gemini";
+ * @import { GeminiCachedContents, GeminiContent, GeminiContentPartFunctionCall, GeminiContentPartText, GeminiCreateCachedContentInput as GeminiCreateCachedContentInput, GeminiFunctionContent, GeminiGenerateContentInput, GeminiGeneratedContent, GeminiModelConfig, GeminiModelContent, GeminiSystemContent, GeminiToolConfig, GeminiToolDefinition, GeminiUserContent } from "./gemini";
  * @import { ToolDefinition } from "../tool";
  * @import { GenericModelProviderConfig } from "../config"
  */
@@ -56,6 +56,13 @@ export function createCacheEnabledGeminiModelCaller(
       const tools = convertGenericToolDefinitionToGeminiFormat(
         input.tools || [],
       );
+      /** @type {GeminiToolConfig} */
+      const toolConfig = {
+        functionCallingConfig: {
+          // Workaround to prevent MALFORMED_FUNCTION_CALL issues with gemini-3-flash
+          mode: "VALIDATED",
+        },
+      };
       const systemInstruction = contents.find((c) => c.role === "system");
       const contentsWithoutSystem = contents.filter((c) => c.role !== "system");
 
@@ -100,6 +107,7 @@ export function createCacheEnabledGeminiModelCaller(
               system_instruction: systemInstruction,
               contents: contentsWithoutSystem,
               tools: tools.length ? tools : undefined,
+              toolConfig,
             };
 
       const response = await fetch(url, {
@@ -209,6 +217,7 @@ export function createCacheEnabledGeminiModelCaller(
           ],
           systemInstruction,
           tools,
+          toolConfig,
         });
       }
 
@@ -224,6 +233,7 @@ export function createCacheEnabledGeminiModelCaller(
    * @property {(GeminiUserContent|GeminiModelContent|GeminiFunctionContent)[]} contentsWithoutSystem
    * @property {GeminiSystemContent=} systemInstruction
    * @property {GeminiToolDefinition[]=} tools
+   * @property {GeminiToolConfig=} toolConfig
    */
 
   /**
@@ -233,6 +243,7 @@ export function createCacheEnabledGeminiModelCaller(
     contentsWithoutSystem,
     systemInstruction,
     tools,
+    toolConfig,
   }) {
     const url = `${baseURL}/v1beta/cachedContents`;
 
@@ -243,6 +254,7 @@ export function createCacheEnabledGeminiModelCaller(
       system_instruction: systemInstruction,
       contents: contentsWithoutSystem,
       tools,
+      toolConfig,
     };
 
     await fetch(url, {

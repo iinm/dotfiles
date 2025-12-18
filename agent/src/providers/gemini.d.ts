@@ -54,6 +54,7 @@ export type GeminiGenerateContentInput = {
   cachedContent?: string;
   contents: (GeminiUserContent | GeminiModelContent | GeminiFunctionContent)[];
   tools?: GeminiToolDefinition[];
+  toolConfig?: GeminiToolConfig;
 };
 
 /* Content */
@@ -127,6 +128,12 @@ export type GeminiToolDefinition = {
   }[];
 };
 
+export type GeminiToolConfig = {
+  functionCallingConfig?: {
+    mode?: "AUTO" | "ANY" | "NONE" | "VALIDATED";
+  };
+};
+
 /* Output */
 export type GeminiGeneratedContent = {
   candidates?: GeminiGeneratedContentCandidate[];
@@ -182,6 +189,7 @@ export type GeminiCreateCachedContentInput = {
   };
   contents: (GeminiUserContent | GeminiModelContent | GeminiFunctionContent)[];
   tools?: GeminiToolDefinition[];
+  toolConfig?: GeminiToolConfig;
 };
 
 export type GeminiCachedContents = {
