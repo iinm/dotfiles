@@ -549,6 +549,12 @@ function convertGeminiStreamContentsToContent(events) {
           ...candidate.content.parts,
         );
       }
+      if (candidate?.finishReason && mergedContent.candidates?.[0]) {
+        mergedContent.candidates[0].finishReason = candidate.finishReason;
+      }
+      if (candidate?.finishMessage && mergedContent.candidates?.[0]) {
+        mergedContent.candidates[0].finishMessage = candidate.finishMessage;
+      }
     }
   }
 
@@ -628,7 +634,7 @@ class GeminiNoCandidateError extends Error {
   }
 }
 
-export class GeminiMalformedFunctionCallError extends Error {
+class GeminiMalformedFunctionCallError extends Error {
   /**
    * @param {string} message
    */

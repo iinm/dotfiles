@@ -141,7 +141,8 @@ export type GeminiGeneratedContentCandidate = {
    * ...
    */
   finishReason?: "MALFORMED_FUNCTION_CALL" | string;
-  safetyRatings: GeminiSafetyRating[];
+  finishMessage?: string;
+  safetyRatings?: GeminiSafetyRating[];
 };
 
 export type GeminiSafetyRating = {
