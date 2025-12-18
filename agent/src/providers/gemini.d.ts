@@ -140,7 +140,7 @@ export type GeminiGeneratedContentCandidate = {
    * - STOP
    * ...
    */
-  finishReason?: string;
+  finishReason?: "MALFORMED_FUNCTION_CALL" | string;
   safetyRatings: GeminiSafetyRating[];
 };
 

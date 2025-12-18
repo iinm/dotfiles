@@ -284,32 +284,8 @@ export function createModelCaller(modelName, providers) {
           },
           input,
         );
-    case "gemini-flash-thinking": {
-      const model = "gemini-2.5-flash";
-      const modelCaller = createCacheEnabledGeminiModelCaller(
-        providers?.gemini ?? {},
-        { model },
-      );
-      return (input) =>
-        modelCaller(
-          {
-            model,
-            requestConfig: {
-              generationConfig: {
-                maxOutputTokens: 1024 * 48,
-                thinkingConfig: {
-                  includeThoughts: true,
-                  // dynamic thinking
-                  thinkingBudget: -1,
-                },
-              },
-            },
-          },
-          input,
-        );
-    }
-    case "gemini-flash-thinking-8k": {
-      const model = "gemini-2.5-flash";
+    case "gemini-flash-thinking-low": {
+      const model = "gemini-3-flash-preview";
       const modelCaller = createCacheEnabledGeminiModelCaller(
         providers?.gemini ?? {},
         { model },
@@ -323,7 +299,7 @@ export function createModelCaller(modelName, providers) {
                 maxOutputTokens: 1024 * 16,
                 thinkingConfig: {
                   includeThoughts: true,
-                  thinkingBudget: 1024 * 8,
+                  thinkingLevel: "low",
                 },
               },
             },
@@ -331,8 +307,8 @@ export function createModelCaller(modelName, providers) {
           input,
         );
     }
-    case "gemini-flash-thinking-16k": {
-      const model = "gemini-2.5-flash";
+    case "gemini-flash-thinking-medium": {
+      const model = "gemini-3-flash-preview";
       const modelCaller = createCacheEnabledGeminiModelCaller(
         providers?.gemini ?? {},
         { model },
@@ -346,7 +322,7 @@ export function createModelCaller(modelName, providers) {
                 maxOutputTokens: 1024 * 32,
                 thinkingConfig: {
                   includeThoughts: true,
-                  thinkingBudget: 1024 * 16,
+                  thinkingLevel: "medium",
                 },
               },
             },
@@ -354,8 +330,8 @@ export function createModelCaller(modelName, providers) {
           input,
         );
     }
-    case "gemini-flash-thinking-24k-max": {
-      const model = "gemini-2.5-flash";
+    case "gemini-flash-thinking-high": {
+      const model = "gemini-3-flash-preview";
       const modelCaller = createCacheEnabledGeminiModelCaller(
         providers?.gemini ?? {},
         { model },
@@ -369,7 +345,7 @@ export function createModelCaller(modelName, providers) {
                 maxOutputTokens: 1024 * 48,
                 thinkingConfig: {
                   includeThoughts: true,
-                  thinkingBudget: 1024 * 24,
+                  thinkingLevel: "high",
                 },
               },
             },

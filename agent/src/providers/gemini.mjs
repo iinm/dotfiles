@@ -181,26 +181,19 @@ export function createCacheEnabledGeminiModelCaller(
       };
 
       const message = convertGeminiAssistantMessageToGenericFormat(content);
-      if (message instanceof GeminiNoCandidateError) {
+      if (
+        message instanceof GeminiNoCandidateError ||
+        message instanceof GeminiMalformedFunctionCallError
+      ) {
         const interval = Math.min(2 * 2 ** retryCount, 16);
         console.error(
           styleText(
             "yellow",
-            `No candidates found in Gemini response. Retrying in ${interval} seconds...`,
+            `${message.name}: Retrying in ${interval} seconds...`,
           ),
         );
         await new Promise((resolve) => setTimeout(resolve, interval * 1000));
-        return modelCaller(
-          config,
-          {
-            ...input,
-            messages: [
-              ...input.messages,
-              { role: "user", content: [{ type: "text", text: "continue" }] },
-            ],
-          },
-          retryCount + 1,
-        );
+        return modelCaller(config, input, retryCount + 1);
       }
 
       // Create context cache for next request
@@ -469,13 +462,19 @@ function convertGenericToolDefinitionToGeminiFormat(tools) {
 
 /**
  * @param {GeminiGeneratedContent} content
- * @returns {AssistantMessage | GeminiNoCandidateError}
+ * @returns {AssistantMessage | GeminiNoCandidateError | GeminiMalformedFunctionCallError}
  */
 function convertGeminiAssistantMessageToGenericFormat(content) {
   const candidate = content.candidates?.at(0);
   if (!candidate) {
     return new GeminiNoCandidateError(
       `No candidates found: content=${JSON.stringify(content)}`,
+    );
+  }
+
+  if (candidate.finishReason === "MALFORMED_FUNCTION_CALL") {
+    return new GeminiMalformedFunctionCallError(
+      `Malformed function call: content=${JSON.stringify(content)}`,
     );
   }
 
@@ -626,6 +625,16 @@ class GeminiNoCandidateError extends Error {
   constructor(message) {
     super(message);
     this.name = "GeminiNoCandidateError";
+  }
+}
+
+export class GeminiMalformedFunctionCallError extends Error {
+  /**
+   * @param {string} message
+   */
+  constructor(message) {
+    super(message);
+    this.name = "GeminiMalformedFunctionCallError";
   }
 }
 
