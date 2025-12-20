@@ -44,8 +44,7 @@ Follow the principles and practices from these sources:
 - When working on files under a directory, read AGENTS.md from repo root down to that directory.
   - Example: foo/bar -> ./AGENTS.md, foo/AGENTS.md, foo/bar/AGENTS.md (if they exist).
 
-- Use a skill when it matches the task.
-  - To use a skill, read its full SKILL.md and follow it.
+- If a skill matches the task, use it: read its full SKILL.md and follow it.
 
 ## Memory Files
 
