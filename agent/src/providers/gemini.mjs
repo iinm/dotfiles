@@ -5,6 +5,7 @@
  * @import { GenericModelProviderConfig } from "../config"
  */
 
+import { execFile } from "node:child_process";
 import { styleText } from "node:util";
 import { noThrow } from "../utils/noThrow.mjs";
 
@@ -29,7 +30,8 @@ export function createCacheEnabledGeminiModelCaller(
   modelConfig,
 ) {
   const baseURL =
-    providerConfig.baseURL || "https://generativelanguage.googleapis.com";
+    providerConfig.baseURL ||
+    "https://generativelanguage.googleapis.com/v1beta";
 
   const props = {
     cacheTTL: 2 * 60, // seconds
@@ -71,7 +73,25 @@ export function createCacheEnabledGeminiModelCaller(
         state.cache = undefined;
       }
 
-      const url = `${baseURL}/v1beta/models/${config.model}:streamGenerateContent?alt=sse`;
+      const url =
+        providerConfig.platform === "vertex-ai"
+          ? `${baseURL}/publishers/google/models/${config.model}:streamGenerateContent?alt=sse`
+          : `${baseURL}/models/${config.model}:streamGenerateContent?alt=sse`;
+
+      /** @type {Record<string,string>} */
+      const authHeader =
+        providerConfig.platform === "vertex-ai"
+          ? {
+              Authorization: `Bearer ${await getGoogleCloudAccessToken()}`,
+            }
+          : {
+              "x-goog-api-key": providerConfig.apiKey ?? "",
+            };
+
+      const headers = {
+        ...providerConfig.customHeaders,
+        ...authHeader,
+      };
 
       /** @type {Pick<GeminiGenerateContentInput, "generationConfig" | "safetySettings">} */
       const baseRequest = {
@@ -113,9 +133,8 @@ export function createCacheEnabledGeminiModelCaller(
       const response = await fetch(url, {
         method: "POST",
         headers: {
-          ...providerConfig.customHeaders,
+          ...headers,
           "Content-Type": "application/json",
-          "x-goog-api-key": `${providerConfig.apiKey}`,
         },
         body: JSON.stringify(request),
         signal: AbortSignal.timeout(120 * 1000),
@@ -218,6 +237,7 @@ export function createCacheEnabledGeminiModelCaller(
           systemInstruction,
           tools,
           toolConfig,
+          headers,
         });
       }
 
@@ -234,6 +254,7 @@ export function createCacheEnabledGeminiModelCaller(
    * @property {GeminiSystemContent=} systemInstruction
    * @property {GeminiToolDefinition[]=} tools
    * @property {GeminiToolConfig=} toolConfig
+   * @property {Record<string,string>} headers
    */
 
   /**
@@ -244,12 +265,18 @@ export function createCacheEnabledGeminiModelCaller(
     systemInstruction,
     tools,
     toolConfig,
+    headers,
   }) {
-    const url = `${baseURL}/v1beta/cachedContents`;
+    const modelPrefix =
+      providerConfig.platform === "vertex-ai"
+        ? `${baseURL.match(/projects\/[^/]+\/locations\/[^/]+/)?.[0] || ""}/publishers/google/models`
+        : "models";
+
+    const url = `${baseURL}/cachedContents`;
 
     /** @type {GeminiCreateCachedContentInput} */
     const request = {
-      model: `models/${modelConfig.model}`,
+      model: `${modelPrefix}/${modelConfig.model}`,
       ttl: `${props.cacheTTL}s`,
       system_instruction: systemInstruction,
       contents: contentsWithoutSystem,
@@ -260,9 +287,8 @@ export function createCacheEnabledGeminiModelCaller(
     await fetch(url, {
       method: "POST",
       headers: {
-        ...providerConfig.customHeaders,
+        ...headers,
         "Content-Type": "application/json",
-        "x-goog-api-key": `${providerConfig.apiKey}`,
       },
       body: JSON.stringify(request),
       signal: AbortSignal.timeout(120 * 1000),
@@ -281,15 +307,17 @@ export function createCacheEnabledGeminiModelCaller(
 
           // Delete old cache if previous cache is alive
           if (state.cache && Date.now() < state.cache.expireTime.getTime()) {
-            fetch(`${baseURL}/v1beta/${state.cache.name}`, {
-              method: "DELETE",
-              headers: {
-                ...providerConfig.customHeaders,
-                "Content-Type": "application/json",
-                "x-goog-api-key": `${providerConfig.apiKey}`,
+            fetch(
+              `${url}/${state.cache.name.replace(/.*cachedContents\//, "")}`,
+              {
+                method: "DELETE",
+                headers: {
+                  ...headers,
+                  "Content-Type": "application/json",
+                },
+                signal: AbortSignal.timeout(120 * 1000),
               },
-              signal: AbortSignal.timeout(120 * 1000),
-            })
+            )
               .then(async (response) => {
                 if (response.status !== 200) {
                   console.error(
@@ -356,37 +384,34 @@ function convertGenericMessageToGeminiFormat(messages) {
           (part) => part.type === "text" || part.type === "image",
         );
 
-        /** @type {GeminiContent[]} */
-        for (const toolResult of toolUseResults) {
+        if (toolUseResults.length) {
           geminiContents.push({
             role: "user",
-            parts: [
-              {
-                functionResponse: {
+            parts: toolUseResults.map((toolResult) => ({
+              functionResponse: {
+                name: toolResult.toolName,
+                response: {
                   name: toolResult.toolName,
-                  response: {
-                    name: toolResult.toolName,
-                    content: toolResult.content.map((part) => {
-                      switch (part.type) {
-                        case "text":
-                          return { text: part.text };
-                        case "image":
-                          return {
-                            inline_data: {
-                              mime_type: part.mimeType,
-                              data: part.data,
-                            },
-                          };
-                        default:
-                          throw new Error(
-                            `Unsupported content part: ${JSON.stringify(part)}`,
-                          );
-                      }
-                    }),
-                  },
+                  content: toolResult.content.map((part) => {
+                    switch (part.type) {
+                      case "text":
+                        return { text: part.text };
+                      case "image":
+                        return {
+                          inline_data: {
+                            mime_type: part.mimeType,
+                            data: part.data,
+                          },
+                        };
+                      default:
+                        throw new Error(
+                          `Unsupported content part: ${JSON.stringify(part)}`,
+                        );
+                    }
+                  }),
                 },
               },
-            ],
+            })),
           });
         }
 
@@ -703,4 +728,27 @@ async function* readGeminiStreamContents(reader) {
       buffer = buffer.slice(dataEndIndices[dataEndIndices.length - 1] + 4);
     }
   }
+}
+
+export async function getGoogleCloudAccessToken() {
+  /** @type {string} */
+  const stdout = await new Promise((resolve, reject) => {
+    execFile(
+      "gcloud",
+      ["auth", "print-access-token"],
+      {
+        shell: false,
+        timeout: 10 * 1000,
+      },
+      (error, stdout, _stderr) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve(stdout.trim());
+      },
+    );
+  });
+
+  return stdout;
 }

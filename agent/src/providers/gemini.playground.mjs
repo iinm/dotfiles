@@ -1,71 +1,92 @@
+import { execSync } from "node:child_process";
+
 (async () => {
   const model = "gemini-3-flash-preview";
-  const apiKey = process.env.GEMINI_API_KEY;
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      signal: AbortSignal.timeout(120 * 1000),
-      body: JSON.stringify({
-        // system_instruction: {
-        //   parts: [{ text: SYSTEM_INSTRUCTION }],
-        // },
-        generationConfig: {
-          temperature: 1,
-          thinkingConfig: {
-            includeThoughts: true,
-            thinkingLevel: "high",
-          },
+
+  // Google AI Studio
+  // const apiKey = process.env.GEMINI_API_KEY;
+  // const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
+  // const headers = {};
+
+  // Vertex AI
+  const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID;
+  const location = "global";
+  // const location = /** @type {string} */ ("asia-northeast1");
+  const url = `https://${location === "global" ? "" : `${location}-`}aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${model}:streamGenerateContent?alt=sse`;
+
+  const token = execSync("gcloud auth print-access-token").toString().trim();
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...headers,
+    },
+    signal: AbortSignal.timeout(120 * 1000),
+    body: JSON.stringify({
+      // system_instruction: {
+      //   parts: [{ text: SYSTEM_INSTRUCTION }],
+      // },
+      generationConfig: {
+        temperature: 1,
+        thinkingConfig: {
+          includeThoughts: true,
+          thinkingLevel: "high",
         },
-        safetySettings: [
-          {
-            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-            threshold: "BLOCK_NONE",
-          },
-          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-          {
-            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-            threshold: "BLOCK_NONE",
-          },
-        ],
-        contents: [
-          {
-            parts: [
-              {
-                // text: "こんにちは、あなたは何ができますか？",
-                text: "今日の東京、バンコク、台北、パリの天気は？",
-                // text: "1から1000までの和は？",
-              },
-            ],
-          },
-        ],
-        tools: [
-          {
-            functionDeclarations: {
-              name: "get_weather",
-              description: "天気を取得する",
-              parameters: {
-                type: "object",
-                properties: {
-                  location: {
-                    type: "string",
-                    description: "場所",
-                  },
+      },
+      safetySettings: [
+        {
+          category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+          threshold: "BLOCK_NONE",
+        },
+        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+        {
+          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+          threshold: "BLOCK_NONE",
+        },
+      ],
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              // text: "こんにちは、あなたは何ができますか？",
+              text: "今日の東京、バンコク、台北、パリの天気は？",
+              // text: "1から1000までの和は？",
+            },
+          ],
+        },
+      ],
+      tools: [
+        {
+          functionDeclarations: {
+            name: "get_weather",
+            description: "天気を取得する",
+            parameters: {
+              type: "object",
+              properties: {
+                location: {
+                  type: "string",
+                  description: "場所",
                 },
-                required: ["location"],
               },
+              required: ["location"],
             },
           },
-        ],
-      }),
-    },
-  );
+        },
+      ],
+    }),
+  });
 
   console.log("Response status:", response.status);
+  if (response.status >= 400) {
+    console.log(await response.text());
+    return;
+  }
 
   if (!response.body) {
     throw new Error("Response body is empty");

@@ -31,7 +31,7 @@ Create the configuration.
 
   "providers": {
     "anthropic": {
-      "apiKey": "FIXME",
+      "apiKey": "FIXME"
       // (Optional) AI Gateway example:
       // "baseURL": "https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/anthropic",
       // "customHeaders": {
@@ -39,22 +39,30 @@ Create the configuration.
       // }
     },
     "gemini": {
-      "apiKey": "FIXME",
+      // Google AI Studio
+      "apiKey": "FIXME"
+      // Or Vertex AI (Requires gcloud CLI to get authentication token)
+      // "platform": "vertex-ai",
+      // "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>",
     },
     "openai": {
-      "apiKey": "FIXME",
+      "apiKey": "FIXME"
     },
     "xai": {
-      "apiKey": "FIXME",
+      "apiKey": "FIXME"
     }
   },
   // Optional
   "tools": {
+    "askGoogle": {
+      // Google AI Studio
+      "geminiApiKey": "FIXME"
+      // Or Vertex AI (Requires gcloud CLI to get authentication token)
+      // "platform": "vertex-ai",
+      // "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>",
+    },
     "tavily": {
       "apiKey": "FIXME"
-    },
-    "askGoogle": {
-      "geminiApiKey": "FIXME"
     }
   }
 }

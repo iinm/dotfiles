@@ -89,9 +89,11 @@ import { createSessionId } from "./utils/createSessionId.mjs";
     builtinTools.push(createTavilySearchTool(appConfig.tools.tavily));
   }
 
-  if (appConfig.tools?.askGoogle?.geminiApiKey) {
+  if (appConfig.tools?.askGoogle) {
     builtinTools.push(
       createAskGoogleTool({
+        platform: appConfig.tools.askGoogle.platform,
+        baseURL: appConfig.tools.askGoogle.baseURL,
         geminiApiKey: appConfig.tools.askGoogle.geminiApiKey,
       }),
     );

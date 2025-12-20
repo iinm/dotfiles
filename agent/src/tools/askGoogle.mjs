@@ -2,7 +2,15 @@
  * @import { Tool } from '../tool'
  */
 
+import { getGoogleCloudAccessToken } from "../providers/gemini.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
+
+/**
+ * @typedef {Object} AskGoogleToolOptions
+ * @property {"vertex-ai"=} platform
+ * @property {string=} geminiApiKey
+ * @property {string=} baseURL
+ */
 
 /**
  * @typedef {Object} AskGoogleInput
@@ -10,7 +18,7 @@ import { noThrow } from "../utils/noThrow.mjs";
  */
 
 /**
- * @param {{geminiApiKey: string}} config
+ * @param {AskGoogleToolOptions} config
  * @returns {Tool}
  */
 export function createAskGoogleTool(config) {
@@ -37,11 +45,27 @@ export function createAskGoogleTool(config) {
     impl: async (input) =>
       await noThrow(async () => {
         const model = "gemini-3-flash-preview";
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+        const url =
+          config.platform === "vertex-ai" && config.baseURL
+            ? `${config.baseURL}/publishers/google/models/${model}:generateContent`
+            : config.baseURL
+              ? `${config.baseURL}/models/${model}:generateContent`
+              : `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+
+        /** @type {Record<string,string>} */
+        const authHeader =
+          config.platform === "vertex-ai"
+            ? {
+                Authorization: `Bearer ${await getGoogleCloudAccessToken()}`,
+              }
+            : {
+                "x-goog-api-key": config.geminiApiKey ?? "",
+              };
 
         const data = {
           contents: [
             {
+              role: "user",
               parts: [{ text: input.question }],
             },
           ],
@@ -55,7 +79,7 @@ export function createAskGoogleTool(config) {
         const response = await fetch(url, {
           method: "POST",
           headers: {
-            "x-goog-api-key": config.geminiApiKey,
+            ...authHeader,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(data),

@@ -14,6 +14,8 @@ export type AppConfig = {
       apiKey?: string;
     };
     askGoogle?: {
+      platform?: "vertex-ai";
+      baseURL?: string;
       geminiApiKey?: string;
     };
   };
@@ -29,8 +31,9 @@ export type ModelProvidersConfig = {
 };
 
 export type GenericModelProviderConfig = {
-  apiKey?: string;
+  platform?: "vertex-ai";
   baseURL?: string;
+  apiKey?: string;
   customHeaders?: Record<string, string>;
 };
 
