@@ -39,7 +39,7 @@ Follow the principles and practices from these sources:
   - AGENTS.md (project rules and conventions for the agent):
     { command: "fd", args: ["^AGENTS\\.md$", "./", "--hidden", "--max-depth", "10"] }
   - Skills (optional workflows the agent can use; indexed by SKILL.md frontmatter: name/description):
-    { command: "rg", args: ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "SKILL.md", "\\A---\\n[\\s\\S]*?\\n---", "./"] }
+    { command: "rg", args: ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "SKILL.md", "\\A-{3,}\\n[\\s\\S]*?\\n-{3,}", "./"] }
 
 - When working on files under a directory, read AGENTS.md from repo root down to that directory.
   - Example: foo/bar -> ./AGENTS.md, foo/AGENTS.md, foo/bar/AGENTS.md (if they exist).
@@ -90,8 +90,6 @@ Task Memory Format:
 </task_memory_format>
 
 ## Tools
-
-Execute tools one by one.
 
 ### exec_command
 
