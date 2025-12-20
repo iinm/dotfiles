@@ -772,16 +772,12 @@ local setup_minuet = function()
       },
 
       gemini = {
-        model = 'gemini-2.5-flash',
+        model = 'gemini-3-flash-preview',
         optional = {
           generationConfig = {
             maxOutputTokens = 256,
-            -- for thinking model
             thinkingConfig = {
-              -- disable thinking
-              thinkingBudget = 0,
-              -- dynamic thinking
-              -- thinkingBudget = -1,
+              thinkingLevel = 'minimal',
             },
           },
           safetySettings = {
