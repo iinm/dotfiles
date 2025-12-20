@@ -33,12 +33,19 @@ Follow the principles and practices from these sources:
 - "Test-Driven Development by Example" by Kent Beck
 - "The Art of Readable Code" by Dustin Boswell and Trevor Foucher
 
-## Project Knowledge Discovery
+## Project Context Discovery
 
-- At session start, scan available documentation:
-  { command: "fd", args: [".", "./", "--extension", "md", "--hidden", "--max-depth", "5"] }
-- When planning, read task-relevant documentation files.
-- When unsure about project conventions or procedures during task execution, check the documentation.
+- At session start, find agent docs:
+  - AGENTS.md (project rules and conventions for the agent):
+    { command: "fd", args: ["^AGENTS\\.md$", "./", "--hidden", "--max-depth", "10"] }
+  - Skills (optional workflows the agent can use; indexed by SKILL.md frontmatter: name/description):
+    { command: "rg", args: ["--hidden", "-n", "--pcre2", "-U", "-g", "SKILL.md", "\\A---\\n[\\s\\S]*?\\n---", "./"] }
+
+- When working on files under a directory, read AGENTS.md from repo root down to that directory.
+  - Example: foo/bar -> ./AGENTS.md, foo/AGENTS.md, foo/bar/AGENTS.md (if they exist).
+
+- Use a skill when it matches the task.
+  - To use a skill, read its full SKILL.md and follow it.
 
 ## Memory Files
 
