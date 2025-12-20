@@ -5,9 +5,9 @@
  * @import { GenericModelProviderConfig } from "../config"
  */
 
-import { execFile } from "node:child_process";
 import { styleText } from "node:util";
 import { noThrow } from "../utils/noThrow.mjs";
+import { getGoogleCloudAccessToken } from "./googleCloud.mjs";
 
 /**
  * @callback GeminiModelCaller
@@ -79,19 +79,16 @@ export function createCacheEnabledGeminiModelCaller(
           : `${baseURL}/models/${config.model}:streamGenerateContent?alt=sse`;
 
       /** @type {Record<string,string>} */
-      const authHeader =
+      const headers =
         providerConfig.platform === "vertex-ai"
           ? {
+              ...providerConfig.customHeaders,
               Authorization: `Bearer ${await getGoogleCloudAccessToken()}`,
             }
           : {
+              ...providerConfig.customHeaders,
               "x-goog-api-key": providerConfig.apiKey ?? "",
             };
-
-      const headers = {
-        ...providerConfig.customHeaders,
-        ...authHeader,
-      };
 
       /** @type {Pick<GeminiGenerateContentInput, "generationConfig" | "safetySettings">} */
       const baseRequest = {
@@ -728,27 +725,4 @@ async function* readGeminiStreamContents(reader) {
       buffer = buffer.slice(dataEndIndices[dataEndIndices.length - 1] + 4);
     }
   }
-}
-
-export async function getGoogleCloudAccessToken() {
-  /** @type {string} */
-  const stdout = await new Promise((resolve, reject) => {
-    execFile(
-      "gcloud",
-      ["auth", "print-access-token"],
-      {
-        shell: false,
-        timeout: 10 * 1000,
-      },
-      (error, stdout, _stderr) => {
-        if (error) {
-          reject(error);
-          return;
-        }
-        resolve(stdout.trim());
-      },
-    );
-  });
-
-  return stdout;
 }

@@ -2,7 +2,7 @@
  * @import { Tool } from '../tool'
  */
 
-import { getGoogleCloudAccessToken } from "../providers/gemini.mjs";
+import { getGoogleCloudAccessToken } from "../providers/googleCloud.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
 
 /**

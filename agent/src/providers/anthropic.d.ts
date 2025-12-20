@@ -14,7 +14,7 @@ export type AnthropicModelConfig = {
 
 /* Request */
 export type AnthropicRequestInput = {
-  model: string;
+  model?: string;
   max_tokens: number;
   temperature?: number;
   thinking?: {

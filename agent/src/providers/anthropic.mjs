@@ -7,6 +7,7 @@
 
 import { styleText } from "node:util";
 import { noThrow } from "../utils/noThrow.mjs";
+import { getGoogleCloudAccessToken } from "./googleCloud.mjs";
 
 /**
  * @param {GenericModelProviderConfig} providerConfig
@@ -30,9 +31,38 @@ export async function callAnthropicModel(
       input.tools || [],
     );
 
+    const url =
+      providerConfig.platform === "vertex-ai"
+        ? `${baseURL}/publishers/anthropic/models/${modelConfig.model}:streamRawPredict`
+        : `${baseURL}/v1/messages`;
+
+    /** @type {Record<string,string>} */
+    const headers =
+      providerConfig.platform === "vertex-ai"
+        ? {
+            ...providerConfig.customHeaders,
+            Authorization: `Bearer ${await getGoogleCloudAccessToken()}`,
+          }
+        : {
+            ...providerConfig.customHeaders,
+            "anthropic-version": "2023-06-01",
+            "x-api-key": `${providerConfig.apiKey}`,
+          };
+
+    const { model: _, ...modelConfigForVertexAI } = modelConfig;
+    const platformRequest =
+      providerConfig.platform === "vertex-ai"
+        ? {
+            anthropic_version: "vertex-2023-10-16",
+            ...modelConfigForVertexAI,
+          }
+        : {
+            ...modelConfig,
+          };
+
     /** @type {AnthropicRequestInput} */
     const request = {
-      ...modelConfig,
+      ...platformRequest,
       system: messages
         .filter((m) => m.role === "system")
         .flatMap((m) => m.content),
@@ -41,13 +71,11 @@ export async function callAnthropicModel(
       stream: true,
     };
 
-    const response = await fetch(`${baseURL}/v1/messages`, {
+    const response = await fetch(url, {
       method: "POST",
       headers: {
-        ...providerConfig.customHeaders,
+        ...headers,
         "Content-Type": "application/json",
-        "x-api-key": `${providerConfig.apiKey}`,
-        "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify(request),
       signal: AbortSignal.timeout(120 * 1000),
