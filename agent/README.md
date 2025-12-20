@@ -66,7 +66,7 @@ Create the configuration.
       "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>"
 
       // Or Google AI Studio
-      // "geminiApiKey": "FIXME"
+      // "apiKey": "FIXME"
     },
     "tavily": {
       "apiKey": "FIXME"

@@ -94,7 +94,7 @@ import { createSessionId } from "./utils/createSessionId.mjs";
       createAskGoogleTool({
         platform: appConfig.tools.askGoogle.platform,
         baseURL: appConfig.tools.askGoogle.baseURL,
-        geminiApiKey: appConfig.tools.askGoogle.geminiApiKey,
+        apiKey: appConfig.tools.askGoogle.apiKey,
       }),
     );
   }

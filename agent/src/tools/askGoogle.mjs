@@ -8,8 +8,8 @@ import { noThrow } from "../utils/noThrow.mjs";
 /**
  * @typedef {Object} AskGoogleToolOptions
  * @property {"vertex-ai"=} platform
- * @property {string=} geminiApiKey
  * @property {string=} baseURL
+ * @property {string=} apiKey
  */
 
 /**
@@ -59,7 +59,7 @@ export function createAskGoogleTool(config) {
                 Authorization: `Bearer ${await getGoogleCloudAccessToken()}`,
               }
             : {
-                "x-goog-api-key": config.geminiApiKey ?? "",
+                "x-goog-api-key": config.apiKey ?? "",
               };
 
         const data = {

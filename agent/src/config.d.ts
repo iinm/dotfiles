@@ -16,7 +16,7 @@ export type AppConfig = {
     askGoogle?: {
       platform?: "vertex-ai";
       baseURL?: string;
-      geminiApiKey?: string;
+      apiKey?: string;
     };
   };
   mcpServers?: Record<string, MCPServerConfig>;
