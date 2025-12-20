@@ -444,6 +444,7 @@ function convertGenericMessageToGeminiFormat(messages) {
             parts.push({
               text: part.thinking,
               thought: true,
+              ...(part.providerMetadata || {}),
             });
           } else if (part.type === "text") {
             parts.push({
@@ -589,6 +590,10 @@ function convertGeminiStreamContentsToContent(events) {
       if (candidate?.finishMessage && mergedContent.candidates?.[0]) {
         mergedContent.candidates[0].finishMessage = candidate.finishMessage;
       }
+    }
+
+    if (event.usageMetadata.totalTokenCount) {
+      mergedContent.usageMetadata = event.usageMetadata;
     }
   }
 
