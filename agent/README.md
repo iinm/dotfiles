@@ -44,12 +44,12 @@ Create the configuration.
       // }
     },
     "gemini": {
-      // Google AI Studio
-      "apiKey": "FIXME"
+      // Vertex AI (Requires gcloud CLI to get authentication token)
+      "platform": "vertex-ai",
+      "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>"
 
-      // Or Vertex AI (Requires gcloud CLI to get authentication token)
-      // "platform": "vertex-ai",
-      // "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>",
+      // Or Google AI Studio
+      // "apiKey": "FIXME"
     },
     "openai": {
       "apiKey": "FIXME"
@@ -61,12 +61,12 @@ Create the configuration.
   // Optional
   "tools": {
     "askGoogle": {
-      // Google AI Studio
-      "geminiApiKey": "FIXME"
+      // Vertex AI (Requires gcloud CLI to get authentication token)
+      "platform": "vertex-ai",
+      "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>"
 
-      // Or Vertex AI (Requires gcloud CLI to get authentication token)
-      // "platform": "vertex-ai",
-      // "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>",
+      // Or Google AI Studio
+      // "geminiApiKey": "FIXME"
     },
     "tavily": {
       "apiKey": "FIXME"
