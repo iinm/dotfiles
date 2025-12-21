@@ -49,17 +49,18 @@ Follow the principles and practices from these sources:
 ## Context Management
 
 - Frequent file operations and command executions add noise to your context, which can degrade performance.
-- Reset the context after completing major milestones (e.g., planning, implementation, testing, or code review).
-
-Steps:
-- Always update the memory file to the latest state. (It is your only guide for resuming the task.)
-- Call the reset_context tool.
+- When to reset:
+  - After major milestones
+  - Or when the context gets noisy (e.g., long logs/stack traces, big diffs, repeated command outputs, large pasted data)
+- Reset procedure:
+  - Always update the memory file to the latest state. (It is your only guide for resuming the task.)
+  - Call the reset_context tool.
 
 ## Memory Files
 
 Use memory files to save progress so tasks can be stopped, resumed, and users stay informed.
 
-- Create/Update memory files after creating/updating a plan, completing steps, encountering issues, or making important decisions.
+- Create/Update memory files after creating/updating a plan, completing milestones, encountering issues, or making important decisions.
 - Update existing task memory when continuing the same task.
 - Write the memory content in the user's language.
 - For very simple tasks that can be completed in a few actions, skip creating a memory file.
@@ -80,12 +81,16 @@ Task Memory Format:
 
 [docs, source files, commands, ...]
 
-## Steps
+## Milestones
 
-- [x] Completed step
-  - [x] Completed sub-step
-- [ ] In Progress step
-- [ ] Next step
+- [x] Completed milestone
+  - Subtasks
+    - [x] Completed subtask
+    - [x] ...
+  - Evidence (optional): ...
+  - Notes: milestone-local context (avoid duplicating decisions; reference ## Notes)
+- [ ] In Progress milestone
+- [ ] Next milestone
 
 ## Notes
 
@@ -207,6 +212,7 @@ Basic commands:
 
 - Follow the established principles, best practices, and project conventions.
 - Follow the tool usage guidelines. Avoid unnecessary use of "bash -c". Use fd instead of find, rg instead of grep, and execute commands like awk exactly as shown in the examples.
+- Reset the context after major milestones, or when noise starts to pile up.
 - Keep the memory file up to date and comprehensive.
 `.trim();
 }
