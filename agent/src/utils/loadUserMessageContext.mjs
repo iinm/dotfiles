@@ -5,6 +5,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { styleText } from "node:util";
+import { noThrow } from "./noThrow.mjs";
 import { parseFileRange } from "./parseFileRange.mjs";
 import { readFileRange } from "./readFileRange.mjs";
 
@@ -111,20 +112,14 @@ async function loadContextSnippet(reference, workingDir) {
 async function loadImageContent(imagePath) {
   const absolutePath = path.resolve(imagePath);
 
-  try {
+  return await noThrow(async () => {
     const data = await readFile(absolutePath);
     return {
       type: "image",
       data: data.toString("base64"),
       mimeType: inferMimeType(absolutePath),
     };
-  } catch (error) {
-    if (error instanceof Error) {
-      return error;
-    }
-
-    return new Error(String(error));
-  }
+  });
 }
 
 /**
