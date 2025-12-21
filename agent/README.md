@@ -173,7 +173,7 @@ The agent loads configuration files in the following order. Settings in later fi
   // https://github.com/iinm/dotfiles/tree/main/agent-sandbox
   "sandbox": {
     "command": "agent-sandbox",
-    "args": ["--dockerfile", ".agent/sandbox/Dockerfile", "--allow-write", "--skip-build", "--keep-alive", "20"],
+    "args": ["--dockerfile", ".agent/sandbox/Dockerfile", "--allow-write", "--skip-build", "--keep-alive", "30"],
 
     "rules": [
       // Run specific commands outside the sandbox
