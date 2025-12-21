@@ -116,22 +116,22 @@ grep -qE "DRY_RUN: docker run .+ --publish 127.0.0.1:8000:8000" <<< "$out"
 
 echo "case: container user/group id matches host user/group id"
 # shellcheck disable=SC2016
-agent-sandbox --dockerfile Dockerfile.minimum --keep-alive 0 bash -c 'echo $(id -u):$(id -g)' | grep -qE "$(id -u):$(id -g)"
+agent-sandbox --dockerfile Dockerfile.minimum bash -c 'echo $(id -u):$(id -g)' | grep -qE "$(id -u):$(id -g)"
 
 
 echo "case: working directory is mounted and readable"
 # when/then:
-agent-sandbox --dockerfile Dockerfile.minimum --keep-alive 0 cat Dockerfile.minimum | grep -qE "FROM debian"
+agent-sandbox --dockerfile Dockerfile.minimum cat Dockerfile.minimum | grep -qE "FROM debian"
 
 
 echo "case: working directory owner is sandbox user"
 # when/then:
-agent-sandbox --dockerfile Dockerfile.minimum --keep-alive 0 ls -ld . | grep -qE sandbox
+agent-sandbox --dockerfile Dockerfile.minimum ls -ld . | grep -qE sandbox
 
 
 echo "case: working directory is read-only by default"
 # when:
-out=$(agent-sandbox --dockerfile Dockerfile.minimum --keep-alive 0 touch test 2>&1) || status=$?
+out=$(agent-sandbox --dockerfile Dockerfile.minimum touch test 2>&1) || status=$?
 # then:
 test "$status" -ne 0
 grep -qE "Read-only file system" <<< "$out"
@@ -139,7 +139,7 @@ grep -qE "Read-only file system" <<< "$out"
 
 echo "case: --allow-write makes working directory writable"
 # when/then:
-agent-sandbox --allow-write --dockerfile Dockerfile.minimum --keep-alive 0 touch test && test -e test
+agent-sandbox --allow-write --dockerfile Dockerfile.minimum touch test && test -e test
 rm -f test
 
 
@@ -152,7 +152,7 @@ else
 fi
 nc_pid=$!
 # when:
-out=$(agent-sandbox --dockerfile Dockerfile.minimum --keep-alive 0 busybox nc -w 2 host.docker.internal 8000 < /dev/null 2>&1) || status=$?
+out=$(agent-sandbox --dockerfile Dockerfile.minimum busybox nc -w 2 host.docker.internal 8000 < /dev/null 2>&1) || status=$?
 # then:
 test "$status" -ne 0
 grep -qE "nc: bad address" <<< "$out"
@@ -171,7 +171,7 @@ else
 fi
 nc_pid=$!
 # when:
-out=$(agent-sandbox --dockerfile Dockerfile.minimum --keep-alive 0 --allow-net host.docker.internal busybox nc -w 2 host.docker.internal 8000 < /dev/null 2>&1) || status=$?
+out=$(agent-sandbox --dockerfile Dockerfile.minimum --allow-net host.docker.internal busybox nc -w 2 host.docker.internal 8000 < /dev/null 2>&1) || status=$?
 # then:
 grep -qE "nc: timed out" <<< "$out"
 # cleanup:
@@ -189,7 +189,7 @@ else
 fi
 nc_pid=$!
 # when:
-out=$(agent-sandbox --dockerfile Dockerfile.minimum --keep-alive 0 --allow-net host.docker.internal:8000 busybox nc -w 2 host.docker.internal 8000 < /dev/null 2>&1)
+out=$(agent-sandbox --dockerfile Dockerfile.minimum --allow-net host.docker.internal:8000 busybox nc -w 2 host.docker.internal 8000 < /dev/null 2>&1)
 # cleanup:
 if lsof -i:8000 | grep -q "$nc_pid"; then
   kill "$nc_pid"
@@ -205,7 +205,7 @@ else
 fi
 nc_pid=$!
 # when:
-out=$(agent-sandbox --dockerfile Dockerfile.minimum --keep-alive 0 --allow-net 0.0.0.0/0 busybox nc -w 2 8.8.8.8 443 < /dev/null 2>&1)
+out=$(agent-sandbox --dockerfile Dockerfile.minimum --allow-net 0.0.0.0/0 busybox nc -w 2 8.8.8.8 443 < /dev/null 2>&1)
 # cleanup:
 if lsof -i:8000 | grep -q "$nc_pid"; then
   kill "$nc_pid"
@@ -219,7 +219,7 @@ agent-sandbox echo hello | grep -qE "^hello$"
 
 echo "case: remove network if it fails to start container"
 # when:
-out=$(agent-sandbox --dockerfile Dockerfile.minimum --env-file no-such-file --keep-alive 0 --allow-net --verbose true 2>&1) || status=$?
+out=$(agent-sandbox --dockerfile Dockerfile.minimum --env-file no-such-file --allow-net --verbose true 2>&1) || status=$?
 # then:
 test "$status" -ne 0
 grep -qE "Removing network" <<< "$out"
