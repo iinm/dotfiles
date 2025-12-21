@@ -51,7 +51,7 @@ Follow the principles and practices from these sources:
 - Frequent file operations and command executions add noise to your context, which can degrade performance.
 - When to reset:
   - After major milestones
-  - Or when the context gets noisy (e.g., long logs/stack traces, big diffs, repeated command outputs, large pasted data)
+  - Or when the context gets noisy (e.g., reading many files during investigation that are no longer needed, repeated debugging attempts, long logs, etc.)
 - Reset procedure:
   - Always update the memory file to the latest state. (It is your only guide for resuming the task.)
   - Call the reset_context tool.
