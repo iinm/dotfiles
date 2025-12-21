@@ -23,7 +23,7 @@
   },
   "sandbox": {
     "command": ".agent/sandbox/run",
-    "args": ["--skip-build"],
+    "args": ["--skip-build", "--keep-alive", "20"],
     "rules": [
       {
         "pattern": {
