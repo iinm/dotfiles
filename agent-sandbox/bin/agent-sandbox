@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.34"
+SCRIPT_VERSION="0.0.35"
 
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
@@ -533,11 +533,14 @@ EOF
     fi
   fi
 
-  if test "skip_build" = "no" -a "$(docker inspect --type container "$CONTAINER_NAME" --format "{{ .State.Running }}")" = "true"; then
+  if test "$skip_build" = "yes" -a "$(docker inspect --type container "$CONTAINER_NAME" --format "{{ .State.Running }}")" = "true"; then
     log "Container is already running. Reusing $CONTAINER_NAME"
   else
     log "Stopping existing container if it exists."
     docker stop "$CONTAINER_NAME" &> /dev/null || true
+
+    log "Remove network if it exists."
+    docker network rm "$NETWORK_NAME" &> /dev/null || true
 
     if test "$allow_net" = "yes"; then
       log "Creating network."
