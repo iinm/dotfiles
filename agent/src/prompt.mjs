@@ -36,15 +36,23 @@ Follow the principles and practices from these sources:
 ## Project Context Discovery
 
 - At session start, find agent docs:
-  - AGENTS.md (project rules and conventions for the agent):
+  - AGENTS.md (project rules and conventions):
     { command: "fd", args: ["^AGENTS\\.md$", "./", "--hidden", "--max-depth", "10"] }
-  - Skills (optional workflows the agent can use; indexed by SKILL.md frontmatter: name/description):
+  - Skills (reusable workflow procedures in SKILL.md):
     { command: "rg", args: ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "SKILL.md", "\\A-{3,}\\n[\\s\\S]*?\\n-{3,}", "./"] }
+  - Subagents (Claude Code workflow references in .claude/agents):
+    { command: "rg", args: ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "*.md", "\\A-{3,}\\n[\\s\\S]*?\\n-{3,}", "./.claude/agents"] }
+
+- Find general docs if agent docs are missing:
+  { command: "fd", args: [".", "./", "--extension", "md", "--hidden", "--max-depth", "10"] }
 
 - When working on files under a directory, read AGENTS.md from repo root down to that directory.
   - Example: foo/bar -> ./AGENTS.md, foo/AGENTS.md, foo/bar/AGENTS.md (if they exist).
 
-- If a skill matches the task, use it: read its full SKILL.md and follow it.
+- Using Skills and Subagents:
+  - If a skill or subagent matches the task, read its full file and follow/adapt it as a guide.
+  - Note: Subagents are Claude Code configs; use as reference docs, not executable processes.
+  - Warning: Tool names in subagent configs may differ from your available tools.
 
 ## Context Management
 
