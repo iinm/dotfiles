@@ -8,6 +8,7 @@ import { EventEmitter } from "node:events";
 import fs from "node:fs/promises";
 import { styleText } from "node:util";
 import { MESSAGES_DUMP_FILE_PATH } from "./env.mjs";
+import { resetContextTool } from "./tools/resetContext.mjs";
 import { consumeInterruptMessage } from "./utils/consumeInterruptMessage.mjs";
 
 /**
@@ -95,7 +96,6 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
         input[0].type === "text" &&
         input[0].text.toLocaleLowerCase().match(/^(yes|y|ｙ)$/i)
       ) {
-        // if (input.toLowerCase().match(/^(yes|y|ｙ)$/i)) {
         if (input[0].text.match(/^(YES|Y)$/)) {
           // Allow tool use
           for (const toolUse of toolUseParts) {
@@ -104,9 +104,22 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
         }
 
         // Approved
-        const toolResults = await Promise.all(
-          toolUseParts.map((toolUse) => callTool(toolUse, toolByName)),
-        );
+        /** @type {MessageContentToolResult[]} */
+        const toolResults = [];
+        for (const toolUse of toolUseParts) {
+          toolResults.push(await callTool(toolUse, toolByName));
+        }
+
+        // Reset context
+        if (
+          toolUseParts.some(
+            (toolUse) => toolUse.toolName === resetContextTool.def.name,
+          )
+        ) {
+          // system + last message
+          state.messages.splice(1, state.messages.length - 2);
+        }
+
         state.messages.push({ role: "user", content: toolResults });
         agentEventEmitter.emit(
           "message",
@@ -243,6 +256,16 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
       const toolResults = [];
       for (const toolUse of toolUseParts) {
         toolResults.push(await callTool(toolUse, toolByName));
+      }
+
+      // Reset context
+      if (
+        toolUseParts.some(
+          (toolUse) => toolUse.toolName === resetContextTool.def.name,
+        )
+      ) {
+        // system + last message
+        state.messages.splice(1, state.messages.length - 2);
       }
 
       state.messages.push({ role: "user", content: toolResults });

@@ -42,7 +42,7 @@ export function createCacheEnabledGeminiModelCaller(
   /**
    * @typedef {Object} CacheState
    * @property {string} name
-   * @property {number} contentsLength
+   * @property {number} contentsLength - Length of contents without system
    * @property {Date} expireTime
    */
 
@@ -69,7 +69,7 @@ export function createCacheEnabledGeminiModelCaller(
       const contentsWithoutSystem = contents.filter((c) => c.role !== "system");
 
       // Clear cache if messages are cleared
-      if (contentsWithoutSystem.length <= 1) {
+      if (contentsWithoutSystem.length <= (state.cache?.contentsLength ?? 0)) {
         state.cache = undefined;
       }
 

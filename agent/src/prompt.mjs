@@ -46,6 +46,15 @@ Follow the principles and practices from these sources:
 
 - If a skill matches the task, use it: read its full SKILL.md and follow it.
 
+## Context Management
+
+- Frequent file operations and command executions add noise to your context, which can degrade performance.
+- Reset the context after completing major milestones (e.g., planning, implementation, testing, or code review).
+
+Steps:
+- Always update the memory file to the latest state. (It is your only guide for resuming the task.)
+- Call the reset_context tool.
+
 ## Memory Files
 
 Use memory files to save progress so tasks can be stopped, resumed, and users stay informed.
