@@ -16,6 +16,7 @@ on_exit() {
 
 trap 'on_exit' EXIT
 
+
 echo "case: --help option displays help message"
 # when/then:
 agent-sandbox --help | grep -qE "^Usage"
@@ -212,9 +213,20 @@ if lsof -i:8000 | grep -q "$nc_pid"; then
 fi
 
 
-echo "case: run basic command with preset configuration"
-# when/then:
-agent-sandbox echo hello | grep -qE "^hello$"
+echo "case: reuse existing container"
+# given:
+agent-sandbox --dockerfile Dockerfile.minimum --keep-alive 5 --verbose true &> /dev/null
+# when:
+out=$(agent-sandbox --dockerfile Dockerfile.minimum --skip-build --keep-alive 5 --verbose --dry-run true 2>&1)
+# then:
+grep -qE "Container is already running. Reusing" <<< "$out"
+# given:
+sleep 5
+# when:
+out=$(agent-sandbox --dockerfile Dockerfile.minimum --skip-build --keep-alive 5 --verbose --dry-run true 2>&1)
+# then:
+grep -qE "Stopping existing container." <<< "$out"
+grep -qE "Remove existing network." <<< "$out"
 
 
 echo "case: remove network if it fails to start container"
@@ -223,3 +235,8 @@ out=$(agent-sandbox --dockerfile Dockerfile.minimum --env-file no-such-file --al
 # then:
 test "$status" -ne 0
 grep -qE "Removing network" <<< "$out"
+
+
+echo "case: run basic command with preset configuration"
+# when/then:
+agent-sandbox echo hello | grep -qE "^hello$"
