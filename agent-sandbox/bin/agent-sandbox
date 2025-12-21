@@ -203,7 +203,7 @@ main() {
         shift 2
         ;;
       --env-file )
-        local env_file="$2"
+        env_file="$2"
         shift 2
         ;;
       --tty        ) allocate_tty="yes"; shift ;;
