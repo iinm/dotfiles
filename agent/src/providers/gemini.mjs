@@ -651,6 +651,13 @@ function convertGeminiStreamContentToAgentPartialContents(
       }
 
       if ("functionCall" in part) {
+        if (previousPartialContent?.type === "tool_use") {
+          partialMessageContents.push({
+            type: "tool_use",
+            content: "\n",
+            position: "delta",
+          });
+        }
         partialMessageContents.push({
           type: "tool_use",
           content: part.functionCall.name,
