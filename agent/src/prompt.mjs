@@ -45,14 +45,14 @@ Follow the principles and practices from these sources:
 
 - At session start, find agent docs:
   - AGENTS.md (project rules and conventions):
-    { command: "fd", args: ["^AGENTS\\.md$", "./", "--hidden", "--max-depth", "10"] }
+    { command: "fd", args: ["^AGENTS\\.md$", "./", "--hidden", "--max-depth", "5"] }
   - Skills (reusable workflow procedures in SKILL.md):
     { command: "rg", args: ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "SKILL.md", "\\A-{3,}\\n[\\s\\S]*?\\n-{3,}", "./"] }
   - Subagents (Claude Code workflow references in .claude/agents):
     { command: "rg", args: ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "*.md", "\\A-{3,}\\n[\\s\\S]*?\\n-{3,}", "./.claude/agents"] }
 
-- Find general docs if agent docs are missing:
-  { command: "fd", args: [".", "./", "--extension", "md", "--hidden", "--max-depth", "10"] }
+- (Fallback) Find general docs if agent docs are missing:
+  { command: "fd", args: [".", "./", "--extension", "md", "--hidden", "--max-depth", "5"] }
 
 - When working on files under a directory, read AGENTS.md from repo root down to that directory.
   - Example: foo/bar -> ./AGENTS.md, foo/AGENTS.md, foo/bar/AGENTS.md (if they exist).
@@ -120,6 +120,8 @@ Task Memory Format:
 </task_memory_format>
 
 ## Tools
+
+Call multiple tools at once when they don't depend on each other's results.
 
 ### exec_command
 
