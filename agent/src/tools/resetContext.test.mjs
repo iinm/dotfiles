@@ -36,7 +36,14 @@ describe("resetContextTool", () => {
     });
 
     // then:
-    assert.strictEqual(result, content);
+    const expected = [
+      "Context reset successful",
+      "Reason: testing",
+      `Memory file: ${memoryPath}`,
+      "",
+      content,
+    ].join("\n");
+    assert.strictEqual(result, expected);
   });
 
   it("rejects parent directory traversal in memoryPath", async () => {

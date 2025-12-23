@@ -70,6 +70,7 @@ export type AnthropicAssistantMessage = {
 /* Message Content */
 export type AnthropicAssistantMessageContent =
   | AnthropicMessageContentThinking
+  // | AnthropicMessageContentRedactedThinking
   | AnthropicMessageContentText
   | AnthropicMessageContentToolCall;
 
@@ -79,6 +80,12 @@ export type AnthropicMessageContentThinking = {
   signature: string;
   cache_control?: { type: "ephemeral" };
 };
+
+// TODO: https://platform.claude.com/docs/en/build-with-claude/extended-thinking#thinking-redaction
+// export type AnthropicMessageContentRedactedThinking = {
+//   type: "redacted_thinking";
+//   data: string;
+// };
 
 export type AnthropicMessageContentText = {
   type: "text";

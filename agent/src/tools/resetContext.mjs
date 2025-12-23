@@ -9,6 +9,7 @@ import { noThrow } from "../utils/noThrow.mjs";
 /**
  * @typedef {Object} ResetContextInput
  * @property {string} memoryPath
+ * @property {string} reason
  */
 
 /** @type {Tool} */
@@ -46,6 +47,16 @@ export const resetContextTool = {
         );
       }
 
-      return fs.readFile(absolutePath, { encoding: "utf-8" });
+      const memoryContent = await fs.readFile(absolutePath, {
+        encoding: "utf-8",
+      });
+
+      return [
+        "Context reset successful",
+        `Reason: ${input.reason}`,
+        `Memory file: ${input.memoryPath}`,
+        "",
+        memoryContent,
+      ].join("\n");
     }),
 };

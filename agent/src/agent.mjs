@@ -116,11 +116,18 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
             (toolUse) => toolUse.toolName === resetContextTool.def.name,
           )
         ) {
-          // system + last message
-          state.messages.splice(1, state.messages.length - 2);
+          // Keep only the system prompt
+          state.messages.splice(1, state.messages.length - 1);
+          // To avoid "a final `assistant` message must start with a thinking block" error from claude
+          // convert tool results to user message
+          state.messages.push({
+            role: "user",
+            content: toolResults.flatMap(({ content }) => content),
+          });
+        } else {
+          state.messages.push({ role: "user", content: toolResults });
         }
 
-        state.messages.push({ role: "user", content: toolResults });
         agentEventEmitter.emit(
           "message",
           state.messages[state.messages.length - 1],
@@ -264,11 +271,18 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
           (toolUse) => toolUse.toolName === resetContextTool.def.name,
         )
       ) {
-        // system + last message
-        state.messages.splice(1, state.messages.length - 2);
+        // Keep only the system prompt
+        state.messages.splice(1, state.messages.length - 1);
+        // To avoid "a final `assistant` message must start with a thinking block" error from claude
+        // convert tool results to user message
+        state.messages.push({
+          role: "user",
+          content: toolResults.flatMap(({ content }) => content),
+        });
+      } else {
+        state.messages.push({ role: "user", content: toolResults });
       }
 
-      state.messages.push({ role: "user", content: toolResults });
       agentEventEmitter.emit(
         "message",
         state.messages[state.messages.length - 1],
