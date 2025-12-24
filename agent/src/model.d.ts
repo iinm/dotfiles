@@ -44,6 +44,7 @@ export type AssistantMessage = {
   role: "assistant";
   content: (
     | MessageContentThinking
+    | MessageContentRedactedThinking
     | MessageContentText
     | MessageContentToolUse
   )[];
@@ -57,6 +58,11 @@ export type AssistantMessage = {
 export type MessageContentThinking = {
   type: "thinking";
   thinking: string;
+  providerMetadata?: Record<string, unknown>;
+};
+
+export type MessageContentRedactedThinking = {
+  type: "redacted_thinking";
   providerMetadata?: Record<string, unknown>;
 };
 

@@ -60,17 +60,13 @@ export type AnthropicUserMessage = {
 
 export type AnthropicAssistantMessage = {
   role: "assistant";
-  content: (
-    | AnthropicMessageContentThinking
-    | AnthropicMessageContentText
-    | AnthropicMessageContentToolCall
-  )[];
+  content: AnthropicAssistantMessageContent[];
 };
 
 /* Message Content */
 export type AnthropicAssistantMessageContent =
   | AnthropicMessageContentThinking
-  // | AnthropicMessageContentRedactedThinking
+  | AnthropicMessageContentRedactedThinking
   | AnthropicMessageContentText
   | AnthropicMessageContentToolCall;
 
@@ -81,11 +77,11 @@ export type AnthropicMessageContentThinking = {
   cache_control?: { type: "ephemeral" };
 };
 
-// TODO: https://platform.claude.com/docs/en/build-with-claude/extended-thinking#thinking-redaction
-// export type AnthropicMessageContentRedactedThinking = {
-//   type: "redacted_thinking";
-//   data: string;
-// };
+// https://platform.claude.com/docs/en/build-with-claude/extended-thinking#thinking-redaction
+export type AnthropicMessageContentRedactedThinking = {
+  type: "redacted_thinking";
+  data: string;
+};
 
 export type AnthropicMessageContentText = {
   type: "text";
