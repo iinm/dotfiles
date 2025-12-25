@@ -190,7 +190,7 @@ else
 fi
 nc_pid=$!
 # when:
-out=$(agent-sandbox --dockerfile Dockerfile.minimum --allow-net host.docker.internal:8000 busybox nc -w 2 host.docker.internal 8000 < /dev/null 2>&1)
+agent-sandbox --dockerfile Dockerfile.minimum --allow-net host.docker.internal:8000 busybox nc -w 2 host.docker.internal 8000 < /dev/null
 # cleanup:
 if lsof -i:8000 | grep -q "$nc_pid"; then
   kill "$nc_pid"
@@ -206,7 +206,7 @@ else
 fi
 nc_pid=$!
 # when:
-out=$(agent-sandbox --dockerfile Dockerfile.minimum --allow-net 0.0.0.0/0 busybox nc -w 2 8.8.8.8 443 < /dev/null 2>&1)
+agent-sandbox --dockerfile Dockerfile.minimum --allow-net 0.0.0.0/0 busybox nc -w 2 8.8.8.8 443 < /dev/null
 # cleanup:
 if lsof -i:8000 | grep -q "$nc_pid"; then
   kill "$nc_pid"
@@ -225,8 +225,8 @@ sleep 5
 # when:
 out=$(agent-sandbox --dockerfile Dockerfile.minimum --skip-build --keep-alive 5 --verbose --dry-run true 2>&1)
 # then:
-grep -qE "Stopping existing container." <<< "$out"
-grep -qE "Remove existing network." <<< "$out"
+grep -qE "Stopping any existing container:" <<< "$out"
+grep -qE "Remove any existing network:" <<< "$out"
 
 
 echo "case: remove network if it fails to start container"

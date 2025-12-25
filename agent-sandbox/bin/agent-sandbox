@@ -205,19 +205,13 @@ main() {
         publish_ports+=("${new_publish_ports[@]}")
         shift 2
         ;;
-      --env-file )
-        env_file="$2"
-        shift 2
-        ;;
+      --env-file   ) env_file="$2"; shift 2 ;;
       --tty        ) allocate_tty="yes"; shift ;;
       --no-cache   ) no_cache="yes"; shift ;;
       --skip-build ) skip_build="yes"; shift ;;
       --verbose    ) VERBOSE="yes"; shift ;;
       --dry-run    ) DRY_RUN="yes"; shift ;;
-      --keep-alive )
-        keep_alive_seconds="$2"
-        shift 2
-        ;;
+      --keep-alive ) keep_alive_seconds="$2"; shift 2 ;;
       --  ) shift; continue ;;
       --* ) echo "Error: Unknown option: $1" >&2; return 1 ;;
       *   ) break ;;
@@ -273,7 +267,6 @@ main() {
   host_user_id=$(id -u)
   host_group_id=$(id -g)
   
-  # set options
   local host_project_root
   local container_project_root
   local container_workdir
@@ -297,7 +290,6 @@ main() {
   image_tag="latest"
 
   local container_id
-  # container_id="$(env LC_CTYPE=C tr -dc '[:alnum:]' < /dev/urandom 2> /dev/null | head -c 10 || true)"
   if which shasum &> /dev/null; then
     container_id="$(shasum -a 256 <<< "${sandbox_args[@]}" | head -c 8)"
   elif which sha256sum &> /dev/null; then
@@ -490,24 +482,6 @@ main() {
     docker_run_opts+=(--env "TZ=${host_timezone}")
   fi
 
-  on_exit() {
-    local exit_status="$?"
-  
-    if test "$VERBOSE" = "no"; then
-      exec 2> /dev/null
-    fi
-    exec 1>&2
-
-    run cleanup_networks "$IMAGE_NAME"
-
-    exec 3>&-
-    exec 4>&-
-  
-    return "$exit_status"
-  }
-  
-  trap 'on_exit' EXIT
-
   # shellcheck disable=SC2001
   log "$(cat << EOF
 Sandbox Configurations:
@@ -522,12 +496,29 @@ Sandbox Configurations:
 EOF
   )"
 
-  run cleanup_networks "$IMAGE_NAME"
+  on_exit() {
+    local exit_status="$?"
+  
+    if test "$VERBOSE" = "no"; then
+      # discard stderr
+      exec 2> /dev/null
+    fi
+    exec 1>&2
+  
+    run cleanup_networks "$IMAGE_NAME"
+  
+    exec 3>&-
+    exec 4>&-
+  
+    return "$exit_status"
+  }
+ 
+  trap 'on_exit' EXIT
 
   if test "$skip_build" = "yes"; then
-    log "Skip building docker image."
+    log "Skip building docker image: $IMAGE_NAME"
   else
-    log "Building docker image."
+    log "Building docker image: $IMAGE_NAME"
     if test -n "$dockerfile"; then
       run docker build "${docker_build_opts[@]}" "$docker_build_context"
     else
@@ -539,14 +530,14 @@ EOF
   if test "$skip_build" = "yes" -a "$(docker inspect --type container "$container_name" --format "{{ .State.Running }}" 2> /dev/null)" = "true"; then
     log "Container is already running. Reusing $container_name"
   else
-    log "Stopping existing container."
+    log "Stopping any existing container: $container_name"
     run docker stop "$container_name" 2> /dev/null || true
 
-    log "Remove existing network."
+    log "Remove any existing network: $network_name"
     run docker network rm "$network_name" 2> /dev/null || true
 
     if test "$allow_net" = "yes"; then
-      log "Creating network."
+      log "Creating network: $network_name"
       run docker network create "$network_name" --driver bridge \
         -o com.docker.network.bridge.enable_ip_masquerade=true
     fi
@@ -587,7 +578,7 @@ EOF
   fi
 
   run docker exec --detach --user 0:0 "$container_name" \
-    "$CONTAINER_SCRIPT_PATH" container_terminate_on_idle "$keep_alive_seconds"
+    "$CONTAINER_SCRIPT_PATH" terminate_idle_container "$keep_alive_seconds"
 
   # restore stdout, stderr
   exec 1>&3
@@ -597,14 +588,14 @@ EOF
     "$CONTAINER_SCRIPT_PATH" container_exec "$container_project_root" "$@"
 }
 
-container_terminate_on_idle() {
+terminate_idle_container() {
   local keep_alive_seconds="$1"
 
   local last_activity_time
   last_activity_time=$(date +%s)
 
   # stop existing watchdog process
-  for pid in $(busybox ps -o pid=,user=,comm=,args= | awk '$1 > 1 && $0 ~ /container_terminate_on_idle/ && $3 !~ /awk/ { print $1 }'); do
+  for pid in $(busybox ps -o pid=,user=,comm=,args= | awk '$1 > 1 && $0 ~ /terminate_idle_container/ && $3 !~ /awk/ { print $1 }'); do
     if test "$pid" -ne "$$"; then
       kill "$pid" || true
     fi
@@ -623,6 +614,7 @@ cleanup_networks() {
   local image_name="$1"
 
   log "Cleaning up networks."
+  local network_name
   for network_name in $(docker network ls --format '{{.Name}}' --filter "name=^$image_name"); do
     log "Checking if network $network_name is used."
     # Note: network_name = container_name
@@ -943,9 +935,9 @@ if test "$#" -gt 0; then
       | setup_container_volume_owner \
       | setup_container_firewall \
       | setup_container_user \
-      | print_preset_dockerfile \
-      | container_terminate_on_idle \
-      | container_exec )
+      | terminate_idle_container \
+      | container_exec \
+      | print_preset_dockerfile )
       "$@"
       ;;
     * )
