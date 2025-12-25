@@ -142,7 +142,13 @@ log() {
   echo -e "[$(date "+%Y-%m-%d %H:%M:%S%z")][$(hostname)] $*"
 }
 
+# These variables are global because they are accessed in the on_exit trap after main() returns.
+VERBOSE="no"
+DRY_RUN="no"
+IMAGE_NAME=
+
 main() {
+  # Options
   local dockerfile=""
   local allow_write="no"
   local allow_net="no"
@@ -157,10 +163,7 @@ main() {
   local skip_build="no"
   local platform=""
   local keep_alive_seconds="0"
-
-  VERBOSE="no"
-  DRY_RUN="no"
-  
+ 
   while test "$#" -gt 0; do
     case "$1" in
       --help        ) help; return 0 ;;
@@ -304,8 +307,8 @@ main() {
     return 1
   fi
 
-  CONTAINER_NAME="${IMAGE_NAME}--${container_id}"
-  NETWORK_NAME="${CONTAINER_NAME}"
+  local container_name="${IMAGE_NAME}--${container_id}"
+  local network_name="${container_name}"
 
   if test -z "$dockerfile"; then
     log "Dockerfile not specified, using preset configuration."
@@ -351,7 +354,7 @@ main() {
   local docker_run_opts=(
     --detach
     --rm
-    --name "$CONTAINER_NAME"
+    --name "$container_name"
     --entrypoint ""
     --user 0:0
     --mount "type=bind,source=${MOUNTABLE_SCRIPT_PATH},target=${CONTAINER_SCRIPT_PATH},readonly"
@@ -391,7 +394,7 @@ main() {
     docker_run_opts+=(
       --cap-add NET_ADMIN
       --cap-add NET_RAW
-      --net "$NETWORK_NAME"
+      --net "$network_name"
       --add-host host.docker.internal:host-gateway
     )
   else
@@ -533,18 +536,18 @@ EOF
     fi
   fi
 
-  if test "$skip_build" = "yes" -a "$(docker inspect --type container "$CONTAINER_NAME" --format "{{ .State.Running }}" 2> /dev/null)" = "true"; then
-    log "Container is already running. Reusing $CONTAINER_NAME"
+  if test "$skip_build" = "yes" -a "$(docker inspect --type container "$container_name" --format "{{ .State.Running }}" 2> /dev/null)" = "true"; then
+    log "Container is already running. Reusing $container_name"
   else
     log "Stopping existing container."
-    run docker stop "$CONTAINER_NAME" 2> /dev/null || true
+    run docker stop "$container_name" 2> /dev/null || true
 
     log "Remove existing network."
-    run docker network rm "$NETWORK_NAME" 2> /dev/null || true
+    run docker network rm "$network_name" 2> /dev/null || true
 
     if test "$allow_net" = "yes"; then
       log "Creating network."
-      run docker network create "$NETWORK_NAME" --driver bridge \
+      run docker network create "$network_name" --driver bridge \
         -o com.docker.network.bridge.enable_ip_masquerade=true
     fi
 
@@ -567,30 +570,30 @@ EOF
 
     if test "${#volume_mount_paths[@]}" -gt 0; then
       log "Setting up volume ownership to match host user ($host_user_id:$host_group_id)."
-      run docker exec --user 0:0 "$CONTAINER_NAME" "$CONTAINER_SCRIPT_PATH" setup_container_volume_owner \
+      run docker exec --user 0:0 "$container_name" "$CONTAINER_SCRIPT_PATH" setup_container_volume_owner \
         "$host_user_id" "$host_group_id" "${volume_mount_paths[@]}"
     fi
 
     if test "$allow_net" = "yes"; then
       log "Setting up firewall."
-      run docker exec --user 0:0 "$CONTAINER_NAME" \
+      run docker exec --user 0:0 "$container_name" \
         "$CONTAINER_SCRIPT_PATH" setup_container_firewall "${allow_net_destinations[@]}"
     fi
 
     log "Setting up container user to match host user ($host_user_id:$host_group_id) for file access."
-    run docker exec --user 0:0 "$CONTAINER_NAME" "$CONTAINER_SCRIPT_PATH" setup_container_user \
+    run docker exec --user 0:0 "$container_name" "$CONTAINER_SCRIPT_PATH" setup_container_user \
       "$container_default_user_id" "$container_default_group_id" \
       "$host_user_id" "$host_group_id"
   fi
 
-  run docker exec --detach --user 0:0 "$CONTAINER_NAME" \
+  run docker exec --detach --user 0:0 "$container_name" \
     "$CONTAINER_SCRIPT_PATH" container_terminate_on_idle "$keep_alive_seconds"
 
   # restore stdout, stderr
   exec 1>&3
   exec 2>&4
 
-  run docker exec "${docker_exec_opts[@]}" "$CONTAINER_NAME" \
+  run docker exec "${docker_exec_opts[@]}" "$container_name" \
     "$CONTAINER_SCRIPT_PATH" container_exec "$container_project_root" "$@"
 }
 
