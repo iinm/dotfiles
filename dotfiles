@@ -266,16 +266,20 @@ function local_config --description "Host specific configuration"
 
   function project_config_on_pwd_change --on-variable PWD --description "Project specific configuration"
     # Set node version
-    if string match -rq "/path/to/project1" "$PWD"
-      # fish_remove_path_pattern ".+/tools/node-v.+/bin"
-      # fish_add_path --path -m ~/tools/node-vXX.XX.X/bin
+    if string match -rq 'path/to/project1$' "$PWD"
+      # use_node "XX.XX.X"
       # echo "use node" (node -v) >&2
-    else if string match -rq "/path/to/project2" "$PWD"
-      # fish_remove_path_pattern ".+/tools/node-v.+/bin"
-      # fish_add_path --path -m ~/tools/node-vYY.YY.Y/bin
-      # echo "use node" (node -v) >&2
+    else if string match -rq 'path/to/project2$' "$PWD"
+      # use_node "YY.YY.Y"
     else
-      # fish_remove_path_pattern ".+/tools/node-v.+/bin"
+      use_node
+    end
+  end
+
+  function use_node --argument-names ver
+    fish_remove_path_pattern '.+/tools/node-v[^/]+/bin'
+    if test -n "$ver"
+      fish_add_path --path -m "$HOME/tools/node-v$ver-linux-x64/bin"
     end
   end
 
