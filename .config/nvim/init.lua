@@ -499,6 +499,7 @@ local setup_plugins = function()
 
     -- ui
     'sainnhe/everforest',
+    'stevearc/dressing.nvim',
 
     -- fuzzy finder
     'junegunn/fzf',
