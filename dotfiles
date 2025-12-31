@@ -436,7 +436,7 @@ install_golang() {
   if test -e "${golang_dir}/bin/go"; then
     echo "skip: Go $golang_version is installed in $golang_dir"
   else
-    echo "run: install Go $golang_version"
+    echo "run: install Go $golang_version to $golang_dir"
     
     local platform="linux-amd64"
     if test "$(uname)" = "Darwin"; then
@@ -472,7 +472,7 @@ install_nodejs() {
   if "${nodejs_dir}/bin/node" -v 2> /dev/null | grep -q "$nodejs_version"; then
     echo "skip: Node.js $nodejs_version is installed in $nodejs_dir"
   else
-    echo "run: install Node.js $nodejs_version"
+    echo "run: install Node.js $nodejs_version to $nodejs_dir"
     local url="https://nodejs.org/dist/v${nodejs_version}/node-v${nodejs_version}-${kernel}-${machine}.${ext}"
     rm -rf "$nodejs_dir"
     curl --show-error --fail -L "$url" | tar -C ~/tools -x${extract_option}f -
