@@ -99,10 +99,15 @@ if status is-interactive
   end
 
   if type --quiet colima
-    # cores: same as the host
+    # cpu cores: same as the host
     # memory: half of the host
     # disk: 100GB
-    alias colima_start 'colima start --cpu (sysctl -n hw.ncpu) --memory (math (sysctl -n hw.memsize) / 1024^3 / 2) --disk 100 --arch aarch64 --vm-type=vz --vz-rosetta --mount-type virtiofs --dns 8.8.8.8 --dns 1.1.1.1'
+    function colima_start
+      colima start --cpu (sysctl -n hw.ncpu) --memory (math (sysctl -n hw.memsize) / 1024^3 / 2) \
+        --arch aarch64 --disk 100 \
+        --vm-type=vz --vz-rosetta --mount-type virtiofs \
+        --dns 8.8.8.8 --dns 1.1.1.1
+    end
   end
 
   if type --quiet gh
