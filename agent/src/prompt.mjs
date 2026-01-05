@@ -215,7 +215,6 @@ Basic commands:
 ## Reminder
 
 - Follow the established principles, best practices, and project conventions.
-- Follow the tool usage guidelines. Avoid unnecessary use of "bash -c". Use fd instead of find, rg instead of grep, and execute commands like awk exactly as shown in the examples.
 - Reset the context after major milestones, or when noise starts to pile up.
 - Keep the memory file up to date and comprehensive.
 `.trim();
