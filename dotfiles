@@ -279,6 +279,7 @@ function local_config --description "Host specific configuration"
   function use_node --argument-names ver
     fish_remove_path_pattern '.+/tools/node-v[^/]+/bin'
     if test -n "$ver"
+      #fish_add_path --path -m "$HOME/tools/node-v$ver-darwin-arm64/bin"
       fish_add_path --path -m "$HOME/tools/node-v$ver-linux-x64/bin"
     end
   end
