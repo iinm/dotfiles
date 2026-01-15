@@ -72,7 +72,7 @@ export function createModelCaller(modelName, providers) {
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "gpt-5.1-codex-max",
+            model: "gpt-5.2-codex",
             reasoning: {
               effort: "low",
               summary: "auto",
@@ -85,7 +85,7 @@ export function createModelCaller(modelName, providers) {
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "gpt-5.1-codex-max",
+            model: "gpt-5.2-codex",
             reasoning: {
               effort: "medium",
               summary: "auto",
@@ -98,7 +98,7 @@ export function createModelCaller(modelName, providers) {
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "gpt-5.1-codex-max",
+            model: "gpt-5.2-codex",
             reasoning: {
               effort: "high",
               summary: "auto",
@@ -111,7 +111,7 @@ export function createModelCaller(modelName, providers) {
         callOpenAIModel(
           providers?.openai ?? {},
           {
-            model: "gpt-5.1-codex-max",
+            model: "gpt-5.2-codex",
             reasoning: {
               effort: "xhigh",
               summary: "auto",
