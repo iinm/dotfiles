@@ -151,7 +151,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
     } else if (
       input.length === 1 &&
       input[0].type === "text" &&
-      input[0].text.toLowerCase() === "/debug.resume"
+      input[0].text.toLowerCase() === "/resume"
     ) {
       // Resume the conversation stopped by rate limit, etc.
     } else {

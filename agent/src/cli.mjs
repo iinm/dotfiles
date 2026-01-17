@@ -19,10 +19,6 @@ import { readFileRange } from "./utils/readFileRange.mjs";
 
 const PROMPT_COMMANDS = [
   {
-    command: "/save",
-    prompt: () => "Save task memory",
-  },
-  {
     command: "/commit",
     prompt: () =>
       `
@@ -55,20 +51,19 @@ Create a commit.
 const SLASH_COMMANDS = [
   "/help",
   ...PROMPT_COMMANDS.map(({ command }) => command),
-  "/debug.resume",
-  "/debug.dump",
-  "/debug.load",
+  "/resume",
+  "/dump",
+  "/load",
 ];
 
 const HELP_MESSAGE = `
 Commands:
   /help               - Display this help message
-  /save               - Save the current task state to memory
   /commit             - Create a commit message based on staged changes
   /commit.co-authored - Create a commit message with Co-authored-by trailer
-  /debug.resume       - Resume conversation after an LLM provider error
-  /debug.dump         - Save current messages to a JSON file
-  /debug.load         - Load messages from a JSON file
+  /resume             - Resume conversation after an LLM provider error
+  /dump               - Save current messages to a JSON file
+  /load               - Load messages from a JSON file
 
 File Input Syntax:
   !path/to/file     - Read content from a file
@@ -217,13 +212,13 @@ export function startInteractiveSession({
       return;
     }
 
-    if (inputTrimmed.toLowerCase() === "/debug.dump") {
+    if (inputTrimmed.toLowerCase() === "/dump") {
       await agentCommands.dumpMessages();
       cli.prompt();
       return;
     }
 
-    if (inputTrimmed.toLowerCase() === "/debug.load") {
+    if (inputTrimmed.toLowerCase() === "/load") {
       await agentCommands.loadMessages();
       cli.prompt();
       return;
