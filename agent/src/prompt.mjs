@@ -40,11 +40,13 @@ At session start, find agent docs:
   { command: "fd", args: ["^AGENTS.*\\.md$", "./", "--hidden", "--max-depth", "5"] }
 - Skills (reusable workflows with specialized knowledge):
   { command: "rg", args: ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "SKILL.md", "\\A-{3,}\\n[\\s\\S]*?\\n-{3,}", "./"] }
+- Subagents (specialized personas for specific roles):
+  { command: "rg", args: ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "*.md", "\\A-{3,}\\n[\\s\\S]*?\\n-{3,}", "./.claude/agents"] }
 
 When working on files under a directory, read AGENTS.md from repo root down to that directory.
 Example: foo/bar -> ./AGENTS.md, foo/AGENTS.md, foo/bar/AGENTS.md (if they exist).
 
-If a skill matches the task, read its full file and follow/adapt it.
+If a skill or subagent matches the task, apply it.
 
 ## Context Management
 
