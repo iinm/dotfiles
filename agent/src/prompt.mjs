@@ -23,6 +23,7 @@ export function createPrompt({
 
 - Respond to the user in the same language they use.
 - Address the user by their name, rather than 'user'.
+- Use emojis sparingly to highlight key points.
 
 ## Principles and Practices
 
