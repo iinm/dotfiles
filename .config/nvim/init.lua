@@ -164,7 +164,7 @@ local setup_keymap = function()
     pattern = '*',
     callback = function()
       local opts = { buffer = 0 }
-      vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
+      vim.keymap.set('t', '<esc><esc>', [[<C-\><C-n>]], opts)
       vim.keymap.set('t', '<C-g>', '<Cmd>file<CR>', opts)
       vim.keymap.set('t', '<C-w>h', '<Cmd>wincmd h<CR>', opts)
       vim.keymap.set('t', '<C-w>j', '<Cmd>wincmd j<CR>', opts)
