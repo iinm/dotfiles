@@ -21,7 +21,7 @@ export function createToolUseApprover({
     allowedToolUseInSession: [],
   };
 
-  const resetApproveCount = () => {
+  const resetApprovalCount = () => {
     state.approvalCount = 0;
   };
 
@@ -54,6 +54,6 @@ export function createToolUseApprover({
   return {
     isAllowedToolUse,
     allowToolUse,
-    resetApprovalCount: resetApproveCount,
+    resetApprovalCount,
   };
 }
