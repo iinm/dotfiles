@@ -463,7 +463,7 @@ local setup_auto_commands = function()
     group = vim.api.nvim_create_augroup('UserFzfExitOnEsc', {}),
     pattern = { 'fzf' },
     callback = function()
-      vim.keymap.set('t', '<esc>', '<C-c>', { buffer = true })
+      vim.keymap.set('t', '<esc>', '<C-c>', { buffer = true, nowait = true })
     end,
   })
 
