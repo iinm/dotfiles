@@ -247,7 +247,7 @@ export function createModelCaller(modelName, providers) {
         callAnthropicModel(
           providers?.anthropic ?? {},
           {
-            model: "claude-opus-4-5",
+            model: "claude-opus-4-6",
             max_tokens: 1024 * 16,
             thinking: {
               type: "enabled",
@@ -261,7 +261,7 @@ export function createModelCaller(modelName, providers) {
         callAnthropicModel(
           providers?.anthropic ?? {},
           {
-            model: "claude-opus-4-5",
+            model: "claude-opus-4-6",
             max_tokens: 1024 * 32,
             thinking: {
               type: "enabled",
@@ -275,7 +275,7 @@ export function createModelCaller(modelName, providers) {
         callAnthropicModel(
           providers?.anthropic ?? {},
           {
-            model: "claude-opus-4-5",
+            model: "claude-opus-4-6",
             max_tokens: 1000 * 64,
             thinking: {
               type: "enabled",
