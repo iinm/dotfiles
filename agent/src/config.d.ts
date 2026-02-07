@@ -36,6 +36,10 @@ export type GenericModelProviderConfig = {
   apiKey?: string;
   customHeaders?: Record<string, string>;
   modelMap?: Record<string, string>;
+
+  bedrock?: {
+    awsProfile?: string;
+  };
 };
 
 export type MCPServerConfig = {

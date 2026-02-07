@@ -33,7 +33,7 @@ import { SignatureV4 } from "@smithy/signature-v4";
   const region = "ap-northeast-1";
   const url = `https://bedrock-runtime.${region}.amazonaws.com/model/${modelId}/invoke-with-response-stream`;
   const urlParsed = new URL(url);
-  const { hostname, pathname: path } = urlParsed;
+  const { hostname, pathname } = urlParsed;
 
   const payload = {
     anthropic_version: "bedrock-2023-05-31",
@@ -57,7 +57,7 @@ import { SignatureV4 } from "@smithy/signature-v4";
     protocol: "https:",
     method: "POST",
     hostname,
-    path,
+    path: pathname,
     headers: {
       host: hostname,
       "Content-Type": "application/json",

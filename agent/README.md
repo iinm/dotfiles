@@ -36,7 +36,9 @@ Create the configuration.
       // Or Bedrock
       // "platform": "bedrock",
       // "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
-      // "apiKey": "FIXME",
+      // "bedrock": {
+      //   "awsProfile": "FIXME"
+      // },
       // "modelMap": {
       //   "claude-haiku-4-5": "<region>.anthropic.claude-haiku-4-5-20251001-v1:0",
       //   "claude-sonnet-4-5": "<region>.anthropic.claude-sonnet-4-5-20250929-v1:0",

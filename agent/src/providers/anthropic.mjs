@@ -6,6 +6,10 @@
  */
 
 import { styleText } from "node:util";
+import { Sha256 } from "@aws-crypto/sha256-js";
+import { fromIni } from "@aws-sdk/credential-providers";
+import { HttpRequest } from "@smithy/protocol-http";
+import { SignatureV4 } from "@smithy/signature-v4";
 import { noThrow } from "../utils/noThrow.mjs";
 import { getGoogleCloudAccessToken } from "./googleCloud.mjs";
 
@@ -43,7 +47,11 @@ export async function callAnthropicModel(
       providerConfig.platform === "bedrock"
         ? {
             ...providerConfig.customHeaders,
-            Authorization: `Bearer ${providerConfig.apiKey}`,
+            ...(providerConfig.apiKey
+              ? {
+                  Authorization: `Bearer ${providerConfig.apiKey}`,
+                }
+              : {}),
           }
         : providerConfig.platform === "vertex-ai"
           ? {
@@ -82,18 +90,64 @@ export async function callAnthropicModel(
         .flatMap((m) => m.content),
       messages: cacheEnabledMessages.filter((m) => m.role !== "system"),
       tools: tools.length ? tools : undefined,
-      // stream: true,
     };
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        ...headers,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(request),
-      signal: AbortSignal.timeout(120 * 1000),
-    });
+    const runFetchDefault = async () =>
+      fetch(url, {
+        method: "POST",
+        headers: {
+          ...headers,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(request),
+        signal: AbortSignal.timeout(120 * 1000),
+      });
+
+    // bedrock + sso profile
+    const runFetchForBedrock = async () => {
+      const region =
+        baseURL.match(/bedrock-runtime\.([\w-]+)\.amazonaws\.com/)?.[1] ?? "";
+      const urlParsed = new URL(url);
+      const { hostname, pathname } = urlParsed;
+
+      const signer = new SignatureV4({
+        credentials: fromIni({
+          profile: providerConfig.bedrock?.awsProfile ?? "",
+        }),
+        region,
+        service: "bedrock",
+        sha256: Sha256,
+      });
+
+      const req = new HttpRequest({
+        protocol: "https:",
+        method: "POST",
+        hostname,
+        path: pathname,
+        headers: {
+          host: hostname,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(request),
+      });
+
+      const signed = await signer.sign(req);
+
+      return fetch(url, {
+        method: signed.method,
+        headers: signed.headers,
+        body: signed.body,
+        signal: AbortSignal.timeout(120 * 1000),
+      });
+    };
+
+    const runFetch =
+      providerConfig.platform === "bedrock" &&
+      providerConfig.bedrock?.awsProfile
+        ? runFetchForBedrock
+        : runFetchDefault;
+
+    const response = await runFetch();
 
     if (response.status === 429 || response.status >= 500) {
       const interval = Math.min(2 * 2 ** retryCount, 16);
