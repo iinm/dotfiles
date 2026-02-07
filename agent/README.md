@@ -64,6 +64,9 @@ Create the configuration.
       // Vertex AI (Requires gcloud CLI to get authentication token)
       "platform": "vertex-ai",
       "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>"
+      "vertexAi": {
+        "account": "FIXME"
+      }
 
       // Or Google AI Studio
       // "apiKey": "FIXME"
@@ -80,7 +83,8 @@ Create the configuration.
     "askGoogle": {
       // Vertex AI (Requires gcloud CLI to get authentication token)
       "platform": "vertex-ai",
-      "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>"
+      "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>",
+      "account": "FIXME"
 
       // Or Google AI Studio
       // "apiKey": "FIXME"

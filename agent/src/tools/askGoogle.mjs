@@ -10,6 +10,7 @@ import { noThrow } from "../utils/noThrow.mjs";
  * @property {"vertex-ai"=} platform
  * @property {string=} baseURL
  * @property {string=} apiKey
+ * @property {string=} account
  */
 
 /**
@@ -56,7 +57,7 @@ export function createAskGoogleTool(config) {
         const authHeader =
           config.platform === "vertex-ai"
             ? {
-                Authorization: `Bearer ${await getGoogleCloudAccessToken()}`,
+                Authorization: `Bearer ${await getGoogleCloudAccessToken(config.account)}`,
               }
             : {
                 "x-goog-api-key": config.apiKey ?? "",

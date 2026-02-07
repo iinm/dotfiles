@@ -17,6 +17,9 @@ export type AppConfig = {
       platform?: "vertex-ai";
       baseURL?: string;
       apiKey?: string;
+      vertexAi?: {
+        account?: string;
+      };
     };
   };
   mcpServers?: Record<string, MCPServerConfig>;
@@ -39,6 +42,9 @@ export type GenericModelProviderConfig = {
 
   bedrock?: {
     awsProfile?: string;
+  };
+  vertexAi?: {
+    account?: string;
   };
 };
 
