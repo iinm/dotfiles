@@ -24,7 +24,7 @@ export type AnthropicRequestInput = {
   system: AnthropicMessageContentText[];
   messages: (AnthropicUserMessage | AnthropicAssistantMessage)[];
   tools?: AnthropicToolDefinition[];
-  stream: boolean;
+  stream?: boolean;
 };
 
 /* Output */

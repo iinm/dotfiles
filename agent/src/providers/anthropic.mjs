@@ -32,33 +32,47 @@ export async function callAnthropicModel(
     );
 
     const url =
-      providerConfig.platform === "vertex-ai"
-        ? `${baseURL}/publishers/anthropic/models/${modelConfig.model}:streamRawPredict`
-        : `${baseURL}/v1/messages`;
+      providerConfig.platform === "bedrock"
+        ? `${baseURL}/model/${providerConfig.modelMap?.[modelConfig.model]}/invoke-with-response-stream`
+        : providerConfig.platform === "vertex-ai"
+          ? `${baseURL}/publishers/anthropic/models/${providerConfig.modelMap?.[modelConfig.model]}:streamRawPredict`
+          : `${baseURL}/v1/messages`;
 
     /** @type {Record<string,string>} */
     const headers =
-      providerConfig.platform === "vertex-ai"
+      providerConfig.platform === "bedrock"
         ? {
             ...providerConfig.customHeaders,
-            Authorization: `Bearer ${await getGoogleCloudAccessToken()}`,
+            Authorization: `Bearer ${providerConfig.apiKey}`,
           }
-        : {
-            ...providerConfig.customHeaders,
-            "anthropic-version": "2023-06-01",
-            "x-api-key": `${providerConfig.apiKey}`,
-          };
+        : providerConfig.platform === "vertex-ai"
+          ? {
+              ...providerConfig.customHeaders,
+              Authorization: `Bearer ${await getGoogleCloudAccessToken()}`,
+            }
+          : {
+              ...providerConfig.customHeaders,
+              "anthropic-version": "2023-06-01",
+              "x-api-key": `${providerConfig.apiKey}`,
+            };
 
-    const { model: _, ...modelConfigForVertexAI } = modelConfig;
+    const { model: _, ...modelConfigWithoutName } = modelConfig;
     const platformRequest =
-      providerConfig.platform === "vertex-ai"
+      providerConfig.platform === "bedrock"
         ? {
-            anthropic_version: "vertex-2023-10-16",
-            ...modelConfigForVertexAI,
+            anthropic_version: "bedrock-2023-05-31",
+            ...modelConfigWithoutName,
           }
-        : {
-            ...modelConfig,
-          };
+        : providerConfig.platform === "vertex-ai"
+          ? {
+              anthropic_version: "vertex-2023-10-16",
+              stream: true,
+              ...modelConfigWithoutName,
+            }
+          : {
+              ...modelConfig,
+              stream: true,
+            };
 
     /** @type {AnthropicRequestInput} */
     const request = {
@@ -68,7 +82,7 @@ export async function callAnthropicModel(
         .flatMap((m) => m.content),
       messages: cacheEnabledMessages.filter((m) => m.role !== "system"),
       tools: tools.length ? tools : undefined,
-      stream: true,
+      // stream: true,
     };
 
     const response = await fetch(url, {
@@ -109,12 +123,16 @@ export async function callAnthropicModel(
     }
 
     const reader = response.body.getReader();
+    const eventStreamReader =
+      providerConfig.platform === "bedrock"
+        ? readAnthropicOnBedrockStreamEvents
+        : readAnthropicStreamEvents;
 
     /** @type {AnthropicStreamEvent[]} */
     const events = [];
     /** @type {PartialMessageContent | undefined} */
     let previousPartialContent;
-    for await (const event of readAnthropicStreamEvents(reader)) {
+    for await (const event of eventStreamReader(reader)) {
       events.push(event);
 
       const partialContent = convertAnthropicStreamEventToAgentPartialContent(
@@ -511,6 +529,80 @@ async function* readAnthropicStreamEvents(reader) {
 
     if (eventEndIndices.length) {
       buffer = buffer.slice(eventEndIndices[eventEndIndices.length - 1] + 2);
+    }
+  }
+}
+
+/**
+ * @param {ReadableStreamDefaultReader<Uint8Array>} reader
+ */
+async function* readAnthropicOnBedrockStreamEvents(reader) {
+  let buffer = new Uint8Array();
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
+
+    const nextBuffer = new Uint8Array(buffer.length + value.length);
+    nextBuffer.set(buffer);
+    nextBuffer.set(value, buffer.length);
+    buffer = nextBuffer;
+
+    // AWS event stream format
+    // https://github.com/awslabs/aws-c-event-stream/blob/main/docs/images/encoding.png
+    while (buffer.length >= 12) {
+      const view = new DataView(
+        buffer.buffer,
+        buffer.byteOffset,
+        buffer.byteLength,
+      );
+      const totalLength = view.getUint32(0);
+      const headersLength = view.getUint32(4);
+
+      if (buffer.length < totalLength) {
+        break;
+      }
+
+      const payloadOffset = 12 + headersLength;
+      // prelude 12 bytes + CRC 4 bytes = 16
+      const payloadLength = totalLength - headersLength - 16;
+      const payload = buffer.slice(
+        payloadOffset,
+        payloadOffset + payloadLength,
+      );
+
+      const decodedPayload = new TextDecoder().decode(payload);
+      try {
+        const json = JSON.parse(decodedPayload);
+        if (json.bytes) {
+          const anthropicEvent = Buffer.from(json.bytes, "base64").toString(
+            "utf-8",
+          );
+          /** @type {AnthropicStreamEvent} */
+          const parsedEvent = JSON.parse(anthropicEvent);
+          yield parsedEvent;
+        } else if (json.message) {
+          console.error(
+            styleText(
+              "yellow",
+              `Bedrock message received: ${JSON.stringify(json.message)}`,
+            ),
+          );
+        }
+      } catch (err) {
+        if (err instanceof Error) {
+          console.error(
+            styleText(
+              "red",
+              `Error decoding payload: ${err.message}\nPayload: ${decodedPayload}`,
+            ),
+          );
+        }
+      }
+
+      buffer = buffer.slice(totalLength);
     }
   }
 }

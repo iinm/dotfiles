@@ -33,9 +33,24 @@ Create the configuration.
     "anthropic": {
       "apiKey": "FIXME"
 
+      // Or Bedrock
+      // "platform": "bedrock",
+      // "baseURL": "https://bedrock-runtime.ap-northeast-1.amazonaws.com",
+      // "apiKey": "FIXME",
+      // "modelMap": {
+      //   "claude-haiku-4-5": "jp.anthropic.claude-haiku-4-5-20251001-v1:0",
+      //   "claude-sonnet-4-5": "jp.anthropic.claude-sonnet-4-5-20250929-v1:0",
+      //   "claude-opus-4-6": "global.anthropic.claude-opus-4-6-v1"
+      // }
+
       // Or Vertex AI (Requires gcloud CLI to get authentication token)
       // "platform": "vertex-ai",
       // "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>",
+      // "modelMap": {
+      //   "claude-haiku-4-5": "claude-haiku-4-5@20251001",
+      //   "claude-sonnet-4-5": "claude-sonnet-4-5@20250929",
+      //   "claude-opus-4-6": "claude-opus-4-6"
+      // }
 
       // (Optional) AI Gateway example:
       // "baseURL": "https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/anthropic",

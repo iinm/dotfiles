@@ -31,10 +31,11 @@ export type ModelProvidersConfig = {
 };
 
 export type GenericModelProviderConfig = {
-  platform?: "vertex-ai";
+  platform?: "vertex-ai" | "bedrock";
   baseURL?: string;
   apiKey?: string;
   customHeaders?: Record<string, string>;
+  modelMap?: Record<string, string>;
 };
 
 export type MCPServerConfig = {
