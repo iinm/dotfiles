@@ -7,4 +7,5 @@ agent-sandbox --dockerfile .agent/sandbox/Dockerfile \
   --volume node_modules \
   --mount-readonly ~/.gitconfig:/home/node/.gitconfig \
   --allow-write \
+  --allow-net bedrock-runtime.ap-northeast-1.amazonaws.com \
   "$@"
