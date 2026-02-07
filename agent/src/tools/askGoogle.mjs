@@ -9,8 +9,9 @@ import { noThrow } from "../utils/noThrow.mjs";
  * @typedef {Object} AskGoogleToolOptions
  * @property {"vertex-ai"=} platform
  * @property {string=} baseURL
- * @property {string=} apiKey
- * @property {string=} account
+ * @property {string=} apiKey - API key for Google AI Studio
+ * @property {string=} account - The Google Cloud account to use for Vertex AI
+ * @property {string=} model
  */
 
 /**
@@ -45,7 +46,7 @@ export function createAskGoogleTool(config) {
      */
     impl: async (input) =>
       await noThrow(async () => {
-        const model = "gemini-3-flash-preview";
+        const model = config.model ?? "gemini-3-flash-preview";
         const url =
           config.platform === "vertex-ai" && config.baseURL
             ? `${config.baseURL}/publishers/google/models/${model}:generateContent`

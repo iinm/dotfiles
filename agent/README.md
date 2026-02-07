@@ -64,7 +64,7 @@ Create the configuration.
       // Vertex AI (Requires gcloud CLI to get authentication token)
       "platform": "vertex-ai",
       "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>"
-      "vertexAi": {
+      "vertexAI": {
         "account": "FIXME"
       }
 
@@ -84,7 +84,8 @@ Create the configuration.
       // Vertex AI (Requires gcloud CLI to get authentication token)
       "platform": "vertex-ai",
       "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>",
-      "account": "FIXME"
+      "account": "FIXME",
+      "model": "gemini-3-flash-preview"
 
       // Or Google AI Studio
       // "apiKey": "FIXME"

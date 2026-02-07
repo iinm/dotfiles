@@ -83,7 +83,7 @@ export function createCacheEnabledGeminiModelCaller(
         providerConfig.platform === "vertex-ai"
           ? {
               ...providerConfig.customHeaders,
-              Authorization: `Bearer ${await getGoogleCloudAccessToken(providerConfig.vertexAi?.account)}`,
+              Authorization: `Bearer ${await getGoogleCloudAccessToken(providerConfig.vertexAI?.account)}`,
             }
           : {
               ...providerConfig.customHeaders,

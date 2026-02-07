@@ -13,13 +13,16 @@ export type AppConfig = {
     tavily?: {
       apiKey?: string;
     };
+    /**
+     * - Vertex AI: requires baseURL and account
+     * - AI Studio: requires apiKey
+     */
     askGoogle?: {
       platform?: "vertex-ai";
       baseURL?: string;
+      account?: string;
       apiKey?: string;
-      vertexAi?: {
-        account?: string;
-      };
+      model?: string;
     };
   };
   mcpServers?: Record<string, MCPServerConfig>;
@@ -43,7 +46,7 @@ export type GenericModelProviderConfig = {
   bedrock?: {
     awsProfile?: string;
   };
-  vertexAi?: {
+  vertexAI?: {
     account?: string;
   };
 };
