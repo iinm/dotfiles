@@ -18,6 +18,7 @@ fish_add_path $HOME/tools/node/bin
 fish_add_path $HOME/tools/go/bin
 fish_add_path $HOME/tools/lua-language-server/bin
 fish_add_path $HOME/tools/google-cloud-sdk/bin
+fish_add_path $HOME/tools/aws/dist
 fish_add_path $HOME/go/bin
 
 set -x DOTFILES_DIR (dirname (dirname (readlink -f $HOME/.config/fish)))
