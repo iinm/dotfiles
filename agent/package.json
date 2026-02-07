@@ -10,8 +10,12 @@
     "fix": "npx @biomejs/biome check --fix"
   },
   "dependencies": {
+    "@aws-crypto/sha256-js": "^5.2.0",
+    "@aws-sdk/credential-providers": "^3.985.0",
     "@modelcontextprotocol/sdk": "^1.25.3",
     "@mozilla/readability": "^0.6.0",
+    "@smithy/protocol-http": "^5.3.8",
+    "@smithy/signature-v4": "^5.3.8",
     "diff": "^8.0.3",
     "jsdom": "^27.4.0",
     "puppeteer": "^24.36.0",

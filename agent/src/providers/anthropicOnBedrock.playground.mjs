@@ -1,31 +1,78 @@
-(async () => {
-  if (!process.env.BEDROCK_API_KEY) {
-    console.error("Error: BEDROCK_API_KEY is not set");
-    process.exit(1);
-  }
+import { Sha256 } from "@aws-crypto/sha256-js";
+import { fromIni } from "@aws-sdk/credential-providers";
+import { HttpRequest } from "@smithy/protocol-http";
+import { SignatureV4 } from "@smithy/signature-v4";
 
+(async () => {
   const modelId = "jp.anthropic.claude-haiku-4-5-20251001-v1:0";
-  const response = await fetch(
-    `https://bedrock-runtime.ap-northeast-1.amazonaws.com/model/${modelId}/invoke-with-response-stream`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.BEDROCK_API_KEY}`,
+
+  // with api key
+  // const response = await fetch(
+  //   `https://bedrock-runtime.ap-northeast-1.amazonaws.com/model/${modelId}/invoke-with-response-stream`,
+  //   {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: `Bearer ${process.env.BEDROCK_API_KEY}`,
+  //     },
+  //     signal: AbortSignal.timeout(120 * 1000),
+  //     body: JSON.stringify({
+  //       anthropic_version: "bedrock-2023-05-31",
+  //       max_tokens: 1000,
+  //       messages: [
+  //         {
+  //           role: "user",
+  //           content: [{ type: "text", text: "こんにちは" }],
+  //         },
+  //       ],
+  //     }),
+  //   },
+  // );
+
+  // with sso profile
+  const region = "ap-northeast-1";
+  const url = `https://bedrock-runtime.${region}.amazonaws.com/model/${modelId}/invoke-with-response-stream`;
+  const urlParsed = new URL(url);
+  const { hostname, pathname: path } = urlParsed;
+
+  const payload = {
+    anthropic_version: "bedrock-2023-05-31",
+    max_tokens: 1000,
+    messages: [
+      {
+        role: "user",
+        content: [{ type: "text", text: "こんにちは" }],
       },
-      signal: AbortSignal.timeout(120 * 1000),
-      body: JSON.stringify({
-        anthropic_version: "bedrock-2023-05-31",
-        max_tokens: 1000,
-        messages: [
-          {
-            role: "user",
-            content: [{ type: "text", text: "こんにちは" }],
-          },
-        ],
-      }),
+    ],
+  };
+
+  const signer = new SignatureV4({
+    credentials: fromIni({ profile: process.env.AWS_PROFILE }),
+    region,
+    service: "bedrock",
+    sha256: Sha256,
+  });
+
+  const req = new HttpRequest({
+    protocol: "https:",
+    method: "POST",
+    hostname,
+    path,
+    headers: {
+      host: hostname,
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify(payload),
+  });
+
+  const signed = await signer.sign(req);
+
+  const response = await fetch(url, {
+    method: signed.method,
+    headers: signed.headers,
+    body: signed.body,
+    signal: AbortSignal.timeout(120 * 1000),
+  });
 
   console.log("Response status:", response.status);
 
