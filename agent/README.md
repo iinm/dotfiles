@@ -33,7 +33,7 @@ Create the configuration.
     "anthropic": {
       "apiKey": "FIXME"
 
-      // Or Bedrock
+      // Or Bedrock + AWS SSO
       // "platform": "bedrock",
       // "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
       // "bedrock": {
