@@ -35,12 +35,12 @@ Create the configuration.
 
       // Or Bedrock
       // "platform": "bedrock",
-      // "baseURL": "https://bedrock-runtime.ap-northeast-1.amazonaws.com",
+      // "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
       // "apiKey": "FIXME",
       // "modelMap": {
-      //   "claude-haiku-4-5": "jp.anthropic.claude-haiku-4-5-20251001-v1:0",
-      //   "claude-sonnet-4-5": "jp.anthropic.claude-sonnet-4-5-20250929-v1:0",
-      //   "claude-opus-4-6": "global.anthropic.claude-opus-4-6-v1"
+      //   "claude-haiku-4-5": "<region>.anthropic.claude-haiku-4-5-20251001-v1:0",
+      //   "claude-sonnet-4-5": "<region>.anthropic.claude-sonnet-4-5-20250929-v1:0",
+      //   "claude-opus-4-6": "<region>.anthropic.claude-opus-4-6-v1"
       // }
 
       // Or Vertex AI (Requires gcloud CLI to get authentication token)
