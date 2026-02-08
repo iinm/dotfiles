@@ -9,7 +9,7 @@ This CLI tool automatically allows the execution of certain tools but requires e
 ## Requirements
 
 - Node.js 22 or later
-- API keys for LLM providers
+- LLM provider credentials (API keys, AWS SSO, gcloud CLI, or Azure CLI)
 - (Optional) Tavily API key
 
 ## Quick Start
@@ -33,7 +33,7 @@ Create the configuration.
     "anthropic": {
       "apiKey": "FIXME"
 
-      // Or Bedrock + AWS SSO
+      // Or use Bedrock + AWS SSO
       // "platform": "bedrock",
       // "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
       // "bedrock": {
@@ -45,7 +45,7 @@ Create the configuration.
       //   "claude-opus-4-6": "<region>.anthropic.claude-opus-4-6-v1"
       // }
 
-      // Or Vertex AI (Requires gcloud CLI to get authentication token)
+      // Or use Vertex AI (Requires gcloud CLI to get authentication token)
       // "platform": "vertex-ai",
       // "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>",
       // "modelMap": {
@@ -61,26 +61,52 @@ Create the configuration.
       // }
     },
     "gemini": {
-      // Vertex AI (Requires gcloud CLI to get authentication token)
-      "platform": "vertex-ai",
-      "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>"
-      "vertexAI": {
-        "account": "FIXME"
-      }
+      // Google AI Studio
+      "apiKey": "FIXME"
 
-      // Or Google AI Studio
-      // "apiKey": "FIXME"
+      // Or use Vertex AI (Requires gcloud CLI to get authentication token)
+      // "platform": "vertex-ai",
+      // "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>"
+      // "vertexAI": {
+      //   "account": "FIXME"
+      // }
     },
     "openai": {
       "apiKey": "FIXME"
 
-      // Or Azure (Requires Azure CLI to get access token)
+      // Or use Azure (Requires Azure CLI to get access token)
       // "platform": "azure",
       // "baseURL": "https://<resource>.openai.azure.com/openai",
       // "modelMap": {
       //   "gpt-5.2-chat-latest": "gpt-5.2-chat"
       // }
+    }
+  },
+  // Optional
+  "tools": {
+    "askGoogle": {
+      // Google AI Studio
+      "apiKey": "FIXME"
+
+      // Or use Vertex AI (Requires gcloud CLI to get authentication token)
+      // "platform": "vertex-ai",
+      // "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>",
+      // "account": "FIXME",
+      // "model": "gemini-3-flash-preview"
     },
+    "tavily": {
+      "apiKey": "FIXME"
+    }
+  }
+}
+```
+
+<details>
+<summary>Other Supported Providers</summary>
+
+```js
+{
+  "providers": {
     "moonshotai": {
       "platform": "bedrock",
       "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
@@ -124,25 +150,11 @@ Create the configuration.
     "xai": {
       "apiKey": "FIXME"
     }
-  },
-  // Optional
-  "tools": {
-    "askGoogle": {
-      // Vertex AI (Requires gcloud CLI to get authentication token)
-      "platform": "vertex-ai",
-      "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>",
-      "account": "FIXME",
-      "model": "gemini-3-flash-preview"
-
-      // Or Google AI Studio
-      // "apiKey": "FIXME"
-    },
-    "tavily": {
-      "apiKey": "FIXME"
-    }
   }
 }
 ```
+
+</details>
 
 Run the agent.
 
