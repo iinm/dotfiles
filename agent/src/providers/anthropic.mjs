@@ -561,7 +561,10 @@ async function* readAnthropicStreamEvents(reader) {
       break;
     }
 
-    buffer = new Uint8Array([...buffer, ...value]);
+    const nextBuffer = new Uint8Array(buffer.length + value.length);
+    nextBuffer.set(buffer);
+    nextBuffer.set(value, buffer.length);
+    buffer = nextBuffer;
 
     const lineFeed = "\n".charCodeAt(0);
     const eventEndIndices = [];

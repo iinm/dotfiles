@@ -108,7 +108,10 @@ import { execSync } from "node:child_process";
     // console.log("--- Decoded Value ---");
     // console.log(decodedValue);
 
-    buffer = new Uint8Array([...buffer, ...value]);
+    const nextBuffer = new Uint8Array(buffer.length + value.length);
+    nextBuffer.set(buffer);
+    nextBuffer.set(value, buffer.length);
+    buffer = nextBuffer;
 
     const carriageReturn = "\r".charCodeAt(0);
     const lineFeed = "\n".charCodeAt(0);
