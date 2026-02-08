@@ -435,6 +435,15 @@ export function createModelCaller(modelName, providers) {
           input,
         );
     }
+    case "kimi":
+      return (input) =>
+        callOpenAICompatibleModel(
+          providers?.moonshotai ?? {},
+          {
+            model: "kimi-k2.5",
+          },
+          input,
+        );
     case "grok-fast":
       return (input) =>
         callOpenAICompatibleModel(

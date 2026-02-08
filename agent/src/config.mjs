@@ -73,6 +73,10 @@ export async function loadAppConfig({ tmuxSessionId }) {
           ...(merged.providers?.anthropic ?? {}),
           ...(config.providers?.anthropic ?? {}),
         },
+        moonshotai: {
+          ...(merged.providers?.moonshotai ?? {}),
+          ...(config.providers?.moonshotai ?? {}),
+        },
         xai: {
           ...(merged.providers?.xai ?? {}),
           ...(config.providers?.xai ?? {}),

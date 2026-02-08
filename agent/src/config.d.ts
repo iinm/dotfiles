@@ -33,6 +33,7 @@ export type ModelProvidersConfig = {
   anthropic?: GenericModelProviderConfig;
   gemini?: GenericModelProviderConfig;
   openai?: GenericModelProviderConfig;
+  moonshotai?: GenericModelProviderConfig;
   xai?: GenericModelProviderConfig;
 };
 

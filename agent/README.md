@@ -81,6 +81,16 @@ Create the configuration.
       //   "gpt-5.2-chat-latest": "gpt-5.2-chat"
       // }
     },
+    "moonshotai": {
+      "platform": "bedrock",
+      "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
+      "bedrock": {
+        "awsProfile": "FIXME"
+      },
+      "modelMap": {
+        "kimi-k2.5": "moonshotai.kimi-k2.5"
+      }
+    },
     "xai": {
       "apiKey": "FIXME"
     }

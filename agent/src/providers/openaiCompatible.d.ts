@@ -11,7 +11,7 @@ export type OpenAIModelConfig =
 
 /* Request */
 export type OpenAIChatCompletionRequest = {
-  model: string;
+  model?: string;
   messages: OpenAIMessage[];
   tools?: OpenAIToolDefinition[];
   stream?: boolean;

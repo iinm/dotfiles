@@ -11,6 +11,7 @@ import { fromIni } from "@aws-sdk/credential-providers";
 import { HttpRequest } from "@smithy/protocol-http";
 import { SignatureV4 } from "@smithy/signature-v4";
 import { noThrow } from "../utils/noThrow.mjs";
+import { readBedrockStreamEvents } from "./bedrock.mjs";
 import { getGoogleCloudAccessToken } from "./googleCloud.mjs";
 
 /**
@@ -37,7 +38,7 @@ export async function callAnthropicModel(
 
     const url =
       providerConfig.platform === "bedrock"
-        ? `${baseURL}/model/${providerConfig.modelMap?.[modelConfig.model]}/invoke-with-response-stream`
+        ? `${baseURL}/model/${providerConfig.modelMap?.[modelConfig.model] ?? modelConfig.model}/invoke-with-response-stream`
         : providerConfig.platform === "vertex-ai"
           ? `${baseURL}/publishers/anthropic/models/${providerConfig.modelMap?.[modelConfig.model]}:streamRawPredict`
           : `${baseURL}/v1/messages`;
@@ -179,7 +180,9 @@ export async function callAnthropicModel(
     const reader = response.body.getReader();
     const eventStreamReader =
       providerConfig.platform === "bedrock"
-        ? readAnthropicOnBedrockStreamEvents
+        ? /** @type {typeof readAnthropicStreamEvents} */ (
+            readBedrockStreamEvents
+          )
         : readAnthropicStreamEvents;
 
     /** @type {AnthropicStreamEvent[]} */
@@ -583,80 +586,6 @@ async function* readAnthropicStreamEvents(reader) {
 
     if (eventEndIndices.length) {
       buffer = buffer.slice(eventEndIndices[eventEndIndices.length - 1] + 2);
-    }
-  }
-}
-
-/**
- * @param {ReadableStreamDefaultReader<Uint8Array>} reader
- */
-async function* readAnthropicOnBedrockStreamEvents(reader) {
-  let buffer = new Uint8Array();
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-
-    const nextBuffer = new Uint8Array(buffer.length + value.length);
-    nextBuffer.set(buffer);
-    nextBuffer.set(value, buffer.length);
-    buffer = nextBuffer;
-
-    // AWS event stream format
-    // https://github.com/awslabs/aws-c-event-stream/blob/main/docs/images/encoding.png
-    while (buffer.length >= 12) {
-      const view = new DataView(
-        buffer.buffer,
-        buffer.byteOffset,
-        buffer.byteLength,
-      );
-      const totalLength = view.getUint32(0);
-      const headersLength = view.getUint32(4);
-
-      if (buffer.length < totalLength) {
-        break;
-      }
-
-      const payloadOffset = 12 + headersLength;
-      // prelude 12 bytes + CRC 4 bytes = 16
-      const payloadLength = totalLength - headersLength - 16;
-      const payload = buffer.slice(
-        payloadOffset,
-        payloadOffset + payloadLength,
-      );
-
-      const decodedPayload = new TextDecoder().decode(payload);
-      try {
-        const json = JSON.parse(decodedPayload);
-        if (json.bytes) {
-          const anthropicEvent = Buffer.from(json.bytes, "base64").toString(
-            "utf-8",
-          );
-          /** @type {AnthropicStreamEvent} */
-          const parsedEvent = JSON.parse(anthropicEvent);
-          yield parsedEvent;
-        } else if (json.message) {
-          console.error(
-            styleText(
-              "yellow",
-              `Bedrock message received: ${JSON.stringify(json.message)}`,
-            ),
-          );
-        }
-      } catch (err) {
-        if (err instanceof Error) {
-          console.error(
-            styleText(
-              "red",
-              `Error decoding payload: ${err.message}\nPayload: ${decodedPayload}`,
-            ),
-          );
-        }
-      }
-
-      buffer = buffer.slice(totalLength);
     }
   }
 }

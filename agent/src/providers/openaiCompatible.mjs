@@ -1,12 +1,17 @@
 /**
- * @import { ModelInput, Message,  MessageContentToolResult, MessageContentText, AssistantMessage, ModelOutput, PartialMessageContent, MessageContentThinking, MessageContentToolUse } from "../model"
+ * @import { ModelInput, Message, MessageContentText, AssistantMessage, ModelOutput, PartialMessageContent, MessageContentThinking, MessageContentToolUse } from "../model"
  * @import { OpenAIAssistantMessage, OpenAIMessage, OpenAIMessageToolCall, OpenAIModelConfig, OpenAIToolDefinition, OpenAIStreamData, OpenAIChatCompletion, OpenAIMessageContentImage, OpenAIChatCompletionRequest } from "./openaiCompatible"
  * @import { ToolDefinition } from "../tool"
  * @import { GenericModelProviderConfig } from "../config"
  */
 
 import { styleText } from "node:util";
+import { Sha256 } from "@aws-crypto/sha256-js";
+import { fromIni } from "@aws-sdk/credential-providers";
+import { HttpRequest } from "@smithy/protocol-http";
+import { SignatureV4 } from "@smithy/signature-v4";
 import { noThrow } from "../utils/noThrow.mjs";
+import { readBedrockStreamEvents } from "./bedrock.mjs";
 
 /**
  * @param {GenericModelProviderConfig} providerConfig
@@ -29,27 +34,104 @@ export async function callOpenAICompatibleModel(
       input.tools || [],
     );
 
+    const url =
+      providerConfig.platform === "bedrock"
+        ? `${baseURL}/model/${providerConfig.modelMap?.[modelConfig.model] ?? modelConfig.model}/invoke-with-response-stream`
+        : `${baseURL}/v1/chat/completions`;
+
+    /** @type {Record<string,string>} */
+    const headers =
+      providerConfig.platform === "bedrock"
+        ? {
+            ...providerConfig.customHeaders,
+            ...(providerConfig.apiKey
+              ? {
+                  Authorization: `Bearer ${providerConfig.apiKey}`,
+                }
+              : {}),
+          }
+        : {
+            ...providerConfig.customHeaders,
+            Authorization: `Bearer ${providerConfig.apiKey}`,
+          };
+
+    const { model: _, ...modelConfigWithoutName } = modelConfig;
+    const platformRequest =
+      providerConfig.platform === "bedrock"
+        ? {
+            ...modelConfigWithoutName,
+          }
+        : {
+            ...modelConfig,
+            stream: true,
+          };
+
     /** @type {OpenAIChatCompletionRequest} */
     const request = {
-      ...modelConfig,
+      ...platformRequest,
       messages,
       tools: tools.length ? tools : undefined,
-      stream: true,
       stream_options: {
         include_usage: true,
       },
     };
 
-    const response = await fetch(`${baseURL}/v1/chat/completions`, {
-      method: "POST",
-      headers: {
-        ...providerConfig.customHeaders,
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${providerConfig.apiKey}`,
-      },
-      body: JSON.stringify(request),
-      signal: AbortSignal.timeout(120 * 1000),
-    });
+    const runFetchDefault = async () =>
+      fetch(url, {
+        method: "POST",
+        headers: {
+          ...headers,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(request),
+        signal: AbortSignal.timeout(120 * 1000),
+      });
+
+    // bedrock + sso profile
+    const runFetchForBedrock = async () => {
+      const region =
+        baseURL.match(/bedrock-runtime\.([\w-]+)\.amazonaws\.com/)?.[1] ?? "";
+      const urlParsed = new URL(url);
+      const { hostname, pathname } = urlParsed;
+
+      const signer = new SignatureV4({
+        credentials: fromIni({
+          profile: providerConfig.bedrock?.awsProfile ?? "",
+        }),
+        region,
+        service: "bedrock",
+        sha256: Sha256,
+      });
+
+      const req = new HttpRequest({
+        protocol: "https:",
+        method: "POST",
+        hostname,
+        path: pathname,
+        headers: {
+          host: hostname,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(request),
+      });
+
+      const signed = await signer.sign(req);
+
+      return fetch(url, {
+        method: signed.method,
+        headers: signed.headers,
+        body: signed.body,
+        signal: AbortSignal.timeout(120 * 1000),
+      });
+    };
+
+    const runFetch =
+      providerConfig.platform === "bedrock" &&
+      providerConfig.bedrock?.awsProfile
+        ? runFetchForBedrock
+        : runFetchDefault;
+
+    const response = await runFetch();
 
     if (response.status === 429 || response.status >= 500) {
       const interval = Math.min(2 * 2 ** retryCount, 16);
@@ -70,7 +152,7 @@ export async function callOpenAICompatibleModel(
 
     if (response.status !== 200) {
       throw new Error(
-        `Failed to call OpenAI model: status=${response.status}, body=${await response.text()}`,
+        `Failed to call OpenAI compatible model: status=${response.status}, body=${await response.text()}`,
       );
     }
 
@@ -79,12 +161,16 @@ export async function callOpenAICompatibleModel(
     }
 
     const reader = response.body.getReader();
+    const eventStreamReader =
+      providerConfig.platform === "bedrock"
+        ? /** @type {typeof readOpenAIStreamData} */ (readBedrockStreamEvents)
+        : readOpenAIStreamData;
 
     /** @type {OpenAIStreamData[]} */
     const dataList = [];
     /** @type {PartialMessageContent | undefined} */
     let previousPartialContent;
-    for await (const data of readOpenAIStreamData(reader)) {
+    for await (const data of eventStreamReader(reader)) {
       dataList.push(data);
 
       const partialContents = convertOpenAIStreamDataToAgentPartialContent(
@@ -377,9 +463,7 @@ function convertOpenAIStreamDataToChatCompletion(dataList) {
 
       if (delta.tool_calls) {
         for (const toolCallDelta of delta.tool_calls) {
-          const toolCall = message.tool_calls?.find(
-            (tc) => tc.id === toolCallDelta.id,
-          );
+          const toolCall = message.tool_calls?.at(toolCallDelta.index);
           if (!toolCall) {
             if (!message.tool_calls) {
               message.tool_calls = [];
