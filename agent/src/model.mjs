@@ -444,6 +444,24 @@ export function createModelCaller(modelName, providers) {
           },
           input,
         );
+    case "minimax":
+      return (input) =>
+        callOpenAICompatibleModel(
+          providers?.minimax ?? {},
+          {
+            model: "MiniMax-M2.1",
+          },
+          input,
+        );
+    case "glm":
+      return (input) =>
+        callOpenAICompatibleModel(
+          providers?.zai ?? {},
+          {
+            model: "glm-4.7",
+          },
+          input,
+        );
     case "grok-fast":
       return (input) =>
         callOpenAICompatibleModel(
