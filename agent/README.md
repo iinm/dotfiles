@@ -74,7 +74,7 @@ Create the configuration.
     "openai": {
       "apiKey": "FIXME"
 
-      // Or Azure
+      // Or Azure (Requires Azure CLI to get access token)
       // "platform": "azure",
       // "baseURL": "https://<resource>.openai.azure.com/openai",
       // "modelMap": {
