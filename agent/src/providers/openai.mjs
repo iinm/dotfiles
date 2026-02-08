@@ -1,5 +1,5 @@
 /**
- * @import { ModelInput, Message,  MessageContentToolResult, MessageContentText, AssistantMessage, ModelOutput, PartialMessageContent } from "../model"
+ * @import { ModelInput, Message, AssistantMessage, ModelOutput, PartialMessageContent } from "../model"
  * @import { OpenAIInputImage, OpenAIInputItem, OpenAIModelConfig, OpenAIOutputItem, OpenAIRequest, OpenAIStreamEvent, OpenAIToolFunction } from "./openai"
  * @import { ToolDefinition } from "../tool"
  * @import { GenericModelProviderConfig } from "../config"
@@ -7,6 +7,7 @@
 
 import { styleText } from "node:util";
 import { noThrow } from "../utils/noThrow.mjs";
+import { getAzureAccessToken } from "./azure.mjs";
 
 /**
  * @param {GenericModelProviderConfig} providerConfig
@@ -29,20 +30,31 @@ export async function callOpenAIModel(
       input.tools || [],
     );
 
+    const { model, ...baseModelConfig } = modelConfig;
+
     /** @type {OpenAIRequest} */
     const request = {
-      ...modelConfig,
+      ...baseModelConfig,
+      model:
+        providerConfig.platform === "azure"
+          ? (providerConfig.modelMap?.[model] ?? model)
+          : model,
       input: messages,
       tools: tools.length ? tools : undefined,
       stream: true,
     };
+
+    const apiKey =
+      providerConfig.platform === "azure"
+        ? await getAzureAccessToken()
+        : providerConfig.apiKey;
 
     const response = await fetch(`${baseURL}/v1/responses`, {
       method: "POST",
       headers: {
         ...providerConfig.customHeaders,
         "Content-Type": "application/json",
-        Authorization: `Bearer ${providerConfig.apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify(request),
       signal: AbortSignal.timeout(5 * 60 * 1000),

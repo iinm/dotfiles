@@ -37,7 +37,7 @@ export type ModelProvidersConfig = {
 };
 
 export type GenericModelProviderConfig = {
-  platform?: "vertex-ai" | "bedrock";
+  platform?: "vertex-ai" | "bedrock" | "azure";
   baseURL?: string;
   apiKey?: string;
   customHeaders?: Record<string, string>;

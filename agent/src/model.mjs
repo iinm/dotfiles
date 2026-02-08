@@ -158,6 +158,19 @@ export function createModelCaller(modelName, providers) {
           },
           input,
         );
+    case "gpt-chat":
+      return (input) =>
+        callOpenAIModel(
+          providers?.openai ?? {},
+          {
+            model: "gpt-5.2-chat-latest",
+            reasoning: {
+              effort: "medium",
+              summary: "auto",
+            },
+          },
+          input,
+        );
     case "claude-haiku-thinking-8k":
       return (input) =>
         callAnthropicModel(

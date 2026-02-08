@@ -73,6 +73,13 @@ Create the configuration.
     },
     "openai": {
       "apiKey": "FIXME"
+
+      // Or Azure
+      // "platform": "azure",
+      // "baseURL": "https://<resource>.openai.azure.com/openai",
+      // "modelMap": {
+      //   "gpt-5.2-chat-latest": "gpt-5.2-chat"
+      // }
     },
     "xai": {
       "apiKey": "FIXME"
