@@ -35,25 +35,25 @@ export async function* readBedrockStreamEvents(reader) {
       const payloadOffset = 12 + headersLength;
       // prelude 12 bytes + CRC 4 bytes = 16
       const payloadLength = totalLength - headersLength - 16;
-      const payload = buffer.slice(
+      const payloadRaw = buffer.slice(
         payloadOffset,
         payloadOffset + payloadLength,
       );
 
-      const decodedPayload = new TextDecoder().decode(payload);
+      const payloadDecoded = new TextDecoder().decode(payloadRaw);
       try {
-        const json = JSON.parse(decodedPayload);
-        if (json.bytes) {
-          const anthropicEvent = Buffer.from(json.bytes, "base64").toString(
+        const payloadParsed = JSON.parse(payloadDecoded);
+        if (payloadParsed.bytes) {
+          const event = Buffer.from(payloadParsed.bytes, "base64").toString(
             "utf-8",
           );
-          const parsedEvent = JSON.parse(anthropicEvent);
-          yield parsedEvent;
-        } else if (json.message) {
+          const eventParsed = JSON.parse(event);
+          yield eventParsed;
+        } else if (payloadParsed.message) {
           console.error(
             styleText(
               "yellow",
-              `Bedrock message received: ${JSON.stringify(json.message)}`,
+              `Bedrock message received: ${JSON.stringify(payloadParsed.message)}`,
             ),
           );
         }
@@ -62,7 +62,7 @@ export async function* readBedrockStreamEvents(reader) {
           console.error(
             styleText(
               "red",
-              `Error decoding payload: ${err.message}\nPayload: ${decodedPayload}`,
+              `Error decoding payload: ${err.message}\nPayload: ${payloadDecoded}`,
             ),
           );
         }
