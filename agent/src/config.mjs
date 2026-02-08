@@ -77,6 +77,10 @@ export async function loadAppConfig({ tmuxSessionId }) {
           ...(merged.providers?.moonshotai ?? {}),
           ...(config.providers?.moonshotai ?? {}),
         },
+        deepseek: {
+          ...(merged.providers?.deepseek ?? {}),
+          ...(config.providers?.deepseek ?? {}),
+        },
         minimax: {
           ...(merged.providers?.minimax ?? {}),
           ...(config.providers?.minimax ?? {}),

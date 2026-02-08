@@ -444,6 +444,15 @@ export function createModelCaller(modelName, providers) {
           },
           input,
         );
+    case "deepseek":
+      return (input) =>
+        callOpenAICompatibleModel(
+          providers?.deepseek ?? {},
+          {
+            model: "deepseek-reasoner",
+          },
+          input,
+        );
     case "minimax":
       return (input) =>
         callOpenAICompatibleModel(

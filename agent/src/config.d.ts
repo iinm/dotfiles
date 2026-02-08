@@ -34,6 +34,7 @@ export type ModelProvidersConfig = {
   gemini?: GenericModelProviderConfig;
   openai?: GenericModelProviderConfig;
   moonshotai?: GenericModelProviderConfig;
+  deepseek?: GenericModelProviderConfig;
   minimax?: GenericModelProviderConfig;
   zai?: GenericModelProviderConfig;
   xai?: GenericModelProviderConfig;

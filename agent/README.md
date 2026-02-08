@@ -91,6 +91,36 @@ Create the configuration.
         "kimi-k2.5": "moonshotai.kimi-k2.5"
       }
     },
+    "deepseek": {
+      "platform": "bedrock",
+      "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
+      "bedrock": {
+        "awsProfile": "FIXME"
+      },
+      "modelMap": {
+        "deepseek-reasoner": "deepseek.v3.2"
+      }
+    },
+    "minimax": {
+      "platform": "bedrock",
+      "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
+      "bedrock": {
+        "awsProfile": "FIXME"
+      },
+      "modelMap": {
+        "MiniMax-M2.1": "minimax.minimax-m2.1"
+      }
+    },
+    "zai": {
+      "platform": "bedrock",
+      "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
+      "bedrock": {
+        "awsProfile": "FIXME"
+      },
+      "modelMap": {
+        "glm-4.7": "zai.glm-4.7"
+      }
+    },
     "xai": {
       "apiKey": "FIXME"
     }
