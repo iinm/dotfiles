@@ -1,6 +1,9 @@
 import { execFile } from "node:child_process";
 
 /**
+ * Note:
+ * - Use AZURE_CONFIG_DIR to switch accounts.
+ *
  * @returns {Promise<string>}
  */
 export async function getAzureAccessToken() {
