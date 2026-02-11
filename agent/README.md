@@ -327,7 +327,79 @@ npx npm-check-updates -t minor -c 3 -u
 <summary>Amazon Bedrock</summary>
 
 ```sh
+# IAM Identity Center 
+identity_center_instance_arn="FIXME" # e.g., arn:aws:sso:::instance/ssoins-xxxxxxxxxxxxxxxx"
+identity_store_id=FIXME
+aws_account_id=FIXME
 
+# Create a permission set
+permission_set_arn=$(aws sso-admin create-permission-set \
+  --instance-arn "$identity_center_instance_arn" \
+  --name "BedrockForCodingAgent" \
+  --description "Allows only Bedrock model invocation" \
+  --query "PermissionSet.PermissionSetArn" --output text)
+
+# Add a policy to the permission set
+policy='{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream"
+      ],
+      "Resource": [
+        "arn:aws:bedrock:*::foundation-model/*",
+        "arn:aws:bedrock:*:*:inference-profile/*"
+      ]
+    }
+  ]
+}'
+
+aws sso-admin put-inline-policy-to-permission-set \
+  --instance-arn "$identity_center_instance_arn" \
+  --permission-set-arn "$permission_set_arn" \
+  --inline-policy "$policy"
+
+# Create an SSO user
+sso_user_name=FIXME
+sso_user_email=FIXME
+sso_user_family_name=FIXME
+sso_user_given_name=FIXME
+
+user_id=$(aws identitystore create-user \
+  --identity-store-id "$identity_store_id" \
+  --user-name "$sso_user_name" \
+  --display-name "$sso_user_name" \
+  --name "FamilyName=${sso_user_family_name},GivenName=${sso_user_given_name}" \
+  --emails Value=${sso_user_email},Primary=true \
+  --query "UserId" --output text)
+
+# Associate the user, permission set, and account
+aws sso-admin create-account-assignment \
+  --instance-arn "$identity_center_instance_arn" \
+  --target-id "$aws_account_id" \
+  --target-type AWS_ACCOUNT \
+  --permission-set-arn "$permission_set_arn" \
+  --principal-type USER \
+  --principal-id "$user_id"
+
+# Verify the setup
+aws configure sso
+# profile: CodingAgent
+
+profile=CodingAgent
+aws sso login --profile "$profile"
+
+echo '{"anthropic_version": "bedrock-2023-05-31", "max_tokens": 1024, "messages": [{"role": "user", "content": "Hello"}]}' > request.json
+
+aws bedrock-runtime invoke-model \
+  --model-id global.anthropic.claude-haiku-4-5-20251001-v1:0 \
+  --body fileb://request.json \
+  --profile "$profile" \
+  --region ap-northeast-1 \
+  response.json
 ```
 </details>
 
