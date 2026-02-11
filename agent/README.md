@@ -107,16 +107,6 @@ Create the configuration.
 ```js
 {
   "providers": {
-    "moonshotai": {
-      "platform": "bedrock",
-      "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
-      "bedrock": {
-        "awsProfile": "FIXME"
-      },
-      "modelMap": {
-        "kimi-k2.5": "moonshotai.kimi-k2.5"
-      }
-    },
     "deepseek": {
       "platform": "bedrock",
       "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
@@ -135,6 +125,16 @@ Create the configuration.
       },
       "modelMap": {
         "MiniMax-M2.1": "minimax.minimax-m2.1"
+      }
+    },
+    "moonshotai": {
+      "platform": "bedrock",
+      "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
+      "bedrock": {
+        "awsProfile": "FIXME"
+      },
+      "modelMap": {
+        "kimi-k2.5": "moonshotai.kimi-k2.5"
       }
     },
     "zai": {
@@ -320,3 +320,50 @@ npm run fix -- --unsafe
 npx npm-check-updates -t minor -c 3
 npx npm-check-updates -t minor -c 3 -u
 ```
+
+## Appendix: Creating Least-Privilege Users for Cloud Providers
+
+<details>
+<summary>Amazon Bedrock</summary>
+
+```sh
+
+```
+</details>
+
+<details>
+<summary>Azure - Microsoft Foundry</summary>
+
+```sh
+
+```
+</details>
+
+<details>
+<summary>Google Cloud Vertex AI</summary>
+
+```sh
+project_id=FIXME
+service_account_name=FIXME
+service_account_email="${service_account_name}@${project_id}.iam.gserviceaccount.com"
+your_account_email=FIXME
+
+# Create a service account
+gcloud iam service-accounts create "$service_account_name" \
+  --project "$project_id" --display-name "Vertex AI Caller Service Account for Coding Agent"
+
+# Grant permissions
+gcloud projects add-iam-policy-binding "$project_id" \
+  --member "serviceAccount:$service_account_email" \
+  --role="roles/aiplatform.serviceAgent"
+
+# Allow your account to impersonate the service account
+gcloud iam service-accounts add-iam-policy-binding "$service_account_email" \
+  --project "$project_id" \
+  --member "user:$your_account_email" \
+  --role "roles/iam.serviceAccountTokenCreator"
+
+# Verify that tokens can be issued
+gcloud auth print-access-token --impersonate-service-account "$service_account_email"
+```
+</details>
