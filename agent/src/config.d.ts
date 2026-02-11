@@ -36,6 +36,7 @@ export type ModelProvidersConfig = {
   moonshotai?: GenericModelProviderConfig;
   deepseek?: GenericModelProviderConfig;
   minimax?: GenericModelProviderConfig;
+  qwen?: GenericModelProviderConfig;
   zai?: GenericModelProviderConfig;
   xai?: GenericModelProviderConfig;
 };

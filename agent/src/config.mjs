@@ -85,6 +85,10 @@ export async function loadAppConfig({ tmuxSessionId }) {
           ...(merged.providers?.minimax ?? {}),
           ...(config.providers?.minimax ?? {}),
         },
+        qwen: {
+          ...(merged.providers?.qwen ?? {}),
+          ...(config.providers?.qwen ?? {}),
+        },
         zai: {
           ...(merged.providers?.zai ?? {}),
           ...(config.providers?.zai ?? {}),

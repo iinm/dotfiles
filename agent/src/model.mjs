@@ -471,6 +471,15 @@ export function createModelCaller(modelName, providers) {
           },
           input,
         );
+    case "qwen-next":
+      return (input) =>
+        callOpenAICompatibleModel(
+          providers?.qwen ?? {},
+          {
+            model: "qwen3-next-80b-a3b",
+          },
+          input,
+        );
     case "grok-fast":
       return (input) =>
         callOpenAICompatibleModel(
