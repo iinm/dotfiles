@@ -46,7 +46,13 @@ export async function callOpenAIModel(
 
     const apiKey =
       providerConfig.platform === "azure"
-        ? await getAzureAccessToken()
+        ? await getAzureAccessToken(
+            providerConfig.azure?.azureConfigDir
+              ? {
+                  azureConfigDir: providerConfig.azure.azureConfigDir,
+                }
+              : undefined,
+          )
         : providerConfig.apiKey;
 
     const response = await fetch(`${baseURL}/v1/responses`, {

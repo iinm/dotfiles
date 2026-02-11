@@ -79,6 +79,9 @@ Create the configuration.
       // "baseURL": "https://<resource>.openai.azure.com/openai",
       // "modelMap": {
       //   "gpt-5.2-chat-latest": "gpt-5.2-chat"
+      // },
+      // "azure": {
+      //   "azureConfigDir": "/home/xxx/.azure-for-agent"
       // }
     }
   },
@@ -407,7 +410,32 @@ aws bedrock-runtime invoke-model \
 <summary>Azure - Microsoft Foundry</summary>
 
 ```sh
+resource_group=FIXME
+account_name=FIXME # resource name
 
+# Create a service principal
+service_principal=$(az ad sp create-for-rbac --name "CodingAgentServicePrincipal" --skip-assignment)
+echo "$service_principal"
+app_id=$(echo "$service_principal" | jq -r .appId)
+
+# Assign role permissions
+# https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/role-based-access-control?view=foundry-classic#azure-openai-roles
+resource_id=$(az cognitiveservices account show \
+    --name "$account_name" \
+    --resource-group "$resource_group" \
+    --query id --output tsv)
+
+az role assignment create \
+  --role "Cognitive Services OpenAI User" \
+  --assignee "$app_id" \
+  --scope "$resource_id"
+
+# Log in with the service principal
+export app_secret=$(echo "$service_principal" | jq -r .password)
+export tenant_id=$(echo "$service_principal" | jq -r .tenant)
+
+export AZURE_CONFIG_DIR=$HOME/.azure-agent # Change the location to store credentials
+az login --service-principal -u "$app_id" -p "$app_secret" --tenant "$tenant_id"
 ```
 </details>
 

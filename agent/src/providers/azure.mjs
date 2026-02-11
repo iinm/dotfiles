@@ -1,12 +1,10 @@
 import { execFile } from "node:child_process";
 
 /**
- * Note:
- * - Use AZURE_CONFIG_DIR to switch accounts.
- *
+ * @param {{azureConfigDir: string}=} config
  * @returns {Promise<string>}
  */
-export async function getAzureAccessToken() {
+export async function getAzureAccessToken(config) {
   /** @type {string} */
   const stdout = await new Promise((resolve, reject) => {
     execFile(
@@ -14,12 +12,21 @@ export async function getAzureAccessToken() {
       [
         "account",
         "get-access-token",
-        "--scope",
-        "https://ai.azure.com/.default",
+        "--resource",
+        "https://cognitiveservices.azure.com",
+        "--query",
+        "accessToken",
+        "--output",
+        "tsv",
       ],
       {
         shell: false,
         timeout: 10 * 1000,
+        env: config
+          ? {
+              AZURE_CONFIG_DIR: config.azureConfigDir,
+            }
+          : undefined,
       },
       (error, stdout, _stderr) => {
         if (error) {
@@ -31,7 +38,5 @@ export async function getAzureAccessToken() {
     );
   });
 
-  /** @type {{accessToken: string}} */
-  const parsed = JSON.parse(stdout);
-  return parsed.accessToken;
+  return stdout;
 }

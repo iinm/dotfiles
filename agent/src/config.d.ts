@@ -47,6 +47,9 @@ export type GenericModelProviderConfig = {
   customHeaders?: Record<string, string>;
   modelMap?: Record<string, string>;
 
+  azure?: {
+    azureConfigDir?: string;
+  };
   bedrock?: {
     awsProfile?: string;
   };
