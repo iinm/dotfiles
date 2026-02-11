@@ -2,6 +2,7 @@
  * @import { Tool } from '../tool'
  */
 
+import { styleText } from "node:util";
 import { getGoogleCloudAccessToken } from "../providers/googleCloud.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
 
@@ -24,6 +25,85 @@ import { noThrow } from "../utils/noThrow.mjs";
  * @returns {Tool}
  */
 export function createAskGoogleTool(config) {
+  /**
+   * @param {AskGoogleInput} input
+   * @param {number} retryCount
+   * @returns {Promise<string | Error>}
+   */
+  async function askGoogle(input, retryCount = 0) {
+    const model = config.model ?? "gemini-3-flash-preview";
+    const url =
+      config.platform === "vertex-ai" && config.baseURL
+        ? `${config.baseURL}/publishers/google/models/${model}:generateContent`
+        : config.baseURL
+          ? `${config.baseURL}/models/${model}:generateContent`
+          : `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+
+    /** @type {Record<string,string>} */
+    const authHeader =
+      config.platform === "vertex-ai"
+        ? {
+            Authorization: `Bearer ${await getGoogleCloudAccessToken(config.account)}`,
+          }
+        : {
+            "x-goog-api-key": config.apiKey ?? "",
+          };
+
+    const data = {
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: input.question }],
+        },
+      ],
+      tools: [
+        {
+          google_search: {},
+        },
+      ],
+    };
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        ...authHeader,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+      signal: AbortSignal.timeout(120 * 1000),
+    });
+
+    if (response.status === 429 || response.status >= 500) {
+      const interval = Math.min(2 * 2 ** retryCount, 16);
+      console.error(
+        styleText(
+          "yellow",
+          `Google API returned ${response.status}. Retrying in ${interval} seconds...`,
+        ),
+      );
+      await new Promise((resolve) => setTimeout(resolve, interval * 1000));
+      return askGoogle(input, retryCount + 1);
+    }
+
+    if (!response.ok) {
+      return new Error(
+        `Failed to ask Google: status=${response.status}, body=${await response.text()}`,
+      );
+    }
+
+    const body = await response.json();
+
+    const answer = body.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (typeof answer !== "string") {
+      return new Error(
+        `Unexpected response format from Google: ${JSON.stringify(body)}`,
+      );
+    }
+
+    return answer;
+  }
+
   return {
     def: {
       name: "ask_google",
@@ -44,67 +124,6 @@ export function createAskGoogleTool(config) {
      * @param {AskGoogleInput} input
      * @returns {Promise<string | Error>}
      */
-    impl: async (input) =>
-      await noThrow(async () => {
-        const model = config.model ?? "gemini-3-flash-preview";
-        const url =
-          config.platform === "vertex-ai" && config.baseURL
-            ? `${config.baseURL}/publishers/google/models/${model}:generateContent`
-            : config.baseURL
-              ? `${config.baseURL}/models/${model}:generateContent`
-              : `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-
-        /** @type {Record<string,string>} */
-        const authHeader =
-          config.platform === "vertex-ai"
-            ? {
-                Authorization: `Bearer ${await getGoogleCloudAccessToken(config.account)}`,
-              }
-            : {
-                "x-goog-api-key": config.apiKey ?? "",
-              };
-
-        const data = {
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: input.question }],
-            },
-          ],
-          tools: [
-            {
-              google_search: {},
-            },
-          ],
-        };
-
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            ...authHeader,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-          signal: AbortSignal.timeout(120 * 1000),
-        });
-
-        if (!response.ok) {
-          return new Error(
-            `Failed to ask Google: status=${response.status}, body=${await response.text()}`,
-          );
-        }
-
-        const body = await response.json();
-
-        const answer = body.candidates?.[0]?.content?.parts?.[0]?.text;
-
-        if (typeof answer !== "string") {
-          return new Error(
-            `Unexpected response format from Google: ${JSON.stringify(body)}`,
-          );
-        }
-
-        return answer;
-      }),
+    impl: async (input) => await noThrow(async () => askGoogle(input, 0)),
   };
 }
