@@ -23,7 +23,7 @@ export const AGENT_MODEL = process.env.AGENT_MODEL || "";
 export const AGENT_NOTIFY_CMD_DEFAULT = path.join(
   AGENT_ROOT,
   "bin",
-  "agent-notify-desktop",
+  "agent-notify-terminal-bell",
 );
 
 export const AGENT_INTERRUPT_MESSAGE_FILE_PATH = path.join(
