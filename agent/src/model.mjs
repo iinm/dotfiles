@@ -449,7 +449,8 @@ export function createModelCaller(modelName, providers) {
         callOpenAICompatibleModel(
           providers?.deepseek ?? {},
           {
-            model: "deepseek-reasoner",
+            model: "deepseek-v3.2",
+            thinking: { type: "enabled" },
           },
           input,
         );
@@ -467,7 +468,7 @@ export function createModelCaller(modelName, providers) {
         callOpenAICompatibleModel(
           providers?.zai ?? {},
           {
-            model: "glm-4.7",
+            model: "glm-5",
           },
           input,
         );

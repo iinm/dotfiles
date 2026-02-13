@@ -7,6 +7,11 @@ export type OpenAIModelConfig =
   | {
       model: string;
       reasoning_effort?: "low" | "medium" | "high";
+    }
+  // DeepSeek: https://api-docs.deepseek.com/guides/thinking_mode
+  | {
+      model: string;
+      thinking: { type: "enabled" };
     };
 
 /* Request */

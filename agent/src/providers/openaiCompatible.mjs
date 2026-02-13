@@ -12,6 +12,7 @@ import { HttpRequest } from "@smithy/protocol-http";
 import { SignatureV4 } from "@smithy/signature-v4";
 import { noThrow } from "../utils/noThrow.mjs";
 import { readBedrockStreamEvents } from "./bedrock.mjs";
+import { getGoogleCloudAccessToken } from "./googleCloud.mjs";
 
 /**
  * @param {GenericModelProviderConfig} providerConfig
@@ -37,7 +38,9 @@ export async function callOpenAICompatibleModel(
     const url =
       providerConfig.platform === "bedrock"
         ? `${baseURL}/model/${providerConfig.modelMap?.[modelConfig.model] ?? modelConfig.model}/invoke-with-response-stream`
-        : `${baseURL}/v1/chat/completions`;
+        : providerConfig.platform === "vertex-ai"
+          ? `${baseURL}/endpoints/openapi/chat/completions`
+          : `${baseURL}/v1/chat/completions`;
 
     /** @type {Record<string,string>} */
     const headers =
@@ -50,10 +53,15 @@ export async function callOpenAICompatibleModel(
                 }
               : {}),
           }
-        : {
-            ...providerConfig.customHeaders,
-            Authorization: `Bearer ${providerConfig.apiKey}`,
-          };
+        : providerConfig.platform === "vertex-ai"
+          ? {
+              ...providerConfig.customHeaders,
+              Authorization: `Bearer ${await getGoogleCloudAccessToken()}`,
+            }
+          : {
+              ...providerConfig.customHeaders,
+              Authorization: `Bearer ${providerConfig.apiKey}`,
+            };
 
     const { model: _, ...modelConfigWithoutName } = modelConfig;
     const platformRequest =
@@ -61,10 +69,18 @@ export async function callOpenAICompatibleModel(
         ? {
             ...modelConfigWithoutName,
           }
-        : {
-            ...modelConfig,
-            stream: true,
-          };
+        : providerConfig.platform === "vertex-ai"
+          ? {
+              ...modelConfig,
+              model:
+                providerConfig.modelMap?.[modelConfig.model] ??
+                modelConfig.model,
+              stream: true,
+            }
+          : {
+              ...modelConfig,
+              stream: true,
+            };
 
     /** @type {OpenAIChatCompletionRequest} */
     const request = {

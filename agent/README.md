@@ -117,8 +117,15 @@ Create the configuration.
         "awsProfile": "FIXME"
       },
       "modelMap": {
-        "deepseek-reasoner": "deepseek.v3.2"
+        "deepseek-v3.2": "deepseek.v3.2"
       }
+
+      // Or use Vertex AI
+      // "platform": "vertex-ai",
+      // "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>",
+      // "modelMap": {
+      //   "deepseek-v3.2": "deepseek-ai/deepseek-v3.2-maas"
+      // }
     },
     "minimax": {
       "platform": "bedrock",
@@ -157,8 +164,15 @@ Create the configuration.
         "awsProfile": "FIXME"
       },
       "modelMap": {
-        "glm-4.7": "zai.glm-4.7"
+        "glm-5": "zai.glm-5"
       }
+
+      // Or use Vertex AI
+      // "platform": "vertex-ai",
+      // "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>",
+      // "modelMap": {
+      //   "glm-5": "zai-org/glm-5-maas"
+      // }
     },
     "xai": {
       "apiKey": "FIXME"
