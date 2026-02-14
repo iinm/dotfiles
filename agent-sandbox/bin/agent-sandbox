@@ -78,12 +78,15 @@ Examples:
     $SCRIPT_NAME --tty --verbose --dry-run zsh
 
   Start Claude Code:
-    $SCRIPT_NAME --allow-write --allow-net \\
+    $SCRIPT_NAME --allow-write \\
+      --allow-net api.anthropic.com,sentry.io,statsig.anthropic.com,statsig.com \\
       --mount-writable ~/.claude:/home/sandbox/.claude,~/.claude.json:/home/sandbox/.claude.json \\
       --mount-readonly ~/.gitconfig:/home/sandbox/.gitconfig \\
-      --tty --verbose zsh -ic claude
+      --tty --verbose claude
 
   Start Claude Code using Amazon Bedrock:
+    Configure environment variables as described at: https://code.claude.com/docs/en/amazon-bedrock
+
     $SCRIPT_NAME --env-file .env.sandbox --allow-write --allow-net \\
       --mount-writable ~/.claude:/home/sandbox/.claude,~/.claude.json:/home/sandbox/.claude.json \\
       --mount-readonly ~/.gitconfig:/home/sandbox/.gitconfig \\
@@ -92,23 +95,25 @@ Examples:
       --allow-net bedrock.ap-northeast-1.amazonaws.com \\
       --allow-net oidc.ap-northeast-1.amazonaws.com \\
       --allow-net portal.sso.ap-northeast-1.amazonaws.com \\
-      --tty --verbose zsh -ic claude
+      --tty --verbose claude
 
   Start Codex CLI:
-    $SCRIPT_NAME --env-file .env.sandbox --allow-write --allow-net \\
+    $SCRIPT_NAME --allow-write \\
+      --allow-net api.openai.com \\
       --mount-writable ~/.codex:/home/sandbox/.codex \\
       --mount-readonly ~/.gitconfig:/home/sandbox/.gitconfig \\
-      --tty --verbose zsh -ic codex
+      --tty --verbose codex
 
   Start Gemini CLI:
-    $SCRIPT_NAME --env-file .env.sandbox --allow-write --allow-net \\
+    $SCRIPT_NAME --allow-write \\
+      --allow-net generativelanguage.googleapis.com,oauth2.googleapis.com,cloudcode-pa.googleapis.com,play.googleapis.com,registry.npmjs.org,github.com,release-assets.githubusercontent.com \\
       --mount-writable ~/.gemini:/home/sandbox/.gemini \\
       --mount-readonly ~/.gitconfig:/home/sandbox/.gitconfig \\
-      --tty --verbose zsh -ic gemini
+      --tty --verbose gemini
 
   Install tools with mise:
-    $SCRIPT_NAME --allow-net nodejs.org --verbose zsh -ic "mise install node"
-    $SCRIPT_NAME --allow-net github.com,dl.google.com zsh -ic "mise install go"
+    $SCRIPT_NAME --allow-net mise-versions.jdx.dev,nodejs.org --verbose mise install node
+    $SCRIPT_NAME --allow-net mise-versions.jdx.dev,github.com,dl.google.com mise install go
 
   Use volume:
     $SCRIPT_NAME --volume agent-sandbox--global--home-npm:/home/node/.npm \\
@@ -131,8 +136,6 @@ Preset Configuration:
   - AI coding assistants: Claude Code, Gemini CLI, Codex CLI
   - Persistent storage for shell history, git config, and AI tool configurations
   - Default editor: busybox vi
-  - Pre-allowed network access for mise and coding agents
-    (mise-versions.jdx.dev, api.anthropic.com, generativelanguage.googleapis.com, etc.)
 
 
 How to view DNS query log:
@@ -331,28 +334,6 @@ main() {
       # project local persistent volume
       "${IMAGE_NAME}--home:/persistent/home"
     )
-
-    if test "$allow_net" = "yes"; then
-      allow_net_destinations+=(
-        # mise
-        "mise-versions.jdx.dev"
-
-        # Claude Code
-        "api.anthropic.com"
-        "sentry.io"
-        "statsig.anthropic.com"
-        "statsig.com"
-
-        # Gemini CLI
-        "generativelanguage.googleapis.com"
-        "oauth2.googleapis.com"
-        "cloudcode-pa.googleapis.com"
-        "play.googleapis.com"
-
-        # Codex CLI
-        "api.openai.com"
-      )
-    fi
   fi
 
   # docker options
