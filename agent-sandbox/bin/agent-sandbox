@@ -83,6 +83,17 @@ Examples:
       --mount-readonly ~/.gitconfig:/home/sandbox/.gitconfig \\
       --tty --verbose zsh -ic claude
 
+  Start Claude Code using Amazon Bedrock:
+    $SCRIPT_NAME --env-file .env.sandbox --allow-write --allow-net \\
+      --mount-writable ~/.claude:/home/sandbox/.claude,~/.claude.json:/home/sandbox/.claude.json \\
+      --mount-readonly ~/.gitconfig:/home/sandbox/.gitconfig \\
+      --mount-readonly ~/.aws:/home/sandbox/.aws \\
+      --allow-net bedrock-runtime.ap-northeast-1.amazonaws.com \\
+      --allow-net bedrock.ap-northeast-1.amazonaws.com \\
+      --allow-net oidc.ap-northeast-1.amazonaws.com \\
+      --allow-net portal.sso.ap-northeast-1.amazonaws.com \\
+      --tty --verbose zsh -ic claude
+
   Start Codex CLI:
     $SCRIPT_NAME --env-file .env.sandbox --allow-write --allow-net \\
       --mount-writable ~/.codex:/home/sandbox/.codex \\
