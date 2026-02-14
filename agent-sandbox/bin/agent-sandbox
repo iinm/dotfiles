@@ -727,15 +727,15 @@ setup_container_firewall() {
   fi
 
   # reset
-  ipset destroy allow_list 2>/dev/null || true
-  ipset create allow_list hash:net,port
-
   iptables -F
   iptables -X
   # iptables -t nat -F
   # iptables -t nat -X
   iptables -t mangle -F
   iptables -t mangle -X
+
+  ipset create allow_list hash:net,port -exist
+  ipset flush allow_list
   
   # allow dns
   iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
