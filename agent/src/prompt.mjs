@@ -31,7 +31,7 @@ At session start, find agent docs:
 - AGENTS.md (project rules and conventions):
   { command: "fd", args: ["^AGENTS.*\\.md$", "./", "--hidden", "--max-depth", "5"] }
 - Skills (reusable workflows with specialized knowledge):
-  { command: "rg", args: ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "SKILL.md", "\\A-{3,}\\n[\\s\\S]*?\\n-{3,}", "./"] }
+  { command: "rg", args: ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "SKILL.md", "\\A---\\n[\\s\\S]*?\\n---", "./"] }
 
 When working on files under a directory, read AGENTS.md from repo root down to that directory.
 Example: foo/bar -> ./AGENTS.md, foo/AGENTS.md, foo/bar/AGENTS.md (if they exist).
@@ -130,7 +130,6 @@ File and directory command examples:
   - Directory or file must be specified.
   - Escape special regex characters with a backslash.
   - Options:
-    - -n: Show line number
     - -i: Ignore case.
     - -w: Match whole words.
     - -g: Glob pattern. e.g. "*.js", "!*.test.ts".
