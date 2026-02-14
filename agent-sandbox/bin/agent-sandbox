@@ -669,8 +669,6 @@ setup_container_volume_owner() {
   done
 }
 
-# Future improvements:
-# - Use ipset
 setup_container_firewall() {
   local destinations=("$@")
   local addresses=()
@@ -729,6 +727,9 @@ setup_container_firewall() {
   fi
 
   # reset
+  ipset destroy allow_list 2>/dev/null || true
+  ipset create allow_list hash:net,port
+
   iptables -F
   iptables -X
   # iptables -t nat -F
@@ -760,16 +761,22 @@ setup_container_firewall() {
   
   # allow given addresses
   for address in "${addresses[@]}"; do
+    local address_part
+    local port
     if grep -q ':' <<< "$address"; then
-      local address_part
-      local port
       IFS=':' read -r address_part port <<< "$address"
+    else
+      address_part="$address"
+      port=443
+    fi
+
+    if test "$address_part" = "0.0.0.0/0"; then
       iptables -A OUTPUT -d "$address_part" -p tcp --dport "$port" -j ACCEPT
     else
-      # allow only HTTPS (443) connections
-      iptables -A OUTPUT -d "$address" -p tcp --dport 443 -j ACCEPT
+      ipset add allow_list "${address_part},tcp:${port}" -exist
     fi
   done
+  iptables -A OUTPUT -p tcp -m set --match-set allow_list dst,dst -j ACCEPT
 }
 
 setup_container_user() {
