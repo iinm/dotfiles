@@ -2,8 +2,6 @@
 
 set -eu -o pipefail
 
-SCRIPT_VERSION="0.0.37"
-
 SCRIPT_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
 
@@ -12,7 +10,7 @@ CONTAINER_SCRIPT_PATH="/sandbox/bin/$SCRIPT_NAME"
 
 help() {
   cat << HELP
-$SCRIPT_NAME v$SCRIPT_VERSION - Run a command in a sandboxed Docker environment
+$SCRIPT_NAME - Run a command in a sandboxed Docker environment
 
 Usage: $SCRIPT_NAME [--dockerfile FILE]
            [--platform PLATFORM]
