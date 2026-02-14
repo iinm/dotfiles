@@ -158,20 +158,20 @@ Create the configuration.
       }
     },
     "zai": {
-      "platform": "bedrock",
-      "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
-      "bedrock": {
-        "awsProfile": "FIXME"
-      },
+      "platform": "vertex-ai",
+      "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>",
       "modelMap": {
-        "glm-5": "zai.glm-5"
+        "glm-5": "zai-org/glm-5-maas"
       }
 
-      // Or use Vertex AI
-      // "platform": "vertex-ai",
-      // "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>",
+      // Or use Bedrock
+      // "platform": "bedrock",
+      // "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
+      // "bedrock": {
+      //   "awsProfile": "FIXME"
+      // },
       // "modelMap": {
-      //   "glm-5": "zai-org/glm-5-maas"
+      //   "glm-4.7": "zai.glm-4.7"
       // }
     },
     "xai": {

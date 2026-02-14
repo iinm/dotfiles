@@ -441,6 +441,7 @@ export function createModelCaller(modelName, providers) {
           providers?.moonshotai ?? {},
           {
             model: "kimi-k2.5",
+            thinking: { type: "enabled" },
           },
           input,
         );
@@ -460,6 +461,7 @@ export function createModelCaller(modelName, providers) {
           providers?.minimax ?? {},
           {
             model: "MiniMax-M2.1",
+            thinking: { type: "enabled" },
           },
           input,
         );
@@ -469,6 +471,7 @@ export function createModelCaller(modelName, providers) {
           providers?.zai ?? {},
           {
             model: "glm-5",
+            thinking: { type: "enabled" },
           },
           input,
         );
@@ -478,6 +481,7 @@ export function createModelCaller(modelName, providers) {
           providers?.qwen ?? {},
           {
             model: "qwen3-next-80b-a3b",
+            thinking: { type: "enabled" },
           },
           input,
         );
