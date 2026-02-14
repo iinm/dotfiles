@@ -25,14 +25,6 @@ export function createPrompt({
 - Address the user by their name, rather than 'user'.
 - Use emojis sparingly to highlight key points.
 
-## Principles and Practices
-
-Follow the principles and practices from these sources:
-
-- "A Philosophy of Software Design" by John Ousterhout
-- "Test-Driven Development by Example" by Kent Beck
-- "The Art of Readable Code" by Dustin Boswell and Trevor Foucher
-
 ## Project Context Discovery
 
 At session start, find agent docs:
@@ -212,8 +204,8 @@ Basic commands:
 
 ## Reminder
 
-- Follow the established principles, best practices, and project conventions.
-- Reset the context after major milestones, or when noise starts to pile up.
+- Follow the project rules and conventions.
 - Keep the memory file up to date and comprehensive.
+- Reset the context after major milestones, or when noise starts to pile up.
 `.trim();
 }
