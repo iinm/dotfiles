@@ -144,6 +144,11 @@ How to view DNS query log:
   
   View DNS query logs in real-time
   docker logs -f <container-name>
+
+Custom entrypoint:
+  If /sandbox/bin/user-entrypoint.sh exists and is executable,
+  it will be executed before the main command. Use this for custom
+  initialization (e.g., setting environment variables, starting services).
 HELP
 }
 
@@ -642,7 +647,11 @@ container_exec() {
   local max_attempts=20
   for _ in $(seq "$max_attempts"); do
     if stat -c "%U:%G" "$project_dir" | grep -qE "$(id -un):$(id -gn)"; then
-      exec "$@"
+      if test -x /sandbox/bin/user-entrypoint.sh; then
+        exec /sandbox/bin/user-entrypoint.sh "$@"
+      else
+        exec "$@"
+      fi
     fi
     sleep 0.5
   done
@@ -899,11 +908,32 @@ RUN install -dm 755 /etc/apt/keyrings \
 # Create user
 RUN groupadd sandbox \
     && useradd -g sandbox -m sandbox \
-    && mkdir -p /sandbox/tools && chown sandbox:sandbox /sandbox/tools
+    && mkdir -p /sandbox && chown sandbox:sandbox /sandbox
+
+# Create user entrypoint script for persistence configuration
+RUN mkdir -p /sandbox/bin
+COPY <<'USER_ENTRYPOINT' /sandbox/bin/user-entrypoint.sh
+#!/bin/bash
+# Configure persistence for sandbox data (history, configs, etc.) by symlinking to /persistent/home/.
+
+test -L ~/.bash_history || (touch /persistent/home/.bash_history; ln -s /persistent/home/.bash_history ~/)
+test -L ~/.zsh_history || (touch /persistent/home/.zsh_history; ln -s /persistent/home/.zsh_history ~/)
+test -L ~/.config || (mkdir -p /persistent/home/.config; ln -s /persistent/home/.config ~/)
+test -L ~/.gitconfig || (touch /persistent/home/.gitconfig; ln -s /persistent/home/.gitconfig ~/)
+test -L ~/.local || (mkdir -p /persistent/home/.local/share; ln -s /persistent/home/.local ~/)
+test -L ~/.claude || (mkdir -p /persistent/home/.claude; ln -s /persistent/home/.claude ~/)
+test -L ~/.claude.json || (touch /persistent/home/.claude.json; ln -s /persistent/home/.claude.json ~/)
+test -L ~/.gemini || (mkdir -p /persistent/home/.gemini; ln -s /persistent/home/.gemini ~/)
+test -L ~/.codex || (mkdir -p /persistent/home/.codex; ln -s /persistent/home/.codex ~/)
+
+eval "$(mise activate bash)"
+exec "$@"
+USER_ENTRYPOINT
+RUN chmod +x /sandbox/bin/user-entrypoint.sh
 
 USER sandbox
-ENV NPM_CONFIG_PREFIX=/sandbox/tools/npm-global
-ENV PATH=/sandbox/tools/npm-global/bin:$PATH
+ENV NPM_CONFIG_PREFIX=/sandbox/npm-global
+ENV PATH=/sandbox/npm-global/bin:$PATH
 
 # Install coding agents
 RUN npm install -g @anthropic-ai/claude-code \
@@ -923,21 +953,6 @@ RUN curl -fsSL https://raw.githubusercontent.com/grml/grml-etc-core/refs/tags/v0
     && git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting /home/sandbox/.zsh/zsh-syntax-highlighting \
     && echo 'source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh' >> /home/sandbox/.zshrc.local \
     && echo 'unsetopt HIST_SAVE_BY_COPY' >> /home/sandbox/.zshrc.local
-
-# Configure persistence for sandbox data (history, configs, etc.) by symlinking to /persistent/home/.
-RUN echo 'test -L ~/.bash_history || (touch /persistent/home/.bash_history; ln -s /persistent/home/.bash_history ~/)' >> /home/sandbox/.bashrc \
-    && echo 'test -L ~/.zsh_history || (touch /persistent/home/.zsh_history; ln -s /persistent/home/.zsh_history ~/)' >> /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.config || (mkdir -p /persistent/home/.config; ln -s /persistent/home/.config ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.gitconfig || (touch /persistent/home/.gitconfig; ln -s /persistent/home/.gitconfig ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.local || (mkdir -p /persistent/home/.local/share; ln -s /persistent/home/.local ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.claude || (mkdir -p /persistent/home/.claude; ln -s /persistent/home/.claude ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.claude.json || (touch /persistent/home/.claude.json; ln -s /persistent/home/.claude.json ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.gemini || (mkdir -p /persistent/home/.gemini; ln -s /persistent/home/.gemini ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc.local \
-    && echo 'test -L ~/.codex || (mkdir -p /persistent/home/.codex; ln -s /persistent/home/.codex ~/)' | tee -a /home/sandbox/.bashrc /home/sandbox/.zshrc
-
-# Configure mise
-RUN echo 'eval "$(mise activate zsh)"' >> /home/sandbox/.zshrc.local \
-    && echo 'eval "$(mise activate bash)"' >> /home/sandbox/.bashrc
 
 ENV LANG=en_US.UTF-8
 ENV EDITOR="busybox vi"
