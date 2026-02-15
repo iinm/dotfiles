@@ -226,6 +226,7 @@ $AGENT_ROOT (where this README file exists)
   \__ .config
         \__ config.json        # User configuration
         \__ config.local.json  # User local configuration (including secrets)
+        \__ prompts/           # Global/User-defined prompts
 
 <project-root>
   \__ $AGENT_PROJECT_METADATA_DIR (default: .agent)
@@ -233,6 +234,7 @@ $AGENT_ROOT (where this README file exists)
         \__ config.local.json      # Project-specific local configuration (including secrets)
         \__ interrupt-message.txt  # Interrupt message consumed by the agent
         \__ memory/                # Task-specific memory files
+        \__ prompts/               # Project-specific prompts
         \__ sandbox/               # (Example) Sandbox configuration
         \__ instructions.md        # (Example) Task-specific instructions
 ```
@@ -331,6 +333,30 @@ The agent loads configuration files in the following order. Settings in later fi
   // "notifyCmd": "/path/to/notification-command"
 }
 ```
+
+## File-based Prompts
+
+You can define reusable prompts in Markdown files. These are especially useful for common tasks like creating commit messages or conducting retrospectives.
+
+### Prompt File Format
+
+Prompts are Markdown files with a YAML frontmatter:
+
+```md
+---
+description: Create a commit message based on staged changes
+---
+Review the staged changes and create a concise commit message following the conventional commits specification.
+```
+
+### Locations
+
+The agent searches for prompts in the following directories:
+
+- `.agent/prompts/` (Project-specific prompts)
+- `$AGENT_ROOT/.config/prompts/` (Global/User-defined prompts)
+
+The prompt ID is the relative path of the file without the `.md` extension. For example, `.agent/prompts/retro.md` becomes `/prompts:retro`.
 
 ## Development
 
