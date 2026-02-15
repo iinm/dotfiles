@@ -162,16 +162,27 @@ async function fetchContent(url) {
  */
 async function getMarkdownFiles(dir, baseDir = dir) {
   const entries = await fs.readdir(dir, { withFileTypes: true });
-  /** @type {string[]} */
-  let files = [];
+  const files = [];
+
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      files = files.concat(await getMarkdownFiles(fullPath, baseDir));
-    } else if (entry.isFile() && entry.name.endsWith(".md")) {
+    let isDirectory = entry.isDirectory();
+    let isFile = entry.isFile();
+
+    if (entry.isSymbolicLink()) {
+      const stat = await fs.stat(fullPath).catch(() => null);
+      if (!stat) continue;
+      isDirectory = stat.isDirectory();
+      isFile = stat.isFile();
+    }
+
+    if (isDirectory) {
+      files.push(...(await getMarkdownFiles(fullPath, baseDir)));
+    } else if (isFile && entry.name.endsWith(".md")) {
       files.push(path.relative(baseDir, fullPath));
     }
   }
+
   return files;
 }
 
