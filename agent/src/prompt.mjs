@@ -1,6 +1,7 @@
 /**
  * @typedef {object} PromptConfig
  * @property {string} username
+ * @property {string} modelName
  * @property {string} sessionId
  * @property {string} tmuxSessionId
  * @property {string} workingDir - The current working directory.
@@ -13,6 +14,7 @@
  */
 export function createPrompt({
   username,
+  modelName,
   sessionId,
   tmuxSessionId,
   workingDir,
@@ -197,6 +199,7 @@ Basic commands:
 ## Environment
 
 - User name: ${username}
+- Your model name: ${modelName}
 - Current working directory: ${workingDir}
 - Session id: ${sessionId}
 - tmux session id: ${tmuxSessionId}

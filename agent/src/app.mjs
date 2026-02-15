@@ -71,6 +71,7 @@ import { createSessionId } from "./utils/createSessionId.mjs";
 
   const prompt = createPrompt({
     username: USER_NAME,
+    modelName: appConfig.model || "",
     sessionId,
     tmuxSessionId,
     workingDir: process.cwd(),

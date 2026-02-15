@@ -13,76 +13,17 @@ import readline from "node:readline";
 import { styleText } from "node:util";
 import { createPatch } from "diff";
 import { consumeInterruptMessage } from "./utils/consumeInterruptMessage.mjs";
+import { loadPrompts } from "./utils/loadPrompts.mjs";
 import { loadUserMessageContext } from "./utils/loadUserMessageContext.mjs";
 import { notify } from "./utils/notify.mjs";
 import { parseFileRange } from "./utils/parseFileRange.mjs";
 import { readFileRange } from "./utils/readFileRange.mjs";
 
-const PROMPT_COMMANDS = [
-  {
-    command: "/commit",
-    prompt: () =>
-      `
-Create a commit.
-- Understand the staged changes: exec_command { command: "git", args: ["diff", "--staged"] }
-- Check the commit message format: exec_command { command: "git", args: ["log", "--no-merges", "--oneline", "-n", "10"] }
-- Create a concise and descriptive commit message that follows the project's commit convention.
-- Create a commit: exec_command { command: "git", args: ["commit", "-m", "<commit message>"] }
-    `.trim(),
-  },
-  {
-    command: "/commit.co-authored",
-    /**
-     * @param {{modelName: string}} args
-     * @returns {string}
-     */
-    prompt: ({ modelName }) =>
-      `
-Create a commit.
-- Understand the staged changes: exec_command { command: "git", args: ["diff", "--staged"] }
-- Check the commit message format: exec_command { command: "git", args: ["log", "--no-merges", "--oneline", "-n", "10"] }
-- Create a concise and descriptive commit message that follows the project's commit convention.
-- Use this exact format to include Co-authored-by information:
-  exec_command: { command: "git", args: ["commit", "-m", "<commit message>", "-m", "", "-m", "Co-authored-by: Agent by iinm <agent-by-iinm+${modelName}@localhost>"] }
-    `.trim(),
-  },
-  {
-    command: "/retro",
-    prompt: () =>
-      `
-Review this session and propose improvements to the agent instructions.
-
-Steps:
-1. Read the current instruction files:
-   - exec_command { command: "fd", args: ["^AGENTS.*\\.md$", "./", "--hidden", "--max-depth", "5"] }
-   - Read each AGENTS.md file found.
-   - Also check for SKILL.md files.
-
-2. Reflect on this session's conversation:
-   - Identify moments where the user corrected your behavior, pointed out mistakes, or gave feedback.
-   - Identify patterns where you struggled, made wrong assumptions, or needed multiple attempts.
-   - Identify any implicit conventions or preferences the user demonstrated.
-
-3. Propose concrete improvements:
-   - For each issue found, suggest a specific change to AGENTS.md, SKILL.md, or a new file.
-   - Use patch_file or write_file to apply the changes (ask user for approval).
-   - Focus on actionable rules and conventions, not vague guidelines.
-   - Avoid duplicating instructions already present in the system prompt.
-
-Output format:
-- Start with a summary of observations (what went well, what didn't).
-- Then list each proposed change with:
-  - The problem or pattern observed
-  - The target file
-  - The specific addition or modification
-    `.trim(),
-  },
-];
-
 // Define available slash commands for tab completion
 const SLASH_COMMANDS = [
   "/help",
-  ...PROMPT_COMMANDS.map(({ command }) => command),
+  "/prompts",
+  "/prompts:",
   "/paste",
   "/resume",
   "/dump",
@@ -91,14 +32,13 @@ const SLASH_COMMANDS = [
 
 const HELP_MESSAGE = `
 Commands:
-  /help               - Display this help message
-  /commit             - Create a commit message based on staged changes
-  /commit.co-authored - Create a commit message with Co-authored-by trailer
-  /paste              - Paste content from clipboard
-  /retro              - Review session and propose agent instruction improvements
-  /resume             - Resume conversation after an LLM provider error
-  /dump               - Save current messages to a JSON file
-  /load               - Load messages from a JSON file
+  /help         - Display this help message
+  /prompts      - List available prompts
+  /prompts:<id> - Invoke a prompt with the given ID (e.g., /prompts:commit)
+  /paste        - Paste content from clipboard
+  /resume       - Resume conversation after an LLM provider error
+  /dump         - Save current messages to a JSON file
+  /load         - Load messages from a JSON file
 
 File Input Syntax:
   !path/to/file     - Read content from a file
@@ -162,15 +102,34 @@ export function startInteractiveSession({
     prompt: cliPrompt,
     /**
      * @param {string} line
+     * @param {(err?: Error | null, result?: [string[], string]) => void} callback
      */
-    completer: (line) => {
-      if (line.startsWith("/")) {
-        const completions = SLASH_COMMANDS;
-        const hits = completions.filter((c) => c.startsWith(line));
-        const candidates = hits.length ? hits : completions;
-        return [candidates, line];
-      }
-      return [[], line];
+    completer: (line, callback) => {
+      (async () => {
+        try {
+          if (line.startsWith("/prompts:")) {
+            const prompts = await loadPrompts();
+            const ids = Array.from(prompts.keys()).map(
+              (id) => `/prompts:${id}`,
+            );
+            const hits = ids.filter((id) => id.startsWith(line));
+            callback(null, [hits.length ? hits : ids, line]);
+            return;
+          }
+
+          if (line.startsWith("/")) {
+            const hits = SLASH_COMMANDS.filter((c) => c.startsWith(line));
+            callback(null, [hits.length ? hits : SLASH_COMMANDS, line]);
+            return;
+          }
+          callback(null, [[], line]);
+        } catch (err) {
+          callback(err instanceof Error ? err : new Error(String(err)), [
+            [],
+            line,
+          ]);
+        }
+      })();
     },
   });
 
@@ -259,6 +218,55 @@ export function startInteractiveSession({
       return;
     }
 
+    if (inputTrimmed.startsWith("/prompts")) {
+      const prompts = await loadPrompts();
+
+      if (inputTrimmed === "/prompts") {
+        console.log(styleText("bold", "\nAvailable Prompts:"));
+        if (prompts.size === 0) {
+          console.log("  No prompts found.");
+        } else {
+          for (const prompt of prompts.values()) {
+            console.log(
+              `  ${styleText("cyan", prompt.id.padEnd(20))} - ${prompt.description}`,
+            );
+          }
+        }
+        cli.prompt();
+        return;
+      }
+
+      if (inputTrimmed.startsWith("/prompts:")) {
+        const match = inputTrimmed.match(/^\/prompts:([^ ]+)(?:\s+(.*))?$/);
+        if (!match) {
+          console.log(styleText("red", "\nInvalid prompt invocation format."));
+          cli.prompt();
+          return;
+        }
+
+        const id = match[1];
+        const args = match[2] || "";
+        const prompt = prompts.get(id);
+
+        if (!prompt) {
+          console.log(styleText("red", `\nPrompt not found: ${id}`));
+          cli.prompt();
+          return;
+        }
+
+        const invocation = `/prompts:${id}${args ? ` ${args}` : ""}`;
+        const message = `System: This prompt was invoked as "${invocation}".\n\n${prompt.content}`;
+
+        console.log(styleText("gray", "\n<prompt>"));
+        console.log(message);
+        console.log(styleText("gray", "</prompt>"));
+
+        userEventEmitter.emit("userInput", [{ type: "text", text: message }]);
+        state.turn = false;
+        return;
+      }
+    }
+
     if (inputTrimmed.startsWith("/paste")) {
       const prompt = inputTrimmed.slice("/paste".length).trim();
       let clipboard;
@@ -301,20 +309,6 @@ export function startInteractiveSession({
       userEventEmitter.emit("userInput", messageWithContext);
       state.turn = false;
       return;
-    }
-
-    for (const cmd of PROMPT_COMMANDS) {
-      if (inputTrimmed.toLowerCase() === cmd.command) {
-        const rawMessage = cmd.prompt({ modelName });
-        const message = `System: ${rawMessage}`;
-        console.log(styleText("gray", "\n<prompt>"));
-        console.log(message);
-        console.log(styleText("gray", "</prompt>"));
-
-        userEventEmitter.emit("userInput", [{ type: "text", text: message }]);
-        state.turn = false;
-        return;
-      }
     }
 
     const messageWithContext = await loadUserMessageContext(inputTrimmed);
