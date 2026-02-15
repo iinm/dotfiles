@@ -349,6 +349,18 @@ description: Create a commit message based on staged changes
 Review the staged changes and create a concise commit message following the conventional commits specification.
 ```
 
+You can also import remote prompts with the `import` field:
+
+```md
+---
+description: Simplify complex code
+import: https://raw.githubusercontent.com/anthropics/claude-plugins-official/refs/heads/main/plugins/code-simplifier/agents/code-simplifier.md
+---
+Additional instructions or overrides for the imported prompt.
+```
+
+Remote prompts are fetched and cached locally. The local content will be appended to the imported content.
+
 ### Locations
 
 The agent searches for prompts in the following directories:
