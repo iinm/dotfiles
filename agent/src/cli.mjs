@@ -8,6 +8,7 @@
  * @import { TavilySearchInput } from "./tools/tavilySearch"
  */
 
+import { execFileSync } from "node:child_process";
 import readline from "node:readline";
 import { styleText } from "node:util";
 import { createPatch } from "diff";
@@ -51,6 +52,7 @@ Create a commit.
 const SLASH_COMMANDS = [
   "/help",
   ...PROMPT_COMMANDS.map(({ command }) => command),
+  "/paste",
   "/resume",
   "/dump",
   "/load",
@@ -61,6 +63,7 @@ Commands:
   /help               - Display this help message
   /commit             - Create a commit message based on staged changes
   /commit.co-authored - Create a commit message with Co-authored-by trailer
+  /paste              - Paste content from clipboard
   /resume             - Resume conversation after an LLM provider error
   /dump               - Save current messages to a JSON file
   /load               - Load messages from a JSON file
@@ -221,6 +224,50 @@ export function startInteractiveSession({
     if (inputTrimmed.toLowerCase() === "/load") {
       await agentCommands.loadMessages();
       cli.prompt();
+      return;
+    }
+
+    if (inputTrimmed.startsWith("/paste")) {
+      const prompt = inputTrimmed.slice("/paste".length).trim();
+      let clipboard;
+      try {
+        if (process.platform === "darwin") {
+          clipboard = execFileSync("pbpaste", { encoding: "utf8" });
+        } else if (process.platform === "linux") {
+          clipboard = execFileSync("xsel", ["--clipboard", "--output"], {
+            encoding: "utf8",
+          });
+        } else {
+          console.log(
+            styleText(
+              "red",
+              `\nUnsupported platform for /paste: ${process.platform}`,
+            ),
+          );
+          cli.prompt();
+          return;
+        }
+      } catch (e) {
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        console.log(
+          styleText(
+            "red",
+            `\nFailed to get clipboard content: ${errorMessage}`,
+          ),
+        );
+        cli.prompt();
+        return;
+      }
+
+      const combinedInput = prompt ? `${prompt}\n\n${clipboard}` : clipboard;
+
+      console.log(styleText("gray", "\n<paste>"));
+      console.log(combinedInput);
+      console.log(styleText("gray", "</paste>"));
+
+      const messageWithContext = await loadUserMessageContext(combinedInput);
+      userEventEmitter.emit("userInput", messageWithContext);
+      state.turn = false;
       return;
     }
 
