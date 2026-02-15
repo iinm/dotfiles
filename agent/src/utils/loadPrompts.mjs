@@ -31,9 +31,7 @@ export async function loadPrompts() {
         const fullPath = path.join(dir, file);
         const content = await fs.readFile(fullPath, "utf-8");
         const prompt = parsePrompt(file, content, fullPath);
-        if (prompt) {
-          prompts.set(prompt.id, prompt);
-        }
+        prompts.set(prompt.id, prompt);
       }
     } catch (err) {
       if (err instanceof Error && "code" in err && err.code !== "ENOENT") {
@@ -71,14 +69,21 @@ async function getMarkdownFiles(dir, baseDir = dir) {
  * @param {string} relativePath
  * @param {string} fileContent
  * @param {string} fullPath
- * @returns {Prompt | null}
+ * @returns {Prompt}
  */
 function parsePrompt(relativePath, fileContent, fullPath) {
   const id = relativePath.replace(/\.md$/, "");
   // Match YAML frontmatter
   const match = fileContent.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
 
-  if (!match) return null;
+  if (!match) {
+    return {
+      id,
+      description: "(No description)",
+      content: fileContent.trim(),
+      filePath: fullPath,
+    };
+  }
 
   const frontmatter = match[1];
   const content = match[2].trim();
