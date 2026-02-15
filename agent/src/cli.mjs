@@ -441,7 +441,7 @@ function formatToolUse(toolUse) {
     );
   }
 
-  const { providerMetadata: _, ...filteredToolUse } = toolUse;
+  const { provider: _, ...filteredToolUse } = toolUse;
 
   return JSON.stringify(filteredToolUse, null, 2);
 }

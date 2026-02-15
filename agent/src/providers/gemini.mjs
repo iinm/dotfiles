@@ -444,12 +444,12 @@ function convertGenericMessageToGeminiFormat(messages) {
             parts.push({
               text: part.thinking,
               thought: true,
-              ...(part.providerMetadata || {}),
+              ...(part.provider?.fields || {}),
             });
           } else if (part.type === "text") {
             parts.push({
               text: part.text,
-              ...(part.providerMetadata || {}),
+              ...(part.provider?.fields || {}),
             });
           } else if (part.type === "tool_use") {
             parts.push({
@@ -457,7 +457,7 @@ function convertGenericMessageToGeminiFormat(messages) {
                 name: part.toolName,
                 args: part.input,
               },
-              ...(part.providerMetadata || {}),
+              ...(part.provider?.fields || {}),
             });
           }
         }
@@ -527,8 +527,8 @@ function convertGeminiAssistantMessageToGenericFormat(content) {
         assistantMessageContent.push({
           type: "text",
           text: part.text,
-          providerMetadata: part.thoughtSignature
-            ? { thoughtSignature: part.thoughtSignature }
+          provider: part.thoughtSignature
+            ? { fields: { thoughtSignature: part.thoughtSignature } }
             : undefined,
         });
       }
@@ -539,8 +539,8 @@ function convertGeminiAssistantMessageToGenericFormat(content) {
         toolUseId: part.functionCall.name,
         toolName: part.functionCall.name,
         input: part.functionCall.args,
-        providerMetadata: part.thoughtSignature
-          ? { thoughtSignature: part.thoughtSignature }
+        provider: part.thoughtSignature
+          ? { fields: { thoughtSignature: part.thoughtSignature } }
           : undefined,
       });
     }

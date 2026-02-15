@@ -237,13 +237,13 @@ function convertGenericMessageToOpenAIFormat(genericMessages) {
         break;
       }
       case "assistant": {
-        if (!genericMessage.providerMetadata?.originalMessage) {
+        if (!genericMessage.provider?.source) {
           throw new Error(
             "Original message is required for assistant role but not provided.",
           );
         }
         const source = /** @type {OpenAIOutputItem[]} */ (
-          genericMessage.providerMetadata.originalMessage
+          genericMessage.provider.source
         );
         openAIInputItems.push(...source);
       }
@@ -311,9 +311,9 @@ function convertOpenAIAssistantMessageToGenericFormat(openAIOutputItems) {
   return {
     role: "assistant",
     content,
-    providerMetadata: {
+    provider: {
       // Keep the original message because converting from generic to provider format is complex.
-      originalMessage: openAIOutputItems,
+      source: openAIOutputItems,
     },
   };
 }

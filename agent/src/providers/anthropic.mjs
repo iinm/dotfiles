@@ -295,7 +295,7 @@ function convertGenericMessageToAnthropicFormat(genericMessages) {
           content: genericMessage.content.map((part) => {
             if (part.type === "thinking") {
               const signature = /** @type {string} */ (
-                part.providerMetadata?.signature ?? ""
+                part.provider?.fields?.signature
               );
               return {
                 type: "thinking",
@@ -304,9 +304,7 @@ function convertGenericMessageToAnthropicFormat(genericMessages) {
               };
             }
             if (part.type === "redacted_thinking") {
-              const data = /** @type {string} */ (
-                part.providerMetadata?.data ?? ""
-              );
+              const data = /** @type {string} */ (part.provider?.fields?.data);
               return {
                 type: "redacted_thinking",
                 data,
@@ -365,12 +363,12 @@ function convertAnthropicAssistantMessageToGenericFormat(
       content.push({
         type: "thinking",
         thinking: part.thinking,
-        providerMetadata: { signature: part.signature },
+        provider: { fields: { signature: part.signature } },
       });
     } else if (part.type === "redacted_thinking") {
       content.push({
         type: "redacted_thinking",
-        providerMetadata: { data: part.data },
+        provider: { fields: { data: part.data } },
       });
     } else if (part.type === "text") {
       content.push({ type: "text", text: part.text });

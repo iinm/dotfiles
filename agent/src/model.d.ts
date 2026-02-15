@@ -48,28 +48,24 @@ export type AssistantMessage = {
     | MessageContentText
     | MessageContentToolUse
   )[];
-  providerMetadata?: {
-    /** Original message from the provider */
-    originalMessage?: unknown;
-    [key: string]: unknown;
-  };
+  provider?: MessageContentProvider;
 };
 
 export type MessageContentThinking = {
   type: "thinking";
   thinking: string;
-  providerMetadata?: Record<string, unknown>;
+  provider?: MessageContentProvider;
 };
 
 export type MessageContentRedactedThinking = {
   type: "redacted_thinking";
-  providerMetadata?: Record<string, unknown>;
+  provider?: MessageContentProvider;
 };
 
 export type MessageContentText = {
   type: "text";
   text: string;
-  providerMetadata?: Record<string, unknown>;
+  provider?: MessageContentProvider;
 };
 
 export type MessageContentImage = {
@@ -87,7 +83,7 @@ export type MessageContentToolUse = {
   toolUseId: string;
   toolName: string;
   input: Record<string, unknown>;
-  providerMetadata?: Record<string, unknown>;
+  provider?: MessageContentProvider;
 };
 
 export type MessageContentToolResult = {
@@ -96,4 +92,18 @@ export type MessageContentToolResult = {
   toolName: string;
   content: (MessageContentText | MessageContentImage)[];
   isError?: boolean;
+};
+
+export type MessageContentProvider = {
+  /**
+   * Raw source data from the provider
+   * (original message, response, output items, etc.)
+   */
+  source?: unknown;
+
+  /**
+   * Provider-specific fields that are directly merged
+   * into the content part sent to the provider API.
+   */
+  fields?: Record<string, unknown>;
 };

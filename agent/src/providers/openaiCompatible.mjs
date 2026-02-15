@@ -427,9 +427,6 @@ function convertOpenAIAssistantMessageToGenericFormat(openAIAsistantMessage) {
   return {
     role: "assistant",
     content,
-    providerMetadata: {
-      originalMessage: openAIAsistantMessage,
-    },
   };
 }
 

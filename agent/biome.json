@@ -6,7 +6,7 @@
     "useIgnoreFile": false
   },
   "files": {
-    "includes": ["**", "!.config", "!.cache"],
+    "includes": ["**", "!.config", "!.cache", "!.agent"],
     "ignoreUnknown": false
   },
   "formatter": {
