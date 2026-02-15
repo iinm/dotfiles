@@ -30,6 +30,59 @@ const SLASH_COMMANDS = [
   "/load",
 ];
 
+/**
+ * Return the longest common prefix of the given strings.
+ * @param {string[]} strings
+ * @returns {string}
+ */
+function commonPrefix(strings) {
+  if (strings.length === 0) return "";
+  let prefix = strings[0];
+  for (let i = 1; i < strings.length; i++) {
+    while (!strings[i].startsWith(prefix)) {
+      prefix = prefix.slice(0, -1);
+    }
+  }
+  return prefix;
+}
+
+/**
+ * Display completion candidates and invoke the readline callback.
+ *
+ * Node.js readline normally requires two consecutive Tab presses to show the
+ * candidate list. This helper lets readline handle the common-prefix
+ * auto-completion first, then prints the candidate list on the next tick and
+ * redraws the prompt so the display stays clean.
+ *
+ * @param {import("node:readline").Interface} rl
+ * @param {string[]} candidates
+ * @param {string} line
+ * @param {(err: Error | null, result: [string[], string]) => void} callback
+ */
+function showCompletions(rl, candidates, line, callback) {
+  if (candidates.length <= 1) {
+    callback(null, [candidates, line]);
+    return;
+  }
+  const prefix = commonPrefix(candidates);
+  if (prefix.length > line.length) {
+    // Let readline insert the common prefix.
+    callback(null, [[prefix], line]);
+  } else {
+    // Nothing new to insert.
+    callback(null, [[], line]);
+  }
+  // After readline finishes its own refresh, print the candidate list and
+  // redraw the prompt line.  We cannot use rl.prompt(true) because its
+  // internal _refreshLine clears everything below the prompt start, which
+  // erases the candidate list we just wrote.  Instead we manually re-output
+  // the prompt and current line content.
+  setTimeout(() => {
+    process.stdout.write(`\r\n${candidates.join("  ")}\r\n`);
+    process.stdout.write(`${rl.getPrompt()}${rl.line}`);
+  }, 0);
+}
+
 const HELP_MESSAGE = `
 Commands:
   /help         - Display this help message
@@ -113,13 +166,18 @@ export function startInteractiveSession({
               (id) => `/prompts:${id}`,
             );
             const hits = ids.filter((id) => id.startsWith(line));
-            callback(null, [hits.length ? hits : ids, line]);
+            showCompletions(cli, hits.length ? hits : ids, line, callback);
             return;
           }
 
           if (line.startsWith("/")) {
             const hits = SLASH_COMMANDS.filter((c) => c.startsWith(line));
-            callback(null, [hits.length ? hits : SLASH_COMMANDS, line]);
+            showCompletions(
+              cli,
+              hits.length ? hits : SLASH_COMMANDS,
+              line,
+              callback,
+            );
             return;
           }
           callback(null, [[], line]);
