@@ -16,6 +16,7 @@ import { AGENT_PROJECT_METADATA_DIR, AGENT_ROOT } from "../env.mjs";
  */
 export async function loadPrompts() {
   const promptDirs = [
+    path.resolve(AGENT_ROOT, ".config", "prompts.predefined"),
     path.resolve(AGENT_ROOT, ".config", "prompts"),
     path.resolve(AGENT_PROJECT_METADATA_DIR, "prompts"),
   ];

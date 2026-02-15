@@ -3,7 +3,7 @@ tmp/
 .cache/
 
 .config/*
-!.config/prompts/
+!.config/prompts.predefined/
 
 .agent/*
 !.agent/config.json
