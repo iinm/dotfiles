@@ -1,23 +1,26 @@
 {
   "autoApproval": {
     "patterns": [
+      // {
+      //   "toolName": "exec_command",
+      //   "input": {
+      //     "command": "npm",
+      //     "args": ["run", { "regex": "^(ci|check|fix)$" }]
+      //   }
+      // },
+      // {
+      //   "toolName": { "regex": "^(write_file|patch_file)$" },
+      //   "input": { "filePath": { "regex": "^\\.agent/memory/.+\\.md$" } }
+      // },
+      // {
+      //   "toolName": { "regex": "^(write_file|patch_file)$" },
+      //   "input": { "filePath": { "regex": "^src/" } }
+      // },
+      // {
+      //   "toolName": "ask_google"
+      // }
       {
-        "toolName": "exec_command",
-        "input": {
-          "command": "npm",
-          "args": ["run", { "regex": "^(check|fix)$" }]
-        }
-      },
-      {
-        "toolName": { "regex": "^(write_file|patch_file)$" },
-        "input": { "filePath": { "regex": "^\\.agent/memory/.+\\.md$" } }
-      },
-      {
-        "toolName": { "regex": "^(write_file|patch_file)$" },
-        "input": { "filePath": { "regex": "^src/" } }
-      },
-      {
-        "toolName": "ask_google"
+        "toolName": { "regex": "." }
       }
     ]
   },
@@ -28,7 +31,7 @@
       {
         "pattern": {
           "command": "npm",
-          "args": ["install"]
+          "args": ["ci"]
         },
         "mode": "sandbox",
         "extraArgs": ["--allow-net", "0.0.0.0/0"]
