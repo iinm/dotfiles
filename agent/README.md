@@ -284,6 +284,7 @@ The agent loads configuration files in the following order. Settings in later fi
   "sandbox": {
     "command": "agent-sandbox",
     "args": ["--dockerfile", ".agent/sandbox/Dockerfile", "--allow-write", "--skip-build", "--keep-alive", "30"],
+    "separator": "--",
 
     "rules": [
       // Run specific commands outside the sandbox
