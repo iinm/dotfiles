@@ -23,8 +23,8 @@ export function createPrompt({
   return `
 ## Communication Style
 
-- Respond to the user in the same language they use.
-- Address the user by their name, rather than 'user'.
+- Think in English, but respond in the user's language.
+- Address the user by their name, rather than "user".
 - Use emojis sparingly to highlight key points.
 
 ## Project Context Discovery
