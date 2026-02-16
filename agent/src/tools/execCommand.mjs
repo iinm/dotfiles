@@ -168,13 +168,23 @@ function rewriteInputForSandbox(input, sandbox) {
     return input;
   }
 
+  const args = [
+    ...(sandbox.args || []),
+    ...(matchedRule?.additionalArgs || []),
+  ];
+
+  if (sandbox.separator) {
+    args.push(sandbox.separator);
+  }
+
+  args.push(input.command);
+
+  if (input.args) {
+    args.push(...input.args);
+  }
+
   return {
     command: sandbox.command,
-    args: [
-      ...(sandbox.args || []),
-      ...(matchedRule?.additionalArgs || []),
-      input.command,
-      ...(input.args || []),
-    ],
+    args,
   };
 }

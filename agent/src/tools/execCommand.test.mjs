@@ -180,4 +180,42 @@ THIS_IS_SANDBOX non-target-command --non-target-command-arg
 `.trim(),
     );
   });
+
+  it("runs command in sandbox with separator", async () => {
+    // given:
+    const execCommandToolWithSeparator = createExecCommandTool({
+      sandbox: {
+        command: "echo",
+        args: ["SANDBOX"],
+        separator: "--",
+        rules: [
+          {
+            pattern: {
+              command: "target",
+            },
+            mode: "sandbox",
+            additionalArgs: ["--allow-net"],
+          },
+        ],
+      },
+    });
+
+    // when:
+    const result = await execCommandToolWithSeparator.impl({
+      command: "target",
+      args: ["--arg"],
+    });
+
+    // then:
+    assert.equal(
+      result,
+      `
+<stdout>
+SANDBOX --allow-net -- target --arg
+</stdout>
+
+<stderr></stderr>
+`.trim(),
+    );
+  });
 });

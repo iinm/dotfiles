@@ -10,6 +10,7 @@ export type ExecCommandConfig = {
 export type ExecCommandSanboxConfig = {
   command: string;
   args?: string[];
+  separator?: string;
   rules?: {
     pattern: {
       command: string;
