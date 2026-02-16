@@ -45,6 +45,9 @@ export function createExecCommandTool(config) {
       if (typeof input.command !== "string") {
         return new Error("command must be a string");
       }
+      if (input.command.startsWith("-")) {
+        return new Error("command must not start with '-'");
+      }
       if (input.args && !Array.isArray(input.args)) {
         return new Error("args must be an array of strings");
       }

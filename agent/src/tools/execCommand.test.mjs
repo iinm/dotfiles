@@ -84,6 +84,15 @@ Error: Command failed: node -e process.exit(1)
     );
   });
 
+  it("validates input command", () => {
+    assert.ok(!execCommandTool.validateInput({ command: "ls" }));
+    assert.ok(execCommandTool.validateInput({ command: "-v" }) instanceof Error);
+    assert.equal(
+      execCommandTool.validateInput({ command: "-v" })?.message,
+      "command must not start with '-'",
+    );
+  });
+
   it("runs command in sandbox", async () => {
     // given:
     const execCommandToolWithSandbox = createExecCommandTool({
