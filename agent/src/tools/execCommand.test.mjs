@@ -87,7 +87,10 @@ Error: Command failed: node -e process.exit(1)
   it("validates input command", () => {
     assert.ok(execCommandTool.validateInput);
     if (execCommandTool.validateInput) {
-      assert.ok(!execCommandTool.validateInput({ command: "ls" }));
+      assert.strictEqual(
+        execCommandTool.validateInput({ command: "ls" }),
+        undefined,
+      );
       assert.ok(
         execCommandTool.validateInput({ command: "-v" }) instanceof Error,
       );
