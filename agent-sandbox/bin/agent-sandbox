@@ -229,7 +229,7 @@ main() {
       --verbose    ) VERBOSE="yes"; shift ;;
       --dry-run    ) DRY_RUN="yes"; shift ;;
       --keep-alive ) keep_alive_seconds="$2"; shift 2 ;;
-      --  ) shift; continue ;;
+      --  ) shift; break ;;
       --* ) echo "Error: Unknown option: $1" >&2; return 1 ;;
       *   ) break ;;
     esac
