@@ -27,6 +27,7 @@
   "sandbox": {
     "command": ".agent/sandbox/run",
     "args": ["--skip-build", "--keep-alive", "30"],
+    "separator": "--",
     "rules": [
       {
         "pattern": {
