@@ -27,6 +27,7 @@ export async function callOpenAICompatibleModel(
   input,
   retryCount = 0,
 ) {
+  const retryInterval = Math.min(2 * 2 ** retryCount, 16);
   const baseURL = providerConfig.baseURL || "https://api.openai.com";
 
   return await noThrow(async () => {
@@ -150,14 +151,13 @@ export async function callOpenAICompatibleModel(
     const response = await runFetch();
 
     if (response.status === 429 || response.status >= 500) {
-      const interval = Math.min(2 * 2 ** retryCount, 16);
       console.error(
         styleText(
           "yellow",
-          `OpenAI rate limit exceeded. Retry in ${interval} seconds...`,
+          `OpenAI rate limit exceeded. Retry in ${retryInterval} seconds...`,
         ),
       );
-      await new Promise((resolve) => setTimeout(resolve, interval * 1000));
+      await new Promise((resolve) => setTimeout(resolve, retryInterval * 1000));
       return callOpenAICompatibleModel(
         providerConfig,
         modelConfig,
@@ -205,8 +205,23 @@ export async function callOpenAICompatibleModel(
       }
     }
 
-    /** @type {OpenAIChatCompletion} */
     const chatCompletion = convertOpenAIStreamDataToChatCompletion(dataList);
+    if (chatCompletion instanceof Error) {
+      console.error(
+        styleText(
+          "yellow",
+          `Failed to process stream: ${chatCompletion.message}\nRetry in ${retryInterval} seconds...`,
+        ),
+      );
+      await new Promise((resolve) => setTimeout(resolve, retryInterval * 1000));
+      return callOpenAICompatibleModel(
+        providerConfig,
+        modelConfig,
+        input,
+        retryCount + 1,
+      );
+    }
+
     const openAIAssistantMessage = chatCompletion.choices[0].message;
 
     return {
@@ -440,17 +455,17 @@ function convertOpenAIAssistantMessageToGenericFormat(openAIAsistantMessage) {
 
 /**
  * @param {OpenAIStreamData[]} dataList
- * @returns {OpenAIChatCompletion}
+ * @returns {OpenAIChatCompletion | Error}
  */
 function convertOpenAIStreamDataToChatCompletion(dataList) {
   const firstData = dataList.at(0);
   if (!firstData) {
-    throw new Error("No data found in the stream");
+    return new Error("No data found in the stream");
   }
 
   const fistChoice = firstData.choices.at(0);
   if (!fistChoice) {
-    throw new Error("No choice found in the first data");
+    return new Error("No choice found in the first data");
   }
 
   const message = /** @type {OpenAIAssistantMessage} */ (fistChoice.delta);
