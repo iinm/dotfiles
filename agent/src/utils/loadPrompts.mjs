@@ -15,6 +15,7 @@ import {
  * @property {string} content
  * @property {string} filePath
  * @property {string} [import]
+ * @property {boolean} [userInvocable]
  */
 
 /**
@@ -48,10 +49,18 @@ export async function loadPrompts() {
 
       if (content === null) continue;
 
-      let prompt = parsePrompt(file, content, fullPath);
+      //  Ignore all files in the skills/ directory except for SKILL.md.
+      if (file.match(/(^|\/)skills\//) && !file.endsWith("/SKILL.md")) {
+        continue;
+      }
 
+      let prompt = parsePrompt(file, content, fullPath);
       if (prompt.import) {
         prompt = await mergeRemotePrompt(prompt, file, fullPath);
+      }
+
+      if (prompt.userInvocable === false) {
+        continue;
       }
 
       prompts.set(prompt.id, prompt);
@@ -89,8 +98,7 @@ async function mergeRemotePrompt(localPrompt, relativePath, fullPath) {
     ...remotePrompt,
     ...localPrompt, // Local overrides
     content: `${remotePrompt.content}\n\n---\n\n${localPrompt.content}`.trim(),
-    description:
-      localPrompt.description || remotePrompt.description || "(No description)",
+    description: localPrompt.description || remotePrompt.description || "",
   };
 }
 
@@ -194,7 +202,7 @@ async function getMarkdownFiles(dir, baseDir = dir) {
  * @returns {Prompt}
  */
 function parsePrompt(relativePath, fileContent, fullPath) {
-  const id = relativePath.replace(/\.md$/, "");
+  const id = relativePath.replace(/\/SKILL\.md$/, "").replace(/\.md$/, "");
   // Match YAML frontmatter
   const match = fileContent.match(
     /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/,
@@ -203,7 +211,7 @@ function parsePrompt(relativePath, fileContent, fullPath) {
   if (!match) {
     return {
       id,
-      description: "(No description)",
+      description: "",
       content: fileContent.trim(),
       filePath: fullPath,
     };
@@ -212,12 +220,15 @@ function parsePrompt(relativePath, fileContent, fullPath) {
   const frontmatter = match[1];
   const content = match[2].trim();
 
+  const userInvocableRaw = parseFrontmatterField(frontmatter, "user-invocable");
+
   return {
     id,
     description: parseFrontmatterField(frontmatter, "description") ?? "",
     content,
     filePath: fullPath,
     import: parseFrontmatterField(frontmatter, "import"),
+    userInvocable: userInvocableRaw ? userInvocableRaw === "true" : undefined,
   };
 }
 

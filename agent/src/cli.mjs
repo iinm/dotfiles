@@ -285,8 +285,10 @@ export function startInteractiveSession({
           console.log("  No prompts found.");
         } else {
           for (const prompt of prompts.values()) {
+            const maxLength = process.stdout.columns ?? 100;
+            const line = `  ${styleText("cyan", prompt.id.padEnd(20))} - ${prompt.description}`;
             console.log(
-              `  ${styleText("cyan", prompt.id.padEnd(20))} - ${prompt.description}`,
+              line.length > maxLength ? line.slice(0, maxLength) : line,
             );
           }
         }
