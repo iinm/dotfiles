@@ -11,6 +11,7 @@ import { fromIni } from "@aws-sdk/credential-providers";
 import { HttpRequest } from "@smithy/protocol-http";
 import { SignatureV4 } from "@smithy/signature-v4";
 import { noThrow } from "../utils/noThrow.mjs";
+import { retryOnError } from "../utils/retryOnError.mjs";
 import { readBedrockStreamEvents } from "./bedrock.mjs";
 import { getGoogleCloudAccessToken } from "./googleCloud.mjs";
 
@@ -148,7 +149,22 @@ export async function callOpenAICompatibleModel(
         ? runFetchForBedrock
         : runFetchDefault;
 
-    const response = await runFetch();
+    const response = await retryOnError(() => runFetch(), {
+      shouldRetry: (err) => err instanceof Error && err.name === "TimeoutError",
+      beforeRetry: (err, interval) => {
+        console.error(
+          styleText(
+            "yellow",
+            `Failed to call model: ${String(err)}; Retry in ${interval} seconds...`,
+          ),
+        );
+        return Promise.resolve();
+      },
+      initialInterval: 2,
+      maxInterval: 16,
+      multiplier: 2,
+      maxAttempt: 5,
+    });
 
     if (response.status === 429 || response.status >= 500) {
       console.error(
@@ -210,7 +226,7 @@ export async function callOpenAICompatibleModel(
       console.error(
         styleText(
           "yellow",
-          `Failed to process stream: ${chatCompletion.message}\nRetry in ${retryInterval} seconds...`,
+          `Failed to process stream: ${chatCompletion.message}; Retry in ${retryInterval} seconds...`,
         ),
       );
       await new Promise((resolve) => setTimeout(resolve, retryInterval * 1000));
