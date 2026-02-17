@@ -410,11 +410,19 @@ function convertOpenAIAssistantMessageToGenericFormat(openAIAsistantMessage) {
   if (openAIAsistantMessage.tool_calls) {
     for (const toolCall of openAIAsistantMessage.tool_calls) {
       if (toolCall.type === "function") {
+        /** @type {Record<string, unknown>} */
+        let args;
+        try {
+          args = JSON.parse(toolCall.function.arguments);
+        } catch (err) {
+          args = { err: String(err) };
+        }
+
         content.push({
           type: "tool_use",
           toolUseId: toolCall.id,
           toolName: toolCall.function.name,
-          input: JSON.parse(toolCall.function.arguments),
+          input: args,
         });
       } else {
         throw new Error(
