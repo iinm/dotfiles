@@ -475,7 +475,7 @@ export function createModelCaller(modelName, providers) {
           },
           input,
         );
-    case "qwen-next":
+    case "qwen":
       return (input) =>
         callOpenAICompatibleModel(
           providers?.qwen ?? {},
