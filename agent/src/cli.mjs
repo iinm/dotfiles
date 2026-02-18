@@ -319,7 +319,7 @@ export function startInteractiveSession({
             const maxLength = process.stdout.columns ?? 100;
             const line = `  ${styleText("cyan", prompt.id.padEnd(20))} - ${prompt.description}`;
             console.log(
-              line.length > maxLength ? line.slice(0, maxLength) : line,
+              line.length > maxLength ? `${line.slice(0, maxLength)}...` : line,
             );
           }
         }
