@@ -218,7 +218,7 @@ export function createModelCaller(modelName, providers) {
         callAnthropicModel(
           providers?.anthropic ?? {},
           {
-            model: "claude-sonnet-4-5",
+            model: "claude-sonnet-4-6",
             max_tokens: 1024 * 16,
             thinking: {
               type: "enabled",
