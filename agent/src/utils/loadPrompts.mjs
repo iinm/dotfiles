@@ -16,6 +16,7 @@ import {
  * @property {string} filePath
  * @property {string} [import]
  * @property {boolean} [userInvocable]
+ * @property {boolean} [isShortcut]
  */
 
 /**
@@ -202,7 +203,10 @@ async function getMarkdownFiles(dir, baseDir = dir) {
  * @returns {Prompt}
  */
 function parsePrompt(relativePath, fileContent, fullPath) {
-  const id = relativePath.replace(/\/SKILL\.md$/, "").replace(/\.md$/, "");
+  const rawId = relativePath.replace(/\/SKILL\.md$/, "").replace(/\.md$/, "");
+  const isShortcut = rawId.startsWith("shortcuts/");
+  const id = isShortcut ? rawId.replace(/^shortcuts\//, "") : rawId;
+
   // Match YAML frontmatter
   const match = fileContent.match(
     /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/,
@@ -229,6 +233,7 @@ function parsePrompt(relativePath, fileContent, fullPath) {
     filePath: fullPath,
     import: parseFrontmatterField(frontmatter, "import"),
     userInvocable: userInvocableRaw ? userInvocableRaw === "true" : undefined,
+    isShortcut,
   };
 }
 

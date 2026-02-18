@@ -367,10 +367,14 @@ Remote prompts are fetched and cached locally. The local content will be appende
 
 The agent searches for prompts in the following directories:
 
-- `.agent/prompts/` (Project-specific prompts)
 - `$AGENT_ROOT/.config/prompts/` (Global/User-defined prompts)
+- `.agent/prompts/` (Project-specific prompts)
 
 The prompt ID is the relative path of the file without the `.md` extension. For example, `.agent/prompts/retro.md` becomes `/prompts:retro`.
+
+### Shortcuts
+
+Prompts located in a `shortcuts/` subdirectory (e.g., `.agent/prompts/shortcuts/review.md`) can be invoked directly as a top-level command (e.g., `/review`). This is useful for frequently used tasks. If a prompt is in a `shortcuts/` subdirectory, its ID is simplified by removing the `shortcuts/` prefix for use as a shortcut (e.g., `shortcuts/review` becomes `/review`).
 
 ## Development
 

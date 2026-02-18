@@ -88,6 +88,7 @@ Commands:
   /help         - Display this help message
   /prompts      - List available prompts
   /prompts:<id> - Invoke a prompt with the given ID (e.g., /prompts:commit)
+  /<id>         - Shortcut for prompts in the shortcuts/ directory (e.g., /review)
   /paste        - Paste content from clipboard
   /resume       - Resume conversation after an LLM provider error
   /dump         - Save current messages to a JSON file
@@ -140,6 +141,32 @@ export function startInteractiveSession({
     turn: true,
   };
 
+  /**
+   * @param {string} id
+   * @param {string} args
+   * @param {string} displayInvocation
+   */
+  const invokePrompt = async (id, args, displayInvocation) => {
+    const prompts = await loadPrompts();
+    const prompt = prompts.get(id);
+
+    if (!prompt) {
+      console.log(styleText("red", `\nPrompt not found: ${id}`));
+      cli.prompt();
+      return;
+    }
+
+    const invocation = `${displayInvocation}${args ? ` ${args}` : ""}`;
+    const message = `System: This prompt was invoked as "${invocation}".\n\n${prompt.content}`;
+
+    console.log(styleText("gray", "\n<prompt>"));
+    console.log(message);
+    console.log(styleText("gray", "</prompt>"));
+
+    userEventEmitter.emit("userInput", [{ type: "text", text: message }]);
+    state.turn = false;
+  };
+
   const cliPrompt = [
     "",
     styleText(["cyanBright", "bgGray"], "▌") +
@@ -160,8 +187,8 @@ export function startInteractiveSession({
     completer: (line, callback) => {
       (async () => {
         try {
+          const prompts = await loadPrompts();
           if (line.startsWith("/prompts:")) {
-            const prompts = await loadPrompts();
             const ids = Array.from(prompts.keys()).map(
               (id) => `/prompts:${id}`,
             );
@@ -171,10 +198,14 @@ export function startInteractiveSession({
           }
 
           if (line.startsWith("/")) {
-            const hits = SLASH_COMMANDS.filter((c) => c.startsWith(line));
+            const shortcuts = Array.from(prompts.values())
+              .filter((p) => p.isShortcut)
+              .map((p) => `/${p.id}`);
+            const allCommands = [...SLASH_COMMANDS, ...shortcuts];
+            const hits = allCommands.filter((c) => c.startsWith(line));
             showCompletions(
               cli,
-              hits.length ? hits : SLASH_COMMANDS,
+              hits.length ? hits : allCommands,
               line,
               callback,
             );
@@ -303,26 +334,7 @@ export function startInteractiveSession({
           cli.prompt();
           return;
         }
-
-        const id = match[1];
-        const args = match[2] || "";
-        const prompt = prompts.get(id);
-
-        if (!prompt) {
-          console.log(styleText("red", `\nPrompt not found: ${id}`));
-          cli.prompt();
-          return;
-        }
-
-        const invocation = `/prompts:${id}${args ? ` ${args}` : ""}`;
-        const message = `System: This prompt was invoked as "${invocation}".\n\n${prompt.content}`;
-
-        console.log(styleText("gray", "\n<prompt>"));
-        console.log(message);
-        console.log(styleText("gray", "</prompt>"));
-
-        userEventEmitter.emit("userInput", [{ type: "text", text: message }]);
-        state.turn = false;
+        await invokePrompt(match[1], match[2] || "", `/prompts:${match[1]}`);
         return;
       }
     }
@@ -369,6 +381,21 @@ export function startInteractiveSession({
       userEventEmitter.emit("userInput", messageWithContext);
       state.turn = false;
       return;
+    }
+
+    // Handle shortcuts for prompts in shortcuts/ directory
+    if (inputTrimmed.startsWith("/")) {
+      const match = inputTrimmed.match(/^\/([^ ]+)(?:\s+(.*))?$/);
+      if (match) {
+        const id = match[1];
+        const prompts = await loadPrompts();
+        const prompt = prompts.get(id);
+
+        if (prompt?.isShortcut) {
+          await invokePrompt(id, match[2] || "", `/${id}`);
+          return;
+        }
+      }
     }
 
     const messageWithContext = await loadUserMessageContext(inputTrimmed);
