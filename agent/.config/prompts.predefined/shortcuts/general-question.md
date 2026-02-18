@@ -1,6 +1,6 @@
 ---
-description: プロジェクトとは関係のない一般的な質問に答える
+description: Answer general questions unrelated to the project
 ---
 
-- プロジェクトコンテキストの探索をスキップする
-- 不明な点はWeb検索を利用し、根拠に基づいて回答する
+- Skip project context discovery.
+- Use web search for unknown information and provide evidence-based answers.
