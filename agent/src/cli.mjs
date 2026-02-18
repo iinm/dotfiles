@@ -87,8 +87,8 @@ const HELP_MESSAGE = `
 Commands:
   /help         - Display this help message
   /prompts      - List available prompts
-  /prompts:<id> - Invoke a prompt with the given ID (e.g., /prompts:commit)
-  /<id>         - Shortcut for prompts in the shortcuts/ directory (e.g., /review)
+  /prompts:<id> - Invoke a prompt with the given ID (e.g., /prompts:code-simplifier)
+  /<id>         - Shortcut for prompts in the shortcuts/ directory (e.g., /commit)
   /paste        - Paste content from clipboard
   /resume       - Resume conversation after an LLM provider error
   /dump         - Save current messages to a JSON file
@@ -108,7 +108,11 @@ Image Attachments (use within input content):
   @path/to/image.png      - Attach an image (png, jpg, jpeg, gif, webp)
   @'path/with spaces.png' - Quote paths that include spaces
   @path/with\\ spaces.png  - Escape spaces with a backslash
-`.trim();
+`
+  .trim()
+  .replace(/^[^ ].*:/gm, (m) => styleText("bold", m))
+  .replace(/^ {2}\/.+?(?= - )/gm, (m) => styleText("cyan", m))
+  .replace(/^ {2}.+?(?= - )/gm, (m) => styleText("blue", m));
 
 const MAX_DISPLAY_OUTPUT_LENGTH = 1024;
 
