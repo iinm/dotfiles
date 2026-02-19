@@ -272,6 +272,9 @@ The agent loads configuration files in the following order. Settings in later fi
       // MCP Tool naming convention: mcp__<serverName>__<toolName>
       {
         "toolName": { "regex": "mcp__chrome_devtools__.+" }
+      },
+      {
+        "toolName": { "regex": "slack_(read|search)_.+" }
       }
     ],
 
@@ -314,12 +317,10 @@ The agent loads configuration files in the following order. Settings in later fi
       "command": "npx",
       "args": ["-y", "chrome-devtools-mcp@latest", "--isolated"]
     },
-    "perplexity": {
+    "slack": {
       "command": "npx",
-      "args": ["-y", "server-perplexity-ask"],
-      "env": {
-        "PERPLEXITY_API_KEY": "FIXME"
-      }
+      "args": ["-y", "mcp-remote", "https://mcp.slack.com/mcp", "--header", "Authorization:Bearer FIXME"],
+      "enabledTools": []
     },
     "notion": {
       "command": "npx",

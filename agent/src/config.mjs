@@ -300,7 +300,7 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
     },
     {
       toolName: "exec_command",
-      input: { command: "git", args: [/^(status|diff|log|show)$/] },
+      input: { command: "git", args: [/^(status|diff|log|show|ls-remote)$/] },
     },
     {
       toolName: "exec_command",
