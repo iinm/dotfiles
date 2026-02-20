@@ -12,12 +12,7 @@
 export const delegateToSubagentTool = {
   def: {
     name: "delegate_to_subagent",
-    description: [
-      "Delegate a subtask to a subagent.",
-      "The subagent will complete the task and report the result back.",
-      "Cannot be called when already acting as a subagent.",
-      "Must be called alone - cannot be called with other tools or multiple times at once.",
-    ].join("\n"),
+    description: "Delegate a subtask to a subagent.",
     inputSchema: {
       type: "object",
       properties: {

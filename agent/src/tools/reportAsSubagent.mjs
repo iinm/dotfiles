@@ -11,10 +11,8 @@
 export const reportAsSubagentTool = {
   def: {
     name: "report_as_subagent",
-    description: [
-      "End the subagent role and report the result to the main agent by reading the memory file.",
-      "Cannot be called from the main agent.",
-    ].join("\n"),
+    description:
+      "End the subagent role and report the result to the main agent.",
     inputSchema: {
       type: "object",
       properties: {

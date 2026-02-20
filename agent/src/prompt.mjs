@@ -40,16 +40,6 @@ Example: foo/bar -> ./AGENTS.md, foo/AGENTS.md, foo/bar/AGENTS.md (if they exist
 
 If a skill matches the task, read its full file and follow/adapt it.
 
-## Context Management
-
-- Frequent file operations and command executions add noise to your context, which can degrade performance.
-- When to reset:
-  - After major milestones
-  - Or when the context gets noisy (e.g., reading many files during investigation that are no longer needed, repeated debugging attempts, long logs, etc.)
-- Reset procedure:
-  - Always update the memory file to the latest state. (It is your only guide for resuming the task.)
-  - Call the reset_context tool.
-
 ## Memory Files
 
 Use memory files to save progress so tasks can be stopped, resumed, and users stay informed.
@@ -100,6 +90,36 @@ Task Memory Format:
 ## Tools
 
 Call multiple tools at once when they don't depend on each other's results.
+
+### delegate_to_subagent
+
+Delegate a subtask to a subagent with a fresh context.
+
+When to use:
+- A subtask will require many file reads or command executions
+- Trial-and-error work that would clutter the main context
+- An independent subtask with a clear, specific goal
+
+Constraints:
+- Cannot be called when already acting as a subagent
+- Must be called alone (cannot be combined with other tools or multiple delegates)
+
+Before delegating:
+- Define a clear, specific goal for the subagent
+
+### report_as_subagent
+
+Report completion and return to the main agent.
+
+When to call:
+- The assigned task is completed
+- Blocked and need main agent's decision
+
+Memory file should include:
+- What was accomplished
+- Key findings or decisions
+- Any blockers or open questions
+- Recommendations for next steps
 
 ### exec_command
 
@@ -211,6 +231,5 @@ Basic commands:
 
 - Follow the project rules and conventions.
 - Keep the memory file up to date and comprehensive.
-- Reset the context after major milestones, or when noise starts to pile up.
 `.trim();
 }
