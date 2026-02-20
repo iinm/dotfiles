@@ -19,7 +19,7 @@ export const delegateToSubagentTool = {
         name: {
           type: "string",
           description:
-            "Role or name of the subagent (e.g., 'researcher', 'reviewer').",
+            "Role or name of the subagent (e.g., 'researcher', 'analyzer', 'architect', 'planner', 'implementer', 'tester', 'debugger', 'reviewer', 'refactorer').",
         },
         goal: {
           type: "string",
