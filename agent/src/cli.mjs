@@ -207,10 +207,11 @@ export function startInteractiveSession({
   sandbox,
   onStop,
 }) {
-  /** @type {{ turn: boolean, multiLineBuffer: string[] | null }} */
+  /** @type {{ turn: boolean, multiLineBuffer: string[] | null, subagentName: string }} */
   const state = {
     turn: true,
     multiLineBuffer: null,
+    subagentName: "",
   };
 
   /**
@@ -530,7 +531,12 @@ export function startInteractiveSession({
 
   agentEventEmitter.on("partialMessageContent", (partialContent) => {
     if (partialContent.position === "start") {
-      console.log(styleText("gray", `\n<${partialContent.type}>`));
+      const subagentPrefix = state.subagentName
+        ? `(${state.subagentName}) `
+        : "";
+      console.log(
+        styleText("gray", `\n${subagentPrefix}<${partialContent.type}>`),
+      );
     }
     if (partialContent.content) {
       if (partialContent.type === "tool_use") {
@@ -561,7 +567,8 @@ export function startInteractiveSession({
   });
 
   agentEventEmitter.on("subagentStatus", (status) => {
-    currentCliPrompt = getCliPrompt(status?.name);
+    state.subagentName = status?.name || "";
+    currentCliPrompt = getCliPrompt(state.subagentName);
     cli.setPrompt(currentCliPrompt);
     cli.prompt();
   });
