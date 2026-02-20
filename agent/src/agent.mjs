@@ -22,7 +22,7 @@ import { noThrow } from "./utils/noThrow.mjs";
  * @returns {Agent}
  */
 export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
-  /** @type {{ messages: Message[], subagents: { name: string, delegateResultMessageIndex: number }[] }} */
+  /** @type {{ messages: Message[], subagents: { name: string, goal: string, delegateResultMessageIndex: number }[] }} */
   const state = {
     messages: [
       {
@@ -101,10 +101,10 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
       return;
     }
 
-    // Truncate history back to the delegation point
+    // Truncate history back to before the delegation point (remove delegate tool_use, tool_result, and subagent history)
     state.messages.splice(
-      currentSubagent.delegateResultMessageIndex + 1,
-      state.messages.length - currentSubagent.delegateResultMessageIndex,
+      currentSubagent.delegateResultMessageIndex - 1,
+      state.messages.length - (currentSubagent.delegateResultMessageIndex - 1),
     );
 
     agentEventEmitter.emit(
@@ -122,7 +122,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
       content: [
         {
           type: "text",
-          text: `The subagent "${currentSubagent.name}" has completed the task and reported the following result:\n\n${resultText}`,
+          text: `The subagent "${currentSubagent.name}" has completed the task.\n\nOriginal goal: ${currentSubagent.goal}\n\nResult:\n${resultText}`,
         },
       ],
     });
@@ -147,6 +147,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
 
             state.subagents.push({
               name,
+              goal,
               delegateResultMessageIndex: state.messages.length,
             });
 
