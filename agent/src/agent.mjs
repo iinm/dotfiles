@@ -117,12 +117,19 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
     const resultText = reportResult?.content
       .map((c) => (c.type === "text" ? c.text : ""))
       .join("\n");
+    // Get memory path from the report tool input
+    const reportInput = /** @type {ReportAsSubagentInput} */ (
+      reportToolUse.input
+    );
+    const memoryPathText = reportInput.memoryPath
+      ? `\n\nMemory file: ${reportInput.memoryPath}`
+      : "";
     state.messages.push({
       role: "user",
       content: [
         {
           type: "text",
-          text: `The subagent "${currentSubagent.name}" has completed the task.\n\nOriginal goal: ${currentSubagent.goal}\n\nResult:\n${resultText}`,
+          text: `The subagent "${currentSubagent.name}" has completed the task.\n\nOriginal goal: ${currentSubagent.goal}${memoryPathText}\n\nResult:\n${resultText}`,
         },
       ],
     });
