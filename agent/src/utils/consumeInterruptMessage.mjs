@@ -10,7 +10,7 @@ export async function consumeInterruptMessage() {
       AGENT_INTERRUPT_MESSAGE_FILE_PATH,
       "utf8",
     );
-    await fs.unlink(AGENT_INTERRUPT_MESSAGE_FILE_PATH);
+    await fs.truncate(AGENT_INTERRUPT_MESSAGE_FILE_PATH, 0);
 
     if (content.trim() === "") {
       return undefined;

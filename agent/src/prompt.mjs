@@ -114,7 +114,10 @@ exec_command is used to run a one-shot command without shell interpretation.
 
 Examples:
 - Show current branch: { command: "git", args: ["branch", "--show-current"] }
-- View pull request on GitHub: { command: "gh", args: ["pr", "view" , "123"] }
+- Use gh for GitHub:
+  - View pull request details: { command: "gh", args: ["pr", "view", "123"] }
+  - List comments: { command: "gh", args: ["api", "repos/<organization>/<repo>/pulls/<pr_number>/comments", "--jq", ".[] | {id: .id, user: .user.login, path: .path, line: .line, body: .body, created_at: .created_at}"] }
+  - Get a specific comment: { command: "gh", args: ["api", "repos/<organization>/<repo>/pulls/comments/<comment_id>", "--jq", "{user: .user.login, path: .path, line: .line, body: .body, created_at: .created_at}"] }
 - Query JSON files: { command: "jq", args: ["<filter>", "file.json"] }
 
 File and directory command examples:

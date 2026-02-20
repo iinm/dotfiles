@@ -21,14 +21,59 @@ import { readFileRange } from "./utils/readFileRange.mjs";
 
 // Define available slash commands for tab completion
 const SLASH_COMMANDS = [
-  "/help",
-  "/prompts",
-  "/prompts:",
-  "/paste",
-  "/resume",
-  "/dump",
-  "/load",
+  { name: "/help", description: "Display this help message" },
+  { name: "/prompts", description: "List available prompts" },
+  {
+    name: "/prompts:<id>",
+    description:
+      "Invoke a prompt with the given ID (e.g., /prompts:code-simplifier)",
+  },
+  {
+    name: "/<id>",
+    description:
+      "Shortcut for prompts in the shortcuts/ directory (e.g., /commit)",
+  },
+  { name: "/paste", description: "Paste content from clipboard" },
+  {
+    name: "/resume",
+    description: "Resume conversation after an LLM provider error",
+  },
+  { name: "/dump", description: "Save current messages to a JSON file" },
+  { name: "/load", description: "Load messages from a JSON file" },
 ];
+
+/**
+ * @typedef {Object} CompletionCandidate
+ * @property {string} name
+ * @property {string} description
+ */
+
+/**
+ * Find candidates that match the line, prioritizing prefix matches.
+ * @param {(string | CompletionCandidate)[]} candidates
+ * @param {string} line
+ * @param {number} queryStartIndex
+ * @returns {(string | CompletionCandidate)[]}
+ */
+function findMatches(candidates, line, queryStartIndex) {
+  const query = line.slice(queryStartIndex);
+  const prefixMatches = [];
+  const partialMatches = [];
+
+  for (const candidate of candidates) {
+    const name = typeof candidate === "string" ? candidate : candidate.name;
+    if (name.startsWith(line)) {
+      prefixMatches.push(candidate);
+    } else if (
+      query.length > 0 &&
+      name.slice(queryStartIndex).includes(query)
+    ) {
+      partialMatches.push(candidate);
+    }
+  }
+
+  return [...prefixMatches, ...partialMatches];
+}
 
 /**
  * Return the longest common prefix of the given strings.
@@ -55,16 +100,17 @@ function commonPrefix(strings) {
  * redraws the prompt so the display stays clean.
  *
  * @param {import("node:readline").Interface} rl
- * @param {string[]} candidates
+ * @param {(string | CompletionCandidate)[]} candidates
  * @param {string} line
  * @param {(err: Error | null, result: [string[], string]) => void} callback
  */
 function showCompletions(rl, candidates, line, callback) {
+  const names = candidates.map((c) => (typeof c === "string" ? c : c.name));
   if (candidates.length <= 1) {
-    callback(null, [candidates, line]);
+    callback(null, [names, line]);
     return;
   }
-  const prefix = commonPrefix(candidates);
+  const prefix = commonPrefix(names);
   if (prefix.length > line.length) {
     // Let readline insert the common prefix.
     callback(null, [[prefix], line]);
@@ -78,37 +124,57 @@ function showCompletions(rl, candidates, line, callback) {
   // erases the candidate list we just wrote.  Instead we manually re-output
   // the prompt and current line content.
   setTimeout(() => {
-    process.stdout.write(`\r\n${candidates.join("  ")}\r\n`);
+    const maxLength = process.stdout.columns ?? 100;
+    const list = candidates
+      .map((c) => {
+        if (typeof c === "string") return c;
+        const nameText = c.name.padEnd(25);
+        const separator = " - ";
+        const descText = c.description;
+
+        // 画面幅に合わせて説明文をカット（色を付ける前に計算）
+        const availableWidth =
+          maxLength - nameText.length - separator.length - 3;
+        const displayDesc =
+          descText.length > availableWidth && availableWidth > 0
+            ? `${descText.slice(0, availableWidth)}...`
+            : descText;
+
+        const name = styleText("cyan", nameText);
+        const description = styleText("dim", displayDesc);
+        return `${name}${separator}${description}`;
+      })
+      .join("\r\n");
+    process.stdout.write(`\r\n${list}\r\n`);
     process.stdout.write(`${rl.getPrompt()}${rl.line}`);
   }, 0);
 }
 
-const HELP_MESSAGE = `
-Commands:
-  /help         - Display this help message
-  /prompts      - List available prompts
-  /prompts:<id> - Invoke a prompt with the given ID (e.g., /prompts:code-simplifier)
-  /<id>         - Shortcut for prompts in the shortcuts/ directory (e.g., /commit)
-  /paste        - Paste content from clipboard
-  /resume       - Resume conversation after an LLM provider error
-  /dump         - Save current messages to a JSON file
-  /load         - Load messages from a JSON file
-
-File Input Syntax:
-  !path/to/file     - Read content from a file
-  !path/to/file:N   - Read line N from a file
-  !path/to/file:N-M - Read lines N to M from a file
-
-References (use within input content):
-  @path/to/file     - Reference content from another file
-  @path/to/file:N   - Reference line N from another file
-  @path/to/file:N-M - Reference lines N to M from another file
-
-Image Attachments (use within input content):
-  @path/to/image.png      - Attach an image (png, jpg, jpeg, gif, webp)
-  @'path/with spaces.png' - Quote paths that include spaces
-  @path/with\\ spaces.png  - Escape spaces with a backslash
-`
+const HELP_MESSAGE = [
+  "Commands:",
+  ...SLASH_COMMANDS.map(
+    (cmd) => `  ${cmd.name.padEnd(13)} - ${cmd.description}`,
+  ),
+  "",
+  "Multi-line Input Syntax:",
+  '  """               - Start/stop multi-line input mode',
+  "",
+  "File Input Syntax:",
+  "  !path/to/file     - Read content from a file",
+  "  !path/to/file:N   - Read line N from a file",
+  "  !path/to/file:N-M - Read lines N to M from a file",
+  "",
+  "References (use within input content):",
+  "  @path/to/file     - Reference content from another file",
+  "  @path/to/file:N   - Reference line N from another file",
+  "  @path/to/file:N-M - Reference lines N to M from another file",
+  "",
+  "Image Attachments (use within input content):",
+  "  @path/to/image.png      - Attach an image (png, jpg, jpeg, gif, webp)",
+  "  @'path/with spaces.png' - Quote paths that include spaces",
+  "  @path/with\\ spaces.png  - Escape spaces with a backslash",
+]
+  .join("\n")
   .trim()
   .replace(/^[^ ].*:/gm, (m) => styleText("bold", m))
   .replace(/^ {2}\/.+?(?= - )/gm, (m) => styleText("cyan", m))
@@ -141,16 +207,19 @@ export function startInteractiveSession({
   sandbox,
   onStop,
 }) {
+  /** @type {{ turn: boolean, multiLineBuffer: string[] | null }} */
   const state = {
     turn: true,
+    multiLineBuffer: null,
   };
 
   /**
    * @param {string} id
    * @param {string} args
    * @param {string} displayInvocation
+   * @returns {Promise<void>}
    */
-  const invokePrompt = async (id, args, displayInvocation) => {
+  async function invokePrompt(id, args, displayInvocation) {
     const prompts = await loadPrompts();
     const prompt = prompts.get(id);
 
@@ -169,7 +238,7 @@ export function startInteractiveSession({
 
     userEventEmitter.emit("userInput", [{ type: "text", text: message }]);
     state.turn = false;
-  };
+  }
 
   const cliPrompt = [
     "",
@@ -192,35 +261,50 @@ export function startInteractiveSession({
       (async () => {
         try {
           const prompts = await loadPrompts();
+
+          // Completion for /prompts:<id>
           if (line.startsWith("/prompts:")) {
-            const ids = Array.from(prompts.keys()).map(
-              (id) => `/prompts:${id}`,
-            );
-            const hits = ids.filter((id) => id.startsWith(line));
-            showCompletions(cli, hits.length ? hits : ids, line, callback);
+            const prefix = "/prompts:";
+            const candidates = Array.from(prompts.values()).map((p) => ({
+              name: `${prefix}${p.id}`,
+              description: p.description,
+            }));
+            const hits = findMatches(candidates, line, prefix.length);
+
+            showCompletions(cli, hits, line, callback);
             return;
           }
 
+          // Completion for slash commands and shortcuts
           if (line.startsWith("/")) {
             const shortcuts = Array.from(prompts.values())
               .filter((p) => p.isShortcut)
-              .map((p) => `/${p.id}`);
-            const allCommands = [...SLASH_COMMANDS, ...shortcuts];
-            const hits = allCommands.filter((c) => c.startsWith(line));
-            showCompletions(
-              cli,
-              hits.length ? hits : allCommands,
-              line,
-              callback,
+              .map((p) => ({
+                name: `/${p.id}`,
+                description: p.description,
+              }));
+
+            const allCommands = [...SLASH_COMMANDS, ...shortcuts].filter(
+              (cmd) => {
+                const name = typeof cmd === "string" ? cmd : cmd.name;
+                // Exclude /<id> template and specific internal prompt prefixes
+                return (
+                  name !== "/<id>" &&
+                  (name === "/prompts:" || !name.startsWith("/prompt:"))
+                );
+              },
             );
+
+            const hits = findMatches(allCommands, line, 1);
+
+            showCompletions(cli, hits, line, callback);
             return;
           }
+
           callback(null, [[], line]);
         } catch (err) {
-          callback(err instanceof Error ? err : new Error(String(err)), [
-            [],
-            line,
-          ]);
+          const error = err instanceof Error ? err : new Error(String(err));
+          callback(error, [[], line]);
         }
       })();
     },
@@ -242,18 +326,13 @@ export function startInteractiveSession({
     }
   });
 
-  cli.on("line", async (input) => {
+  /**
+   * Process the complete user input.
+   * @param {string} input
+   * @returns {Promise<void>}
+   */
+  async function processInput(input) {
     const inputTrimmed = input.trim();
-
-    if (!state.turn) {
-      console.warn(
-        styleText(
-          "yellow",
-          `\nAgent is working. Ignore input: ${inputTrimmed}`,
-        ),
-      );
-      return;
-    }
 
     if (inputTrimmed.length === 0) {
       cli.prompt();
@@ -272,7 +351,7 @@ export function startInteractiveSession({
       return;
     }
 
-    // Handle file reading when message starts with @
+    // Handle file reading when message starts with !
     if (inputTrimmed.startsWith("!")) {
       const fileRange = parseFileRange(inputTrimmed.slice(1));
       if (fileRange instanceof Error) {
@@ -405,6 +484,44 @@ export function startInteractiveSession({
     const messageWithContext = await loadUserMessageContext(inputTrimmed);
     userEventEmitter.emit("userInput", messageWithContext);
     state.turn = false;
+  }
+
+  cli.on("line", async (lineInput) => {
+    if (!state.turn) {
+      console.warn(
+        styleText(
+          "yellow",
+          `\nAgent is working. Ignore input: ${lineInput.trim()}`,
+        ),
+      );
+      return;
+    }
+
+    // Handle multi-line delimiter
+    if (lineInput.trim() === '"""') {
+      if (state.multiLineBuffer === null) {
+        state.multiLineBuffer = [];
+        cli.setPrompt(styleText("gray", "... "));
+        cli.prompt();
+        return;
+      }
+
+      const combined = state.multiLineBuffer.join("\n");
+      state.multiLineBuffer = null;
+      cli.setPrompt(cliPrompt);
+
+      await processInput(combined);
+      return;
+    }
+
+    // Accumulate lines if in multi-line mode
+    if (state.multiLineBuffer !== null) {
+      state.multiLineBuffer.push(lineInput);
+      cli.prompt();
+      return;
+    }
+
+    await processInput(lineInput);
   });
 
   agentEventEmitter.on("partialMessageContent", (partialContent) => {

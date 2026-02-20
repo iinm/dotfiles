@@ -218,4 +218,70 @@ SANDBOX --allow-net -- target --arg
 `.trim(),
     );
   });
+
+  it("truncates large stdout and saves to a file", async () => {
+    // given:
+    const largeSize = 1024 * 8 + 1;
+    const command = "node";
+    const args = ["-e", `process.stdout.write("A".repeat(${largeSize}))`];
+
+    // when:
+    const result = await execCommandTool.impl({ command, args });
+
+    // then:
+    assert.ok(typeof result === "string");
+    const filePathMatch = result.match(/Saved to (.+?\.txt)\./);
+    const filePath = filePathMatch ? filePathMatch[1] : "UNKNOWN";
+
+    const head = "A".repeat(2048);
+    const tail = "A".repeat(2048);
+    const expectedContent = [
+      `Content is too large (8193 characters, 1 lines). Saved to ${filePath}.`,
+      `<truncated_output part="start" length="2048" total_length="8193">\n${head}\n</truncated_output>`,
+      `<truncated_output part="end" length="2048" total_length="8193">\n${tail}</truncated_output>\n`,
+    ].join("\n\n");
+
+    assert.equal(
+      result,
+      `
+<stdout>
+${expectedContent}</stdout>
+
+<stderr></stderr>
+`.trim(),
+    );
+  });
+
+  it("truncates large stderr and saves to a file", async () => {
+    // given:
+    const largeSize = 1024 * 8 + 1;
+    const command = "node";
+    const args = ["-e", `process.stderr.write("E".repeat(${largeSize}))`];
+
+    // when:
+    const result = await execCommandTool.impl({ command, args });
+
+    // then:
+    assert.ok(typeof result === "string");
+    const filePathMatch = result.match(/Saved to (.+?\.txt)\./);
+    const filePath = filePathMatch ? filePathMatch[1] : "UNKNOWN";
+
+    const head = "E".repeat(2048);
+    const tail = "E".repeat(2048);
+    const expectedContent = [
+      `Content is too large (8193 characters, 1 lines). Saved to ${filePath}.`,
+      `<truncated_output part="start" length="2048" total_length="8193">\n${head}\n</truncated_output>`,
+      `<truncated_output part="end" length="2048" total_length="8193">\n${tail}</truncated_output>\n`,
+    ].join("\n\n");
+
+    assert.equal(
+      result,
+      `
+<stdout></stdout>
+
+<stderr>
+${expectedContent}</stderr>
+`.trim(),
+    );
+  });
 });

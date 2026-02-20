@@ -300,7 +300,10 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
     },
     {
       toolName: "exec_command",
-      input: { command: "git", args: [/^(status|diff|log|show|ls-remote)$/] },
+      input: {
+        command: "git",
+        args: [/^(status|diff|log|show|ls-remote|rev-parse)$/],
+      },
     },
     {
       toolName: "exec_command",
@@ -316,7 +319,29 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
     },
     {
       toolName: "exec_command",
+      input: { command: "gh", args: ["--version"] },
+    },
+    {
+      toolName: "exec_command",
+      input: { command: "gh", args: ["auth", "status"] },
+    },
+    {
+      toolName: "exec_command",
       input: { command: "gh", args: [/^(pr|issue)$/, /^(view|diff)$/] },
+    },
+    {
+      toolName: "exec_command",
+      input: {
+        command: "gh",
+        args: ["api", /^repos\/[^/]+\/[^/]+\/pulls\/\d+\/comments$/],
+      },
+    },
+    {
+      toolName: "exec_command",
+      input: {
+        command: "gh",
+        args: ["api", /^repos\/[^/]+\/[^/]+\/pulls\/comments\/\d+$/],
+      },
     },
 
     // Tmux command

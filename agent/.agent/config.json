@@ -5,7 +5,7 @@
         "toolName": "exec_command",
         "input": {
           "command": "npm",
-          "args": ["run", { "regex": "^(ci|check|fix)$" }]
+          "args": ["run", { "regex": "^(ci|check|fix|test)$" }]
         }
       },
       {

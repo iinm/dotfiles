@@ -77,47 +77,34 @@ export function createExecCommandTool(config) {
               timeout: 5 * 60 * 1000,
             },
             async (err, stdout, stderr) => {
-              let stdoutOrMessage = stdout;
-              if (stdout.length > OUTPUT_MAX_LENGTH) {
-                const filePath = await writeTmpFile(
-                  stdout,
-                  "exec_command",
-                  "txt",
-                );
-                const lineCount = stdout.split("\n").length;
-                stdoutOrMessage = (() => {
-                  const head = stdout.slice(0, OUTPUT_TRUNCATED_LENGTH);
-                  const tail = stdout.slice(
-                    Math.max(stdout.length - OUTPUT_TRUNCATED_LENGTH, 0),
-                  );
-                  return [
-                    `Content is too large (${stdout.length} characters, ${lineCount} lines). Saved to ${filePath}.`,
-                    `<truncated_output part="start" length="${OUTPUT_TRUNCATED_LENGTH}" total_length="${stdout.length}">\n${head}\n</truncated_output>`,
-                    `<truncated_output part="end" length="${OUTPUT_TRUNCATED_LENGTH}" total_length="${stdout.length}">\n${tail}</truncated_output>\n`,
-                  ].join("\n\n");
-                })();
-              }
+              /**
+               * @param {string} content
+               * @param {string} type
+               * @returns {Promise<string>}
+               */
+              const formatOutput = async (content, type) => {
+                if (content.length <= OUTPUT_MAX_LENGTH) {
+                  return content;
+                }
 
-              let stderrOrMessage = stderr;
-              if (stderr.length > OUTPUT_MAX_LENGTH) {
-                const filePath = await writeTmpFile(
-                  stderr,
-                  `exec_command-${command.replaceAll("/", "-").replaceAll(".", "dot-")}`,
-                  "txt",
+                const prefix = `exec_command-${type}`;
+                const filePath = await writeTmpFile(content, prefix, "txt");
+                const lineCount = content.split("\n").length;
+
+                const head = content.slice(0, OUTPUT_TRUNCATED_LENGTH);
+                const tail = content.slice(
+                  Math.max(content.length - OUTPUT_TRUNCATED_LENGTH, 0),
                 );
-                const lineCount = stderr.split("\n").length;
-                stderrOrMessage = (() => {
-                  const head = stderr.slice(0, OUTPUT_TRUNCATED_LENGTH);
-                  const tail = stderr.slice(
-                    Math.max(stderr.length - OUTPUT_TRUNCATED_LENGTH, 0),
-                  );
-                  return [
-                    `Content is large (${stderr.length} characters, ${lineCount} lines) and saved to ${filePath}`,
-                    `<truncated_output part="start" length="${OUTPUT_TRUNCATED_LENGTH}" total_length="${stderr.length}">\n${head}\n</truncated_output>`,
-                    `<truncated_output part="end" length="${OUTPUT_TRUNCATED_LENGTH}" total_length="${stderr.length}">\n${tail}</truncated_output>\n`,
-                  ].join("\n\n");
-                })();
-              }
+
+                return [
+                  `Content is too large (${content.length} characters, ${lineCount} lines). Saved to ${filePath}.`,
+                  `<truncated_output part="start" length="${OUTPUT_TRUNCATED_LENGTH}" total_length="${content.length}">\n${head}\n</truncated_output>`,
+                  `<truncated_output part="end" length="${OUTPUT_TRUNCATED_LENGTH}" total_length="${content.length}">\n${tail}</truncated_output>\n`,
+                ].join("\n\n");
+              };
+
+              const stdoutOrMessage = await formatOutput(stdout, "stdout");
+              const stderrOrMessage = await formatOutput(stderr, "stderr");
 
               const result = [
                 stdoutOrMessage

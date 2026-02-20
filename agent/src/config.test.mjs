@@ -51,7 +51,7 @@ describe("createDefaultAllowedToolUsePatterns", () => {
       isApproved: false,
     },
     {
-      desc: "awk with known args pattern should be allowed",
+      desc: "awk with known args pattern should be allowed #1",
       toolUse: {
         toolName: "exec_command",
         input: {
@@ -62,7 +62,7 @@ describe("createDefaultAllowedToolUsePatterns", () => {
       isApproved: true,
     },
     {
-      desc: "awk with known args pattern should be allowed",
+      desc: "awk with known args pattern should be allowed #2",
       toolUse: {
         toolName: "exec_command",
         input: {
@@ -73,7 +73,7 @@ describe("createDefaultAllowedToolUsePatterns", () => {
       isApproved: true,
     },
     {
-      desc: "awk with known args pattern should be allowed",
+      desc: "awk with known args pattern should be allowed: FNR range",
       toolUse: {
         toolName: "exec_command",
         input: {
@@ -182,6 +182,39 @@ describe("createDefaultAllowedToolUsePatterns", () => {
       },
       isApproved: true,
     },
+    {
+      desc: "gh read comments command should be allowed",
+      toolUse: {
+        toolName: "exec_command",
+        input: {
+          command: "gh",
+          args: [
+            "api",
+            "repos/org-name/repo-name/pulls/864/comments",
+            "--jq",
+            ".[] | {id: .id, user: .user.login, body: .body}",
+          ],
+        },
+      },
+      isApproved: true,
+    },
+    {
+      desc: "gh read specific comment command should be allowed",
+      toolUse: {
+        toolName: "exec_command",
+        input: {
+          command: "gh",
+          args: [
+            "api",
+            "repos/org-name/repo-name/pulls/comments/1111111111",
+            "--jq",
+            ".[] | {id: .id, user: .user.login, body: .body}",
+          ],
+        },
+      },
+      isApproved: true,
+    },
+
     {
       desc: "gh pr create command should not be allowed",
       toolUse: {

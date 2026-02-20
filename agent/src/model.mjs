@@ -367,7 +367,7 @@ export function createModelCaller(modelName, providers) {
         );
     }
     case "gemini-pro-thinking-low": {
-      const model = "gemini-3-pro-preview";
+      const model = "gemini-3.1-pro-preview";
       const modelCaller = createCacheEnabledGeminiModelCaller(
         providers?.gemini ?? {},
         { model },
@@ -390,7 +390,7 @@ export function createModelCaller(modelName, providers) {
         );
     }
     case "gemini-pro-thinking-medium": {
-      const model = "gemini-3-pro-preview";
+      const model = "gemini-3.1-pro-preview";
       const modelCaller = createCacheEnabledGeminiModelCaller(
         providers?.gemini ?? {},
         { model },
@@ -413,7 +413,7 @@ export function createModelCaller(modelName, providers) {
         );
     }
     case "gemini-pro-thinking-high": {
-      const model = "gemini-3-pro-preview";
+      const model = "gemini-3.1-pro-preview";
       const modelCaller = createCacheEnabledGeminiModelCaller(
         providers?.gemini ?? {},
         { model },
