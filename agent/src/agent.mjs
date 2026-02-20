@@ -406,6 +406,59 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
         continue;
       }
 
+      // Validate exclusive tool use (reset_context, delegate_to_subagent, report_as_subagent)
+      const exclusiveToolNames = [
+        resetContextTool.def.name,
+        delegateToSubagentTool.def.name,
+        reportAsSubagentTool.def.name,
+      ];
+      const exclusiveToolUseParts = toolUseParts.filter((toolUse) =>
+        exclusiveToolNames.includes(toolUse.toolName),
+      );
+
+      let exclusiveToolViolationMessage = null;
+      if (exclusiveToolUseParts.length > 1) {
+        const toolNames = exclusiveToolUseParts
+          .map((t) => t.toolName)
+          .join(", ");
+        exclusiveToolViolationMessage = `System: ${toolNames} cannot be called together. Only one of these tools can be called at a time.`;
+        console.error(
+          styleText(
+            "yellow",
+            `\nRejected multiple exclusive tool use: ${toolNames}`,
+          ),
+        );
+      } else if (
+        exclusiveToolUseParts.length === 1 &&
+        toolUseParts.length > 1
+      ) {
+        const exclusiveToolName = exclusiveToolUseParts[0].toolName;
+        exclusiveToolViolationMessage = `System: ${exclusiveToolName} cannot be called with other tools. It must be called alone.`;
+        console.error(
+          styleText(
+            "yellow",
+            `\nRejected exclusive tool use with other tools: ${exclusiveToolName}`,
+          ),
+        );
+      }
+
+      if (exclusiveToolViolationMessage) {
+        /** @type {MessageContentToolResult[]} */
+        const toolResults = toolUseParts.map((toolUse) => ({
+          type: "tool_result",
+          toolUseId: toolUse.toolUseId,
+          toolName: toolUse.toolName,
+          content: [{ type: "text", text: "Tool call rejected" }],
+          isError: true,
+        }));
+        state.messages.push({ role: "user", content: toolResults });
+        state.messages.push({
+          role: "user",
+          content: [{ type: "text", text: exclusiveToolViolationMessage }],
+        });
+        continue;
+      }
+
       // Auto approve tool use
       const decisions = toolUseParts.map(toolUseApprover.isAllowedToolUse);
 
