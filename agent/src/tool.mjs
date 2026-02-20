@@ -39,7 +39,7 @@ export function createToolUseApprover({
     for (const pattern of [...patterns, ...state.allowedToolUseInSession]) {
       const patternToMatch = {
         toolName: pattern.toolName,
-        input: pattern.input,
+        ...(pattern.input !== undefined && { input: pattern.input }),
       };
 
       if (!matchValue(toolUseToMatch, patternToMatch)) {

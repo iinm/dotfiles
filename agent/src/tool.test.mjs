@@ -136,4 +136,44 @@ describe("createToolUseApprover", () => {
       "should approve allowed tool use",
     );
   });
+
+  it("should match tool use when pattern.input is undefined", () => {
+    // given:
+    const toolApprover = createToolUseApprover({
+      patterns: [
+        { toolName: "delegate_to_subagent" },
+        { toolName: /^report_as_subagent$/ },
+      ],
+      maxApprovals: 5,
+      maskApprovalInput: (_name, input) => input,
+    });
+
+    /** @type {MessageContentToolUse} */
+    const delegateToolUse = {
+      type: "tool_use",
+      toolUseId: "test1",
+      toolName: "delegate_to_subagent",
+      input: { name: "researcher", goal: "Find information" },
+    };
+
+    /** @type {MessageContentToolUse} */
+    const reportToolUse = {
+      type: "tool_use",
+      toolUseId: "test2",
+      toolName: "report_as_subagent",
+      input: { memoryPath: ".agent/memory/test.md" },
+    };
+
+    // when/then:
+    assert.deepStrictEqual(
+      toolApprover.isAllowedToolUse(delegateToolUse),
+      { action: "allow" },
+      "should approve delegate_to_subagent without input pattern",
+    );
+    assert.deepStrictEqual(
+      toolApprover.isAllowedToolUse(reportToolUse),
+      { action: "allow" },
+      "should approve report_as_subagent without input pattern",
+    );
+  });
 });
