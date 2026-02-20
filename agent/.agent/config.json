@@ -14,6 +14,9 @@
         "reason": "Use fd"
       },
       {
+        "toolName": { "regex": "^(delegate_to_subagent|report_as_subagent)$" }
+      },
+      {
         "toolName": "exec_command",
         "input": {
           "command": "npm",
@@ -47,5 +50,14 @@
         "extraArgs": ["--allow-net", "0.0.0.0/0"]
       }
     ]
+  },
+  "mcpServers": {
+    //"notion": {
+    //  "command": "npx",
+    //  "args": ["-y", "mcp-remote", "https://mcp.notion.com/mcp"],
+    //  "options": {
+    //    "enabledTools": ["notion-search", "notion-fetch"]
+    //  }
+    //}
   }
 }

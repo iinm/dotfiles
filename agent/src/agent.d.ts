@@ -33,6 +33,7 @@ type AgentEventMap = {
   toolUseRequest: [];
   turnEnd: [];
   providerTokenUsage: [ProviderTokenUsage];
+  subagentStatus: [{ name: string } | null];
 };
 
 export type AgentEventEmitter = EventEmitter<AgentEventMap>;

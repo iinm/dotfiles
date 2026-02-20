@@ -2,21 +2,27 @@
  * @import { Agent, AgentConfig, AgentEventEmitter, UserEventEmitter } from "./agent"
  * @import { Message, MessageContentToolResult, MessageContentToolUse, PartialMessageContent } from "./model"
  * @import { Tool, ToolDefinition } from "./tool"
+ * @import { DelegateToSubagentInput } from "./tools/delegateToSubagent.mjs";
+ * @import { ReportAsSubagentInput } from "./tools/reportAsSubagent.mjs";
  */
 
 import { EventEmitter } from "node:events";
 import fs from "node:fs/promises";
+import path from "node:path";
 import { styleText } from "node:util";
-import { MESSAGES_DUMP_FILE_PATH } from "./env.mjs";
+import { AGENT_PROJECT_METADATA_DIR, MESSAGES_DUMP_FILE_PATH } from "./env.mjs";
+import { delegateToSubagentTool } from "./tools/delegateToSubagent.mjs";
+import { reportAsSubagentTool } from "./tools/reportAsSubagent.mjs";
 import { resetContextTool } from "./tools/resetContext.mjs";
 import { consumeInterruptMessage } from "./utils/consumeInterruptMessage.mjs";
+import { noThrow } from "./utils/noThrow.mjs";
 
 /**
  * @param {AgentConfig} config
  * @returns {Agent}
  */
 export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
-  /** @type {{ messages: Message[] }} */
+  /** @type {{ messages: Message[], subagents: { name: string, delegateResultMessageIndex: number }[] }} */
   const state = {
     messages: [
       {
@@ -24,6 +30,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
         content: [{ type: "text", text: prompt }],
       },
     ],
+    subagents: [],
   };
 
   /** @type {UserEventEmitter} */
@@ -31,14 +38,185 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
   /** @type {AgentEventEmitter} */
   const agentEventEmitter = new EventEmitter();
 
+  /**
+   * Process tool results and update state based on special tools
+   * @param {MessageContentToolUse[]} toolUseParts
+   * @param {MessageContentToolResult[]} toolResults
+   */
+  function processToolResults(toolUseParts, toolResults) {
+    const resetContextToolUse = toolUseParts.find(
+      (toolUse) => toolUse.toolName === resetContextTool.def.name,
+    );
+    const reportSubagentToolUse = toolUseParts.find(
+      (toolUse) => toolUse.toolName === reportAsSubagentTool.def.name,
+    );
+
+    if (resetContextToolUse) {
+      handleContextReset(toolResults);
+    } else if (reportSubagentToolUse) {
+      handleSubagentReport(reportSubagentToolUse, toolResults);
+    } else {
+      state.messages.push({ role: "user", content: toolResults });
+    }
+  }
+
+  /**
+   * Handle context reset by clearing conversation history except system prompt.
+   * @param {MessageContentToolResult[]} toolResults
+   * @returns {void}
+   */
+  function handleContextReset(toolResults) {
+    // Keep only the system prompt
+    state.messages.splice(1, state.messages.length - 1);
+    // To avoid "a final `assistant` message must start with a thinking block" error from claude
+    // convert tool results to user message
+    const memoryContents = toolResults.flatMap(({ content }) => content);
+    state.messages.push({
+      role: "user",
+      content: memoryContents,
+    });
+  }
+
+  /**
+   * Handle the result of a subagent reporting back.
+   * On success, truncates conversation history back to the delegation point
+   * and converts the report into a standard user message.
+   * @param {MessageContentToolUse} reportToolUse
+   * @param {MessageContentToolResult[]} toolResults
+   */
+  function handleSubagentReport(reportToolUse, toolResults) {
+    const reportResult = toolResults.find(
+      (res) => res.toolUseId === reportToolUse.toolUseId,
+    );
+
+    if (reportResult?.isError) {
+      state.messages.push({ role: "user", content: toolResults });
+      return;
+    }
+
+    const currentSubagent = state.subagents.pop();
+    if (!currentSubagent) {
+      // Fallback if state is out of sync
+      state.messages.push({ role: "user", content: toolResults });
+      return;
+    }
+
+    // Truncate history back to the delegation point
+    state.messages.splice(
+      currentSubagent.delegateResultMessageIndex + 1,
+      state.messages.length - currentSubagent.delegateResultMessageIndex,
+    );
+
+    agentEventEmitter.emit(
+      "subagentStatus",
+      state.subagents.length > 0 ? (state.subagents.at(-1) ?? null) : null,
+    );
+
+    // Convert the tool result into a standard user message since the original
+    // tool_use was truncated.
+    const resultText = reportResult?.content
+      .map((c) => (c.type === "text" ? c.text : ""))
+      .join("\n");
+    state.messages.push({
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text: `The subagent "${currentSubagent.name}" has completed the task and reported the following result:\n\n${resultText}`,
+        },
+      ],
+    });
+  }
+
+  // Inject delegate/report tool implementations that require access to the agent state
+  const injectedTools = tools.map((tool) => {
+    if (tool.def.name === delegateToSubagentTool.def.name) {
+      return {
+        ...tool,
+        /**
+         * @param {DelegateToSubagentInput} input
+         */
+        impl: async (input) =>
+          noThrow(async () => {
+            if (state.subagents.length > 0) {
+              return new Error(
+                "Cannot call delegate_to_subagent while already acting as a subagent.",
+              );
+            }
+            const { name, goal } = input;
+
+            state.subagents.push({
+              name,
+              delegateResultMessageIndex: state.messages.length,
+            });
+
+            agentEventEmitter.emit("subagentStatus", { name });
+
+            return [
+              `You are now acting as the subagent "${name}".`,
+              `Goal: ${goal}`,
+              `Memory file path format: ${AGENT_PROJECT_METADATA_DIR}/memory/<session-id>--${name}--<kebab-case-title>.md (Replace <kebab-case-title> to match the parent task)`,
+              "",
+              `Please complete the task and when finished, call the "report_as_subagent" tool with the memory file path.`,
+            ].join("\n");
+          }),
+      };
+    }
+
+    if (tool.def.name === reportAsSubagentTool.def.name) {
+      return {
+        ...tool,
+        /**
+         * @param {ReportAsSubagentInput} input
+         */
+        impl: async (input) =>
+          await noThrow(async () => {
+            if (state.subagents.length === 0) {
+              return new Error(
+                "Cannot call report_as_subagent from the main agent.",
+              );
+            }
+            const { memoryPath } = input;
+
+            const workingDir = process.cwd();
+            const absolutePath = path.resolve(memoryPath);
+            const relativePath = path.relative(workingDir, absolutePath);
+            if (
+              relativePath.startsWith("..") ||
+              path.isAbsolute(relativePath)
+            ) {
+              return new Error(
+                "Access denied: memoryPath must be within the working directory",
+              );
+            }
+
+            let memoryContent;
+            try {
+              memoryContent = await fs.readFile(absolutePath, {
+                encoding: "utf-8",
+              });
+            } catch (error) {
+              return new Error(
+                `Failed to read memory file: ${error instanceof Error ? error.message : String(error)}`,
+              );
+            }
+
+            return memoryContent;
+          }),
+      };
+    }
+
+    return tool;
+  });
+
   /** @type {Map<string, Tool>} */
   const toolByName = new Map();
-  for (const tool of tools) {
+  for (const tool of injectedTools) {
     toolByName.set(tool.def.name, tool);
   }
 
   /** @type {ToolDefinition[]} */
-  const toolDefs = tools.map(({ def }) => def);
+  const toolDefs = injectedTools.map(({ def }) => def);
 
   async function dumpMessages() {
     const filePath = MESSAGES_DUMP_FILE_PATH;
@@ -46,14 +224,8 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
       await fs.writeFile(filePath, JSON.stringify(state.messages, null, 2));
       console.log(`Messages dumped to ${filePath}`);
     } catch (error) {
-      if (error instanceof Error) {
-        console.error(`Error dumping messages: ${error.message}`);
-      } else {
-        console.error(
-          "An unknown error occurred while dumping messages:",
-          error,
-        );
-      }
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`Error dumping messages: ${message}`);
     }
   }
 
@@ -110,23 +282,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
           toolResults.push(await callTool(toolUse, toolByName));
         }
 
-        // Reset context
-        if (
-          toolUseParts.some(
-            (toolUse) => toolUse.toolName === resetContextTool.def.name,
-          )
-        ) {
-          // Keep only the system prompt
-          state.messages.splice(1, state.messages.length - 1);
-          // To avoid "a final `assistant` message must start with a thinking block" error from claude
-          // convert tool results to user message
-          state.messages.push({
-            role: "user",
-            content: toolResults.flatMap(({ content }) => content),
-          });
-        } else {
-          state.messages.push({ role: "user", content: toolResults });
-        }
+        processToolResults(toolUseParts, toolResults);
 
         agentEventEmitter.emit(
           "message",
@@ -253,38 +409,21 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
       // Auto approve tool use
       const decisions = toolUseParts.map(toolUseApprover.isAllowedToolUse);
 
-      const deniedToolUseIndices = decisions
-        .map((decision, index) => (decision.action === "deny" ? index : -1))
-        .filter((index) => index !== -1);
-
-      if (deniedToolUseIndices.length > 0) {
+      const hasDeniedToolUse = decisions.some((d) => d.action === "deny");
+      if (hasDeniedToolUse) {
         /** @type {MessageContentToolResult[]} */
         const toolResults = toolUseParts.map((toolUse, index) => {
           const decision = decisions[index];
-          if (decision.action === "deny") {
-            return {
-              type: "tool_result",
-              toolUseId: toolUse.toolUseId,
-              toolName: toolUse.toolName,
-              content: [
-                {
-                  type: "text",
-                  text: `Tool call rejected. ${decision.reason || ""}`.trim(),
-                },
-              ],
-              isError: true,
-            };
-          }
+          const rejectionMessage =
+            decision.action === "deny"
+              ? `Tool call rejected. ${decision.reason || ""}`.trim()
+              : "Tool call rejected due to other denied tool calls";
+
           return {
             type: "tool_result",
             toolUseId: toolUse.toolUseId,
             toolName: toolUse.toolName,
-            content: [
-              {
-                type: "text",
-                text: "Tool call rejected due to other denied tool calls",
-              },
-            ],
+            content: [{ type: "text", text: rejectionMessage }],
             isError: true,
           };
         });
@@ -308,23 +447,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
         toolResults.push(await callTool(toolUse, toolByName));
       }
 
-      // Reset context
-      if (
-        toolUseParts.some(
-          (toolUse) => toolUse.toolName === resetContextTool.def.name,
-        )
-      ) {
-        // Keep only the system prompt
-        state.messages.splice(1, state.messages.length - 1);
-        // To avoid "a final `assistant` message must start with a thinking block" error from claude
-        // convert tool results to user message
-        state.messages.push({
-          role: "user",
-          content: toolResults.flatMap(({ content }) => content),
-        });
-      } else {
-        state.messages.push({ role: "user", content: toolResults });
-      }
+      processToolResults(toolUseParts, toolResults);
 
       agentEventEmitter.emit(
         "message",

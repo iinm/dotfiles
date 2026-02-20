@@ -240,19 +240,23 @@ export function startInteractiveSession({
     state.turn = false;
   }
 
-  const cliPrompt = [
-    "",
-    styleText(["cyanBright", "bgGray"], "▌") +
+  const getCliPrompt = (subagentName = "") =>
+    [
+      "",
       styleText(
         ["white", "bgGray"],
-        `Session: ${sessionId}, Model: ${modelName}, Sandbox: ${sandbox ? "on" : "off"} `,
+        styleText(["cyanBright", "bgGray"], "▌") +
+          (subagentName ? `(${subagentName}) ` : "") +
+          `Session: ${sessionId}, Model: ${modelName}, Sandbox: ${sandbox ? "on" : "off"} `,
       ),
-    "> ",
-  ].join("\n");
+      "> ",
+    ].join("\n");
+
+  let currentCliPrompt = getCliPrompt();
   const cli = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-    prompt: cliPrompt,
+    prompt: currentCliPrompt,
     /**
      * @param {string} line
      * @param {(err?: Error | null, result?: [string[], string]) => void} callback
@@ -340,7 +344,7 @@ export function startInteractiveSession({
     }
 
     // reset prompt
-    cli.setPrompt(cliPrompt);
+    cli.setPrompt(currentCliPrompt);
 
     // clear interrupt message
     await consumeInterruptMessage();
@@ -508,7 +512,7 @@ export function startInteractiveSession({
 
       const combined = state.multiLineBuffer.join("\n");
       state.multiLineBuffer = null;
-      cli.setPrompt(cliPrompt);
+      cli.setPrompt(currentCliPrompt);
 
       await processInput(combined);
       return;
@@ -551,9 +555,15 @@ export function startInteractiveSession({
           "yellow",
           "\nApprove tool calls? (y = allow once, Y = allow in this session, or feedback)",
         ),
-        cliPrompt,
+        currentCliPrompt,
       ].join("\n"),
     );
+  });
+
+  agentEventEmitter.on("subagentStatus", (status) => {
+    currentCliPrompt = getCliPrompt(status?.name);
+    cli.setPrompt(currentCliPrompt);
+    cli.prompt();
   });
 
   agentEventEmitter.on("providerTokenUsage", (usage) => {
