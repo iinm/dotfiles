@@ -251,9 +251,52 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
       }
 
       // Auto approve tool use
-      const isAllToolUseApproved = toolUseParts.every(
-        toolUseApprover.isAllowedToolUse,
-      );
+      const decisions = toolUseParts.map(toolUseApprover.isAllowedToolUse);
+
+      const deniedToolUseIndices = decisions
+        .map((decision, index) => (decision.action === "deny" ? index : -1))
+        .filter((index) => index !== -1);
+
+      if (deniedToolUseIndices.length > 0) {
+        /** @type {MessageContentToolResult[]} */
+        const toolResults = toolUseParts.map((toolUse, index) => {
+          const decision = decisions[index];
+          if (decision.action === "deny") {
+            return {
+              type: "tool_result",
+              toolUseId: toolUse.toolUseId,
+              toolName: toolUse.toolName,
+              content: [
+                {
+                  type: "text",
+                  text: `Tool call rejected. ${decision.reason || ""}`.trim(),
+                },
+              ],
+              isError: true,
+            };
+          }
+          return {
+            type: "tool_result",
+            toolUseId: toolUse.toolUseId,
+            toolName: toolUse.toolName,
+            content: [
+              {
+                type: "text",
+                text: "Tool call rejected due to other denied tool calls",
+              },
+            ],
+            isError: true,
+          };
+        });
+        state.messages.push({ role: "user", content: toolResults });
+        agentEventEmitter.emit(
+          "message",
+          state.messages[state.messages.length - 1],
+        );
+        continue;
+      }
+
+      const isAllToolUseApproved = decisions.every((d) => d.action === "allow");
       if (!isAllToolUseApproved) {
         agentEventEmitter.emit("toolUseRequest");
         break;

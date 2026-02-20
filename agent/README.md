@@ -256,6 +256,18 @@ The agent loads configuration files in the following order. Settings in later fi
     "patterns": [
       {
         "toolName": "exec_command",
+        "input": { "command": "grep" },
+        "action": "deny",
+        "reason": "Use rg"
+      },
+      {
+        "toolName": "exec_command",
+        "input": { "command": "find" },
+        "action": "deny",
+        "reason": "Use fd"
+      },
+      {
+        "toolName": "exec_command",
         "input": { "command": "npm", "args": ["run", { "regex": "^(check|fix)$" }] }
       },
       {

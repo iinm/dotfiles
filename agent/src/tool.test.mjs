@@ -24,32 +24,32 @@ describe("createToolUseApprover", () => {
     };
 
     // when/then:
-    assert.equal(
+    assert.deepStrictEqual(
       toolApprover.isAllowedToolUse(allowedToolUse),
-      true,
+      { action: "allow" },
       "should approve on first use",
     );
-    assert.equal(
+    assert.deepStrictEqual(
       toolApprover.isAllowedToolUse(allowedToolUse),
-      true,
+      { action: "allow" },
       "should approve on second use",
     );
-    assert.equal(
+    assert.deepStrictEqual(
       toolApprover.isAllowedToolUse(allowedToolUse),
-      false,
+      { action: "ask" },
       "should not approve on third use (exceeds maxApprovals)",
     );
 
     // when/then:
     toolApprover.resetApprovalCount();
-    assert.equal(
+    assert.deepStrictEqual(
       toolApprover.isAllowedToolUse(allowedToolUse),
-      true,
+      { action: "allow" },
       "should approve on first use after reset",
     );
   });
 
-  it("should not approve disallowed tool use", () => {
+  it("should not approve disallowed tool use (action: ask by default)", () => {
     // given:
     const toolApprover = createToolUseApprover({
       patterns: [{ toolName: "exec_command", input: { command: "ls" } }],
@@ -66,7 +66,39 @@ describe("createToolUseApprover", () => {
     };
 
     // when/then:
-    assert.equal(toolApprover.isAllowedToolUse(disallowedToolUse), false);
+    assert.deepStrictEqual(toolApprover.isAllowedToolUse(disallowedToolUse), {
+      action: "ask",
+    });
+  });
+
+  it("should deny tool use when action is deny", () => {
+    // given:
+    const toolApprover = createToolUseApprover({
+      patterns: [
+        {
+          toolName: "exec_command",
+          input: { command: "grep" },
+          action: "deny",
+          reason: "Use rg",
+        },
+      ],
+      maxApprovals: 2,
+      maskApprovalInput: (_name, input) => input,
+    });
+
+    /** @type {MessageContentToolUse} */
+    const deniedToolUse = {
+      type: "tool_use",
+      toolUseId: "test",
+      toolName: "exec_command",
+      input: { command: "grep" },
+    };
+
+    // when/then:
+    assert.deepStrictEqual(toolApprover.isAllowedToolUse(deniedToolUse), {
+      action: "deny",
+      reason: "Use rg",
+    });
   });
 
   it("should mask input when allowed", () => {
@@ -90,17 +122,17 @@ describe("createToolUseApprover", () => {
     };
 
     // when/then:
-    assert.equal(
+    assert.deepStrictEqual(
       toolApprover.isAllowedToolUse(toolUse),
-      false,
+      { action: "ask" },
       "should not approve disallowed tool use",
     );
 
     // when/then:
     toolApprover.allowToolUse(toolUse);
-    assert.equal(
+    assert.deepStrictEqual(
       toolApprover.isAllowedToolUse(toolUse),
-      true,
+      { action: "allow" },
       "should approve allowed tool use",
     );
   });

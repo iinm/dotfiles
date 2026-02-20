@@ -100,8 +100,8 @@ export async function loadAppConfig({ tmuxSessionId }) {
       },
       autoApproval: {
         patterns: [
-          ...(merged.autoApproval?.patterns ?? []),
           ...(config.autoApproval?.patterns ?? []),
+          ...(merged.autoApproval?.patterns ?? []),
         ],
         maxApprovals:
           config.autoApproval?.maxApprovals ??

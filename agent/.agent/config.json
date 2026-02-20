@@ -3,6 +3,18 @@
     "patterns": [
       {
         "toolName": "exec_command",
+        "input": { "command": "grep" },
+        "action": "deny",
+        "reason": "Use rg"
+      },
+      {
+        "toolName": "exec_command",
+        "input": { "command": "find" },
+        "action": "deny",
+        "reason": "Use fd"
+      },
+      {
+        "toolName": "exec_command",
         "input": {
           "command": "npm",
           "args": ["run", { "regex": "^(ci|check|fix|test)$" }]

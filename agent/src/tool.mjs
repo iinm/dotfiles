@@ -1,5 +1,5 @@
 /**
- * @import { ToolUseApprover, ToolUseApproverConfig, ToolUsePattern } from './tool'
+ * @import { ToolUseApprover, ToolUseApproverConfig, ToolUseDecision, ToolUsePattern } from './tool'
  * @import { MessageContentToolUse } from './model'
  */
 
@@ -21,35 +21,60 @@ export function createToolUseApprover({
     allowedToolUseInSession: [],
   };
 
-  const resetApprovalCount = () => {
+  /** @returns {void} */
+  function resetApprovalCount() {
     state.approvalCount = 0;
-  };
+  }
 
   /**
    * @param {MessageContentToolUse} toolUse
+   * @returns {ToolUseDecision}
    */
-  const isAllowedToolUse = (toolUse) => {
+  function isAllowedToolUse(toolUse) {
+    const toolUseToMatch = {
+      toolName: toolUse.toolName,
+      input: toolUse.input,
+    };
+
     for (const pattern of [...patterns, ...state.allowedToolUseInSession]) {
-      if (
-        matchValue(toolUse, pattern) &&
-        isSafeToolInput(maskApprovalInput(toolUse.toolName, toolUse.input))
-      ) {
+      const patternToMatch = {
+        toolName: pattern.toolName,
+        input: pattern.input,
+      };
+
+      if (!matchValue(toolUseToMatch, patternToMatch)) {
+        continue;
+      }
+
+      if (pattern.action === "deny") {
+        return {
+          action: "deny",
+          reason: pattern.reason,
+        };
+      }
+
+      const maskedInput = maskApprovalInput(toolUse.toolName, toolUse.input);
+      if (isSafeToolInput(maskedInput)) {
         state.approvalCount += 1;
-        return state.approvalCount <= max;
+        return state.approvalCount <= max
+          ? { action: "allow" }
+          : { action: "ask" };
       }
     }
-    return false;
-  };
+
+    return { action: "ask" };
+  }
 
   /**
    * @param {MessageContentToolUse} toolUse
+   * @returns {void}
    */
-  const allowToolUse = (toolUse) => {
+  function allowToolUse(toolUse) {
     state.allowedToolUseInSession.push({
       toolName: toolUse.toolName,
       input: maskApprovalInput(toolUse.toolName, toolUse.input),
     });
-  };
+  }
 
   return {
     isAllowedToolUse,

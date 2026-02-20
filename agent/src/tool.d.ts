@@ -48,8 +48,13 @@ export type ToolUseApproverConfig = {
   ) => Record<string, unknown>;
 };
 
+export type ToolUseDecision = {
+  action: "allow" | "deny" | "ask";
+  reason?: string;
+};
+
 export type ToolUseApprover = {
-  isAllowedToolUse: (toolUse: MessageContentToolUse) => boolean;
+  isAllowedToolUse: (toolUse: MessageContentToolUse) => ToolUseDecision;
   allowToolUse: (toolUse: MessageContentToolUse) => void;
   resetApprovalCount: () => void;
 };
@@ -57,6 +62,8 @@ export type ToolUseApprover = {
 export type ToolUsePattern = {
   toolName: string;
   input: ObjectPattern;
+  action?: "allow" | "deny";
+  reason?: string;
 };
 
 export type ToolUse = {
