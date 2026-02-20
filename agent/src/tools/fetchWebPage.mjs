@@ -25,6 +25,19 @@ export const fetchWebPageTool = {
   },
 
   /**
+   * @param {Record<string, unknown>} input
+   * @returns {Record<string, unknown>}
+   */
+  maskApprovalInput: (input) => {
+    try {
+      const url = new URL(String(input.url));
+      return { url: url.hostname };
+    } catch {
+      return input;
+    }
+  },
+
+  /**
    * @param {{url: string}} input
    * @returns {Promise<string | Error>}
    */
