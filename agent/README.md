@@ -212,12 +212,13 @@ The agent can use the following tools to assist with tasks:
 - **exec_command**: Run a command without shell interpretation.
 - **write_file**: Write a file.
 - **patch_file**: Patch a file.
-- **reset_context**: Reset the conversation context to reduce noise and maintain performance. It reloads the task state from a specified memory file.
 - **tmux_command**: Run a tmux command.
 - **fetch_web_page**: Fetch and extract web page content from a given URL, returning it as Markdown.
 - **fetch_web_page_with_browser**: Fetch and extract web page content from a given URL using a browser, returning it as Markdown. Can handle JavaScript-rendered content.
 - **search_web**: Search the web for information (requires Tavily API key).
 - **ask_google**: Ask Google a question using natural language (requires Gemini API key).
+- **delegate_to_subagent**: Delegate a subtask to a subagent. The agent switches to a subagent role within the same conversation, focusing on the specified goal.
+- **report_as_subagent**: Report completion and return to the main agent. Used by subagents to communicate results and restore the main agent role.
 
 ## Directory Structure
 
@@ -275,8 +276,7 @@ The agent loads configuration files in the following order. Settings in later fi
         "input": { "filePath": { "regex": "^\\.agent/memory/.+\\.md$" } }
       },
       {
-        "toolName": "reset_context",
-        "input": { "memoryPath": { "regex": "^\\.agent/memory/.+\\.md$" } }
+        "toolName": { "regex": "^(delegate_to_subagent|report_as_subagent)$" }
       },
       {
         "toolName": "ask_google",

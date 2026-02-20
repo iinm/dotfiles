@@ -13,7 +13,6 @@ import { styleText } from "node:util";
 import { AGENT_PROJECT_METADATA_DIR, MESSAGES_DUMP_FILE_PATH } from "./env.mjs";
 import { delegateToSubagentTool } from "./tools/delegateToSubagent.mjs";
 import { reportAsSubagentTool } from "./tools/reportAsSubagent.mjs";
-import { resetContextTool } from "./tools/resetContext.mjs";
 import { consumeInterruptMessage } from "./utils/consumeInterruptMessage.mjs";
 import { noThrow } from "./utils/noThrow.mjs";
 
@@ -44,37 +43,15 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
    * @param {MessageContentToolResult[]} toolResults
    */
   function processToolResults(toolUseParts, toolResults) {
-    const resetContextToolUse = toolUseParts.find(
-      (toolUse) => toolUse.toolName === resetContextTool.def.name,
-    );
     const reportSubagentToolUse = toolUseParts.find(
       (toolUse) => toolUse.toolName === reportAsSubagentTool.def.name,
     );
 
-    if (resetContextToolUse) {
-      handleContextReset(toolResults);
-    } else if (reportSubagentToolUse) {
+    if (reportSubagentToolUse) {
       handleSubagentReport(reportSubagentToolUse, toolResults);
     } else {
       state.messages.push({ role: "user", content: toolResults });
     }
-  }
-
-  /**
-   * Handle context reset by clearing conversation history except system prompt.
-   * @param {MessageContentToolResult[]} toolResults
-   * @returns {void}
-   */
-  function handleContextReset(toolResults) {
-    // Keep only the system prompt
-    state.messages.splice(1, state.messages.length - 1);
-    // To avoid "a final `assistant` message must start with a thinking block" error from claude
-    // convert tool results to user message
-    const memoryContents = toolResults.flatMap(({ content }) => content);
-    state.messages.push({
-      role: "user",
-      content: memoryContents,
-    });
   }
 
   /**
@@ -414,9 +391,8 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
         continue;
       }
 
-      // Validate exclusive tool use (reset_context, delegate_to_subagent, report_as_subagent)
+      // Validate exclusive tool use (delegate_to_subagent, report_as_subagent)
       const exclusiveToolNames = [
-        resetContextTool.def.name,
         delegateToSubagentTool.def.name,
         reportAsSubagentTool.def.name,
       ];

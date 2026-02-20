@@ -18,7 +18,6 @@ import { fetchWebPageTool } from "./tools/fetchWebPage.mjs";
 import { fetchWebPageWithBrowserTool } from "./tools/fetchWebPageWithBrowser.mjs";
 import { patchFileTool } from "./tools/patchFile.mjs";
 import { reportAsSubagentTool } from "./tools/reportAsSubagent.mjs";
-import { resetContextTool } from "./tools/resetContext.mjs";
 import { createTavilySearchTool } from "./tools/tavilySearch.mjs";
 import { createTmuxCommandTool } from "./tools/tmuxCommand.mjs";
 import { writeFileTool } from "./tools/writeFile.mjs";
@@ -87,7 +86,6 @@ import { createSessionId } from "./utils/createSessionId.mjs";
     createTmuxCommandTool({ sandbox: appConfig.sandbox }),
     fetchWebPageTool,
     fetchWebPageWithBrowserTool,
-    resetContextTool,
     delegateToSubagentTool,
     reportAsSubagentTool,
   ];
