@@ -19,6 +19,14 @@
       {
         "toolName": "exec_command",
         "input": {
+          "command": "exec_command"
+        },
+        "action": "deny",
+        "reason": "Expected shell command name"
+      },
+      {
+        "toolName": "exec_command",
+        "input": {
           "command": "npm",
           "args": ["run", { "regex": "^(ci|check|fix|test)$" }]
         }
