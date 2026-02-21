@@ -93,7 +93,7 @@ Call multiple tools at once when they don't depend on each other's results.
 
 ### delegate_to_subagent
 
-Delegate a subtask to a subagent with a fresh context.
+Delegate a subtask to a subagent.
 
 When to use:
 - A subtask will require many file reads or command executions
