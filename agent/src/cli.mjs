@@ -21,6 +21,11 @@ import { readFileRange } from "./utils/readFileRange.mjs";
 const SLASH_COMMANDS = [
   { name: "/help", description: "Display this help message" },
   { name: "/agents", description: "List available agent roles" },
+  {
+    name: "/agents:<id>",
+    description:
+      "Delegate to an agent with the given ID (e.g., /agents:code-simplifier)",
+  },
   { name: "/prompts", description: "List available prompts" },
   {
     name: "/prompts:<id>",
@@ -213,6 +218,33 @@ export function startInteractiveSession({
 
   /**
    * @param {string} id
+   * @param {string} goal
+   * @param {string} displayInvocation
+   * @returns {Promise<void>}
+   */
+  async function invokeAgent(id, goal, displayInvocation) {
+    const agentRoles = await loadAgentRoles();
+    const agent = agentRoles.get(id);
+
+    if (!agent) {
+      console.log(styleText("red", `\nAgent not found: ${id}`));
+      cli.prompt();
+      return;
+    }
+
+    const invocation = `${displayInvocation}${goal ? ` ${goal}` : ""}`;
+    const message = `System: This agent was invoked as "${invocation}".\n\nDelegate to agent "${id}" with the following goal:\n\n${goal}`;
+
+    console.log(styleText("gray", "\n<agent>"));
+    console.log(message);
+    console.log(styleText("gray", "</agent>"));
+
+    userEventEmitter.emit("userInput", [{ type: "text", text: message }]);
+    state.turn = false;
+  }
+
+  /**
+   * @param {string} id
    * @param {string} args
    * @param {string} displayInvocation
    * @returns {Promise<void>}
@@ -265,6 +297,19 @@ export function startInteractiveSession({
       (async () => {
         try {
           const prompts = await loadPrompts();
+          const agentRoles = await loadAgentRoles();
+
+          if (line.startsWith("/agents:")) {
+            const prefix = "/agents:";
+            const candidates = Array.from(agentRoles.values()).map((a) => ({
+              name: `${prefix}${a.id}`,
+              description: a.description,
+            }));
+            const hits = findMatches(candidates, line, prefix.length);
+
+            showCompletions(cli, hits, line, callback);
+            return;
+          }
 
           if (line.startsWith("/prompts:")) {
             const prefix = "/prompts:";
@@ -291,6 +336,7 @@ export function startInteractiveSession({
                 const name = typeof cmd === "string" ? cmd : cmd.name;
                 return (
                   name !== "/<id>" &&
+                  (name === "/agents:" || !name.startsWith("/agent:")) &&
                   (name === "/prompts:" || !name.startsWith("/prompt:"))
                 );
               },
@@ -422,6 +468,17 @@ export function startInteractiveSession({
           }
         }
         cli.prompt();
+        return;
+      }
+
+      if (inputTrimmed.startsWith("/agents:")) {
+        const match = inputTrimmed.match(/^\/agents:([^ ]+)(?:\s+(.*))?$/);
+        if (!match) {
+          console.log(styleText("red", "\nInvalid agent invocation format."));
+          cli.prompt();
+          return;
+        }
+        await invokeAgent(match[1], match[2] || "", `/agents:${match[1]}`);
         return;
       }
 
