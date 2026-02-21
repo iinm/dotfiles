@@ -39,6 +39,7 @@ export type ModelProvidersConfig = {
   qwen?: GenericModelProviderConfig;
   zai?: GenericModelProviderConfig;
   xai?: GenericModelProviderConfig;
+  [key: string]: GenericModelProviderConfig | undefined;
 };
 
 export type GenericModelProviderConfig = {
