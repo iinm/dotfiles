@@ -218,7 +218,7 @@ The agent can use the following tools to assist with tasks:
 - **search_web**: Search the web for information (requires Tavily API key).
 - **ask_google**: Ask Google a question using natural language (requires Gemini API key).
 - **delegate_to_subagent**: Delegate a subtask to a subagent. The agent switches to a subagent role within the same conversation, focusing on the specified goal.
-- **report_as_subagent**: Report completion and return to the main agent. Used by subagents to communicate results and restore the main agent role.
+- **report_as_subagent**: Report completion and return to the main agent. Used by subagents to communicate results and restore the main agent role. After reporting, the subagent's conversation history is removed from the context.
 
 ## Directory Structure
 
