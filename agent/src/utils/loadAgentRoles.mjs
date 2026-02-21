@@ -22,6 +22,7 @@ import {
  */
 export async function loadAgentRoles() {
   const agentDirs = [
+    path.resolve(AGENT_ROOT, ".config", "agents.predefined"),
     path.resolve(AGENT_ROOT, ".config", "agents"),
     path.resolve(AGENT_PROJECT_METADATA_DIR, "agents"),
   ];

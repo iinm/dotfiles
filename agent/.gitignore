@@ -5,7 +5,10 @@ tmp/
 .config/*
 !.config/prompts.predefined/
 !.config/prompts.library/
+!.config/prompts/
+!.config/agents.predefined/
 !.config/agents.library/
+!.config/agents/
 
 .agent/*
 !.agent/config.json
