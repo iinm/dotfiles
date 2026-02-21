@@ -28,7 +28,7 @@ describe("formatToolUse", () => {
       toolUse: createToolUse("exec_command", { command: "ls", args: ["-la"] }),
       expectedIncludes: [
         "tool: exec_command",
-        'commnad: "ls"',
+        'command: "ls"',
         'args: ["-la"]',
       ],
     },
@@ -61,7 +61,7 @@ describe("formatToolUse", () => {
       }),
       expectedIncludes: [
         "tool: tmux_command",
-        "commnad: new-session",
+        "command: new-session",
         'args: ["-d","-s","test"]',
       ],
     },

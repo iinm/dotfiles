@@ -23,7 +23,7 @@ export function formatToolUse(toolUse) {
     const execCommandInput = input;
     return [
       `tool: ${toolName}`,
-      `commnad: ${JSON.stringify(execCommandInput.command)}`,
+      `command: ${JSON.stringify(execCommandInput.command)}`,
       `args: ${JSON.stringify(execCommandInput.args)}`,
     ].join("\n");
   }
@@ -80,7 +80,7 @@ export function formatToolUse(toolUse) {
     const tmuxCommandInput = input;
     return [
       `tool: ${toolName}`,
-      `commnad: ${tmuxCommandInput.command}`,
+      `command: ${tmuxCommandInput.command}`,
       `args: ${JSON.stringify(tmuxCommandInput.args)}`,
     ].join("\n");
   }
