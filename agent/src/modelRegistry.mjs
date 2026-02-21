@@ -1,6 +1,6 @@
 /**
- * @import { CallModel } from "./model"
- * @import { ModelProvidersConfig } from "./config";
+ * @import { CallModel, ModelInput, ModelOutput } from "./model"
+ * @import { ModelProvidersConfig, GenericModelProviderConfig } from "./config";
  */
 
 import { callAnthropicModel } from "./providers/anthropic.mjs";

@@ -1,6 +1,6 @@
 /**
  * @import { AgentEventEmitter } from "./agent"
- * @import { Message, MessageContentText, MessageContentImage, MessageContentToolResult, MessageContentToolUse, PartialMessageContent } from "./model"
+ * @import { CallModel, Message, MessageContentText, MessageContentImage, MessageContentToolResult, MessageContentToolUse, PartialMessageContent } from "./model"
  * @import { Tool, ToolDefinition, ToolUseApprover } from "./tool"
  * @import { SubagentManager } from "./subagentManager.mjs"
  */
@@ -8,26 +8,19 @@
 import { styleText } from "node:util";
 import { delegateToSubagentTool } from "./tools/delegateToSubagent.mjs";
 import { reportAsSubagentTool } from "./tools/reportAsSubagent.mjs";
-import {
-  createExclusiveToolViolationLogMessage,
-  createExclusiveToolViolationResults,
-  createUnknownToolErrorMessage,
-  createUnknownToolResults,
-  findUnknownToolNames,
-  validateExclusiveToolUse,
-} from "./toolValidation.mjs";
+import { validateToolUse } from "./toolValidation.mjs";
 import { consumeInterruptMessage } from "./utils/consumeInterruptMessage.mjs";
 
 /**
  * @typedef {Object} AgentLoopConfig
- * @property {Function} callModel - Function to call the language model
+ * @property {CallModel} callModel - Function to call the language model
  * @property {{ messages: Message[] }} state - Agent state containing messages
  * @property {ToolDefinition[]} toolDefs - Tool definitions for the model
  * @property {Map<string, Tool>} toolByName - Map of tool names to tool implementations
  * @property {AgentEventEmitter} agentEventEmitter - Event emitter for agent events
  * @property {ToolUseApprover} toolUseApprover - Tool use approval checker
  * @property {SubagentManager} subagentManager - Subagent manager instance
- * @property {Function} callTool - Function to execute a tool call
+ * @property {(toolUse: MessageContentToolUse, toolByName: Map<string, Tool>) => Promise<MessageContentToolResult>} callTool - Function to execute a tool call
  */
 
 /**
@@ -187,10 +180,11 @@ export function createAgentLoop({
         continue;
       }
 
-      /** @type {MessageContentToolUse[]} */
-      const toolUseParts = assistantMessage.content.filter(
-        /** @param {any} part */
-        (part) => part.type === "tool_use",
+      const toolUseParts = /** @type {MessageContentToolUse[]} */ (
+        assistantMessage.content.filter(
+          /** @param {any} part */
+          (part) => part.type === "tool_use",
+        )
       );
 
       // No tool use -> turn end
@@ -198,71 +192,36 @@ export function createAgentLoop({
         break;
       }
 
-      // Validate tool use
-      const unknownToolNames = findUnknownToolNames(toolUseParts, toolByName);
-      if (unknownToolNames.length) {
-        state.messages.push({
-          role: "user",
-          content: createUnknownToolResults(toolUseParts, unknownToolNames),
-        });
-        state.messages.push({
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: createUnknownToolErrorMessage(unknownToolNames, toolByName),
-            },
-          ],
-        });
-        console.error(
-          styleText(
-            "yellow",
-            `\nRejected unknown tool use: ${unknownToolNames.join(", ")}`,
-          ),
-        );
-        continue;
-      }
-
-      // Validate exclusive tool use (delegate_to_subagent, report_as_subagent)
+      // Validate tool use (unknown tools and exclusive tool violations)
       const exclusiveToolNames = [
         delegateToSubagentTool.def.name,
         reportAsSubagentTool.def.name,
       ];
-      const exclusiveValidation = validateExclusiveToolUse(
+      const validation = validateToolUse(
         toolUseParts,
+        toolByName,
         exclusiveToolNames,
       );
 
-      if (!exclusiveValidation.isValid) {
+      if (!validation.isValid) {
         state.messages.push({
           role: "user",
-          content: createExclusiveToolViolationResults(toolUseParts),
+          content: /** @type {MessageContentToolResult[]} */ (
+            validation.toolResults
+          ),
         });
         state.messages.push({
           role: "user",
           content: [
             {
               type: "text",
-              text: /** @type {string} */ (exclusiveValidation.errorMessage),
+              text: /** @type {string} */ (validation.errorMessage),
             },
           ],
         });
-        if (
-          exclusiveValidation.violationType &&
-          exclusiveValidation.violatedTools
-        ) {
-          console.error(
-            styleText(
-              "yellow",
-              createExclusiveToolViolationLogMessage(
-                /** @type {string[]} */ (exclusiveValidation.violatedTools),
-                /** @type {'multiple'|'with-others'} */ (
-                  exclusiveValidation.violationType
-                ),
-              ),
-            ),
-          );
-        }
+        console.error(
+          styleText("yellow", /** @type {string} */ (validation.errorMessage)),
+        );
         continue;
       }
 
