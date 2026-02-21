@@ -33,4 +33,17 @@ export const delegateToSubagentTool = {
   impl: async () => {
     throw new Error("Not implemented");
   },
+
+  /**
+   * @param {Record<string, unknown>} input
+   * @returns {Record<string, unknown>}
+   */
+  maskApprovalInput: (input) => {
+    const delegateToSubagentInput = /** @type {DelegateToSubagentInput} */ (
+      input
+    );
+    return {
+      name: delegateToSubagentInput.name,
+    };
+  },
 };
