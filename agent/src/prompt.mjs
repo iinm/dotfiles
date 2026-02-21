@@ -66,8 +66,42 @@ async function discoverProjectContext(workingDir) {
   );
 
   if (skillsResult.stdout.trim()) {
-    contextSection += "\nSkills found:\n";
-    contextSection += `${skillsResult.stdout.trim()}\n`;
+    // Filter out skills with disable-model-invocation: true
+    const lines = skillsResult.stdout.trim().split("\n");
+    const output = [];
+    let currentPath = null;
+    let currentLines = [];
+    let skip = false;
+
+    for (const line of lines) {
+      const isPath = !line.match(/^\d+:/);
+
+      if (isPath) {
+        // Save previous file if not disabled
+        if (currentPath && !skip) {
+          output.push(currentPath, ...currentLines);
+        }
+        // Start new file
+        currentPath = line;
+        currentLines = [];
+        skip = false;
+      } else {
+        currentLines.push(line);
+        if (line.match(/disable-model-invocation:\s*true/)) {
+          skip = true;
+        }
+      }
+    }
+
+    // Don't forget last file
+    if (currentPath && !skip) {
+      output.push(currentPath, ...currentLines);
+    }
+
+    if (output.length > 0) {
+      contextSection += "\nSkills found:\n";
+      contextSection += `${output.join("\n")}\n`;
+    }
   }
 
   return contextSection;
