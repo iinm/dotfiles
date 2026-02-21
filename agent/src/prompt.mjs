@@ -93,26 +93,21 @@ Call multiple tools at once when they don't depend on each other's results.
 
 ### delegate_to_subagent
 
-Delegate a subtask to a subagent.
+Delegate a subtask to a subagent. You inherit the current context and work on the delegated goal. Main agent receives only your summary upon completion.
 
-**Important: After calling this tool, you will immediately become the subagent and work on the delegated task. Do not wait for another agent.**
+Delegate early to keep main context clean. Main agent focuses on planning and decisions; subagent handles detailed work.
 
-When to use:
-- A subtask will require many file reads or command executions
-- Trial-and-error work that would clutter the main context
-- An independent subtask with a clear, specific goal
+Use when:
+- A subtask requires >5 file reads or command executions
+- Exploratory or trial-and-error work
+- Any independent subtask with a clear goal
 
 Constraints:
 - Cannot be called when already acting as a subagent
-- Must be called alone (cannot be combined with other tools or multiple delegates)
+- Must be called alone (cannot be combined with other tools)
+- Define a clear goal before delegating
 
-Before delegating:
-- Define a clear, specific goal for the subagent
-
-After delegation:
-- You will receive a message confirming your subagent role
-- Start working on the goal immediately
-- Call report_as_subagent when finished
+After delegation, start working immediately and call report_as_subagent when finished.
 
 ### report_as_subagent
 
@@ -238,5 +233,6 @@ Basic commands:
 
 - Follow the project rules and conventions.
 - Keep the memory file up to date and comprehensive.
+- Use subagents liberally to keep main context focused on planning and decisions.
 `.trim();
 }
