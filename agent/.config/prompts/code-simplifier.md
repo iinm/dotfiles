@@ -1,1 +1,0 @@
-../prompts.library/code-simplifier.md

@@ -241,12 +241,14 @@ export function startInteractiveSession({
   const getCliPrompt = (subagentName = "") =>
     [
       "",
-      styleText(
-        ["white", "bgGray"],
-        styleText(["cyanBright", "bgGray"], "▌") +
-          (subagentName ? `(${subagentName}) ` : "") +
+      styleText(["cyanBright", "bgGray"], "▌") +
+        (subagentName
+          ? styleText(["cyan", "bgGray"], `[${subagentName}] `)
+          : "") +
+        styleText(
+          ["white", "bgGray"],
           `Session: ${sessionId}, Model: ${modelName}, Sandbox: ${sandbox ? "on" : "off"} `,
-      ),
+        ),
       "> ",
     ].join("\n");
 
@@ -540,11 +542,10 @@ export function startInteractiveSession({
   agentEventEmitter.on("partialMessageContent", (partialContent) => {
     if (partialContent.position === "start") {
       const subagentPrefix = state.subagentName
-        ? `[${styleText("cyan", state.subagentName)}]\n`
+        ? styleText("cyan", `[${state.subagentName}]\n`)
         : "";
-      console.log(
-        styleText("gray", `\n${subagentPrefix}<${partialContent.type}>`),
-      );
+      const partialContentStr = styleText("gray", `<${partialContent.type}>`);
+      console.log(`\n${subagentPrefix}${partialContentStr}`);
     }
     if (partialContent.content) {
       if (partialContent.type === "tool_use") {
