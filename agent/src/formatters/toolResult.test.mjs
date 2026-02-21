@@ -1,22 +1,45 @@
 /**
- * @import { MessageContentToolResult } from "../model"
+ * @import { MessageContentToolResult, MessageContentText } from "../model"
  */
 
 import assert from "node:assert";
 import { describe, it } from "node:test";
 import { formatToolResult } from "./toolResult.mjs";
 
+/**
+ * Factory function for creating text content
+ * @param {string} text
+ * @returns {MessageContentText}
+ */
+function createTextContent(text) {
+  return { type: "text", text };
+}
+
+/**
+ * Factory function for creating tool result
+ * @param {Object} params
+ * @param {string} params.toolName
+ * @param {import("../model").MessageContentToolResult['content']} params.content
+ * @param {boolean} [params.isError]
+ * @returns {MessageContentToolResult}
+ */
+function createToolResult({ toolName, content, isError = false }) {
+  return {
+    type: "tool_result",
+    toolUseId: `test-${toolName}`,
+    toolName,
+    content,
+    isError,
+  };
+}
+
 describe("formatToolResult", () => {
   it("should format text content", () => {
     // given:
-    /** @type {MessageContentToolResult} */
-    const toolResult = {
-      type: "tool_result",
-      toolUseId: "test-1",
+    const toolResult = createToolResult({
       toolName: "exec_command",
-      content: [{ type: "text", text: "Hello World" }],
-      isError: false,
-    };
+      content: [createTextContent("Hello World")],
+    });
 
     // when:
     const result = formatToolResult(toolResult);
@@ -48,14 +71,11 @@ describe("formatToolResult", () => {
 
   it("should format error result", () => {
     // given:
-    /** @type {MessageContentToolResult} */
-    const toolResult = {
-      type: "tool_result",
-      toolUseId: "test-1",
+    const toolResult = createToolResult({
       toolName: "exec_command",
-      content: [{ type: "text", text: "Error message" }],
+      content: [createTextContent("Error message")],
       isError: true,
-    };
+    });
 
     // when:
     const result = formatToolResult(toolResult);
@@ -66,14 +86,10 @@ describe("formatToolResult", () => {
 
   it("should format exec_command output with tags", () => {
     // given:
-    /** @type {MessageContentToolResult} */
-    const toolResult = {
-      type: "tool_result",
-      toolUseId: "test-1",
+    const toolResult = createToolResult({
       toolName: "exec_command",
-      content: [{ type: "text", text: "<stdout>output content</stdout>" }],
-      isError: false,
-    };
+      content: [createTextContent("<stdout>output content</stdout>")],
+    });
 
     // when:
     const result = formatToolResult(toolResult);
@@ -85,19 +101,14 @@ describe("formatToolResult", () => {
 
   it("should format exec_command truncated output", () => {
     // given:
-    /** @type {MessageContentToolResult} */
-    const toolResult = {
-      type: "tool_result",
-      toolUseId: "test-1",
+    const toolResult = createToolResult({
       toolName: "exec_command",
       content: [
-        {
-          type: "text",
-          text: '<truncated_output part="start">content</truncated_output>',
-        },
+        createTextContent(
+          '<truncated_output part="start">content</truncated_output>',
+        ),
       ],
-      isError: false,
-    };
+    });
 
     // when:
     const result = formatToolResult(toolResult);
@@ -108,14 +119,10 @@ describe("formatToolResult", () => {
 
   it("should format tmux_command output", () => {
     // given:
-    /** @type {MessageContentToolResult} */
-    const toolResult = {
-      type: "tool_result",
-      toolUseId: "test-1",
+    const toolResult = createToolResult({
       toolName: "tmux_command",
-      content: [{ type: "text", text: "<stdout>output</stdout>" }],
-      isError: false,
-    };
+      content: [createTextContent("<stdout>output</stdout>")],
+    });
 
     // when:
     const result = formatToolResult(toolResult);
@@ -126,14 +133,10 @@ describe("formatToolResult", () => {
 
   it("should truncate long content", () => {
     // given:
-    /** @type {MessageContentToolResult} */
-    const toolResult = {
-      type: "tool_result",
-      toolUseId: "test-1",
+    const toolResult = createToolResult({
       toolName: "some_other_tool",
-      content: [{ type: "text", text: "x".repeat(2000) }],
-      isError: false,
-    };
+      content: [createTextContent("x".repeat(2000))],
+    });
 
     // when:
     const result = formatToolResult(toolResult);

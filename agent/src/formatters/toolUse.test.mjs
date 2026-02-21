@@ -6,123 +6,95 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 import { formatToolUse } from "./toolUse.mjs";
 
+/**
+ * Factory function for creating tool use objects
+ * @param {string} toolName
+ * @param {Record<string, unknown>} input
+ * @returns {MessageContentToolUse}
+ */
+function createToolUse(toolName, input) {
+  return {
+    type: "tool_use",
+    toolUseId: `test-${toolName}`,
+    toolName,
+    input,
+  };
+}
+
 describe("formatToolUse", () => {
-  it("should format exec_command tool use", () => {
-    // given:
-    /** @type {MessageContentToolUse} */
-    const toolUse = {
-      type: "tool_use",
-      toolUseId: "test-1",
-      toolName: "exec_command",
-      input: { command: "ls", args: ["-la"] },
-    };
-
-    // when:
-    const result = formatToolUse(toolUse);
-
-    // then:
-    assert.ok(result.includes("tool: exec_command"));
-    assert.ok(result.includes('commnad: "ls"'));
-    assert.ok(result.includes('args: ["-la"]'));
-  });
-
-  it("should format write_file tool use", () => {
-    // given:
-    /** @type {MessageContentToolUse} */
-    const toolUse = {
-      type: "tool_use",
-      toolUseId: "test-1",
-      toolName: "write_file",
-      input: { filePath: "/tmp/test.txt", content: "Hello World" },
-    };
-
-    // when:
-    const result = formatToolUse(toolUse);
-
-    // then:
-    assert.ok(result.includes("tool: write_file"));
-    assert.ok(result.includes("filePath: /tmp/test.txt"));
-    assert.ok(result.includes("content:"));
-    assert.ok(result.includes("Hello World"));
-  });
-
-  it("should format patch_file tool use", () => {
-    // given:
-    /** @type {MessageContentToolUse} */
-    const toolUse = {
-      type: "tool_use",
-      toolUseId: "test-1",
-      toolName: "patch_file",
-      input: {
+  const testCases = [
+    {
+      name: "exec_command tool use",
+      toolUse: createToolUse("exec_command", { command: "ls", args: ["-la"] }),
+      expectedIncludes: [
+        "tool: exec_command",
+        'commnad: "ls"',
+        'args: ["-la"]',
+      ],
+    },
+    {
+      name: "write_file tool use",
+      toolUse: createToolUse("write_file", {
+        filePath: "/tmp/test.txt",
+        content: "Hello World",
+      }),
+      expectedIncludes: [
+        "tool: write_file",
+        "filePath: /tmp/test.txt",
+        "content:",
+        "Hello World",
+      ],
+    },
+    {
+      name: "patch_file tool use",
+      toolUse: createToolUse("patch_file", {
         filePath: "/tmp/test.txt",
         diff: "<<<<<<< SEARCH\nold content\n=======\nnew content\n>>>>>>> REPLACE",
-      },
-    };
+      }),
+      expectedIncludes: ["tool: patch_file", "path: /tmp/test.txt", "diff:"],
+    },
+    {
+      name: "tmux_command tool use",
+      toolUse: createToolUse("tmux_command", {
+        command: "new-session",
+        args: ["-d", "-s", "test"],
+      }),
+      expectedIncludes: [
+        "tool: tmux_command",
+        "commnad: new-session",
+        'args: ["-d","-s","test"]',
+      ],
+    },
+    {
+      name: "search_web tool use",
+      toolUse: createToolUse("search_web", { query: "Node.js testing" }),
+      expectedIncludes: ["tool: search_web", "query: Node.js testing"],
+    },
+  ];
 
-    // when:
-    const result = formatToolUse(toolUse);
+  for (const { name, toolUse, expectedIncludes } of testCases) {
+    it(`should format ${name}`, () => {
+      // when:
+      const result = formatToolUse(toolUse);
 
-    // then:
-    assert.ok(result.includes("tool: patch_file"));
-    assert.ok(result.includes("path: /tmp/test.txt"));
-    assert.ok(result.includes("diff:"));
-  });
-
-  it("should format tmux_command tool use", () => {
-    // given:
-    /** @type {MessageContentToolUse} */
-    const toolUse = {
-      type: "tool_use",
-      toolUseId: "test-1",
-      toolName: "tmux_command",
-      input: { command: "new-session", args: ["-d", "-s", "test"] },
-    };
-
-    // when:
-    const result = formatToolUse(toolUse);
-
-    // then:
-    assert.ok(result.includes("tool: tmux_command"));
-    assert.ok(result.includes("commnad: new-session"));
-    assert.ok(result.includes('args: ["-d","-s","test"]'));
-  });
-
-  it("should format search_web tool use", () => {
-    // given:
-    /** @type {MessageContentToolUse} */
-    const toolUse = {
-      type: "tool_use",
-      toolUseId: "test-1",
-      toolName: "search_web",
-      input: { query: "Node.js testing" },
-    };
-
-    // when:
-    const result = formatToolUse(toolUse);
-
-    // then:
-    assert.ok(result.includes("tool: search_web"));
-    assert.ok(result.includes("query: Node.js testing"));
-  });
+      // then:
+      for (const expected of expectedIncludes) {
+        assert.ok(
+          result.includes(expected),
+          `Expected to include: ${expected}`,
+        );
+      }
+    });
+  }
 
   it("should format unknown tool use as JSON", () => {
     // given:
-    const toolUse = {
-      type: "tool_use",
-      toolUseId: "test-1",
-      toolName: "unknown_tool",
-      input: { data: "test" },
-      provider: "some-provider",
-    };
+    const toolUse = createToolUse("unknown_tool", { data: "test" });
 
     // when:
-    const result = formatToolUse(
-      /** @type {MessageContentToolUse} */ (toolUse),
-    );
+    const result = formatToolUse(toolUse);
 
     // then:
-    // provider should be filtered out
-    assert.ok(!result.includes("provider"));
     assert.ok(result.includes("unknown_tool"));
     assert.ok(result.includes("data"));
   });

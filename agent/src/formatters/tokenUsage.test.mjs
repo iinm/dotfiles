@@ -2,17 +2,33 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 import { formatProviderTokenUsage } from "./tokenUsage.mjs";
 
+/** @type {import("../model").ProviderTokenUsage} */
+const simpleUsage = {
+  inputTokens: 100,
+  outputTokens: 50,
+  totalTokens: 150,
+};
+
+/** @type {import("../model").ProviderTokenUsage} */
+const stringUsage = {
+  model: "claude-3-opus",
+  provider: "anthropic",
+};
+
+/** @type {import("../model").ProviderTokenUsage} */
+const nestedUsage = {
+  inputTokens: 100,
+  outputTokens: 50,
+  details: {
+    cacheCreationInputTokens: 10,
+    cacheReadInputTokens: 5,
+  },
+};
+
 describe("formatProviderTokenUsage", () => {
   it("should format simple numeric usage", () => {
-    // given:
-    const usage = {
-      inputTokens: 100,
-      outputTokens: 50,
-      totalTokens: 150,
-    };
-
     // when:
-    const result = formatProviderTokenUsage(usage);
+    const result = formatProviderTokenUsage(simpleUsage);
 
     // then:
     assert.ok(result.includes("inputTokens: 100"));
@@ -21,14 +37,8 @@ describe("formatProviderTokenUsage", () => {
   });
 
   it("should format string values", () => {
-    // given:
-    const usage = {
-      model: "claude-3-opus",
-      provider: "anthropic",
-    };
-
     // when:
-    const result = formatProviderTokenUsage(usage);
+    const result = formatProviderTokenUsage(stringUsage);
 
     // then:
     assert.ok(result.includes("model: claude-3-opus"));
@@ -36,18 +46,8 @@ describe("formatProviderTokenUsage", () => {
   });
 
   it("should format nested object values", () => {
-    // given:
-    const usage = {
-      inputTokens: 100,
-      outputTokens: 50,
-      details: {
-        cacheCreationInputTokens: 10,
-        cacheReadInputTokens: 5,
-      },
-    };
-
     // when:
-    const result = formatProviderTokenUsage(usage);
+    const result = formatProviderTokenUsage(nestedUsage);
 
     // then:
     assert.ok(result.includes("inputTokens: 100"));
@@ -60,6 +60,7 @@ describe("formatProviderTokenUsage", () => {
 
   it("should filter out ignored keys in nested objects", () => {
     // given:
+    /** @type {import("../model").ProviderTokenUsage} */
     const usage = {
       inputTokens: 100,
       openaiDetails: {

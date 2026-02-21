@@ -1,6 +1,5 @@
 /**
- * @import { MessageContentToolUse, MessageContentToolResult } from "./model"
- * @import { Tool } from "./tool"
+ * @import { MessageContentText, MessageContentToolUse } from "./model"
  */
 
 import assert from "node:assert";
@@ -19,7 +18,11 @@ import {
 
 let toolUseIdCounter = 0;
 
-/** @returns {MessageContentToolUse} */
+/**
+ * @param {string} toolName
+ * @param {Record<string, unknown>} [input]
+ * @returns {MessageContentToolUse}
+ */
 function createToolUse(toolName, input = {}) {
   return {
     type: "tool_use",
@@ -29,7 +32,10 @@ function createToolUse(toolName, input = {}) {
   };
 }
 
-/** @returns {Map<string, Tool>} */
+/**
+ * @param {string[]} toolNames
+ * @returns {Map<string, import("./tool").Tool>}
+ */
 function createToolByName(toolNames) {
   return new Map(
     toolNames.map((name) => [
@@ -40,6 +46,7 @@ function createToolByName(toolNames) {
           description: `Description for ${name}`,
           inputSchema: { type: "object" },
         },
+        impl: /** @type {any} */ (async () => ""),
       },
     ]),
   );
@@ -110,7 +117,11 @@ describe("createUnknownToolErrorMessage", () => {
       name: "should create error message with available tools",
       unknown: ["unknown_tool"],
       known: ["exec_command", "write_file", "read_file"],
-      contains: ["Tool not found unknown_tool", "Available tools:", "exec_command"],
+      contains: [
+        "Tool not found unknown_tool",
+        "Available tools:",
+        "exec_command",
+      ],
     },
     {
       name: "should handle multiple unknown tools",
@@ -164,7 +175,13 @@ describe("validateExclusiveToolUse", () => {
     },
   ];
 
-  for (const { name, tools, expectedValid, violationType, violatedTools } of testCases) {
+  for (const {
+    name,
+    tools,
+    expectedValid,
+    violationType,
+    violatedTools,
+  } of testCases) {
     it(name, () => {
       const toolUseParts = tools.map((name) => createToolUse(name));
 
@@ -187,20 +204,23 @@ describe("createExclusiveToolViolationResults", () => {
 
     assert.strictEqual(result.length, 2);
     assert.strictEqual(result[0].isError, true);
-    assert.strictEqual(result[0].content[0].text, "Tool call rejected");
+    const firstContent = /** @type {MessageContentText} */ (
+      result[0].content[0]
+    );
+    assert.strictEqual(firstContent.text, "Tool call rejected");
   });
 });
 
 describe("createExclusiveToolViolationLogMessage", () => {
   const testCases = [
     {
-      name: "should create log message for multiple exclusive tools",
+      name: "should create log message for multiple",
       violationType: "multiple",
       violatedTools: ["delegate", "report"],
       expected: "multiple exclusive tool use",
     },
     {
-      name: "should create log message for exclusive with others",
+      name: "should create log message for with-others",
       violationType: "with-others",
       violatedTools: ["delegate"],
       expected: "exclusive tool use with other tools",
@@ -209,10 +229,9 @@ describe("createExclusiveToolViolationLogMessage", () => {
 
   for (const { name, violationType, violatedTools, expected } of testCases) {
     it(name, () => {
-      // @ts-ignore
       const result = createExclusiveToolViolationLogMessage(
         violatedTools,
-        violationType,
+        /** @type {any} */ (violationType),
       );
 
       assert.ok(result.includes(expected), `Should include "${expected}"`);
@@ -245,7 +264,13 @@ describe("validateToolUse", () => {
     },
   ];
 
-  for (const { name, tools, knownTools = tools, expectedValid, errorContains } of testCases) {
+  for (const {
+    name,
+    tools,
+    knownTools = tools,
+    expectedValid,
+    errorContains,
+  } of testCases) {
     it(name, () => {
       const toolUseParts = tools.map((name) => createToolUse(name));
       const toolByName = createToolByName(knownTools);
