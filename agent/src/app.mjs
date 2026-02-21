@@ -52,13 +52,26 @@ import { createSessionId } from "./utils/createSessionId.mjs";
   /** @type {Tool[]} */
   const mcpTools = [];
   if (appConfig.mcpServers) {
-    for (const [serverName, serverConfig] of Object.entries(
-      appConfig.mcpServers,
-    )) {
+    const mcpServerEntries = Object.entries(appConfig.mcpServers);
+
+    // Log all connections being started
+    console.log();
+    for (const [serverName] of mcpServerEntries) {
       console.log(
-        styleText("blue", `\n🔌 Connecting to MCP server: ${serverName}...`),
+        styleText("blue", `🔌 Connecting to MCP server: ${serverName}...`),
       );
-      const { tools, cleanup } = await setupMCPServer(serverName, serverConfig);
+    }
+
+    // Connect to all MCP servers in parallel
+    const mcpResults = await Promise.all(
+      mcpServerEntries.map(async ([serverName, serverConfig]) => {
+        const result = await setupMCPServer(serverName, serverConfig);
+        return { serverName, ...result };
+      }),
+    );
+
+    // Collect results
+    for (const { serverName, tools, cleanup } of mcpResults) {
       mcpTools.push(...tools);
       mcpCleanups.push(cleanup);
       console.log(

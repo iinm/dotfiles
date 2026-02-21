@@ -5,6 +5,9 @@
  * @import { MCPServerConfig } from "./config";
  */
 
+import { mkdir, open } from "node:fs/promises";
+import path from "node:path";
+import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
 import { noThrow } from "./utils/noThrow.mjs";
 import { writeTmpFile } from "./utils/tmpfile.mjs";
 
@@ -24,12 +27,12 @@ const OUTPUT_MAX_LENGTH = 1024 * 8;
 export async function setupMCPServer(serverName, serverConfig) {
   const { options, ...params } = serverConfig;
 
-  const mcpClient = await startMCPServer({
+  const { client, cleanup } = await startMCPServer({
     serverName,
     params,
   });
 
-  const tools = (await createMCPTools(serverName, mcpClient)).filter(
+  const tools = (await createMCPTools(serverName, client)).filter(
     (tool) =>
       !options?.enabledTools ||
       options.enabledTools.find((enabledToolName) =>
@@ -39,7 +42,10 @@ export async function setupMCPServer(serverName, serverConfig) {
 
   return {
     tools,
-    cleanup: () => mcpClient.close(),
+    cleanup: async () => {
+      cleanup();
+      await client.close();
+    },
   };
 }
 
@@ -51,7 +57,7 @@ export async function setupMCPServer(serverName, serverConfig) {
 
 /**
  * @param {MCPClientOptions} options - The options for the client.
- * @returns {Promise<Client>} - The MCP client.
+ * @returns {Promise<{client: Client; cleanup: () => void}>} - The MCP client and cleanup function.
  */
 async function startMCPServer(options) {
   const mcpClient = await import("@modelcontextprotocol/sdk/client/index.js");
@@ -71,13 +77,25 @@ async function startMCPServer(options) {
     HOME: process.env.HOME || "",
   };
 
+  // Ensure log directory exists and open stderr log file
+  const logDir = path.join(AGENT_PROJECT_METADATA_DIR, "logs");
+  await mkdir(logDir, { recursive: true });
+  const logPath = path.join(logDir, `mcp--${options.serverName}.stderr`);
+  const stderrLogFile = await open(logPath, "a");
+
   const transport = new mcpClientStdio.StdioClientTransport({
     ...restParams,
     env: env ? { ...defaultEnv, ...env } : undefined,
+    stderr: stderrLogFile.fd,
   });
   await client.connect(transport);
 
-  return client;
+  return {
+    client,
+    cleanup: () => {
+      stderrLogFile.close();
+    },
+  };
 }
 
 /**
