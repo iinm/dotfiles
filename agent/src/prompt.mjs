@@ -1,3 +1,78 @@
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
+
+/**
+ * Execute a command and return the result
+ * @param {string} command
+ * @param {string[]} args
+ * @param {string} cwd
+ * @returns {Promise<{stdout: string, stderr: string}>}
+ */
+async function execCommand(command, args, cwd) {
+  try {
+    return await execFileAsync(command, args, {
+      cwd,
+      maxBuffer: 10 * 1024 * 1024,
+    });
+  } catch (error) {
+    const err = /** @type {any} */ (error);
+    return {
+      stdout: err.stdout || "",
+      stderr: err.stderr || err.message || "",
+    };
+  }
+}
+
+/**
+ * Discover project context (AGENTS.md and Skills)
+ * @param {string} workingDir
+ * @returns {Promise<string>}
+ */
+async function discoverProjectContext(workingDir) {
+  let contextSection = "";
+
+  // Find AGENTS.md files
+  const agentsMdResult = await execCommand(
+    "fd",
+    ["^AGENTS.*\\.md$", "./", "--hidden", "--max-depth", "5"],
+    workingDir,
+  );
+
+  if (agentsMdResult.stdout.trim()) {
+    const files = agentsMdResult.stdout.trim().split("\n");
+    contextSection += "\nAGENTS.md files found:\n";
+    files.forEach((file) => {
+      contextSection += `- ${file}\n`;
+    });
+  }
+
+  // Find Skills
+  const skillsResult = await execCommand(
+    "rg",
+    [
+      "--hidden",
+      "--heading",
+      "--line-number",
+      "--pcre2",
+      "--multiline",
+      "--glob",
+      "SKILL.md",
+      "\\A---\\n[\\s\\S]*?\\n---",
+      "./",
+    ],
+    workingDir,
+  );
+
+  if (skillsResult.stdout.trim()) {
+    contextSection += "\nSkills found:\n";
+    contextSection += `${skillsResult.stdout.trim()}\n`;
+  }
+
+  return contextSection;
+}
+
 /**
  * @typedef {object} PromptConfig
  * @property {string} username
@@ -7,6 +82,7 @@
  * @property {string} workingDir - The current working directory.
  * @property {string} projectMetadataDir - The directory where memory files are stored.
  * @property {Map<string, import('./utils/loadAgentRoles.mjs').AgentRole>} agentRoles - Available agent roles.
+ * @property {string} [projectContext] - Pre-discovered project context (AGENTS.md and Skills).
  */
 
 /**
@@ -21,6 +97,7 @@ export function createPrompt({
   workingDir,
   projectMetadataDir,
   agentRoles,
+  projectContext,
 }) {
   // Build agent roles section
   let agentRolesSection = "";
@@ -48,16 +125,23 @@ export function createPrompt({
 
 ## Project Context Discovery
 
-At session start, find agent docs:
-- AGENTS.md (project rules and conventions):
-  { command: "fd", args: ["^AGENTS.*\\.md$", "./", "--hidden", "--max-depth", "5"] }
-- Skills (reusable workflows with specialized knowledge):
-  { command: "rg", args: ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "SKILL.md", "\\A---\\n[\\s\\S]*?\\n---", "./"] }
+${projectContext || "No project context discovered yet."}
 
 When working on files under a directory, read AGENTS.md from repo root down to that directory.
 Example: foo/bar -> ./AGENTS.md, foo/AGENTS.md, foo/bar/AGENTS.md (if they exist).
 
 If a skill matches the task, read its full file and follow/adapt it.
+
+<details>
+<summary>How to discover project context manually</summary>
+
+Find agent docs:
+- AGENTS.md (project rules and conventions):
+  { command: "fd", args: ["^AGENTS.*\\.md$", "./", "--hidden", "--max-depth", "5"] }
+- Skills (reusable workflows with specialized knowledge):
+  { command: "rg", args: ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "SKILL.md", "\\A---\\n[\\s\\S]*?\\n---", "./"] }
+
+</details>
 
 ## Memory Files
 
@@ -255,3 +339,5 @@ Basic commands:
 - Use subagents liberally to keep main context focused on planning and decisions.
 `.trim();
 }
+
+export { discoverProjectContext };

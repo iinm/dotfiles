@@ -9,7 +9,7 @@ import { loadAppConfig } from "./config.mjs";
 import { AGENT_PROJECT_METADATA_DIR, USER_NAME } from "./env.mjs";
 import { setupMCPServer } from "./mcp.mjs";
 import { createModelCaller } from "./modelRegistry.mjs";
-import { createPrompt } from "./prompt.mjs";
+import { createPrompt, discoverProjectContext } from "./prompt.mjs";
 import { createToolUseApprover } from "./tool.mjs";
 import { createAskGoogleTool } from "./tools/askGoogle.mjs";
 import { delegateToSubagentTool } from "./tools/delegateToSubagent.mjs";
@@ -83,6 +83,9 @@ import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
 
   const agentRoles = await loadAgentRoles();
 
+  // Discover project context at session start
+  const projectContext = await discoverProjectContext(process.cwd());
+
   const prompt = createPrompt({
     username: USER_NAME,
     modelName: appConfig.model || "",
@@ -91,6 +94,7 @@ import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
     workingDir: process.cwd(),
     projectMetadataDir: AGENT_PROJECT_METADATA_DIR,
     agentRoles,
+    projectContext,
   });
 
   const builtinTools = [
