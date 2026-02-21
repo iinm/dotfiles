@@ -243,7 +243,7 @@ export function startInteractiveSession({
       "",
       styleText(["cyanBright", "bgGray"], "▌") +
         (subagentName
-          ? styleText(["cyan", "bgGray"], `[${subagentName}] `)
+          ? styleText(["cyanBright", "bgGray"], `[${subagentName}] `)
           : "") +
         styleText(
           ["white", "bgGray"],
