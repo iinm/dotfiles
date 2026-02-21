@@ -2,6 +2,7 @@
  * @import { AgentEventEmitter } from "./agent"
  * @import { Message, MessageContentToolResult, MessageContentToolUse } from "./model"
  * @import { ReportAsSubagentInput } from "./tools/reportAsSubagent.mjs";
+ * @import { AgentRole } from "./utils/loadAgentRoles.mjs";
  */
 
 import fs from "node:fs/promises";
@@ -42,9 +43,10 @@ import { noThrow } from "./utils/noThrow.mjs";
 /**
  * Creates a manager for subagent lifecycle and state.
  * @param {AgentEventEmitter} agentEventEmitter
+ * @param {Map<string, AgentRole>} agentRoles
  * @returns {SubagentManager}
  */
-export function createSubagentManager(agentEventEmitter) {
+export function createSubagentManager(agentEventEmitter, agentRoles) {
   /** @type {SubagentState[]} */
   const subagents = [];
 
@@ -182,25 +184,55 @@ export function createSubagentManager(agentEventEmitter) {
       };
     }
 
+    // Check if it's a custom (ad-hoc) role
+    const isCustomRole = name.startsWith("custom:");
+    const actualName = isCustomRole ? name.substring(7) : name;
+
+    let roleContent = "";
+    if (!isCustomRole) {
+      // Look for preset role
+      const role = agentRoles.get(name);
+      if (!role) {
+        const availableRoles = Array.from(agentRoles.keys())
+          .sort()
+          .map((id) => `  - ${id}`)
+          .join("\n");
+        return {
+          success: false,
+          error: `Preset role "${name}" not found. Available preset roles:\n${availableRoles}\n\nTo use an ad-hoc role, prefix the name with "custom:" (e.g., "custom:researcher").`,
+        };
+      }
+      roleContent = role.content;
+    }
+
     subagents.push({
-      name,
+      name: actualName,
       goal,
       delegateResultMessageIndex: messages.length,
     });
 
-    agentEventEmitter.emit("subagentStatus", { name });
+    agentEventEmitter.emit("subagentStatus", { name: actualName });
+
+    const messageParts = [
+      `✓ Delegation successful. You are now the subagent "${actualName}".`,
+      "",
+      `Your goal: ${goal}`,
+    ];
+
+    if (roleContent) {
+      messageParts.push("", `Role: ${name}`, "---", roleContent, "---");
+    }
+
+    messageParts.push(
+      "",
+      `Memory file path format: ${AGENT_PROJECT_METADATA_DIR}/memory/<session-id>--${actualName}--<kebab-case-title>.md (Replace <kebab-case-title> to match the parent task)`,
+      "",
+      `Start working on this goal now. When finished, call "report_as_subagent" with the memory file path.`,
+    );
 
     return {
       success: true,
-      message: [
-        `✓ Delegation successful. You are now the subagent "${name}".`,
-        "",
-        `Your goal: ${goal}`,
-        "",
-        `Memory file path format: ${AGENT_PROJECT_METADATA_DIR}/memory/<session-id>--${name}--<kebab-case-title>.md (Replace <kebab-case-title> to match the parent task)`,
-        "",
-        `Start working on this goal now. When finished, call "report_as_subagent" with the memory file path.`,
-      ].join("\n"),
+      message: messageParts.join("\n"),
     };
   }
 

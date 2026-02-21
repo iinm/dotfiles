@@ -8,6 +8,7 @@ import type {
   ProviderTokenUsage,
 } from "./model";
 import type { Tool, ToolUseApprover } from "./tool";
+import type { AgentRole } from "./utils/loadAgentRoles.mjs";
 
 export type Agent = {
   userEventEmitter: UserEventEmitter;
@@ -43,4 +44,5 @@ export type AgentConfig = {
   prompt: string;
   tools: Tool[];
   toolUseApprover: ToolUseApprover;
+  agentRoles: Map<string, AgentRole>;
 };

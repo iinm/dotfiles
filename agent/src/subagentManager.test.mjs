@@ -17,7 +17,7 @@ describe("createSubagentManager", () => {
     it("should return null when no subagent is active", () => {
       // given:
       const emitter = createMockEventEmitter();
-      const manager = createSubagentManager(emitter);
+      const manager = createSubagentManager(emitter, new Map());
 
       // when:
       const result = manager.getCurrentSubagent();
@@ -29,12 +29,12 @@ describe("createSubagentManager", () => {
     it("should return the current subagent after delegation", () => {
       // given:
       const emitter = createMockEventEmitter();
-      const manager = createSubagentManager(emitter);
+      const manager = createSubagentManager(emitter, new Map());
       /** @type {Message[]} */
       const messages = [];
 
       // when:
-      manager.delegateToSubagent("test-agent", "Test goal", messages);
+      manager.delegateToSubagent("custom:test-agent", "Test goal", messages);
       const result = manager.getCurrentSubagent();
 
       // then:
@@ -48,7 +48,7 @@ describe("createSubagentManager", () => {
     it("should return 0 initially", () => {
       // given:
       const emitter = createMockEventEmitter();
-      const manager = createSubagentManager(emitter);
+      const manager = createSubagentManager(emitter, new Map());
 
       // when:
       const result = manager.getSubagentCount();
@@ -60,12 +60,12 @@ describe("createSubagentManager", () => {
     it("should return 1 after delegation", () => {
       // given:
       const emitter = createMockEventEmitter();
-      const manager = createSubagentManager(emitter);
+      const manager = createSubagentManager(emitter, new Map());
       /** @type {Message[]} */
       const messages = [];
 
       // when:
-      manager.delegateToSubagent("test-agent", "Test goal", messages);
+      manager.delegateToSubagent("custom:test-agent", "Test goal", messages);
       const result = manager.getSubagentCount();
 
       // then:
@@ -77,7 +77,7 @@ describe("createSubagentManager", () => {
     it("should return false initially", () => {
       // given:
       const emitter = createMockEventEmitter();
-      const manager = createSubagentManager(emitter);
+      const manager = createSubagentManager(emitter, new Map());
 
       // when:
       const result = manager.isInSubagentMode();
@@ -89,12 +89,12 @@ describe("createSubagentManager", () => {
     it("should return true after delegation", () => {
       // given:
       const emitter = createMockEventEmitter();
-      const manager = createSubagentManager(emitter);
+      const manager = createSubagentManager(emitter, new Map());
       /** @type {Message[]} */
       const messages = [];
 
       // when:
-      manager.delegateToSubagent("test-agent", "Test goal", messages);
+      manager.delegateToSubagent("custom:test-agent", "Test goal", messages);
       const result = manager.isInSubagentMode();
 
       // then:
@@ -106,13 +106,13 @@ describe("createSubagentManager", () => {
     it("should return success for valid delegation", () => {
       // given:
       const emitter = createMockEventEmitter();
-      const manager = createSubagentManager(emitter);
+      const manager = createSubagentManager(emitter, new Map());
       /** @type {Message[]} */
       const messages = [];
 
       // when:
       const result = manager.delegateToSubagent(
-        "test-agent",
+        "custom:test-agent",
         "Test goal",
         messages,
       );
@@ -126,14 +126,14 @@ describe("createSubagentManager", () => {
     it("should return error when already in subagent mode", () => {
       // given:
       const emitter = createMockEventEmitter();
-      const manager = createSubagentManager(emitter);
+      const manager = createSubagentManager(emitter, new Map());
       /** @type {Message[]} */
       const messages = [];
-      manager.delegateToSubagent("first-agent", "First goal", messages);
+      manager.delegateToSubagent("custom:first-agent", "First goal", messages);
 
       // when:
       const result = manager.delegateToSubagent(
-        "second-agent",
+        "custom:second-agent",
         "Second goal",
         messages,
       );
@@ -151,12 +151,12 @@ describe("createSubagentManager", () => {
       emitter.on("subagentStatus", (status) => {
         emittedStatuses.push(status);
       });
-      const manager = createSubagentManager(emitter);
+      const manager = createSubagentManager(emitter, new Map());
       /** @type {Message[]} */
       const messages = [];
 
       // when:
-      manager.delegateToSubagent("test-agent", "Test goal", messages);
+      manager.delegateToSubagent("custom:test-agent", "Test goal", messages);
 
       // then:
       assert.strictEqual(emittedStatuses.length, 1);
@@ -168,10 +168,10 @@ describe("createSubagentManager", () => {
     it("should return null when no report_as_subagent tool use", () => {
       // given:
       const emitter = createMockEventEmitter();
-      const manager = createSubagentManager(emitter);
+      const manager = createSubagentManager(emitter, new Map());
       /** @type {Message[]} */
       const messages = [];
-      manager.delegateToSubagent("test-agent", "Test goal", messages);
+      manager.delegateToSubagent("custom:test-agent", "Test goal", messages);
 
       /** @type {MessageContentToolUse[]} */
       const toolUseParts = [
@@ -207,10 +207,10 @@ describe("createSubagentManager", () => {
     it("should return null when report result has error", () => {
       // given:
       const emitter = createMockEventEmitter();
-      const manager = createSubagentManager(emitter);
+      const manager = createSubagentManager(emitter, new Map());
       /** @type {Message[]} */
       const messages = [];
-      manager.delegateToSubagent("test-agent", "Test goal", messages);
+      manager.delegateToSubagent("custom:test-agent", "Test goal", messages);
 
       /** @type {MessageContentToolUse[]} */
       const toolUseParts = [
@@ -246,13 +246,13 @@ describe("createSubagentManager", () => {
     it("should handle successful report and truncate history", () => {
       // given:
       const emitter = createMockEventEmitter();
-      const manager = createSubagentManager(emitter);
+      const manager = createSubagentManager(emitter, new Map());
       /** @type {Message[]} */
       const messages = [
         { role: "user", content: [{ type: "text", text: "Initial" }] },
         { role: "assistant", content: [{ type: "text", text: "Response" }] },
       ];
-      manager.delegateToSubagent("test-agent", "Test goal", messages);
+      manager.delegateToSubagent("custom:test-agent", "Test goal", messages);
       const initialLength = messages.length;
 
       /** @type {MessageContentToolUse[]} */
@@ -302,10 +302,10 @@ describe("createSubagentManager", () => {
       emitter.on("subagentStatus", (status) => {
         emittedStatuses.push(status);
       });
-      const manager = createSubagentManager(emitter);
+      const manager = createSubagentManager(emitter, new Map());
       /** @type {Message[]} */
       const messages = [];
-      manager.delegateToSubagent("test-agent", "Test goal", messages);
+      manager.delegateToSubagent("custom:test-agent", "Test goal", messages);
 
       /** @type {MessageContentToolUse[]} */
       const toolUseParts = [
@@ -341,7 +341,7 @@ describe("createSubagentManager", () => {
     it("should return error when not in subagent mode", async () => {
       // given:
       const emitter = createMockEventEmitter();
-      const manager = createSubagentManager(emitter);
+      const manager = createSubagentManager(emitter, new Map());
 
       // when:
       const result = await manager.reportAsSubagent(".agent/memory/test.md");
@@ -354,10 +354,10 @@ describe("createSubagentManager", () => {
     it("should return error for path outside working directory", async () => {
       // given:
       const emitter = createMockEventEmitter();
-      const manager = createSubagentManager(emitter);
+      const manager = createSubagentManager(emitter, new Map());
       /** @type {Message[]} */
       const messages = [];
-      manager.delegateToSubagent("test-agent", "Test goal", messages);
+      manager.delegateToSubagent("custom:test-agent", "Test goal", messages);
 
       // when:
       const result = await manager.reportAsSubagent("/etc/passwd");
@@ -370,10 +370,10 @@ describe("createSubagentManager", () => {
     it("should return error for non-existent file", async () => {
       // given:
       const emitter = createMockEventEmitter();
-      const manager = createSubagentManager(emitter);
+      const manager = createSubagentManager(emitter, new Map());
       /** @type {Message[]} */
       const messages = [];
-      manager.delegateToSubagent("test-agent", "Test goal", messages);
+      manager.delegateToSubagent("custom:test-agent", "Test goal", messages);
 
       // when:
       const result = await manager.reportAsSubagent(
@@ -390,7 +390,7 @@ describe("createSubagentManager", () => {
     it("should handle full delegation and report cycle", () => {
       // given:
       const emitter = createMockEventEmitter();
-      const manager = createSubagentManager(emitter);
+      const manager = createSubagentManager(emitter, new Map());
       /** @type {Message[]} */
       const messages = [
         { role: "user", content: [{ type: "text", text: "Start" }] },
@@ -398,7 +398,7 @@ describe("createSubagentManager", () => {
 
       // when - delegate:
       const delegateResult = manager.delegateToSubagent(
-        "worker",
+        "custom:worker",
         "Do work",
         messages,
       );

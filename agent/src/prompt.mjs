@@ -6,6 +6,7 @@
  * @property {string} tmuxSessionId
  * @property {string} workingDir - The current working directory.
  * @property {string} projectMetadataDir - The directory where memory files are stored.
+ * @property {Map<string, import('./utils/loadAgentRoles.mjs').AgentRole>} agentRoles - Available preset agent roles.
  */
 
 /**
@@ -19,7 +20,25 @@ export function createPrompt({
   tmuxSessionId,
   workingDir,
   projectMetadataDir,
+  agentRoles,
 }) {
+  // Build agent roles section
+  let agentRolesSection = "";
+  if (agentRoles && agentRoles.size > 0) {
+    const rolesList = Array.from(agentRoles.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([id, role]) => {
+        let desc = role.description || "";
+        if (desc.length > 100) {
+          desc = `${desc.substring(0, 100)}...`;
+        }
+        return `- ${id}: ${desc}`;
+      })
+      .join("\n");
+
+    agentRolesSection = `\nAvailable preset roles:\n${rolesList}\n\nYou can use these as name parameter, or use "custom:" prefix for ad-hoc roles.\n`;
+  }
+
   return `
 ## Communication Style
 
@@ -106,7 +125,7 @@ Constraints:
 - Cannot be called when already acting as a subagent
 - Must be called alone (cannot be combined with other tools)
 - Define a clear goal before delegating
-
+${agentRolesSection}
 After delegation, start working immediately and call report_as_subagent when finished.
 
 ### report_as_subagent

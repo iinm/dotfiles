@@ -18,7 +18,13 @@ import { reportAsSubagentTool } from "./tools/reportAsSubagent.mjs";
  * @param {AgentConfig} config
  * @returns {Agent}
  */
-export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
+export function createAgent({
+  callModel,
+  prompt,
+  tools,
+  toolUseApprover,
+  agentRoles,
+}) {
   /** @type {{ messages: Message[] }} */
   const state = {
     messages: [
@@ -35,7 +41,7 @@ export function createAgent({ callModel, prompt, tools, toolUseApprover }) {
   const agentEventEmitter = new EventEmitter();
 
   // Initialize subagent manager
-  const subagentManager = createSubagentManager(agentEventEmitter);
+  const subagentManager = createSubagentManager(agentEventEmitter, agentRoles);
 
   // Inject delegate/report tool implementations that require access to the agent state
   const injectedTools = tools.map((tool) => {

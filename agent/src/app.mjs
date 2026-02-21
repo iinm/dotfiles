@@ -22,6 +22,7 @@ import { createTavilySearchTool } from "./tools/tavilySearch.mjs";
 import { createTmuxCommandTool } from "./tools/tmuxCommand.mjs";
 import { writeFileTool } from "./tools/writeFile.mjs";
 import { createSessionId } from "./utils/createSessionId.mjs";
+import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
 
 (async () => {
   const sessionId = createSessionId();
@@ -80,6 +81,8 @@ import { createSessionId } from "./utils/createSessionId.mjs";
     }
   }
 
+  const agentRoles = await loadAgentRoles();
+
   const prompt = createPrompt({
     username: USER_NAME,
     modelName: appConfig.model || "",
@@ -87,6 +90,7 @@ import { createSessionId } from "./utils/createSessionId.mjs";
     tmuxSessionId,
     workingDir: process.cwd(),
     projectMetadataDir: AGENT_PROJECT_METADATA_DIR,
+    agentRoles,
   });
 
   const builtinTools = [
@@ -132,6 +136,7 @@ import { createSessionId } from "./utils/createSessionId.mjs";
     prompt,
     tools: [...builtinTools, ...mcpTools],
     toolUseApprover,
+    agentRoles,
   });
 
   startInteractiveSession({
