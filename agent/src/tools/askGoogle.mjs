@@ -53,7 +53,13 @@ export function createAskGoogleTool(config) {
       contents: [
         {
           role: "user",
-          parts: [{ text: input.question }],
+          parts: [
+            {
+              text: `I need a comprehensive answer to this question. Please note that I don't have access to external URLs, so include all relevant facts, data, or explanations directly in your response. Avoid referencing links I can't open.
+
+Question: ${input.question}`,
+            },
+          ],
         },
       ],
       tools: [
