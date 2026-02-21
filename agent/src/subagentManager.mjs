@@ -50,10 +50,15 @@ import { reportAsSubagentTool } from "./tools/reportAsSubagent.mjs";
  */
 
 /**
+ * @typedef {Object} SubagentManagerState
+ * @property {SubagentState | null} current - Current active subagent
+ * @property {number} count - Number of active subagents
+ * @property {boolean} isActive - Whether currently in subagent mode
+ */
+
+/**
  * @typedef {Object} SubagentManager
- * @property {() => SubagentState | null} getCurrentSubagent
- * @property {() => number} getSubagentCount
- * @property {() => boolean} isInSubagentMode
+ * @property {() => SubagentManagerState} getState
  * @property {(toolUseParts: MessageContentToolUse[], toolResults: MessageContentToolResult[], messages: Message[]) => { messages: Message[], newMessage: Message | null }} processToolResults
  * @property {(name: string, goal: string, messages: Message[]) => DelegateResult} delegateToSubagent
  * @property {(memoryPath: string) => Promise<ReportResult>} reportAsSubagent
@@ -70,38 +75,17 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
   const subagents = [];
 
   /**
-   * Get the current active subagent (the most recent one).
-   * @returns {SubagentState | null}
+   * Get the combined state of the subagent manager.
+   * This method provides a unified interface to query subagent state.
+   *
+   * @returns {SubagentManagerState} Combined subagent state
    */
-  function getCurrentSubagent() {
-    return subagents.at(-1) ?? null;
-  }
-
-  /**
-   * Get the number of active subagents.
-   * @returns {number}
-   */
-  function getSubagentCount() {
-    return subagents.length;
-  }
-
-  /**
-   * Check if currently acting as a subagent.
-   * @returns {boolean}
-   */
-  function isInSubagentMode() {
-    return subagents.length > 0;
-  }
-
-  /**
-   * Truncate message history back to before the delegation point.
-   * Returns a new array without modifying the original.
-   * @param {Message[]} messages
-   * @param {number} delegateResultMessageIndex
-   * @returns {Message[]} New truncated message array
-   */
-  function truncateHistory(messages, delegateResultMessageIndex) {
-    return messages.slice(0, delegateResultMessageIndex - 1);
+  function getState() {
+    return {
+      current: subagents.at(-1) ?? null,
+      count: subagents.length,
+      isActive: subagents.length > 0,
+    };
   }
 
   /**
@@ -127,9 +111,11 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
     }
 
     // Truncate history back to before the delegation point
-    const truncatedMessages = truncateHistory(
-      messages,
-      currentSubagent.delegateResultMessageIndex,
+    // The -1 ensures the delegation result message itself is not included,
+    // as it will be replaced by the subagent's report message
+    const truncatedMessages = messages.slice(
+      0,
+      currentSubagent.delegateResultMessageIndex - 1,
     );
 
     agentEventEmitter.emit(
@@ -298,9 +284,7 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
   }
 
   return {
-    getCurrentSubagent,
-    getSubagentCount,
-    isInSubagentMode,
+    getState,
     processToolResults,
     delegateToSubagent,
     reportAsSubagent,

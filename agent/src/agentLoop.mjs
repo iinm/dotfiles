@@ -1,14 +1,12 @@
 /**
  * @import { AgentEventEmitter } from "./agent"
  * @import { CallModel, Message, MessageContentText, MessageContentImage, MessageContentToolResult, MessageContentToolUse, PartialMessageContent } from "./model"
- * @import { Tool, ToolDefinition, ToolUseApprover } from "./tool"
+ * @import { ToolDefinition, ToolUseApprover } from "./tool"
  * @import { SubagentManager } from "./subagentManager.mjs"
  */
 
 import { styleText } from "node:util";
-import { delegateToSubagentTool } from "./tools/delegateToSubagent.mjs";
-import { reportAsSubagentTool } from "./tools/reportAsSubagent.mjs";
-import { validateToolUse } from "./toolValidation.mjs";
+import { createInputHandler } from "./inputHandler.mjs";
 import { consumeInterruptMessage } from "./utils/consumeInterruptMessage.mjs";
 
 /**
@@ -16,11 +14,10 @@ import { consumeInterruptMessage } from "./utils/consumeInterruptMessage.mjs";
  * @property {CallModel} callModel - Function to call the language model
  * @property {{ messages: Message[] }} state - Agent state containing messages
  * @property {ToolDefinition[]} toolDefs - Tool definitions for the model
- * @property {Map<string, Tool>} toolByName - Map of tool names to tool implementations
+ * @property {import("./toolExecutor.mjs").ToolExecutor} toolExecutor - Tool executor instance
  * @property {AgentEventEmitter} agentEventEmitter - Event emitter for agent events
  * @property {ToolUseApprover} toolUseApprover - Tool use approval checker
  * @property {SubagentManager} subagentManager - Subagent manager instance
- * @property {(toolUse: MessageContentToolUse, toolByName: Map<string, Tool>) => Promise<MessageContentToolResult>} callTool - Function to execute a tool call
  */
 
 /**
@@ -37,12 +34,20 @@ export function createAgentLoop({
   callModel,
   state,
   toolDefs,
-  toolByName,
+  toolExecutor,
   agentEventEmitter,
   toolUseApprover,
   subagentManager,
-  callTool,
 }) {
+  // Create input handler
+  const inputHandler = createInputHandler({
+    state,
+    toolExecutor,
+    subagentManager,
+    toolUseApprover,
+    agentEventEmitter,
+  });
+
   /**
    * Handle user input and run the agent turn loop
    * @param {(MessageContentText | MessageContentImage)[]} input - User input content
@@ -51,87 +56,8 @@ export function createAgentLoop({
   async function handleUserInput(input) {
     toolUseApprover.resetApprovalCount();
 
-    const lastMessage = state.messages.at(-1);
-
-    if (lastMessage?.content.some((part) => part.type === "tool_use")) {
-      /** @type {MessageContentToolUse[]} */
-      const toolUseParts = lastMessage.content.filter(
-        (part) => part.type === "tool_use",
-      );
-      // Pending tool call
-      if (
-        input.length === 1 &&
-        input[0].type === "text" &&
-        input[0].text.toLocaleLowerCase().match(/^(yes|y|ｙ)$/i)
-      ) {
-        if (input[0].text.match(/^(YES|Y)$/)) {
-          // Allow tool use
-          for (const toolUse of toolUseParts) {
-            toolUseApprover.allowToolUse(toolUse);
-          }
-        }
-
-        // Approved
-        /** @type {MessageContentToolResult[]} */
-        const toolResults = [];
-        for (const toolUse of toolUseParts) {
-          toolResults.push(await callTool(toolUse, toolByName));
-        }
-
-        const result = subagentManager.processToolResults(
-          toolUseParts,
-          toolResults,
-          state.messages,
-        );
-        state.messages = result.messages;
-        if (result.newMessage) {
-          state.messages = [...state.messages, result.newMessage];
-        } else {
-          state.messages = [
-            ...state.messages,
-            { role: "user", content: toolResults },
-          ];
-        }
-
-        agentEventEmitter.emit(
-          "message",
-          state.messages[state.messages.length - 1],
-        );
-      } else {
-        // Rejected
-        /** @type {MessageContentToolResult[]} */
-        const toolResults = toolUseParts.map((toolUse) => ({
-          type: "tool_result",
-          toolUseId: toolUse.toolUseId,
-          toolName: toolUse.toolName,
-          content: [{ type: "text", text: "Tool call rejected" }],
-          isError: true,
-        }));
-        state.messages = [
-          ...state.messages,
-          { role: "user", content: toolResults },
-          {
-            role: "user",
-            content: input,
-          },
-        ];
-      }
-    } else if (
-      input.length === 1 &&
-      input[0].type === "text" &&
-      input[0].text.toLowerCase() === "/resume"
-    ) {
-      // Resume the conversation stopped by rate limit, etc.
-    } else {
-      // No pending tool call
-      state.messages = [
-        ...state.messages,
-        {
-          role: "user",
-          content: input,
-        },
-      ];
-    }
+    // Process input based on type
+    await inputHandler.handle(input);
 
     await runTurnLoop();
     agentEventEmitter.emit("turnEnd");
@@ -203,38 +129,6 @@ export function createAgentLoop({
         break;
       }
 
-      // Validate tool use (unknown tools and exclusive tool violations)
-      const exclusiveToolNames = [
-        delegateToSubagentTool.def.name,
-        reportAsSubagentTool.def.name,
-      ];
-      const validation = validateToolUse(
-        toolUseParts,
-        toolByName,
-        exclusiveToolNames,
-      );
-
-      if (!validation.isValid) {
-        state.messages = [
-          ...state.messages,
-          {
-            role: "user",
-            content: validation.toolResults,
-          },
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: validation.errorMessage,
-              },
-            ],
-          },
-        ];
-        console.error(styleText("yellow", validation.errorMessage));
-        continue;
-      }
-
       // Auto approve tool use
       const decisions = toolUseParts.map(toolUseApprover.isAllowedToolUse);
 
@@ -273,11 +167,32 @@ export function createAgentLoop({
         break;
       }
 
-      /** @type {MessageContentToolResult[]} */
-      const toolResults = [];
-      for (const toolUse of toolUseParts) {
-        toolResults.push(await callTool(toolUse, toolByName));
+      // Execute tools with batch validation
+      const executionResult = await toolExecutor.executeBatch(toolUseParts);
+
+      // Handle validation errors
+      if (!executionResult.success) {
+        state.messages = [
+          ...state.messages,
+          {
+            role: "user",
+            content: executionResult.errors,
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: executionResult.errorMessage,
+              },
+            ],
+          },
+        ];
+        console.error(styleText("yellow", executionResult.errorMessage));
+        continue;
       }
+
+      const toolResults = executionResult.results;
 
       const result = subagentManager.processToolResults(
         toolUseParts,

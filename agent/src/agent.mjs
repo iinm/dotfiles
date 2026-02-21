@@ -1,6 +1,6 @@
 /**
  * @import { Agent, AgentConfig, AgentEventEmitter, UserEventEmitter } from "./agent"
- * @import { Message, MessageContentToolResult, MessageContentToolUse } from "./model"
+ * @import { Message } from "./model"
  * @import { Tool, ToolDefinition } from "./tool"
  * @import { DelegateToSubagentInput } from "./tools/delegateToSubagent.mjs";
  * @import { ReportAsSubagentInput } from "./tools/reportAsSubagent.mjs";
@@ -11,6 +11,8 @@ import fs from "node:fs/promises";
 import { createAgentLoop } from "./agentLoop.mjs";
 import { MESSAGES_DUMP_FILE_PATH } from "./env.mjs";
 import { createSubagentManager } from "./subagentManager.mjs";
+import { createToolExecutor } from "./toolExecutor.mjs";
+import { createToolInjector } from "./toolInjector.mjs";
 import { delegateToSubagentTool } from "./tools/delegateToSubagent.mjs";
 import { reportAsSubagentTool } from "./tools/reportAsSubagent.mjs";
 
@@ -43,47 +45,61 @@ export function createAgent({
   // Initialize subagent manager
   const subagentManager = createSubagentManager(agentEventEmitter, agentRoles);
 
-  // Inject delegate/report tool implementations that require access to the agent state
-  const injectedTools = tools.map((tool) => {
-    if (tool.def.name === delegateToSubagentTool.def.name) {
-      return {
-        ...tool,
-        /**
-         * @param {DelegateToSubagentInput} input
-         */
-        impl: async (input) => {
-          const result = subagentManager.delegateToSubagent(
-            input.name,
-            input.goal,
-            state.messages,
-          );
-          if (!result.success) {
-            return new Error(result.error);
-          }
-          return result.value;
-        },
-      };
-    }
+  // Create tool injector and register injectors for special tools
+  const toolInjector = createToolInjector();
 
-    if (tool.def.name === reportAsSubagentTool.def.name) {
-      return {
-        ...tool,
-        /**
-         * @param {ReportAsSubagentInput} input
-         */
-        impl: async (input) => {
-          const result = await subagentManager.reportAsSubagent(
-            input.memoryPath,
-          );
-          if (!result.success) {
-            return new Error(result.error);
-          }
-          return result.value;
-        },
-      };
-    }
+  // Register delegate_to_subagent tool injector
+  toolInjector.register(
+    delegateToSubagentTool.def.name,
+    (
+      tool,
+      /** @type {{ subagentManager: import("./subagentManager.mjs").SubagentManager, state: { messages: Message[] } }} */ context,
+    ) => ({
+      ...tool,
+      /**
+       * @param {DelegateToSubagentInput} input
+       */
+      impl: async (input) => {
+        const result = context.subagentManager.delegateToSubagent(
+          input.name,
+          input.goal,
+          context.state.messages,
+        );
+        if (!result.success) {
+          return new Error(result.error);
+        }
+        return result.value;
+      },
+    }),
+  );
 
-    return tool;
+  // Register report_as_subagent tool injector
+  toolInjector.register(
+    reportAsSubagentTool.def.name,
+    (
+      tool,
+      /** @type {{ subagentManager: import("./subagentManager.mjs").SubagentManager }} */ context,
+    ) => ({
+      ...tool,
+      /**
+       * @param {ReportAsSubagentInput} input
+       */
+      impl: async (input) => {
+        const result = await context.subagentManager.reportAsSubagent(
+          input.memoryPath,
+        );
+        if (!result.success) {
+          return new Error(result.error);
+        }
+        return result.value;
+      },
+    }),
+  );
+
+  // Inject implementations into tools
+  const injectedTools = toolInjector.inject(tools, {
+    subagentManager,
+    state,
   });
 
   /** @type {Map<string, Tool>} */
@@ -94,6 +110,14 @@ export function createAgent({
 
   /** @type {ToolDefinition[]} */
   const toolDefs = injectedTools.map(({ def }) => def);
+
+  // Create tool executor with exclusive tool names
+  const toolExecutor = createToolExecutor(toolByName, {
+    exclusiveToolNames: [
+      delegateToSubagentTool.def.name,
+      reportAsSubagentTool.def.name,
+    ],
+  });
 
   async function dumpMessages() {
     const filePath = MESSAGES_DUMP_FILE_PATH;
@@ -130,11 +154,10 @@ export function createAgent({
     callModel,
     state,
     toolDefs,
-    toolByName,
+    toolExecutor,
     agentEventEmitter,
     toolUseApprover,
     subagentManager,
-    callTool,
   });
 
   userEventEmitter.on("userInput", agentLoop.handleUserInput);
@@ -146,63 +169,5 @@ export function createAgent({
       dumpMessages,
       loadMessages,
     },
-  };
-}
-
-/**
- * @param {MessageContentToolUse} toolUse
- * @param {Map<string, Tool>} toolByName
- * @returns {Promise<MessageContentToolResult>}
- */
-async function callTool(toolUse, toolByName) {
-  const tool = toolByName.get(toolUse.toolName);
-  if (!tool) {
-    return {
-      type: "tool_result",
-      toolUseId: toolUse.toolUseId,
-      toolName: toolUse.toolName,
-      content: [{ type: "text", text: `Tool not found: ${toolUse.toolName}` }],
-      isError: true,
-    };
-  }
-
-  if (tool.validateInput) {
-    const validateInputResult = tool.validateInput(toolUse.input);
-    if (validateInputResult instanceof Error) {
-      return {
-        type: "tool_result",
-        toolUseId: toolUse.toolUseId,
-        toolName: toolUse.toolName,
-        content: [{ type: "text", text: validateInputResult.message }],
-        isError: true,
-      };
-    }
-  }
-
-  const result = await tool.impl(toolUse.input);
-  if (result instanceof Error) {
-    return {
-      type: "tool_result",
-      toolUseId: toolUse.toolUseId,
-      toolName: toolUse.toolName,
-      content: [{ type: "text", text: result.message }],
-      isError: true,
-    };
-  }
-
-  if (typeof result === "string") {
-    return {
-      type: "tool_result",
-      toolUseId: toolUse.toolUseId,
-      toolName: toolUse.toolName,
-      content: [{ type: "text", text: result }],
-    };
-  }
-
-  return {
-    type: "tool_result",
-    toolUseId: toolUse.toolUseId,
-    toolName: toolUse.toolName,
-    content: result,
   };
 }
