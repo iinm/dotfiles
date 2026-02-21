@@ -25,6 +25,7 @@ export async function loadAgentRoles() {
     path.resolve(AGENT_ROOT, ".config", "agents.predefined"),
     path.resolve(AGENT_ROOT, ".config", "agents"),
     path.resolve(AGENT_PROJECT_METADATA_DIR, "agents"),
+    path.resolve(process.cwd(), ".claude", "agents"),
   ];
 
   /** @type {Map<string, AgentRole>} */

@@ -25,15 +25,26 @@ import {
  */
 export async function loadPrompts() {
   const promptDirs = [
-    path.resolve(AGENT_ROOT, ".config", "prompts.predefined"),
-    path.resolve(AGENT_ROOT, ".config", "prompts"),
-    path.resolve(AGENT_PROJECT_METADATA_DIR, "prompts"),
+    {
+      dir: path.resolve(AGENT_ROOT, ".config", "prompts.predefined"),
+      idPrefix: "",
+    },
+    { dir: path.resolve(AGENT_ROOT, ".config", "prompts"), idPrefix: "" },
+    { dir: path.resolve(AGENT_PROJECT_METADATA_DIR, "prompts"), idPrefix: "" },
+    {
+      dir: path.resolve(process.cwd(), ".claude", "commands"),
+      idPrefix: "claude/",
+    },
+    {
+      dir: path.resolve(process.cwd(), ".claude", "skills"),
+      idPrefix: "claude/skill/",
+    },
   ];
 
   /** @type {Map<string, Prompt>} */
   const prompts = new Map();
 
-  for (const dir of promptDirs) {
+  for (const { dir, idPrefix } of promptDirs) {
     const files = await getMarkdownFiles(dir).catch((err) => {
       if (err.code !== "ENOENT") {
         console.warn(`Failed to list prompts in ${dir}:`, err);
@@ -55,7 +66,7 @@ export async function loadPrompts() {
         continue;
       }
 
-      let prompt = parsePrompt(file, content, fullPath);
+      let prompt = parsePrompt(file, content, fullPath, idPrefix);
       if (prompt.import) {
         prompt = await mergeRemotePrompt(prompt, file, fullPath);
       }
@@ -200,12 +211,15 @@ async function getMarkdownFiles(dir, baseDir = dir) {
  * @param {string} relativePath
  * @param {string} fileContent
  * @param {string} fullPath
+ * @param {string} [idPrefix=""]
  * @returns {Prompt}
  */
-function parsePrompt(relativePath, fileContent, fullPath) {
+function parsePrompt(relativePath, fileContent, fullPath, idPrefix = "") {
   const rawId = relativePath.replace(/\/SKILL\.md$/, "").replace(/\.md$/, "");
   const isShortcut = rawId.startsWith("shortcuts/");
-  const id = isShortcut ? rawId.replace(/^shortcuts\//, "") : rawId;
+  const id = isShortcut
+    ? idPrefix + rawId.replace(/^shortcuts\//, "")
+    : idPrefix + rawId;
 
   // Match YAML frontmatter
   const match = fileContent.match(
