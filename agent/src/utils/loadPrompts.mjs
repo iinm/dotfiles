@@ -62,7 +62,7 @@ export async function loadPrompts() {
       if (content === null) continue;
 
       //  Ignore all files in the skills/ directory except for SKILL.md.
-      if (file.match(/(^|\/)skills\//) && !file.endsWith("/SKILL.md")) {
+      if (fullPath.match(/\/skills\//) && !file.endsWith("/SKILL.md")) {
         continue;
       }
 
