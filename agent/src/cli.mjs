@@ -219,21 +219,13 @@ export function startInteractiveSession({
   /**
    * @param {string} id
    * @param {string} goal
-   * @param {string} displayInvocation
    * @returns {Promise<void>}
    */
-  async function invokeAgent(id, goal, displayInvocation) {
+  async function invokeAgent(id, goal) {
     const agentRoles = await loadAgentRoles();
     const agent = agentRoles.get(id);
-
-    if (!agent) {
-      console.log(styleText("red", `\nAgent not found: ${id}`));
-      cli.prompt();
-      return;
-    }
-
-    const invocation = `${displayInvocation}${goal ? ` ${goal}` : ""}`;
-    const message = `System: This agent was invoked as "${invocation}".\n\nDelegate to agent "${id}" with the following goal:\n\n${goal}`;
+    const name = agent ? id : `custom:${id}`;
+    const message = `Delegate to "${name}" agent with goal: ${goal}`;
 
     console.log(styleText("gray", "\n<agent>"));
     console.log(message);
@@ -471,17 +463,6 @@ export function startInteractiveSession({
         return;
       }
 
-      if (inputTrimmed.startsWith("/agents:")) {
-        const match = inputTrimmed.match(/^\/agents:([^ ]+)(?:\s+(.*))?$/);
-        if (!match) {
-          console.log(styleText("red", "\nInvalid agent invocation format."));
-          cli.prompt();
-          return;
-        }
-        await invokeAgent(match[1], match[2] || "", `/agents:${match[1]}`);
-        return;
-      }
-
       if (inputTrimmed.startsWith("/prompts:")) {
         const match = inputTrimmed.match(/^\/prompts:([^ ]+)(?:\s+(.*))?$/);
         if (!match) {
@@ -492,6 +473,17 @@ export function startInteractiveSession({
         await invokePrompt(match[1], match[2] || "", `/prompts:${match[1]}`);
         return;
       }
+    }
+
+    if (inputTrimmed.startsWith("/agents:")) {
+      const match = inputTrimmed.match(/^\/agents:([^ ]+)(?:\s+(.*))?$/);
+      if (!match) {
+        console.log(styleText("red", "\nInvalid agent invocation format."));
+        cli.prompt();
+        return;
+      }
+      await invokeAgent(match[1], match[2] || "");
+      return;
     }
 
     if (inputTrimmed.startsWith("/paste")) {
