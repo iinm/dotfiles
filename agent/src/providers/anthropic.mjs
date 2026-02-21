@@ -101,7 +101,7 @@ export async function callAnthropicModel(
           "Content-Type": "application/json",
         },
         body: JSON.stringify(request),
-        signal: AbortSignal.timeout(120 * 1000),
+        signal: AbortSignal.timeout(4 * 60 * 1000),
       });
 
     // bedrock + sso profile
@@ -138,7 +138,7 @@ export async function callAnthropicModel(
         method: signed.method,
         headers: signed.headers,
         body: signed.body,
-        signal: AbortSignal.timeout(120 * 1000),
+        signal: AbortSignal.timeout(4 * 60 * 1000),
       });
     };
 
