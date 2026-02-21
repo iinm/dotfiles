@@ -55,7 +55,7 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
    * @returns {SubagentState | null}
    */
   function getCurrentSubagent() {
-    return subagents.length > 0 ? (subagents.at(-1) ?? null) : null;
+    return subagents.at(-1) ?? null;
   }
 
   /**
@@ -213,26 +213,19 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
 
     agentEventEmitter.emit("subagentStatus", { name: actualName });
 
-    const messageParts = [
-      `✓ Delegation successful. You are now the subagent "${actualName}".`,
-      "",
-      `Your goal: ${goal}`,
-    ];
+    const roleSection = roleContent
+      ? `\n\nRole: ${name}\n---\n${roleContent}\n---`
+      : "";
 
-    if (roleContent) {
-      messageParts.push("", `Role: ${name}`, "---", roleContent, "---");
-    }
-
-    messageParts.push(
-      "",
-      `Memory file path format: ${AGENT_PROJECT_METADATA_DIR}/memory/<session-id>--${actualName}--<kebab-case-title>.md (Replace <kebab-case-title> to match the parent task)`,
-      "",
-      `Start working on this goal now. When finished, call "report_as_subagent" with the memory file path.`,
-    );
+    const message =
+      `✓ Delegation successful. You are now the subagent "${actualName}".\n\n` +
+      `Your goal: ${goal}${roleSection}\n\n` +
+      `Memory file path format: ${AGENT_PROJECT_METADATA_DIR}/memory/<session-id>--${actualName}--<kebab-case-title>.md (Replace <kebab-case-title> to match the parent task)\n\n` +
+      `Start working on this goal now. When finished, call "report_as_subagent" with the memory file path.`;
 
     return {
       success: true,
-      message: messageParts.join("\n"),
+      message,
     };
   }
 

@@ -59,7 +59,7 @@ export async function loadAgentRoles() {
 }
 
 /**
- * Merges a remote role into a local role if an import URL is provided.
+ * Merges a remote role into a local role.
  * @param {AgentRole} localRole
  * @param {string} relativePath
  * @param {string} fullPath
