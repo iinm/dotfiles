@@ -78,15 +78,19 @@ export function createAgentLoop({
           toolResults.push(await callTool(toolUse, toolByName));
         }
 
-        const userMessage = subagentManager.processToolResults(
+        const result = subagentManager.processToolResults(
           toolUseParts,
           toolResults,
           state.messages,
         );
-        if (userMessage) {
-          state.messages.push(userMessage);
+        state.messages = result.messages;
+        if (result.newMessage) {
+          state.messages = [...state.messages, result.newMessage];
         } else {
-          state.messages.push({ role: "user", content: toolResults });
+          state.messages = [
+            ...state.messages,
+            { role: "user", content: toolResults },
+          ];
         }
 
         agentEventEmitter.emit(
@@ -103,13 +107,14 @@ export function createAgentLoop({
           content: [{ type: "text", text: "Tool call rejected" }],
           isError: true,
         }));
-        state.messages.push({ role: "user", content: toolResults });
-        state.messages.push({
-          role: "user",
-          content: /** @type {(MessageContentText | MessageContentImage)[]} */ (
-            input
-          ),
-        });
+        state.messages = [
+          ...state.messages,
+          { role: "user", content: toolResults },
+          {
+            role: "user",
+            content: input,
+          },
+        ];
       }
     } else if (
       input.length === 1 &&
@@ -119,10 +124,13 @@ export function createAgentLoop({
       // Resume the conversation stopped by rate limit, etc.
     } else {
       // No pending tool call
-      state.messages.push({
-        role: "user",
-        content: input,
-      });
+      state.messages = [
+        ...state.messages,
+        {
+          role: "user",
+          content: input,
+        },
+      ];
     }
 
     await runTurnLoop();
@@ -155,7 +163,7 @@ export function createAgentLoop({
       }
 
       const { message: assistantMessage, providerTokenUsage } = modelOutput;
-      state.messages.push(assistantMessage);
+      state.messages = [...state.messages, assistantMessage];
       agentEventEmitter.emit("message", assistantMessage);
       agentEventEmitter.emit("providerTokenUsage", providerTokenUsage);
 
@@ -167,10 +175,13 @@ export function createAgentLoop({
           break;
         }
 
-        state.messages.push({
-          role: "user",
-          content: [{ type: "text", text: "System: Continue" }],
-        });
+        state.messages = [
+          ...state.messages,
+          {
+            role: "user",
+            content: [{ type: "text", text: "System: Continue" }],
+          },
+        ];
         console.error(
           styleText(
             "yellow",
@@ -204,24 +215,23 @@ export function createAgentLoop({
       );
 
       if (!validation.isValid) {
-        state.messages.push({
-          role: "user",
-          content: /** @type {MessageContentToolResult[]} */ (
-            validation.toolResults
-          ),
-        });
-        state.messages.push({
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: /** @type {string} */ (validation.errorMessage),
-            },
-          ],
-        });
-        console.error(
-          styleText("yellow", /** @type {string} */ (validation.errorMessage)),
-        );
+        state.messages = [
+          ...state.messages,
+          {
+            role: "user",
+            content: validation.toolResults,
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: validation.errorMessage,
+              },
+            ],
+          },
+        ];
+        console.error(styleText("yellow", validation.errorMessage));
         continue;
       }
 
@@ -246,7 +256,10 @@ export function createAgentLoop({
             isError: true,
           };
         });
-        state.messages.push({ role: "user", content: toolResults });
+        state.messages = [
+          ...state.messages,
+          { role: "user", content: toolResults },
+        ];
         agentEventEmitter.emit(
           "message",
           state.messages[state.messages.length - 1],
@@ -266,15 +279,19 @@ export function createAgentLoop({
         toolResults.push(await callTool(toolUse, toolByName));
       }
 
-      const userMessage = subagentManager.processToolResults(
+      const result = subagentManager.processToolResults(
         toolUseParts,
         toolResults,
         state.messages,
       );
-      if (userMessage) {
-        state.messages.push(userMessage);
+      state.messages = result.messages;
+      if (result.newMessage) {
+        state.messages = [...state.messages, result.newMessage];
       } else {
-        state.messages.push({ role: "user", content: toolResults });
+        state.messages = [
+          ...state.messages,
+          { role: "user", content: toolResults },
+        ];
       }
 
       agentEventEmitter.emit(
@@ -284,10 +301,13 @@ export function createAgentLoop({
 
       const interruptMessage = await consumeInterruptMessage();
       if (interruptMessage) {
-        state.messages.push({
-          role: "user",
-          content: [{ type: "text", text: interruptMessage }],
-        });
+        state.messages = [
+          ...state.messages,
+          {
+            role: "user",
+            content: [{ type: "text", text: interruptMessage }],
+          },
+        ];
         agentEventEmitter.emit(
           "message",
           state.messages[state.messages.length - 1],

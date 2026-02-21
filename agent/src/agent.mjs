@@ -60,7 +60,7 @@ export function createAgent({
           if (!result.success) {
             return new Error(result.error);
           }
-          return result.message;
+          return result.value;
         },
       };
     }
@@ -71,8 +71,15 @@ export function createAgent({
         /**
          * @param {ReportAsSubagentInput} input
          */
-        impl: async (input) =>
-          subagentManager.reportAsSubagent(input.memoryPath),
+        impl: async (input) => {
+          const result = await subagentManager.reportAsSubagent(
+            input.memoryPath,
+          );
+          if (!result.success) {
+            return new Error(result.error);
+          }
+          return result.value;
+        },
       };
     }
 
@@ -106,11 +113,7 @@ export function createAgent({
       const loadedMessages = JSON.parse(data);
       if (Array.isArray(loadedMessages)) {
         // Keep the system message (index 0) and replace the rest
-        state.messages.splice(
-          1,
-          state.messages.length - 1,
-          ...loadedMessages.slice(1),
-        );
+        state.messages = [state.messages[0], ...loadedMessages.slice(1)];
         console.log(`Messages loaded from ${filePath}`);
       } else {
         console.error("Error loading messages: Invalid format in file.");

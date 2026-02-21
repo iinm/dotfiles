@@ -8,10 +8,19 @@
  */
 
 /**
- * @typedef {Object} ToolValidationResult
- * @property {boolean} isValid - 検証結果
- * @property {string} [errorMessage] - エラーメッセージ（isValidがfalseの場合）
- * @property {MessageContentToolResult[]} [toolResults] - エラー時のツール結果（isValidがfalseの場合）
+ * @typedef {Object} ValidationSuccess
+ * @property {true} isValid - 検証成功
+ */
+
+/**
+ * @typedef {Object} ValidationFailure
+ * @property {false} isValid - 検証失敗
+ * @property {string} errorMessage - エラーメッセージ
+ * @property {MessageContentToolResult[]} toolResults - エラー時のツール結果
+ */
+
+/**
+ * @typedef {ValidationSuccess | ValidationFailure} ToolValidationResult
  */
 
 /**
@@ -53,10 +62,27 @@ export function createUnknownToolErrorMessage(unknownToolNames, toolByName) {
 }
 
 /**
+ * @typedef {Object} ExclusiveValidationSuccess
+ * @property {true} isValid - 検証成功
+ */
+
+/**
+ * @typedef {Object} ExclusiveValidationFailure
+ * @property {false} isValid - 検証失敗
+ * @property {string} errorMessage - エラーメッセージ
+ * @property {'multiple'|'with-others'} violationType - 違反タイプ
+ * @property {string[]} violatedTools - 違反したツール名
+ */
+
+/**
+ * @typedef {ExclusiveValidationSuccess | ExclusiveValidationFailure} ExclusiveValidationResult
+ */
+
+/**
  * 排他的ツール使用の検証を行う
  * @param {MessageContentToolUse[]} toolUseParts - ツール使用パーツの配列
  * @param {string[]} exclusiveToolNames - 排他的ツール名のリスト
- * @returns {{isValid: boolean, errorMessage?: string, violationType?: 'multiple'|'with-others', violatedTools?: string[]}} 検証結果
+ * @returns {ExclusiveValidationResult} 検証結果
  */
 export function validateExclusiveToolUse(toolUseParts, exclusiveToolNames) {
   const exclusiveToolUseParts = toolUseParts.filter((toolUse) =>

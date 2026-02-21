@@ -9,7 +9,6 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
 import { reportAsSubagentTool } from "./tools/reportAsSubagent.mjs";
-import { noThrow } from "./utils/noThrow.mjs";
 
 /**
  * @typedef {Object} SubagentState
@@ -19,15 +18,35 @@ import { noThrow } from "./utils/noThrow.mjs";
  */
 
 /**
- * @typedef {Object} DelegateResult
+ * @typedef {Object} DelegateSuccess
  * @property {true} success
- * @property {string} message
+ * @property {string} value - 成功時のメッセージ
  */
 
 /**
- * @typedef {Object} DelegateError
+ * @typedef {Object} DelegateFailure
  * @property {false} success
- * @property {string} error
+ * @property {string} error - エラーメッセージ
+ */
+
+/**
+ * @typedef {DelegateSuccess | DelegateFailure} DelegateResult
+ */
+
+/**
+ * @typedef {Object} ReportSuccess
+ * @property {true} success
+ * @property {string} value - メモリファイルの内容
+ */
+
+/**
+ * @typedef {Object} ReportFailure
+ * @property {false} success
+ * @property {string} error - エラーメッセージ
+ */
+
+/**
+ * @typedef {ReportSuccess | ReportFailure} ReportResult
  */
 
 /**
@@ -35,9 +54,9 @@ import { noThrow } from "./utils/noThrow.mjs";
  * @property {() => SubagentState | null} getCurrentSubagent
  * @property {() => number} getSubagentCount
  * @property {() => boolean} isInSubagentMode
- * @property {(toolUseParts: MessageContentToolUse[], toolResults: MessageContentToolResult[], messages: Message[]) => Message | null} processToolResults
- * @property {(name: string, goal: string, messages: Message[]) => DelegateResult | DelegateError} delegateToSubagent
- * @property {(memoryPath: string) => Promise<string | Error>} reportAsSubagent
+ * @property {(toolUseParts: MessageContentToolUse[], toolResults: MessageContentToolResult[], messages: Message[]) => { messages: Message[], newMessage: Message | null }} processToolResults
+ * @property {(name: string, goal: string, messages: Message[]) => DelegateResult} delegateToSubagent
+ * @property {(memoryPath: string) => Promise<ReportResult>} reportAsSubagent
  */
 
 /**
@@ -76,14 +95,13 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
 
   /**
    * Truncate message history back to before the delegation point.
+   * Returns a new array without modifying the original.
    * @param {Message[]} messages
    * @param {number} delegateResultMessageIndex
+   * @returns {Message[]} New truncated message array
    */
   function truncateHistory(messages, delegateResultMessageIndex) {
-    messages.splice(
-      delegateResultMessageIndex - 1,
-      messages.length - (delegateResultMessageIndex - 1),
-    );
+    return messages.slice(0, delegateResultMessageIndex - 1);
   }
 
   /**
@@ -93,21 +111,26 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
    * @param {MessageContentToolUse} reportToolUse
    * @param {MessageContentToolResult} reportResult
    * @param {Message[]} messages
-   * @returns {Message | null} The user message to add, or null if not handled
+   * @returns {{ messages: Message[], newMessage: Message | null }}
+   *   - messages: The truncated message history (new array)
+   *   - newMessage: The user message to add, or null if not handled
    */
   function handleSubagentReport(reportToolUse, reportResult, messages) {
     if (reportResult?.isError) {
-      return null;
+      return { messages, newMessage: null };
     }
 
     const currentSubagent = subagents.pop();
     if (!currentSubagent) {
       // Fallback if state is out of sync
-      return null;
+      return { messages, newMessage: null };
     }
 
     // Truncate history back to before the delegation point
-    truncateHistory(messages, currentSubagent.delegateResultMessageIndex);
+    const truncatedMessages = truncateHistory(
+      messages,
+      currentSubagent.delegateResultMessageIndex,
+    );
 
     agentEventEmitter.emit(
       "subagentStatus",
@@ -127,7 +150,8 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
       ? `\n\nMemory file: ${reportInput.memoryPath}`
       : "";
 
-    return {
+    /** @type {import('./model').UserMessage} */
+    const newMessage = {
       role: "user",
       content: [
         {
@@ -136,14 +160,19 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
         },
       ],
     };
+
+    return { messages: truncatedMessages, newMessage };
   }
 
   /**
    * Process tool results and update state based on special tools.
+   * Returns the truncated message history and a new message to add.
    * @param {MessageContentToolUse[]} toolUseParts
    * @param {MessageContentToolResult[]} toolResults
    * @param {Message[]} messages
-   * @returns {Message | null} The user message to add, or null if tool results should be added directly
+   * @returns {{ messages: Message[], newMessage: Message | null }}
+   *   - messages: The potentially truncated message history (new array)
+   *   - newMessage: The user message to add, or null if tool results should be added directly
    */
   function processToolResults(toolUseParts, toolResults, messages) {
     const reportSubagentToolUse = toolUseParts.find(
@@ -155,17 +184,17 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
         (res) => res.toolUseId === reportSubagentToolUse.toolUseId,
       );
       if (!reportResult) {
-        return null;
+        return { messages, newMessage: null };
       }
-      const userMessage = handleSubagentReport(
+      const result = handleSubagentReport(
         reportSubagentToolUse,
         reportResult,
         messages,
       );
-      return userMessage;
+      return result;
     }
 
-    return null;
+    return { messages, newMessage: null };
   }
 
   /**
@@ -173,7 +202,7 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
    * @param {string} name
    * @param {string} goal
    * @param {Message[]} messages - Current message history (for tracking delegation point)
-   * @returns {DelegateResult | DelegateError}
+   * @returns {DelegateResult}
    */
   function delegateToSubagent(name, goal, messages) {
     if (subagents.length > 0) {
@@ -217,7 +246,7 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
       ? `\n\nRole: ${name}\n---\n${roleContent}\n---`
       : "";
 
-    const message =
+    const value =
       `✓ Delegation successful. You are now the subagent "${actualName}".\n\n` +
       `Your goal: ${goal}${roleSection}\n\n` +
       `Memory file path format: ${AGENT_PROJECT_METADATA_DIR}/memory/<session-id>--${actualName}--<kebab-case-title>.md (Replace <kebab-case-title> to match the parent task)\n\n` +
@@ -225,43 +254,47 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
 
     return {
       success: true,
-      message,
+      value,
     };
   }
 
   /**
    * Report as a subagent and read the memory file.
    * @param {string} memoryPath
-   * @returns {Promise<string | Error>}
+   * @returns {Promise<ReportResult>}
    */
   async function reportAsSubagent(memoryPath) {
-    return noThrow(async () => {
-      if (subagents.length === 0) {
-        return new Error("Cannot call report_as_subagent from the main agent.");
-      }
+    if (subagents.length === 0) {
+      return {
+        success: false,
+        error: "Cannot call report_as_subagent from the main agent.",
+      };
+    }
 
-      const workingDir = process.cwd();
-      const absolutePath = path.resolve(memoryPath);
-      const relativePath = path.relative(workingDir, absolutePath);
-      if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
-        return new Error(
-          "Access denied: memoryPath must be within the working directory",
-        );
-      }
+    const absolutePath = path.resolve(memoryPath);
+    const memoryDir = path.resolve(AGENT_PROJECT_METADATA_DIR, "memory");
+    const relativePath = path.relative(memoryDir, absolutePath);
+    if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
+      return {
+        success: false,
+        error: `Access denied: memoryPath must be within ${AGENT_PROJECT_METADATA_DIR}/memory`,
+      };
+    }
 
-      let memoryContent;
-      try {
-        memoryContent = await fs.readFile(absolutePath, {
-          encoding: "utf-8",
-        });
-      } catch (error) {
-        return new Error(
-          `Failed to read memory file: ${error instanceof Error ? error.message : String(error)}`,
-        );
-      }
-
-      return memoryContent;
-    });
+    try {
+      const memoryContent = await fs.readFile(absolutePath, {
+        encoding: "utf-8",
+      });
+      return {
+        success: true,
+        value: memoryContent,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to read memory file: ${error instanceof Error ? error.message : String(error)}`,
+      };
+    }
   }
 
   return {
