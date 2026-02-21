@@ -10,6 +10,7 @@ import { formatProviderTokenUsage } from "./formatters/tokenUsage.mjs";
 import { formatToolResult } from "./formatters/toolResult.mjs";
 import { formatToolUse } from "./formatters/toolUse.mjs";
 import { consumeInterruptMessage } from "./utils/consumeInterruptMessage.mjs";
+import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
 import { loadPrompts } from "./utils/loadPrompts.mjs";
 import { loadUserMessageContext } from "./utils/loadUserMessageContext.mjs";
 import { notify } from "./utils/notify.mjs";
@@ -19,6 +20,7 @@ import { readFileRange } from "./utils/readFileRange.mjs";
 // Define available slash commands for tab completion
 const SLASH_COMMANDS = [
   { name: "/help", description: "Display this help message" },
+  { name: "/agents", description: "List available agent roles" },
   { name: "/prompts", description: "List available prompts" },
   {
     name: "/prompts:<id>",
@@ -378,6 +380,25 @@ export function startInteractiveSession({
 
     if (inputTrimmed.toLowerCase() === "/load") {
       await agentCommands.loadMessages();
+      cli.prompt();
+      return;
+    }
+
+    if (inputTrimmed === "/agents") {
+      const agentRoles = await loadAgentRoles();
+
+      console.log(styleText("bold", "\nAvailable Agent Roles:"));
+      if (agentRoles.size === 0) {
+        console.log("  No agent roles found.");
+      } else {
+        for (const role of agentRoles.values()) {
+          const maxLength = process.stdout.columns ?? 100;
+          const line = `  ${styleText("cyan", role.id.padEnd(20))} - ${role.description}`;
+          console.log(
+            line.length > maxLength ? `${line.slice(0, maxLength)}...` : line,
+          );
+        }
+      }
       cli.prompt();
       return;
     }

@@ -190,7 +190,7 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
 
     let roleContent = "";
     if (!isCustomRole) {
-      // Look for preset role
+      // Look for agent role
       const role = agentRoles.get(name);
       if (!role) {
         const availableRoles = Array.from(agentRoles.keys())
@@ -199,7 +199,7 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
           .join("\n");
         return {
           success: false,
-          error: `Preset role "${name}" not found. Available preset roles:\n${availableRoles}\n\nTo use an ad-hoc role, prefix the name with "custom:" (e.g., "custom:researcher").`,
+          error: `Agent role "${name}" not found. Available agent roles:\n${availableRoles}\n\nTo use an ad-hoc role, prefix the name with "custom:" (e.g., "custom:researcher").`,
         };
       }
       roleContent = role.content;

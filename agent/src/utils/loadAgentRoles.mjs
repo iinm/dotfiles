@@ -97,7 +97,7 @@ async function mergeRemoteRole(localRole, relativePath, fullPath) {
  */
 async function fetchAndCacheRole(url) {
   const hash = crypto.createHash("sha256").update(url).digest("hex");
-  const cacheDir = path.join(AGENT_CACHE_DIR, "agent-roles");
+  const cacheDir = path.join(AGENT_CACHE_DIR, "agents");
   const cachePath = path.join(cacheDir, hash);
 
   const cachedContent = await fs.readFile(cachePath, "utf-8").catch(() => null);

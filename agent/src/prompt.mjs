@@ -6,7 +6,7 @@
  * @property {string} tmuxSessionId
  * @property {string} workingDir - The current working directory.
  * @property {string} projectMetadataDir - The directory where memory files are stored.
- * @property {Map<string, import('./utils/loadAgentRoles.mjs').AgentRole>} agentRoles - Available preset agent roles.
+ * @property {Map<string, import('./utils/loadAgentRoles.mjs').AgentRole>} agentRoles - Available agent roles.
  */
 
 /**
@@ -36,7 +36,7 @@ export function createPrompt({
       })
       .join("\n");
 
-    agentRolesSection = `\nAvailable preset roles:\n${rolesList}\n\nYou can use these as name parameter, or use "custom:" prefix for ad-hoc roles.\n`;
+    agentRolesSection = `\nAvailable agent roles:\n${rolesList}\n\nYou can use these as name parameter, or use "custom:" prefix for ad-hoc roles.\n`;
   }
 
   return `
