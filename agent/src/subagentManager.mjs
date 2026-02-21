@@ -193,11 +193,13 @@ export function createSubagentManager(agentEventEmitter) {
     return {
       success: true,
       message: [
-        `You are now acting as the subagent "${name}".`,
-        `Goal: ${goal}`,
+        `✓ Delegation successful. You are now the subagent "${name}".`,
+        "",
+        `Your goal: ${goal}`,
+        "",
         `Memory file path format: ${AGENT_PROJECT_METADATA_DIR}/memory/<session-id>--${name}--<kebab-case-title>.md (Replace <kebab-case-title> to match the parent task)`,
         "",
-        `Please complete the task and when finished, call the "report_as_subagent" tool with the memory file path.`,
+        `Start working on this goal now. When finished, call "report_as_subagent" with the memory file path.`,
       ].join("\n"),
     };
   }

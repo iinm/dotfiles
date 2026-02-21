@@ -95,6 +95,8 @@ Call multiple tools at once when they don't depend on each other's results.
 
 Delegate a subtask to a subagent.
 
+**Important: After calling this tool, you will immediately become the subagent and work on the delegated task. Do not wait for another agent.**
+
 When to use:
 - A subtask will require many file reads or command executions
 - Trial-and-error work that would clutter the main context
@@ -106,6 +108,11 @@ Constraints:
 
 Before delegating:
 - Define a clear, specific goal for the subagent
+
+After delegation:
+- You will receive a message confirming your subagent role
+- Start working on the goal immediately
+- Call report_as_subagent when finished
 
 ### report_as_subagent
 
