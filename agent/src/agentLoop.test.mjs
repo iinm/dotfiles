@@ -163,7 +163,6 @@ describe("AgentLoop integration patterns", () => {
     // then:
     assert.strictEqual(decision.action, "allow");
   });
-
 });
 
 describe("AgentLoop tool use patterns", () => {
@@ -269,4 +268,3 @@ describe("AgentLoop tool use patterns", () => {
     assert.strictEqual(allApproved, false);
   });
 });
-
