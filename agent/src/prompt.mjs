@@ -36,7 +36,7 @@ async function discoverProjectContext(workingDir) {
   // Find AGENTS.md files
   const agentsMdResult = await execCommand(
     "fd",
-    ["^AGENTS.*\\.md$", "./", "--hidden", "--max-depth", "5"],
+    ["^AGENTS.*\\.md$", "./", "--hidden", "--max-depth", "5", "--follow"],
     workingDir,
   );
 
@@ -93,7 +93,6 @@ async function discoverProjectContext(workingDir) {
       }
     }
 
-    // Don't forget last file
     if (currentPath && !skip) {
       output.push(currentPath, ...currentLines);
     }
@@ -156,26 +155,6 @@ export function createPrompt({
 - Think in English, but respond in the user's language.
 - Address the user by their name, rather than "user".
 - Use emojis sparingly to highlight key points.
-
-## Project Context Discovery
-
-${projectContext || "No project context discovered yet."}
-
-When working on files under a directory, read AGENTS.md from repo root down to that directory.
-Example: foo/bar -> ./AGENTS.md, foo/AGENTS.md, foo/bar/AGENTS.md (if they exist).
-
-If a skill matches the task, read its full file and follow/adapt it.
-
-<details>
-<summary>How to discover project context manually</summary>
-
-Find agent docs:
-- AGENTS.md (project rules and conventions):
-  { command: "fd", args: ["^AGENTS.*\\.md$", "./", "--hidden", "--max-depth", "5"] }
-- Skills (reusable workflows with specialized knowledge):
-  { command: "rg", args: ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "SKILL.md", "\\A---\\n[\\s\\S]*?\\n---", "./"] }
-
-</details>
 
 ## Memory Files
 
@@ -357,6 +336,26 @@ Basic commands:
 - Get output of window before sending keys: capture-pane ["-p", "-t", "<tmux-session-id>:<window>"]
 - Send key to session: send-keys ["-t", "<tmux-session-id>:<window>", "echo hello", "Enter"]
 - Delete line: send-keys ["-t", "<tmux-session-id>:<window>", "C-a", "C-k"]
+
+## Project Context
+
+${projectContext || "No project context discovered yet."}
+
+When working on files under a directory, read AGENTS.md from repo root down to that directory.
+Example: foo/bar -> ./AGENTS.md, foo/AGENTS.md, foo/bar/AGENTS.md (if they exist).
+
+If a skill matches the task, read its full file and follow/adapt it.
+
+<details>
+<summary>How to discover project context manually</summary>
+
+Find agent docs:
+- AGENTS.md (project rules and conventions):
+  { command: "fd", args: ["^AGENTS.*\\.md$", "./", "--hidden", "--max-depth", "5"] }
+- Skills (reusable workflows with specialized knowledge):
+  { command: "rg", args: ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "SKILL.md", "\\A---\\n[\\s\\S]*?\\n---", "./"] }
+
+</details>
 
 ## Environment
 
