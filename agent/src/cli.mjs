@@ -532,7 +532,7 @@ export function startInteractiveSession({
   agentEventEmitter.on("partialMessageContent", (partialContent) => {
     if (partialContent.position === "start") {
       const subagentPrefix = state.subagentName
-        ? `(${state.subagentName}) `
+        ? `(${state.subagentName})\n`
         : "";
       console.log(
         styleText("gray", `\n${subagentPrefix}<${partialContent.type}>`),
