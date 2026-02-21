@@ -332,7 +332,6 @@ The agent loads configuration files in the following order. Settings in later fi
     "slack": {
       "command": "npx",
       "args": ["-y", "mcp-remote", "https://mcp.slack.com/mcp", "--header", "Authorization:Bearer FIXME"],
-      "enabledTools": []
     },
     "notion": {
       "command": "npx",
@@ -341,6 +340,14 @@ The agent loads configuration files in the following order. Settings in later fi
         // Enable only specific tools (optional - if not specified, all tools are enabled)
         "enabledTools": ["notion-search", "notion-fetch"]
       }
+    },
+    "aws-knowledge": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://knowledge-mcp.global.api.aws"]
+    },
+    "google-developer-knowledge": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://developerknowledge.googleapis.com/mcp", "--header", "X-Goog-Api-Key:FIXME"]
     }
   },
 
