@@ -232,7 +232,7 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
     // Exec command
     {
       toolName: "exec_command",
-      input: { command: /^(pwd|date|uname|ls|wc|cat|head|tail|jq)$/ },
+      input: { command: /^(pwd|date|uname|ls|wc|cat|head|tail|jq|echo)$/ },
     },
     {
       toolName: "exec_command",

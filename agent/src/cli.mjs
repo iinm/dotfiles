@@ -262,7 +262,6 @@ export function startInteractiveSession({
         try {
           const prompts = await loadPrompts();
 
-          // Completion for /prompts:<id>
           if (line.startsWith("/prompts:")) {
             const prefix = "/prompts:";
             const candidates = Array.from(prompts.values()).map((p) => ({
@@ -275,7 +274,6 @@ export function startInteractiveSession({
             return;
           }
 
-          // Completion for slash commands and shortcuts
           if (line.startsWith("/")) {
             const shortcuts = Array.from(prompts.values())
               .filter((p) => p.isShortcut)
@@ -287,7 +285,6 @@ export function startInteractiveSession({
             const allCommands = [...SLASH_COMMANDS, ...shortcuts].filter(
               (cmd) => {
                 const name = typeof cmd === "string" ? cmd : cmd.name;
-                // Exclude /<id> template and specific internal prompt prefixes
                 return (
                   name !== "/<id>" &&
                   (name === "/prompts:" || !name.startsWith("/prompt:"))
@@ -312,7 +309,6 @@ export function startInteractiveSession({
 
   readline.emitKeypressEvents(process.stdin);
   if (process.stdin.isTTY) {
-    // readline should handle raw mode itself
     process.stdin.setRawMode(true);
   }
 
@@ -339,10 +335,7 @@ export function startInteractiveSession({
       return;
     }
 
-    // reset prompt
     cli.setPrompt(currentCliPrompt);
-
-    // clear interrupt message
     await consumeInterruptMessage();
 
     if (["/help", "help"].includes(inputTrimmed.toLowerCase())) {
@@ -351,7 +344,6 @@ export function startInteractiveSession({
       return;
     }
 
-    // Handle file reading when message starts with !
     if (inputTrimmed.startsWith("!")) {
       const fileRange = parseFileRange(inputTrimmed.slice(1));
       if (fileRange instanceof Error) {
@@ -527,7 +519,7 @@ export function startInteractiveSession({
   agentEventEmitter.on("partialMessageContent", (partialContent) => {
     if (partialContent.position === "start") {
       const subagentPrefix = state.subagentName
-        ? `(${state.subagentName})\n`
+        ? `[${styleText("cyan", state.subagentName)}]\n`
         : "";
       console.log(
         styleText("gray", `\n${subagentPrefix}<${partialContent.type}>`),
