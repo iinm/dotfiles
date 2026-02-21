@@ -8,7 +8,7 @@ import { startInteractiveSession } from "./cli.mjs";
 import { loadAppConfig } from "./config.mjs";
 import { AGENT_PROJECT_METADATA_DIR, USER_NAME } from "./env.mjs";
 import { setupMCPServer } from "./mcp.mjs";
-import { createModelCaller } from "./model.mjs";
+import { createModelCaller } from "./modelRegistry.mjs";
 import { createPrompt } from "./prompt.mjs";
 import { createToolUseApprover } from "./tool.mjs";
 import { createAskGoogleTool } from "./tools/askGoogle.mjs";

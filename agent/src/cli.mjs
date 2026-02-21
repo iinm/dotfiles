@@ -1,5 +1,5 @@
 /**
- * @import { Message, MessageContentToolResult, MessageContentToolUse, ProviderTokenUsage } from "./model"
+ * @import { Message } from "./model"
  * @import { UserEventEmitter, AgentEventEmitter, AgentCommands } from "./agent"
  */
 

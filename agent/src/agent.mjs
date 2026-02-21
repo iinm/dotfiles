@@ -4,7 +4,6 @@
  * @import { Tool, ToolDefinition } from "./tool"
  * @import { DelegateToSubagentInput } from "./tools/delegateToSubagent.mjs";
  * @import { ReportAsSubagentInput } from "./tools/reportAsSubagent.mjs";
- * @import { SubagentManager } from "./subagentManager.mjs";
  */
 
 import { EventEmitter } from "node:events";
