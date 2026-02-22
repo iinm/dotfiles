@@ -56,15 +56,15 @@ No matches found in diff.
 
 Expected format:
 <<<<<<< SEARCH
-(content to be removed)
+old content
 =======
-(new content to replace the removed content)
+newt content
 >>>>>>> REPLACE
 
 <<<<<<< SEARCH
-(second content to be removed)
+other old content
 =======
-(new content to replace the second removed content)
+other old content
 >>>>>>> REPLACE
 
 Format description:
