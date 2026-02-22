@@ -29,8 +29,7 @@ export function createExecCommandTool(config) {
             type: "string",
           },
           args: {
-            description:
-              'Array of arguments to pass to the command. Important: Include only the arguments that follow the command name. e.g., for "rg --line-number pattern file.txt", set command to "rg" and args to ["--line-number", "pattern", "file.txt"].',
+            description: "Array of arguments to pass to the command.",
             type: "array",
             items: {
               type: "string",

@@ -11,7 +11,8 @@ import { noThrow } from "../utils/noThrow.mjs";
 export const patchFileTool = {
   def: {
     name: "patch_file",
-    description: "Patch a file",
+    description:
+      "Modify a file by replacing specific content with new content.",
     inputSchema: {
       type: "object",
       properties: {
@@ -19,8 +20,24 @@ export const patchFileTool = {
           type: "string",
         },
         diff: {
-          description:
-            "The diff to apply to the file in SEARCH/REPLACE format.",
+          description: `
+- Content is searched as an exact match including indentation and line breaks.
+- The first match found will be replaced if there are multiple matches.
+- Use multiple SEARCH/REPLACE blocks to replace multiple contents.
+
+Format:
+<<<<<<< SEARCH
+old content
+=======
+new content
+>>>>>>> REPLACE
+
+<<<<<<< SEARCH
+other old content
+=======
+other new content
+>>>>>>> REPLACE
+          `.trim(),
           type: "string",
         },
       },
@@ -50,29 +67,7 @@ export const patchFileTool = {
         ),
       );
       if (matches.length === 0) {
-        throw new Error(
-          `
-No matches found in diff.
-
-Expected format:
-<<<<<<< SEARCH
-old content
-=======
-newt content
->>>>>>> REPLACE
-
-<<<<<<< SEARCH
-other old content
-=======
-other old content
->>>>>>> REPLACE
-
-Format description:
-- <<<<<<< SEARCH (7 < characters + SEARCH) is the start of the search content.
-- ======= (7 = characters) is the separator between the search and replace content.
-- >>>>>>> REPLACE (7 > characters + REPLACE) is the end of the replace content.
-`.trim(),
-        );
+        throw new Error("No matches found in diff.");
       }
       let newContent = content;
       for (const match of matches) {

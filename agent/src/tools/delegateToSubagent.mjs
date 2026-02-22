@@ -12,14 +12,15 @@
 export const delegateToSubagentTool = {
   def: {
     name: "delegate_to_subagent",
-    description: "Delegate a subtask to a subagent.",
+    description:
+      "Delegate a subtask to a subagent. You inherit the current context and work on the delegated goal.",
     inputSchema: {
       type: "object",
       properties: {
         name: {
           type: "string",
           description:
-            "Role or name of the subagent (e.g., 'researcher', 'analyzer', 'architect', 'planner', 'implementer', 'tester', 'debugger', 'reviewer', 'refactorer').",
+            "Role or name of the subagent. Use 'custom:' prefix for ad-hoc roles.",
         },
         goal: {
           type: "string",
