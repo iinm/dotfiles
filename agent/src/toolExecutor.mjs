@@ -128,7 +128,6 @@ export function createToolExecutor(toolByName, options = {}) {
     const validation = validateBatch(toolUseParts);
 
     if (!validation.isValid) {
-      // TypeScript: validation.isValid === false guarantees these properties exist
       return {
         success: false,
         errors: /** @type {MessageContentToolResult[]} */ (
