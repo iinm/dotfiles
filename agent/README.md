@@ -10,6 +10,7 @@ This CLI tool automatically allows the execution of certain tools but requires e
 
 - Node.js 22 or later
 - LLM provider credentials (API keys, AWS SSO, gcloud CLI, or Azure CLI)
+- ripgrep (rg)
 - (Optional) Tavily API key
 
 ## Quick Start

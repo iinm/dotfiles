@@ -85,6 +85,9 @@ import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
 
   // Discover project context at session start
   const projectContext = await discoverProjectContext(process.cwd());
+  console.log(
+    `📚 Found ${projectContext.agentsMdCount} AGENTS.md file(s) and ${projectContext.skillsCount} skill(s)`,
+  );
 
   const prompt = createPrompt({
     username: USER_NAME,

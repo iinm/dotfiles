@@ -4,6 +4,13 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 
 /**
+ * @typedef {object} ProjectContext
+ * @property {string} contextSection - The formatted context section
+ * @property {number} agentsMdCount - Number of AGENTS.md files found
+ * @property {number} skillsCount - Number of skills found
+ */
+
+/**
  * Execute a command and return the result
  * @param {string} command
  * @param {string[]} args
@@ -28,10 +35,12 @@ async function execCommand(command, args, cwd) {
 /**
  * Discover project context (AGENTS.md and Skills)
  * @param {string} workingDir
- * @returns {Promise<string>}
+ * @returns {Promise<ProjectContext>}
  */
 async function discoverProjectContext(workingDir) {
   let contextSection = "";
+  let agentsMdCount = 0;
+  let skillsCount = 0;
 
   // Find AGENTS.md files
   const agentsMdResult = await execCommand(
@@ -42,6 +51,7 @@ async function discoverProjectContext(workingDir) {
 
   if (agentsMdResult.stdout.trim()) {
     const files = agentsMdResult.stdout.trim().split("\n");
+    agentsMdCount = files.length;
     contextSection += "\nAGENTS.md files found:\n";
     files.forEach((file) => {
       contextSection += `- ${file}\n`;
@@ -80,6 +90,7 @@ async function discoverProjectContext(workingDir) {
         // Save previous file if not disabled
         if (currentPath && !skip) {
           output.push(currentPath, ...currentLines);
+          skillsCount++;
         }
         // Start new file
         currentPath = line;
@@ -95,6 +106,7 @@ async function discoverProjectContext(workingDir) {
 
     if (currentPath && !skip) {
       output.push(currentPath, ...currentLines);
+      skillsCount++;
     }
 
     if (output.length > 0) {
@@ -103,7 +115,7 @@ async function discoverProjectContext(workingDir) {
     }
   }
 
-  return contextSection;
+  return { contextSection, agentsMdCount, skillsCount };
 }
 
 /**
@@ -115,7 +127,7 @@ async function discoverProjectContext(workingDir) {
  * @property {string} workingDir - The current working directory.
  * @property {string} projectMetadataDir - The directory where memory files are stored.
  * @property {Map<string, import('./utils/loadAgentRoles.mjs').AgentRole>} agentRoles - Available agent roles.
- * @property {string} [projectContext] - Pre-discovered project context (AGENTS.md and Skills).
+ * @property {ProjectContext} [projectContext] - Pre-discovered project context (AGENTS.md and Skills).
  */
 
 /**
@@ -339,7 +351,7 @@ Basic commands:
 
 ## Project Context
 
-${projectContext || "No project context discovered yet."}
+${projectContext?.contextSection || "No project context discovered yet."}
 
 When working on files under a directory, read AGENTS.md from repo root down to that directory.
 Example: foo/bar -> ./AGENTS.md, foo/AGENTS.md, foo/bar/AGENTS.md (if they exist).
