@@ -71,40 +71,13 @@ Use memory files to save progress so tasks can be stopped, resumed, and users st
 
 Path: ${projectMetadataDir}/memory/<session-id>--<kebab-case-title>.md
 
-Task Memory Format:
-
-<task_memory_format>
-# [title]
-
-## Task Description
-
-[issues, requirements, constraints, ...]
-
-## Context
-
-[docs, source files, commands, ...]
-
-## Milestones
-
-- [x] Completed milestone
-  - Subtasks
-    - [x] Completed subtask
-    - [x] ...
-  - Evidence (optional): ...
-  - Notes: milestone-local context
-- [ ] In Progress milestone
-- [ ] Next milestone
-
-## Notes
-
-### [title of note #1]
-
-[considerations, decisions, findings, ...]
-
-## Future Notes
-
-[key learnings, limitations, improvements, ...]
-</task_memory_format>
+Memory files should include:
+- Task overview: What the task is, why it's being done, requirements and constraints
+- Context: Relevant documentation, source files, commands, and resources referenced
+- Progress tracking: Completed milestones with evidence, current status, and next steps
+- Decision records: Important decisions made, alternatives considered, and rationale
+- Findings and learnings: Key discoveries, challenges encountered, and solutions applied
+- Future considerations: Known limitations, potential improvements, and follow-up items
 
 ## Tools
 
