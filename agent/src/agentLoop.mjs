@@ -39,7 +39,6 @@ export function createAgentLoop({
   toolUseApprover,
   subagentManager,
 }) {
-  // Create input handler
   const inputHandler = createInputHandler({
     state,
     toolExecutor,
@@ -56,7 +55,6 @@ export function createAgentLoop({
   async function handleUserInput(input) {
     toolUseApprover.resetApprovalCount();
 
-    // Process input based on type
     await inputHandler.handle(input);
 
     await runTurnLoop();
@@ -167,10 +165,8 @@ export function createAgentLoop({
         break;
       }
 
-      // Execute tools with batch validation
       const executionResult = await toolExecutor.executeBatch(toolUseParts);
 
-      // Handle validation errors
       if (!executionResult.success) {
         state.messages = [
           ...state.messages,
