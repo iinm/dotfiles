@@ -652,7 +652,9 @@ export function startInteractiveSession({
       );
     }
     state.turn = true;
-    cli.prompt();
+
+    // 暫定対応: token usageのconsole出力を確実にflushするため、次のevent loop tickまで遅延
+    setTimeout(() => cli.prompt(), 0);
   });
 
   cli.prompt();
