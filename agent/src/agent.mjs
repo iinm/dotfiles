@@ -42,13 +42,9 @@ export function createAgent({
   /** @type {AgentEventEmitter} */
   const agentEventEmitter = new EventEmitter();
 
-  // Initialize subagent manager
   const subagentManager = createSubagentManager(agentEventEmitter, agentRoles);
 
-  // Create tool injector and register injectors for special tools
   const toolInjector = createToolInjector();
-
-  // Register delegate_to_subagent tool injector
   toolInjector.register(
     delegateToSubagentTool.def.name,
     (
@@ -73,7 +69,6 @@ export function createAgent({
     }),
   );
 
-  // Register report_as_subagent tool injector
   toolInjector.register(
     reportAsSubagentTool.def.name,
     (
@@ -96,7 +91,6 @@ export function createAgent({
     }),
   );
 
-  // Inject implementations into tools
   const injectedTools = toolInjector.inject(tools, {
     subagentManager,
     state,
@@ -111,7 +105,6 @@ export function createAgent({
   /** @type {ToolDefinition[]} */
   const toolDefs = injectedTools.map(({ def }) => def);
 
-  // Create tool executor with exclusive tool names
   const toolExecutor = createToolExecutor(toolByName, {
     exclusiveToolNames: [
       delegateToSubagentTool.def.name,
@@ -149,7 +142,6 @@ export function createAgent({
     }
   }
 
-  // Initialize agent loop
   const agentLoop = createAgentLoop({
     callModel,
     state,
