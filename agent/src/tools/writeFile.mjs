@@ -35,11 +35,6 @@ export const writeFileTool = {
       const { filePath, content } = input;
 
       const absFilePath = path.resolve(filePath);
-      if (!absFilePath.startsWith(process.cwd() + path.sep)) {
-        throw new Error(
-          "filePath must be within the current working directory",
-        );
-      }
 
       // Ensure the destination directory exists before writing
       const dir = path.dirname(absFilePath);

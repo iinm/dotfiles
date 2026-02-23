@@ -34,19 +34,4 @@ describe("writeFileTool", () => {
     const writtenContent = await fs.readFile(tmpFilePath, "utf8");
     assert.equal(writtenContent, "Hello World");
   });
-
-  it("rejects parent directory traversal in filePath", async () => {
-    // when: filePath contains ../
-    const result = await writeFileTool.impl({
-      filePath: "../etc/passwd",
-      content: "dummy",
-    });
-
-    // then: should return an Error
-    assert.ok(result instanceof Error);
-    assert.match(
-      result.message,
-      /filePath must be within the current working directory/,
-    );
-  });
 });

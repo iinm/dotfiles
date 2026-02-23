@@ -4,7 +4,6 @@
  */
 
 import fs from "node:fs/promises";
-import path from "node:path";
 import { noThrow } from "../utils/noThrow.mjs";
 
 /** @type {Tool} */
@@ -52,13 +51,6 @@ other new content
   impl: async (input) =>
     await noThrow(async () => {
       const { filePath, diff } = input;
-
-      const absFilePath = path.resolve(filePath);
-      if (!absFilePath.startsWith(process.cwd() + path.sep)) {
-        throw new Error(
-          "filePath must be within the current working directory",
-        );
-      }
 
       const content = await fs.readFile(filePath, "utf8");
       const matches = Array.from(

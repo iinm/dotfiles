@@ -48,14 +48,68 @@ describe("isSafeToolInput", () => {
 
 describe("isSafeToolInputItem", () => {
   const tmpSymlink = path.resolve(TEMP_DIR, "tmp");
+  const agentTmpDir = path.resolve(AGENT_PROJECT_METADATA_DIR, "tmp");
+  const symlinkInAllowedDir = path.resolve(agentTmpDir, "unsafe-symlink");
+  const brokenSymlinkInAllowedDir = path.resolve(
+    agentTmpDir,
+    "broken-unsafe-symlink",
+  );
+  const brokenSymlinkOutside = path.resolve(TEMP_DIR, "broken-outside-symlink");
+  const safeSymlinkInAllowedDir = path.resolve(
+    agentTmpDir,
+    "safe-symlink-inside",
+  );
+  const nestedSymlinkInAllowedDir = path.resolve(
+    agentTmpDir,
+    "nested-unsafe-symlink",
+  );
+  const circularSymlink = path.resolve(agentTmpDir, "circular-link");
+
+  const midLink = path.resolve(TEMP_DIR, "mid-link");
 
   before(async () => {
+    await rm(TEMP_DIR, { force: true, recursive: true });
+    await rm(symlinkInAllowedDir, { force: true });
+    await rm(brokenSymlinkInAllowedDir, { force: true });
+    await rm(safeSymlinkInAllowedDir, { force: true });
+    await rm(nestedSymlinkInAllowedDir, { force: true });
+    await rm(circularSymlink, { force: true });
+
     await mkdir(TEMP_DIR, { recursive: true });
+    await mkdir(agentTmpDir, { recursive: true });
+
+    // Valid symlink to outside
     await symlink("/tmp", tmpSymlink);
+
+    // Valid symlink in allowed dir to outside
+    await symlink("/etc/passwd", symlinkInAllowedDir);
+
+    // Broken symlink in allowed dir to outside
+    await symlink("/non-existent-path-outside", brokenSymlinkInAllowedDir);
+
+    // Broken symlink outside allowed dir to outside
+    await symlink("/another-non-existent-outside", brokenSymlinkOutside);
+
+    // Symlink in allowed dir to inside working directory
+    await symlink(path.resolve("README.md"), safeSymlinkInAllowedDir);
+
+    // Nested symlink: link1 -> link2 -> outside (broken)
+    await symlink("/tmp/non-existent-nested", midLink);
+    await symlink(midLink, nestedSymlinkInAllowedDir);
+
+    // Circular symlink
+    await symlink(circularSymlink, circularSymlink);
   });
 
   after(async () => {
-    await rm(TEMP_DIR, { recursive: true });
+    await rm(TEMP_DIR, { force: true, recursive: true });
+    // Note: We don't remove AGENT_PROJECT_METADATA_DIR completely as it might be used by other things,
+    // but we clean up our specific symlinks.
+    await rm(symlinkInAllowedDir, { force: true });
+    await rm(brokenSymlinkInAllowedDir, { force: true });
+    await rm(safeSymlinkInAllowedDir, { force: true });
+    await rm(nestedSymlinkInAllowedDir, { force: true });
+    await rm(circularSymlink, { force: true });
   });
 
   const testCases = [
@@ -87,6 +141,36 @@ describe("isSafeToolInputItem", () => {
       expected: false,
     },
     {
+      desc: "symlink in allowed directory (.agent/tmp) pointing outside",
+      arg: symlinkInAllowedDir,
+      expected: false,
+    },
+    {
+      desc: "broken symlink in allowed directory (.agent/tmp) pointing outside",
+      arg: brokenSymlinkInAllowedDir,
+      expected: false,
+    },
+    {
+      desc: "broken symlink outside pointing outside",
+      arg: brokenSymlinkOutside,
+      expected: false,
+    },
+    {
+      desc: "symlink in allowed directory pointing inside",
+      arg: safeSymlinkInAllowedDir,
+      expected: true,
+    },
+    {
+      desc: "nested symlink in allowed directory pointing outside (broken)",
+      arg: nestedSymlinkInAllowedDir,
+      expected: false,
+    },
+    {
+      desc: "circular symlink in allowed directory",
+      arg: circularSymlink,
+      expected: false,
+    },
+    {
       desc: "safe path with unneeded parent directory reference",
       arg: `${AGENT_PROJECT_METADATA_DIR}/../${AGENT_PROJECT_METADATA_DIR}/memory/foo.md`,
       expected: false,
@@ -97,6 +181,19 @@ describe("isSafeToolInputItem", () => {
       expected: false,
     },
     { desc: "git ignored file", arg: "node_modules", expected: false },
+
+    // Non-path arguments containing ".." or "..." should be allowed
+    // as long as they are not path segments.
+    {
+      desc: "git revision range (contains ..)",
+      arg: "main..HEAD",
+      expected: true,
+    },
+    {
+      desc: "git triple-dot revision range (contains ...)",
+      arg: "feature...main",
+      expected: true,
+    },
   ];
 
   for (const { desc, arg, expected } of testCases) {
