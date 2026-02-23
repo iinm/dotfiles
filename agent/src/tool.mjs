@@ -46,20 +46,26 @@ export function createToolUseApprover({
         continue;
       }
 
-      if (pattern.action === "deny") {
+      const action = pattern.action ?? "ask";
+
+      if (action === "deny") {
         return {
           action: "deny",
           reason: pattern.reason,
         };
       }
 
-      const maskedInput = maskApprovalInput(toolUse.toolName, toolUse.input);
-      if (isSafeToolInput(maskedInput)) {
-        state.approvalCount += 1;
-        return state.approvalCount <= max
-          ? { action: "allow" }
-          : { action: "ask" };
+      if (action === "allow") {
+        const maskedInput = maskApprovalInput(toolUse.toolName, toolUse.input);
+        if (isSafeToolInput(maskedInput)) {
+          state.approvalCount += 1;
+          return state.approvalCount <= max
+            ? { action: "allow" }
+            : { action: "ask" };
+        }
       }
+
+      return { action: "ask" };
     }
 
     return { action: "ask" };
@@ -73,6 +79,7 @@ export function createToolUseApprover({
     state.allowedToolUseInSession.push({
       toolName: toolUse.toolName,
       input: maskApprovalInput(toolUse.toolName, toolUse.input),
+      action: "allow",
     });
   }
 

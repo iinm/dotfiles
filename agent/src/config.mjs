@@ -233,6 +233,7 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
     {
       toolName: "exec_command",
       input: { command: /^(pwd|date|uname|ls|wc|cat|head|tail|jq|echo)$/ },
+      action: "allow",
     },
     {
       toolName: "exec_command",
@@ -251,6 +252,7 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
               ),
           ),
       },
+      action: "allow",
     },
     {
       toolName: "exec_command",
@@ -267,6 +269,7 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
               !arg.match(/^(--unrestricted|-u|--no-ignore)(=.+)?$/),
           ),
       },
+      action: "allow",
     },
     {
       toolName: "exec_command",
@@ -274,6 +277,7 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
         command: "sed",
         args: ["-n", /^\d+(,\d+)?(p|l)$/],
       },
+      action: "allow",
     },
     {
       toolName: "exec_command",
@@ -286,6 +290,7 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
         // NR==0, NR=200 {print NR, $0}
         args: [/^F?NR==\d+(, *F?NR==-?\d+)? *\{print (F?NR[," ]*)?\$0\}$/],
       },
+      action: "allow",
     },
     {
       toolName: "exec_command",
@@ -297,6 +302,7 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
           /^F?NR[=<>]+\d+ *(&& *F?NR[=<>]+-?\d+)? *\{print (F?NR[," ]*)?\$0\}$/,
         ],
       },
+      action: "allow",
     },
     {
       toolName: "exec_command",
@@ -304,30 +310,37 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
         command: "git",
         args: [/^(status|diff|log|show|ls-remote|rev-parse)$/],
       },
+      action: "allow",
     },
     {
       toolName: "exec_command",
       input: { command: "git", args: ["branch", "--show-current"] },
+      action: "allow",
     },
     {
       toolName: "exec_command",
       input: { command: "docker", args: [/^(ps)$/] },
+      action: "allow",
     },
     {
       toolName: "exec_command",
       input: { command: "docker", args: ["compose", /^(ps|logs)$/] },
+      action: "allow",
     },
     {
       toolName: "exec_command",
       input: { command: "gh", args: ["--version"] },
+      action: "allow",
     },
     {
       toolName: "exec_command",
       input: { command: "gh", args: ["auth", "status"] },
+      action: "allow",
     },
     {
       toolName: "exec_command",
       input: { command: "gh", args: [/^(pr|issue)$/, /^(view|diff)$/] },
+      action: "allow",
     },
     {
       toolName: "exec_command",
@@ -335,6 +348,7 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
         command: "gh",
         args: ["api", /^repos\/[^/]+\/[^/]+\/pulls\/\d+\/comments$/],
       },
+      action: "allow",
     },
     {
       toolName: "exec_command",
@@ -342,6 +356,7 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
         command: "gh",
         args: ["api", /^repos\/[^/]+\/[^/]+\/pulls\/comments\/\d+$/],
       },
+      action: "allow",
     },
 
     // Tmux command
@@ -350,6 +365,7 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
       input: {
         command: /^(list-sessions|list-windows)$/,
       },
+      action: "allow",
     },
     {
       toolName: "tmux_command",
@@ -364,6 +380,7 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
           (arg) => typeof arg === "string" && arg.startsWith(tmuxSessionId),
         ],
       },
+      action: "allow",
     },
     {
       toolName: "tmux_command",
@@ -371,6 +388,7 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
         command: /^(new-session|new)$/,
         args: ["-d", "-s", tmuxSessionId],
       },
+      action: "allow",
     },
   ];
 }

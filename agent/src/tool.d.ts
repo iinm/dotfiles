@@ -62,7 +62,7 @@ export type ToolUseApprover = {
 export type ToolUsePattern = {
   toolName: ValuePattern;
   input?: ObjectPattern;
-  action?: "allow" | "deny";
+  action?: "allow" | "deny" | "ask";
   reason?: string;
 };
 

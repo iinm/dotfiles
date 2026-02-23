@@ -10,7 +10,9 @@ describe("createToolUseApprover", () => {
   it("should approve allowed tool use up to maxAutoApprovals", () => {
     // given:
     const toolApprover = createToolUseApprover({
-      patterns: [{ toolName: "exec_command", input: { command: "ls" } }],
+      patterns: [
+        { toolName: "exec_command", input: { command: "ls" }, action: "allow" },
+      ],
       maxApprovals: 2,
       maskApprovalInput: (_name, input) => input,
     });
@@ -52,7 +54,9 @@ describe("createToolUseApprover", () => {
   it("should not approve disallowed tool use (action: ask by default)", () => {
     // given:
     const toolApprover = createToolUseApprover({
-      patterns: [{ toolName: "exec_command", input: { command: "ls" } }],
+      patterns: [
+        { toolName: "exec_command", input: { command: "ls" }, action: "allow" },
+      ],
       maxApprovals: 2,
       maskApprovalInput: (_name, input) => input,
     });
@@ -67,6 +71,31 @@ describe("createToolUseApprover", () => {
 
     // when/then:
     assert.deepStrictEqual(toolApprover.isAllowedToolUse(disallowedToolUse), {
+      action: "ask",
+    });
+  });
+
+  it("should ask when action is invalid (typo)", () => {
+    // given:
+    const toolApprover = createToolUseApprover({
+      patterns: [
+        // @ts-expect-error
+        { toolName: "exec_command", input: { command: "ls" }, action: "denyy" },
+      ],
+      maxApprovals: 2,
+      maskApprovalInput: (_name, input) => input,
+    });
+
+    /** @type {MessageContentToolUse} */
+    const toolUse = {
+      type: "tool_use",
+      toolUseId: "test",
+      toolName: "exec_command",
+      input: { command: "ls" },
+    };
+
+    // when/then:
+    assert.deepStrictEqual(toolApprover.isAllowedToolUse(toolUse), {
       action: "ask",
     });
   });
@@ -141,8 +170,8 @@ describe("createToolUseApprover", () => {
     // given:
     const toolApprover = createToolUseApprover({
       patterns: [
-        { toolName: "delegate_to_subagent" },
-        { toolName: /^report_as_subagent$/ },
+        { toolName: "delegate_to_subagent", action: "allow" },
+        { toolName: /^report_as_subagent$/, action: "allow" },
       ],
       maxApprovals: 5,
       maskApprovalInput: (_name, input) => input,

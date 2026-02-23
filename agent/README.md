@@ -270,24 +270,30 @@ The agent loads configuration files in the following order. Settings in later fi
       },
       {
         "toolName": "exec_command",
-        "input": { "command": "npm", "args": ["run", { "regex": "^(check|fix)$" }] }
+        "input": { "command": "npm", "args": ["run", { "regex": "^(check|fix)$" }] },
+        "action": "allow"
       },
       {
         "toolName": { "regex": "^(write_file|patch_file)$" },
-        "input": { "filePath": { "regex": "^\\.agent/memory/.+\\.md$" } }
+        "input": { "filePath": { "regex": "^\\.agent/memory/.+\\.md$" } },
+        "action": "allow"
       },
       {
-        "toolName": { "regex": "^(delegate_to_subagent|report_as_subagent)$" }
+        "toolName": { "regex": "^(delegate_to_subagent|report_as_subagent)$" },
+        "action": "allow"
       },
       {
         "toolName": "ask_google",
+        "action": "allow"
       },
       // MCP Tool naming convention: mcp__<serverName>__<toolName>
       {
-        "toolName": { "regex": "mcp__chrome_devtools__.+" }
+        "toolName": { "regex": "mcp__chrome_devtools__.+" },
+        "action": "allow"
       },
       {
-        "toolName": { "regex": "slack_(read|search)_.+" }
+        "toolName": { "regex": "slack_(read|search)_.+" },
+        "action": "allow"
       }
     ],
 

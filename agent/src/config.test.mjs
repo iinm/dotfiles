@@ -264,7 +264,12 @@ describe("createDefaultAllowedToolUsePatterns", () => {
   for (const { desc, toolUse, isApproved } of execCommandTestCases) {
     test(`(exec_command) ${desc}`, () => {
       assert.strictEqual(
-        patterns.some((p) => matchValue(toolUse, p)),
+        patterns.some((p) =>
+          matchValue(toolUse, {
+            toolName: p.toolName,
+            ...(p.input !== undefined && { input: p.input }),
+          }),
+        ),
         isApproved,
       );
     });
@@ -330,7 +335,12 @@ describe("createDefaultAllowedToolUsePatterns", () => {
   for (const { desc, toolUse, isApproved } of tmuxCommandTestCases) {
     test(`(tmux_command) ${desc}`, () => {
       assert.strictEqual(
-        patterns.some((p) => matchValue(toolUse, p)),
+        patterns.some((p) =>
+          matchValue(toolUse, {
+            toolName: p.toolName,
+            ...(p.input !== undefined && { input: p.input }),
+          }),
+        ),
         isApproved,
       );
     });
