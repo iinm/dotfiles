@@ -6,7 +6,12 @@ import { styleText } from "node:util";
 import { createAgent } from "./agent.mjs";
 import { startInteractiveSession } from "./cli.mjs";
 import { loadAppConfig } from "./config.mjs";
-import { AGENT_PROJECT_METADATA_DIR, USER_NAME } from "./env.mjs";
+import {
+  AGENT_MODEL,
+  AGENT_NOTIFY_CMD_DEFAULT,
+  AGENT_PROJECT_METADATA_DIR,
+  USER_NAME,
+} from "./env.mjs";
 import { setupMCPServer } from "./mcp.mjs";
 import { createModelCaller } from "./modelRegistry.mjs";
 import { createPrompt } from "./prompt.mjs";
@@ -85,7 +90,7 @@ import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
 
   const prompt = createPrompt({
     username: USER_NAME,
-    modelName: appConfig.model || "",
+    modelName: appConfig.model || AGENT_MODEL,
     sessionId,
     tmuxSessionId,
     workingDir: process.cwd(),
@@ -119,9 +124,9 @@ import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
   }
 
   const toolUseApprover = createToolUseApprover({
-    maxApprovals: appConfig.autoApproval?.maxApprovals || 0,
-    patterns: appConfig.autoApproval?.patterns || [],
+    maxApprovals: appConfig.autoApproval?.maxApprovals || 50,
     defaultAction: appConfig.autoApproval?.defaultAction || "ask",
+    patterns: appConfig.autoApproval?.patterns || [],
     maskApprovalInput: (toolName, input) => {
       for (const tool of builtinTools) {
         if (tool.def.name === toolName && tool.maskApprovalInput) {
@@ -146,7 +151,7 @@ import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
     agentCommands,
     sessionId,
     modelName: appConfig.model || "",
-    notifyCmd: appConfig.notifyCmd || "",
+    notifyCmd: appConfig.notifyCmd || AGENT_NOTIFY_CMD_DEFAULT,
     sandbox: Boolean(appConfig.sandbox),
     onStop: async () => {
       for (const cleanup of mcpCleanups) {

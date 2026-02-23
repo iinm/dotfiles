@@ -9,8 +9,6 @@ import path from "node:path";
 import readline from "node:readline";
 import { styleText } from "node:util";
 import {
-  AGENT_MODEL,
-  AGENT_NOTIFY_CMD_DEFAULT,
   AGENT_PROJECT_METADATA_DIR,
   AGENT_ROOT,
   TRUSTED_CONFIG_HASHES_DIR,
@@ -38,18 +36,10 @@ export async function loadAppConfig({ tmuxSessionId }) {
   const loadedConfigPath = [];
   /** @type {AppConfig} */
   let merged = {
-    model: AGENT_MODEL,
     autoApproval: {
       patterns: createDefaultAllowedToolUsePatterns({
         tmuxSessionId,
       }),
-      maxApprovals: 50,
-    },
-    notifyCmd: AGENT_NOTIFY_CMD_DEFAULT,
-    providers: {
-      xai: {
-        baseURL: "https://api.x.ai",
-      },
     },
   };
 
@@ -59,7 +49,7 @@ export async function loadAppConfig({ tmuxSessionId }) {
       loadedConfigPath.push(filePath);
     }
     merged = {
-      model: AGENT_MODEL || config.model || merged.model,
+      model: config.model || merged.model,
       providers: {
         gemini: {
           ...(merged.providers?.gemini ?? {}),
