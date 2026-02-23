@@ -260,6 +260,10 @@ The agent loads configuration files in the following order. Settings in later fi
 ```js
 {
   "autoApproval": {
+    // Automatically deny unmatched tools instead of asking
+    "defaultAction": "deny",
+    // The maximum number of automatic approvals.
+    "maxApprovals": 100,
     "patterns": [
       {
         "toolName": "exec_command",
@@ -312,6 +316,8 @@ The agent loads configuration files in the following order. Settings in later fi
 ```js
 {
   "autoApproval": {
+    // The maximum number of automatic approvals.
+    "maxApprovals": 50,
     "patterns": [
       {
         "toolName": "exec_command",
@@ -351,10 +357,7 @@ The agent loads configuration files in the following order. Settings in later fi
         "toolName": { "regex": "slack_(read|search)_.+" },
         "action": "allow"
       }
-    ],
-
-    // The maximum number of automatic approvals.
-    "maxApprovals": 50
+    ]
   },
 
   // (Optional) Sandbox environment for the exec_command and tmux_command tools

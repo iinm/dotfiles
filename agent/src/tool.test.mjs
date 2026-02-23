@@ -14,6 +14,7 @@ describe("createToolUseApprover", () => {
         { toolName: "exec_command", input: { command: "ls" }, action: "allow" },
       ],
       maxApprovals: 2,
+      defaultAction: "ask",
       maskApprovalInput: (_name, input) => input,
     });
 
@@ -58,6 +59,7 @@ describe("createToolUseApprover", () => {
         { toolName: "exec_command", input: { command: "ls" }, action: "allow" },
       ],
       maxApprovals: 2,
+      defaultAction: "ask",
       maskApprovalInput: (_name, input) => input,
     });
 
@@ -83,6 +85,7 @@ describe("createToolUseApprover", () => {
         { toolName: "exec_command", input: { command: "ls" }, action: "denyy" },
       ],
       maxApprovals: 2,
+      defaultAction: "ask",
       maskApprovalInput: (_name, input) => input,
     });
 
@@ -112,6 +115,7 @@ describe("createToolUseApprover", () => {
         },
       ],
       maxApprovals: 2,
+      defaultAction: "ask",
       maskApprovalInput: (_name, input) => input,
     });
 
@@ -135,6 +139,7 @@ describe("createToolUseApprover", () => {
     const toolApprover = createToolUseApprover({
       patterns: [],
       maxApprovals: 2,
+      defaultAction: "ask",
       maskApprovalInput: (_name, input) => {
         // ignore content
         const { filePath } = input;
@@ -174,6 +179,7 @@ describe("createToolUseApprover", () => {
         { toolName: /^report_as_subagent$/, action: "allow" },
       ],
       maxApprovals: 5,
+      defaultAction: "ask",
       maskApprovalInput: (_name, input) => input,
     });
 
@@ -204,5 +210,54 @@ describe("createToolUseApprover", () => {
       { action: "allow" },
       "should approve report_as_subagent without input pattern",
     );
+  });
+
+  it("should deny tool use when defaultAction is deny and no pattern matches", () => {
+    // given:
+    const toolApprover = createToolUseApprover({
+      patterns: [
+        { toolName: "exec_command", input: { command: "ls" }, action: "allow" },
+      ],
+      maxApprovals: 2,
+      defaultAction: "deny",
+      maskApprovalInput: (_name, input) => input,
+    });
+
+    /** @type {MessageContentToolUse} */
+    const unmatchedToolUse = {
+      type: "tool_use",
+      toolUseId: "test",
+      toolName: "exec_command",
+      input: { command: "rm" },
+    };
+
+    // when/then:
+    assert.deepStrictEqual(toolApprover.isAllowedToolUse(unmatchedToolUse), {
+      action: "deny",
+    });
+  });
+
+  it("should deny tool use when a pattern matches but action is undefined and defaultAction is deny", () => {
+    // given:
+    const toolApprover = createToolUseApprover({
+      patterns: [{ toolName: "exec_command", input: { command: "ls" } }],
+      maxApprovals: 2,
+      defaultAction: "deny",
+      maskApprovalInput: (_name, input) => input,
+    });
+
+    /** @type {MessageContentToolUse} */
+    const toolUse = {
+      type: "tool_use",
+      toolUseId: "test",
+      toolName: "exec_command",
+      input: { command: "ls" },
+    };
+
+    // when/then:
+    assert.deepStrictEqual(toolApprover.isAllowedToolUse(toolUse), {
+      action: "deny",
+      reason: undefined,
+    });
   });
 });

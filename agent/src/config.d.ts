@@ -7,6 +7,7 @@ export type AppConfig = {
   autoApproval?: {
     patterns?: ToolUsePattern[];
     maxApprovals?: number;
+    defaultAction?: "deny" | "ask";
   };
   sandbox?: ExecCommandSanboxConfig;
   tools?: {

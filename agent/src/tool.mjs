@@ -13,6 +13,7 @@ import { matchValue } from "./utils/matchValue.mjs";
 export function createToolUseApprover({
   patterns,
   maxApprovals: max,
+  defaultAction,
   maskApprovalInput,
 }) {
   const state = {
@@ -46,7 +47,7 @@ export function createToolUseApprover({
         continue;
       }
 
-      const action = pattern.action ?? "ask";
+      const action = pattern.action ?? defaultAction;
 
       if (action === "deny") {
         return {
@@ -68,7 +69,7 @@ export function createToolUseApprover({
       return { action: "ask" };
     }
 
-    return { action: "ask" };
+    return { action: defaultAction };
   }
 
   /**

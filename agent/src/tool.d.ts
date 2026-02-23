@@ -35,6 +35,7 @@ export type StructuredToolResultContent =
 export type ToolUseApproverConfig = {
   patterns: ToolUsePattern[];
   maxApprovals: number;
+  defaultAction: "deny" | "ask";
 
   /**
    * Mask the input before auto-approval checks and recording.

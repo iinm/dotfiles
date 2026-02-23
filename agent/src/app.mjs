@@ -121,6 +121,7 @@ import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
   const toolUseApprover = createToolUseApprover({
     maxApprovals: appConfig.autoApproval?.maxApprovals || 0,
     patterns: appConfig.autoApproval?.patterns || [],
+    defaultAction: appConfig.autoApproval?.defaultAction || "ask",
     maskApprovalInput: (toolName, input) => {
       for (const tool of builtinTools) {
         if (tool.def.name === toolName && tool.maskApprovalInput) {
