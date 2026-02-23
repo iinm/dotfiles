@@ -92,13 +92,13 @@ Basic commands:
 ## Project Rules and Skills
  
 - AGENTS.md: Project rules and conventions
-  fd ["^AGENTS\\.md$", "./", "--hidden", "--max-depth", "5"]
-  When working on files under a directory, read AGENTS.md from repo root down to that directory.
-  foo/bar -> ./AGENTS.md, foo/AGENTS.md, foo/bar/AGENTS.md (if they exist).
+  Find: fd ["^AGENTS\\.md$", "./", "--hidden", "--max-depth", "5"]
+  Read from root to target: ./AGENTS.md → dir/AGENTS.md → dir/subdir/AGENTS.md
+  Apply rules when working in that directory
 
-- Skills: Reusable workflows with specialized knowledge
-  rg ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "SKILL.md", "\\A---\\n[\\s\\S]*?\\n---", "./"]
-  If a skill matches the task, read its full file and follow/adapt it.
+- SKILL.md: Reusable workflows with specialized knowledge
+  Find: rg ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "SKILL.md", "\\A---\\n[\\s\\S]*?\\n---", "./"]
+  If skill matches task: read full file and apply the workflow
 
 ## Environment
 
