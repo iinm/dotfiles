@@ -21,7 +21,8 @@ Install the dependencies.
 npm install
 ```
 
-Create the configuration.
+<details>
+<summary>Create the configuration.</summary>
 
 ```js
 // $AGENT_ROOT(where this README file exists)/.config/config.local.json
@@ -104,6 +105,7 @@ Create the configuration.
   }
 }
 ```
+</details>
 
 <details>
 <summary>Other Supported Providers</summary>
@@ -252,21 +254,70 @@ The agent loads configuration files in the following order. Settings in later fi
 
 ### Example
 
+<details>
+<summary>YOLO mode example (requires sandbox for safety)</summary>
+
 ```js
 {
   "autoApproval": {
     "patterns": [
       {
         "toolName": "exec_command",
-        "input": { "command": "grep" },
+        "input": { "command": { "regex": "^(find|grep)$" } },
         "action": "deny",
-        "reason": "Use rg"
+        "reason": "Use rg or fd instead"
       },
       {
-        "toolName": "exec_command",
-        "input": { "command": "find" },
+        // Restrict network access
+        "toolName": { "regex": "^(fetch_web_page|fetch_web_page_with_browser)$" },
         "action": "deny",
-        "reason": "Use fd"
+        "reason": "Use ask_google instead"
+      },
+      {
+        "toolName": { "regex": "^(write_file|patch_file|exec_command|tmux_command)$" },
+        "action": "allow"
+      },
+      {
+        "toolName": "ask_google",
+        "action": "allow"
+      },
+      {
+        "toolName": { "regex": "^(delegate_to_subagent|report_as_subagent)$" },
+        "action": "allow"
+      }
+    ]
+  },
+  "sandbox": {
+    "command": "agent-sandbox",
+    "args": ["--dockerfile", ".agent/sandbox/Dockerfile", "--allow-write", "--skip-build", "--keep-alive", "30"],
+    "separator": "--",
+    "rules": [
+      {
+        "pattern": {
+          "command": "npm",
+          "args": ["ci"]
+        },
+        "mode": "sandbox",
+        "extraArgs": ["--allow-net", "0.0.0.0/0"]
+      }
+    ]
+  }
+}
+```
+</details>
+
+<details>
+<summary>Full example</summary>
+
+```js
+{
+  "autoApproval": {
+    "patterns": [
+      {
+        "toolName": "exec_command",
+        "input": { "command": { "regex": "^(find|grep)$" } },
+        "action": "deny",
+        "reason": "Use rg or fd instead"
       },
       {
         "toolName": "exec_command",
@@ -276,6 +327,11 @@ The agent loads configuration files in the following order. Settings in later fi
       {
         "toolName": { "regex": "^(write_file|patch_file)$" },
         "input": { "filePath": { "regex": "^\\.agent/memory/.+\\.md$" } },
+        "action": "allow"
+      },
+      {
+        "toolName": { "regex": "^(write_file|patch_file)$" },
+        "input": { "filePath": { "regex": "^(\\./)?src/" } },
         "action": "allow"
       },
       {
@@ -364,6 +420,7 @@ The agent loads configuration files in the following order. Settings in later fi
   // "notifyCmd": "/path/to/notification-command"
 }
 ```
+</details>
 
 ## File-based Prompts
 
@@ -384,10 +441,9 @@ You can also import remote prompts with the `import` field:
 
 ```md
 ---
-description: Simplify complex code
 import: https://raw.githubusercontent.com/anthropics/claude-plugins-official/refs/heads/main/plugins/code-simplifier/agents/code-simplifier.md
 ---
-Additional instructions or overrides for the imported prompt.
+Use AGENTS.md instead of CLAUDE.md in this project.
 ```
 
 Remote prompts are fetched and cached locally. The local content will be appended to the imported content.
