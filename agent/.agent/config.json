@@ -42,7 +42,7 @@
     ]
   },
   "sandbox": {
-    "command": ".agent/sandbox/run",
+    "command": ".agent/sandbox/run.sh",
     "args": ["--skip-build", "--keep-alive", "30"],
     "separator": "--",
     "rules": [

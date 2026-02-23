@@ -229,6 +229,7 @@ $AGENT_ROOT (where this README file exists)
         \__ config.json        # User configuration
         \__ config.local.json  # User local configuration (including secrets)
         \__ prompts/           # Global/User-defined prompts
+        \__ agents/            # Global/User-defined agent roles
 
 <project-root>
   \__ $AGENT_PROJECT_METADATA_DIR (default: .agent)
@@ -237,8 +238,7 @@ $AGENT_ROOT (where this README file exists)
         \__ interrupt-message.txt  # Interrupt message consumed by the agent
         \__ memory/                # Task-specific memory files
         \__ prompts/               # Project-specific prompts
-        \__ sandbox/               # (Example) Sandbox configuration
-        \__ instructions.md        # (Example) Task-specific instructions
+        \__ agents/                # Project-specific agent roles
 ```
 
 ## Configuration
@@ -336,6 +336,7 @@ The agent loads configuration files in the following order. Settings in later fi
       "command": "npx",
       "args": ["-y", "chrome-devtools-mcp@latest", "--isolated"]
     },
+    // Warning: Add this to config.local.json to avoid committing secrets to Git
     "slack": {
       "command": "npx",
       "args": ["-y", "mcp-remote", "https://mcp.slack.com/mcp", "--header", "Authorization:Bearer FIXME"],
@@ -348,11 +349,12 @@ The agent loads configuration files in the following order. Settings in later fi
         "enabledTools": ["notion-search", "notion-fetch"]
       }
     },
-    "aws-knowledge": {
+    "aws_knowledge": {
       "command": "npx",
       "args": ["-y", "mcp-remote", "https://knowledge-mcp.global.api.aws"]
     },
-    "google-developer-knowledge": {
+    // Warning: Add this to config.local.json to avoid committing secrets to Git
+    "google_developer-knowledge": {
       "command": "npx",
       "args": ["-y", "mcp-remote", "https://developerknowledge.googleapis.com/mcp", "--header", "X-Goog-Api-Key:FIXME"]
     }
