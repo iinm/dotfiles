@@ -39,17 +39,6 @@ export function createPrompt({
 - Address the user by their name, rather than "user".
 - Use emojis sparingly to highlight key points.
 
-## Project Rules and Skills
- 
-- AGENTS.md or CLAUDE.md: Project rules and conventions
-  fd ["^(AGENTS|CLAUDE)\\.md$", "./", "--hidden", "--max-depth", "5"]
-  When working on files under a directory, read AGENTS.md or CLAUDE.md from repo root down to that directory.
-  foo/bar -> ./AGENTS.md, foo/AGENTS.md, foo/bar/AGENTS.md (if they exist).
-
-- Skills: Reusable workflows with specialized knowledge
-  rg ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "SKILL.md", "\\A---\\n[\\s\\S]*?\\n---", "./"]
-  If a skill matches the task, read its full file and follow/adapt it.
-
 ## Memory Files
 
 - Create/Update memory files after creating/updating a plan, completing milestones, encountering issues, or making decisions.
@@ -100,6 +89,17 @@ Basic commands:
 - Send key to session: send-keys ["-t", "<tmux-session-id>:<window>", "echo hello", "Enter"]
 - Delete line: send-keys ["-t", "<tmux-session-id>:<window>", "C-a", "C-k"]
 
+## Project Rules and Skills
+ 
+- AGENTS.md: Project rules and conventions
+  fd ["^AGENTS\\.md$", "./", "--hidden", "--max-depth", "5"]
+  When working on files under a directory, read AGENTS.md from repo root down to that directory.
+  foo/bar -> ./AGENTS.md, foo/AGENTS.md, foo/bar/AGENTS.md (if they exist).
+
+- Skills: Reusable workflows with specialized knowledge
+  rg ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "SKILL.md", "\\A---\\n[\\s\\S]*?\\n---", "./"]
+  If a skill matches the task, read its full file and follow/adapt it.
+
 ## Environment
 
 - User name: ${username}
@@ -110,6 +110,6 @@ Basic commands:
 - Memory file path: ${projectMetadataDir}/memory/${sessionId}--<kebab-case-title>.md
 
 Available subagents:
-${agentRoleDescriptions}
+${agentRoleDescriptions ?? "N/A"}
 `.trim();
 }
