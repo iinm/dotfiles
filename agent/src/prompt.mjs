@@ -63,15 +63,13 @@ Call multiple tools at once when they don't depend on each other's results.
 - Use relative paths.
 - Avoid bash -c unless pipes (|) or redirection (>, <) are required.
 
-Recommended commands:
+Examples:
 - fd: List directories or find files.
   fd [".", "./", "--max-depth", "3", "--type", "d", "--hidden"]
 - rg: Search for strings. Always specify a directory or file (e.g., "./") to avoid waiting for stdin.
   rg ["--heading", "--line-number", "pattern", "./"]
 - awk: Read specific line ranges (max 200 lines).
   awk ["FNR==1,FNR==200{print FNR,$0}", "file.txt"]
-
-Other useful examples:
 - gh:
   gh ["pr", "view", "123"]
   gh ["api", "repos/<owner>/<repo>/pulls/comments/<id>", "--jq", "{user: .user.login, path: .path, line: .line, body: .body}"]
@@ -82,7 +80,7 @@ Other useful examples:
 - Create a new session with the given tmux session id.
 - Use relative paths.
 
-Basic commands:
+Examples:
 - Start session: new-session ["-d", "-s", "<tmux-session-id>"]
 - Detect window number to send keys: list-windows ["-t", "<tmux-session-id>"]
 - Get output of window before sending keys: capture-pane ["-p", "-t", "<tmux-session-id>:<window>"]
