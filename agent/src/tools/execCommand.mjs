@@ -29,6 +29,7 @@ export function createExecCommandTool(config) {
             type: "string",
           },
           args: {
+            // Gemini 3 flashが command: rg, args: [rg, ...] のようにargsにコマンドを含めることがある
             description:
               "Array of arguments to pass to the command. Do not include the command name itself in this array.",
             type: "array",
