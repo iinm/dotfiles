@@ -1,5 +1,7 @@
 {
   "autoApproval": {
+    "defaultAction": "deny",
+    "maxApprovals": 100,
     "patterns": [
       // YOLO mode
       {
@@ -13,6 +15,13 @@
         "action": "deny",
         "reason": "Use ask_google instead"
       },
+
+      {
+        "toolName": "exec_command",
+        "input": { "command": "git", "args": [{ "regex": "^(commit|revert)$" }] },
+        "action": "ask"
+      },
+
       {
         "toolName": { "regex": "^(write_file|patch_file|exec_command|tmux_command)$" },
         "action": "allow"
