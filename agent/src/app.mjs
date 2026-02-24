@@ -86,11 +86,12 @@ import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
     }
   }
 
+  const modelName = AGENT_MODEL || appConfig.model || "";
   const agentRoles = await loadAgentRoles();
 
   const prompt = createPrompt({
     username: USER_NAME,
-    modelName: appConfig.model || AGENT_MODEL,
+    modelName,
     sessionId,
     tmuxSessionId,
     workingDir: process.cwd(),
@@ -138,7 +139,7 @@ import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
   });
 
   const { userEventEmitter, agentEventEmitter, agentCommands } = createAgent({
-    callModel: createModelCaller(appConfig.model || "", appConfig.providers),
+    callModel: createModelCaller(modelName, appConfig.providers),
     prompt,
     tools: [...builtinTools, ...mcpTools],
     toolUseApprover,
@@ -150,7 +151,7 @@ import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
     agentEventEmitter,
     agentCommands,
     sessionId,
-    modelName: appConfig.model || "",
+    modelName,
     notifyCmd: appConfig.notifyCmd || AGENT_NOTIFY_CMD_DEFAULT,
     sandbox: Boolean(appConfig.sandbox),
     onStop: async () => {
