@@ -29,7 +29,8 @@ export function createExecCommandTool(config) {
             type: "string",
           },
           args: {
-            description: "Array of arguments to pass to the command.",
+            description:
+              "Array of arguments to pass to the command. Do not include the command name itself in this array.",
             type: "array",
             items: {
               type: "string",

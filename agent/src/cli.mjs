@@ -349,6 +349,18 @@ export function startInteractiveSession({
     },
   });
 
+  // Disable automatic prompt redraw on resize during agent turn
+  // @ts-expect-error - internal property
+  const originalRefreshLine = cli._refreshLine?.bind(cli);
+  if (originalRefreshLine) {
+    // @ts-expect-error - internal property
+    cli._refreshLine = (...args) => {
+      if (state.turn) {
+        originalRefreshLine(...args);
+      }
+    };
+  }
+
   readline.emitKeypressEvents(process.stdin);
   if (process.stdin.isTTY) {
     process.stdin.setRawMode(true);
@@ -628,7 +640,6 @@ export function startInteractiveSession({
     state.subagentName = status?.name || "";
     currentCliPrompt = getCliPrompt(state.subagentName);
     cli.setPrompt(currentCliPrompt);
-    cli.prompt();
   });
 
   agentEventEmitter.on("providerTokenUsage", (usage) => {
@@ -651,10 +662,11 @@ export function startInteractiveSession({
         styleText("yellow", `\nNotification error: ${err.message}`),
       );
     }
-    state.turn = true;
-
     // 暫定対応: token usageのconsole出力を確実にflushするため、次のevent loop tickまで遅延
-    setTimeout(() => cli.prompt(), 0);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    state.turn = true;
+    cli.prompt();
   });
 
   cli.prompt();
