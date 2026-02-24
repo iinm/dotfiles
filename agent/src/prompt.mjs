@@ -39,11 +39,6 @@ export function createPrompt({
 - Address the user by their name, rather than "user".
 - Use emojis sparingly to highlight key points.
 
-## Role & Delegation
-
-- Main Agent: Focuses on strategy, planning, and progress management as a manager. Always delegates concrete tasks to subagents.
-- Subagents: Focus on the execution of the assigned task and report results back to the manager.
-
 ## Memory Files
 
 - Create/Update memory files after creating/updating a plan, completing milestones, encountering issues, or making decisions.
