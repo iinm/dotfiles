@@ -64,15 +64,12 @@ Call multiple tools at once when they don't depend on each other's results.
 - Avoid bash -c unless pipes (|) or redirection (>, <) are required.
 
 Examples:
-- fd: List directories or find files.
-  fd [".", "./", "--max-depth", "3", "--type", "d", "--hidden"]
-- rg: Search for strings. Always specify a directory or file (e.g., "./") to avoid waiting for stdin.
-  rg ["--heading", "--line-number", "pattern", "./"]
-- awk: Read specific line ranges (max 200 lines).
-  awk ["FNR==1,FNR==200{print FNR,$0}", "file.txt"]
-- gh:
-  gh ["pr", "view", "123"]
-  gh ["api", "repos/<owner>/<repo>/pulls/comments/<id>", "--jq", "{user: .user.login, path: .path, line: .line, body: .body}"]
+- List directories or find files: fd [".", "./", "--max-depth", "3", "--type", "d", "--hidden"]
+- Search for strings: rg ["--heading", "--line-number", "pattern", "./"]
+- Read specific line ranges (max 200 lines): awk ["FNR==1,FNR==200{print FNR,$0}", "file.txt"]
+- Manage GitHub issues and PRs:
+  Get PR details: gh ["pr", "view", "123", "--json", "title,body,url"]
+  Get PR comment: gh ["api", "repos/<owner>/<repo>/pulls/comments/<id>", "--jq", "{user: .user.login, path: .path, line: .line, body: .body}"]
 
 ### tmux_command
 

@@ -88,8 +88,20 @@ export function createExecCommandTool(config) {
                   return content;
                 }
 
+                let fileExtension = "txt";
+                try {
+                  JSON.parse(content);
+                  fileExtension = "json";
+                } catch {
+                  // not JSON
+                }
+
                 const prefix = `exec_command-${type}`;
-                const filePath = await writeTmpFile(content, prefix, "txt");
+                const filePath = await writeTmpFile(
+                  content,
+                  prefix,
+                  fileExtension,
+                );
                 const lineCount = content.split("\n").length;
 
                 const head = content.slice(0, OUTPUT_TRUNCATED_LENGTH);
