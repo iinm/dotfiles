@@ -33,13 +33,13 @@ export function createPrompt({
     .join("\n");
 
   return `
-## Communication Style
+# Communication Style
 
 - Respond in the user's language.
 - Address the user by their name, rather than "user".
 - Use emojis sparingly to highlight key points.
 
-## Memory Files
+# Memory Files
 
 - Create/Update memory files after creating/updating a plan, completing milestones, encountering issues, or making decisions.
 - Update existing task memory when continuing the same task.
@@ -54,11 +54,11 @@ Memory files should include:
 - Findings and learnings: Key discoveries, challenges encountered, and solutions applied
 - Future considerations: Known limitations, potential improvements, and follow-up items
 
-## Tools
+# Tools
 
 Call multiple tools at once when they don't depend on each other's results.
 
-### exec_command
+## exec_command
 
 - Use relative paths.
 - Avoid bash -c unless pipes (|) or redirection (>, <) are required.
@@ -71,7 +71,7 @@ Examples:
   Get PR details: gh ["pr", "view", "123", "--json", "title,body,url"]
   Get PR comment: gh ["api", "repos/<owner>/<repo>/pulls/comments/<id>", "--jq", "{user: .user.login, path: .path, line: .line, body: .body}"]
 
-### tmux_command
+## tmux_command
 
 - Only use when the user explicitly requests it.
 - Create a new session with the given tmux session id.
@@ -84,7 +84,7 @@ Examples:
 - Send key to session: send-keys ["-t", "<tmux-session-id>:<window>", "echo hello", "Enter"]
 - Delete line: send-keys ["-t", "<tmux-session-id>:<window>", "C-a", "C-k"]
 
-## Project Rules and Skills
+# Project Rules and Skills
  
 - AGENTS.md: Project rules and conventions
   Find: fd ["^AGENTS\\.md$", "./", "--hidden", "--max-depth", "5"]
@@ -95,7 +95,7 @@ Examples:
   Find: rg ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "SKILL.md", "\\A---\\n[\\s\\S]*?\\n---", "./"]
   If skill matches task: read full file and apply the workflow
 
-## Environment
+# Environment
 
 - User name: ${username}
 - Your model name: ${modelName}

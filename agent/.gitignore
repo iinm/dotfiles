@@ -12,6 +12,8 @@ tmp/
 
 .agent/*
 !.agent/config.json
+!.agent/config.manual.json
+!.agent/config.yolo.json
 !.agent/setup.sh
 !.agent/sandbox/
 !.agent/prompts/

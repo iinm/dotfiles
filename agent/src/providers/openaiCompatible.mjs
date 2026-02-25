@@ -170,7 +170,7 @@ export async function callOpenAICompatibleModel(
       console.error(
         styleText(
           "yellow",
-          `OpenAI rate limit exceeded. Retry in ${retryInterval} seconds...`,
+          `Model rate limit exceeded. Retry in ${retryInterval} seconds...`,
         ),
       );
       await new Promise((resolve) => setTimeout(resolve, retryInterval * 1000));
