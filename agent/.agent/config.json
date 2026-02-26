@@ -11,6 +11,16 @@
         "reason": "Use ask_google instead"
       },
       {
+        "toolName": "exec_command",
+        "input": { "command": "git", "args": ["commit"] },
+        "action": "ask"
+      },
+      {
+        "toolName": "exec_command",
+        "input": { "command": { "$regex": "^(gh|docker)$" } },
+        "action": "ask"
+      },
+      {
         "toolName": {
           "$regex": "^(write_file|patch_file|exec_command|tmux_command)$"
         },
@@ -27,6 +37,12 @@
     "args": ["--skip-build", "--keep-alive", "30"],
     "separator": "--",
     "rules": [
+      {
+        "pattern": {
+          "command": { "$regex": "^(gh|docker)$" }
+        },
+        "mode": "unsandboxed"
+      },
       {
         "pattern": {
           "command": "npm",

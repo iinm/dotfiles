@@ -6,7 +6,7 @@ A lightweight CLI-based coding agent.
 
 This CLI tool automatically allows the execution of certain tools but requires explicit approval for security-sensitive operations, such as accessing parent directories.
 
-Note: The `write_file` and `patch_file` tools block direct access to git-ignored files. However, `exec_command` can access any files within the working directory. Use a sandbox for stronger isolation. The security rules are defined in `src/config.mjs#createDefaultAllowedToolUsePatterns` and `src/utils/isSafeToolInput.mjs` within this repository.
+Note: The `write_file` and `patch_file` tools block direct access to git-ignored files. However, `exec_command` can access any files within the working directory. Use a sandbox for stronger isolation. The security rules are defined in `.config/config.predefined.json` and `src/utils/isSafeToolInput.mjs` within this repository.
 
 ## Requirements
 
@@ -268,25 +268,14 @@ The agent loads configuration files in the following order. Settings in later fi
     "maxApprovals": 100,
     // Patterns are evaluated in order. First match wins.
     "patterns": [
-      {
-        "toolName": "exec_command",
-        "input": { "command": { "$regex": "^(find|grep)$" } },
-        "action": "deny",
-        "reason": "Use rg or fd instead"
-      },
       // Prohibit direct access to external URLs
       {
         "toolName": { "$regex": "^(fetch_web_page|fetch_web_page_with_browser)$" },
         "action": "deny",
         "reason": "Use ask_google instead"
       },
-
       {
         "toolName": { "$regex": "^(write_file|patch_file|exec_command|tmux_command)$" },
-        "action": "allow"
-      },
-      {
-        "toolName": { "$regex": "^(delegate_to_subagent|report_as_subagent)$" },
         "action": "allow"
       },
       {
@@ -331,13 +320,6 @@ The agent loads configuration files in the following order. Settings in later fi
     // Patterns are evaluated in order. First match wins.
     "patterns": [
       {
-        "toolName": "exec_command",
-        "input": { "command": { "$regex": "^(find|grep)$" } },
-        "action": "deny",
-        "reason": "Use rg or fd instead"
-      },
-
-      {
         "toolName": { "$regex": "^(write_file|patch_file)$" },
         "input": { "filePath": { "$regex": "^\\.agent/memory/.+\\.md$" } },
         "action": "allow"
@@ -353,10 +335,6 @@ The agent loads configuration files in the following order. Settings in later fi
       {
         "toolName": "exec_command",
         "input": { "command": "npm", "args": ["run", { "$regex": "^(check|test|lint|fix)$" }] },
-        "action": "allow"
-      },
-      {
-        "toolName": { "$regex": "^(delegate_to_subagent|report_as_subagent)$" },
         "action": "allow"
       },
       {
