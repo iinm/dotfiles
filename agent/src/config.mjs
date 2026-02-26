@@ -297,6 +297,16 @@ export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
     {
       toolName: "exec_command",
       input: {
+        command: "awk",
+        // Supported patterns:
+        // FNR>=76 && FNR<=85
+        args: [/^F?NR[=<>]+\d+ *(&& *F?NR[=<>]+-?\d+)?$/],
+      },
+      action: "allow",
+    },
+    {
+      toolName: "exec_command",
+      input: {
         command: "git",
         args: [/^(status|diff|log|show|ls-remote|rev-parse)$/],
       },
