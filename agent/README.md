@@ -275,7 +275,11 @@ The agent loads configuration files in the following order. Settings in later fi
         "reason": "Use ask_google instead"
       },
       {
-        "toolName": { "$regex": "^(write_file|patch_file|exec_command|tmux_command)$" },
+        "toolName": { "$regex": "^(write_file|patch_file)$" },
+        "action": "allow"
+      },
+      {
+        "toolName": { "$regex": "^(exec_command|tmux_command)$" },
         "action": "allow"
       },
       {

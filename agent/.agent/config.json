@@ -21,9 +21,11 @@
         "action": "ask"
       },
       {
-        "toolName": {
-          "$regex": "^(write_file|patch_file|exec_command|tmux_command)$"
-        },
+        "toolName": { "$regex": "^(write_file|patch_file)$" },
+        "action": "allow"
+      },
+      {
+        "toolName": { "$regex": "^(exec_command|tmux_command)$" },
         "action": "allow"
       },
       {
