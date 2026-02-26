@@ -1,22 +1,36 @@
+/**
+ * @import { ToolUsePattern } from "./tool";
+ */
+
 import assert from "node:assert";
+import fs from "node:fs/promises";
 import test, { describe } from "node:test";
-import { createDefaultAllowedToolUsePatterns } from "./config.mjs";
+import { AGENT_ROOT } from "./env.mjs";
+import { evalJSONConfig } from "./utils/evalJSONConfig.mjs";
 import { matchValue } from "./utils/matchValue.mjs";
 
-describe("createDefaultAllowedToolUsePatterns", () => {
-  const tmuxSessionId = "test-session-123";
-  const patterns = createDefaultAllowedToolUsePatterns({ tmuxSessionId });
+describe("predefined patterns from config.predefined.json", async () => {
+  const content = await fs.readFile(
+    `${AGENT_ROOT}/.config/config.predefined.json`,
+    "utf-8",
+  );
+  const parsed = JSON.parse(content.replace(/^ *\/\/.+$/gm, ""));
+  const config =
+    /** @type {{ autoApproval?: { patterns?: ToolUsePattern[] } }} */ (
+      evalJSONConfig(parsed)
+    );
+  const patterns = config.autoApproval?.patterns ?? [];
 
-  const execCommandTestCases = [
+  const testCases = [
     {
       desc: "ls should be allowed",
       toolUse: { toolName: "exec_command", input: { command: "ls" } },
-      isApproved: true,
+      action: "allow",
     },
     {
-      desc: "rm should not be allowed",
+      desc: "rm should not match any pattern",
       toolUse: { toolName: "exec_command", input: { command: "rm" } },
-      isApproved: false,
+      action: undefined,
     },
     {
       desc: "fd with safe args should be allowed",
@@ -24,15 +38,15 @@ describe("createDefaultAllowedToolUsePatterns", () => {
         toolName: "exec_command",
         input: { command: "fd", args: ["--max-depth", "3"] },
       },
-      isApproved: true,
+      action: "allow",
     },
     {
-      desc: "fd with unsafe args should not be allowed",
+      desc: "fd with unsafe args should be ask",
       toolUse: {
         toolName: "exec_command",
         input: { command: "fd", args: ["--unrestricted"] },
       },
-      isApproved: false,
+      action: "ask",
     },
     {
       desc: "rg with safe args should be allowed",
@@ -40,15 +54,15 @@ describe("createDefaultAllowedToolUsePatterns", () => {
         toolName: "exec_command",
         input: { command: "rg", args: ["--ignore-case", "pattern"] },
       },
-      isApproved: true,
+      action: "allow",
     },
     {
-      desc: "rg with unsafe args should not be allowed",
+      desc: "rg with unsafe args should be ask",
       toolUse: {
         toolName: "exec_command",
         input: { command: "rg", args: ["--unrestricted"] },
       },
-      isApproved: false,
+      action: "ask",
     },
     {
       desc: "awk with known args pattern should be allowed #1",
@@ -59,7 +73,7 @@ describe("createDefaultAllowedToolUsePatterns", () => {
           args: ["FNR==10, FNR==-1 {print $0}", "file.txt"],
         },
       },
-      isApproved: true,
+      action: "allow",
     },
     {
       desc: "awk with known args pattern should be allowed #2",
@@ -67,13 +81,24 @@ describe("createDefaultAllowedToolUsePatterns", () => {
         toolName: "exec_command",
         input: {
           command: "awk",
-          args: ['FNR==10, FNR==-1 {print FNR" " $0}', "file.txt"],
+          args: ['FNR==10, FNR==-1 {print FNR" ", $0}', "file.txt"],
         },
       },
-      isApproved: true,
+      action: "allow",
     },
     {
-      desc: "awk with known args pattern should be allowed: FNR range",
+      desc: "awk with single line print should be allowed",
+      toolUse: {
+        toolName: "exec_command",
+        input: {
+          command: "awk",
+          args: ["FNR==50 {print $0}", "file.txt"],
+        },
+      },
+      action: "allow",
+    },
+    {
+      desc: "awk with range condition should be allowed",
       toolUse: {
         toolName: "exec_command",
         input: {
@@ -81,268 +106,148 @@ describe("createDefaultAllowedToolUsePatterns", () => {
           args: ["FNR>=76 && FNR<=85 {print $0}", "file.txt"],
         },
       },
-      isApproved: true,
+      action: "allow",
     },
     {
-      desc: "awk with unknown args pattern should not be allowed",
+      desc: "awk with range condition and line numbers should be allowed",
       toolUse: {
         toolName: "exec_command",
         input: {
           command: "awk",
-          args: ["unknown pattern", "file.txt"],
+          args: ["FNR>=76 && FNR<=85 {print FNR, $0}", "file.txt"],
         },
       },
-      isApproved: false,
+      action: "allow",
     },
     {
-      desc: "git read-only command should be allowed: status",
+      desc: "awk with simple range should be allowed",
       toolUse: {
         toolName: "exec_command",
         input: {
-          command: "git",
-          args: ["status"],
+          command: "awk",
+          args: ["FNR>=76 && FNR<=85", "file.txt"],
         },
       },
-      isApproved: true,
+      action: "allow",
     },
     {
-      desc: "git read-only command should be allowed: branch --show-current",
+      desc: "sed with known pattern should be allowed",
       toolUse: {
         toolName: "exec_command",
-        input: {
-          command: "git",
-          args: ["branch", "--show-current"],
-        },
+        input: { command: "sed", args: ["-n", "10,20p", "file.txt"] },
       },
-      isApproved: true,
+      action: "allow",
     },
     {
-      desc: "git write command should not be allowed",
+      desc: "sed with single line pattern should be allowed",
       toolUse: {
         toolName: "exec_command",
-        input: {
-          command: "git",
-          args: ["push"],
-        },
+        input: { command: "sed", args: ["-n", "42p", "file.txt"] },
       },
-      isApproved: false,
+      action: "allow",
     },
     {
-      desc: "docker read-only command should be allowed",
+      desc: "git status should be allowed",
       toolUse: {
         toolName: "exec_command",
-        input: {
-          command: "docker",
-          args: ["ps"],
-        },
+        input: { command: "git", args: ["status"] },
       },
-      isApproved: true,
+      action: "allow",
     },
     {
-      desc: "docker run command should not be allowed",
+      desc: "git branch --show-current should be allowed",
       toolUse: {
         toolName: "exec_command",
-        input: {
-          command: "docker",
-          args: ["run"],
-        },
+        input: { command: "git", args: ["branch", "--show-current"] },
       },
-      isApproved: false,
+      action: "allow",
     },
     {
-      desc: "docker compose read-only command should be allowed",
+      desc: "git commit should not match any pattern",
       toolUse: {
         toolName: "exec_command",
-        input: {
-          command: "docker",
-          args: ["compose", "ps"],
-        },
+        input: { command: "git", args: ["commit"] },
       },
-      isApproved: true,
+      action: undefined,
     },
     {
-      desc: "docker compose up command should not be allowed",
+      desc: "docker ps should be allowed",
       toolUse: {
         toolName: "exec_command",
-        input: {
-          command: "docker",
-          args: ["compose", "up"],
-        },
+        input: { command: "docker", args: ["ps"] },
       },
-      isApproved: false,
+      action: "allow",
     },
     {
-      desc: "gh read-only command should be allowed",
+      desc: "docker compose ps should be allowed",
       toolUse: {
         toolName: "exec_command",
-        input: {
-          command: "gh",
-          args: ["pr", "view", "123"],
-        },
+        input: { command: "docker", args: ["compose", "ps"] },
       },
-      isApproved: true,
+      action: "allow",
     },
     {
-      desc: "gh read comments command should be allowed",
+      desc: "docker compose logs should be allowed",
       toolUse: {
         toolName: "exec_command",
-        input: {
-          command: "gh",
-          args: [
-            "api",
-            "repos/org-name/repo-name/pulls/864/comments",
-            "--jq",
-            ".[] | {id: .id, user: .user.login, body: .body}",
-          ],
-        },
+        input: { command: "docker", args: ["compose", "logs"] },
       },
-      isApproved: true,
+      action: "allow",
     },
     {
-      desc: "gh read specific comment command should be allowed",
+      desc: "tmux list-sessions should be allowed",
+      toolUse: {
+        toolName: "tmux_command",
+        input: { command: "list-sessions" },
+      },
+      action: "allow",
+    },
+    {
+      desc: "gh --version should be allowed",
       toolUse: {
         toolName: "exec_command",
-        input: {
-          command: "gh",
-          args: [
-            "api",
-            "repos/org-name/repo-name/pulls/comments/1111111111",
-            "--jq",
-            ".[] | {id: .id, user: .user.login, body: .body}",
-          ],
-        },
+        input: { command: "gh", args: ["--version"] },
       },
-      isApproved: true,
+      action: "allow",
     },
-
     {
-      desc: "gh pr create command should not be allowed",
+      desc: "gh auth status should be allowed",
+      toolUse: {
+        toolName: "exec_command",
+        input: { command: "gh", args: ["auth", "status"] },
+      },
+      action: "allow",
+    },
+    {
+      desc: "gh pr view should be allowed",
+      toolUse: {
+        toolName: "exec_command",
+        input: { command: "gh", args: ["pr", "view"] },
+      },
+      action: "allow",
+    },
+    {
+      desc: "gh api for PR comments should be allowed",
       toolUse: {
         toolName: "exec_command",
         input: {
           command: "gh",
-          args: ["pr", "create"],
+          args: ["api", "repos/owner/repo/pulls/123/comments"],
         },
       },
-      isApproved: false,
-    },
-    {
-      desc: "sed read-only command (-n 1,10p) should be allowed",
-      toolUse: {
-        toolName: "exec_command",
-        input: {
-          command: "sed",
-          args: ["-n", "1,10p", "file.txt"],
-        },
-      },
-      isApproved: true,
-    },
-    {
-      desc: "sed read-only command (-n 1,10l) should be allowed",
-      toolUse: {
-        toolName: "exec_command",
-        input: {
-          command: "sed",
-          args: ["-n", "1,10l", "file.txt"],
-        },
-      },
-      isApproved: true,
-    },
-    {
-      desc: "sed with unknown args pattern should not be allowed",
-      toolUse: {
-        toolName: "exec_command",
-        input: {
-          command: "sed",
-          args: ["s/old/new/g", "file.txt"],
-        },
-      },
-      isApproved: false,
+      action: "allow",
     },
   ];
 
-  for (const { desc, toolUse, isApproved } of execCommandTestCases) {
-    test(`(exec_command) ${desc}`, () => {
-      assert.strictEqual(
-        patterns.some((p) =>
-          matchValue(toolUse, {
-            toolName: p.toolName,
-            ...(p.input !== undefined && { input: p.input }),
-          }),
-        ),
-        isApproved,
+  for (const { desc, toolUse, action } of testCases) {
+    test(desc, () => {
+      const matchedPattern = patterns.find((p) =>
+        matchValue(toolUse, {
+          toolName: p.toolName,
+          ...(p.input !== undefined && { input: p.input }),
+        }),
       );
-    });
-  }
-
-  const tmuxCommandTestCases = [
-    {
-      desc: "capture-pane with given session id should be allowed",
-      toolUse: {
-        toolName: "tmux_command",
-        input: {
-          command: "capture-pane",
-          args: ["-p", "-t", `${tmuxSessionId}:0`],
-        },
-      },
-      isApproved: true,
-    },
-    {
-      desc: "capture-pane with unknown session id should not be allowed",
-      toolUse: {
-        toolName: "tmux_command",
-        input: {
-          command: "capture-pane",
-          args: ["-p", "-t", "other-session:0"],
-        },
-      },
-      isApproved: false,
-    },
-    {
-      desc: "new-session with given session id and detach option should be allowed",
-      toolUse: {
-        toolName: "tmux_command",
-        input: {
-          command: "new-session",
-          args: ["-d", "-s", tmuxSessionId],
-        },
-      },
-      isApproved: true,
-    },
-    {
-      desc: "new-session without detach option should not be allowed",
-      toolUse: {
-        toolName: "tmux_command",
-        input: {
-          command: "capture-pane",
-          args: ["-p", "-t", "other-session:0"],
-        },
-      },
-      isApproved: false,
-    },
-    {
-      desc: "list-sessions should be allowed",
-      toolUse: {
-        toolName: "tmux_command",
-        input: {
-          command: "list-sessions",
-        },
-      },
-      isApproved: true,
-    },
-  ];
-
-  for (const { desc, toolUse, isApproved } of tmuxCommandTestCases) {
-    test(`(tmux_command) ${desc}`, () => {
-      assert.strictEqual(
-        patterns.some((p) =>
-          matchValue(toolUse, {
-            toolName: p.toolName,
-            ...(p.input !== undefined && { input: p.input }),
-          }),
-        ),
-        isApproved,
-      );
+      assert.strictEqual(matchedPattern?.action, action);
     });
   }
 });

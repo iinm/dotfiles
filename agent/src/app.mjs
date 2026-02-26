@@ -32,9 +32,7 @@ import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
 (async () => {
   const sessionId = createSessionId();
   const tmuxSessionId = `agent-${sessionId}`;
-  const { appConfig, loadedConfigPath } = await loadAppConfig({
-    tmuxSessionId,
-  });
+  const { appConfig, loadedConfigPath } = await loadAppConfig();
 
   if (loadedConfigPath.length > 0) {
     console.log(styleText("green", "\n⚡ Loaded configuration files"));

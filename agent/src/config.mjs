@@ -1,5 +1,4 @@
 /**
- * @import { ToolUsePattern } from "./tool";
  * @import { AppConfig } from "./config";
  */
 
@@ -16,16 +15,11 @@ import {
 import { evalJSONConfig } from "./utils/evalJSONConfig.mjs";
 
 /**
- * @typedef {Object} LoadAgentConfigInput
- * @property {string} tmuxSessionId
- */
-
-/**
- * @param {LoadAgentConfigInput} input
  * @returns {Promise<{appConfig: AppConfig, loadedConfigPath: string[]}>}
  */
-export async function loadAppConfig({ tmuxSessionId }) {
+export async function loadAppConfig() {
   const paths = [
+    `${AGENT_ROOT}/.config/config.predefined.json`,
     `${AGENT_ROOT}/.config/config.json`,
     `${AGENT_ROOT}/.config/config.local.json`,
     `${AGENT_PROJECT_METADATA_DIR}/config.json`,
@@ -35,13 +29,7 @@ export async function loadAppConfig({ tmuxSessionId }) {
   /** @type {string[]} */
   const loadedConfigPath = [];
   /** @type {AppConfig} */
-  let merged = {
-    autoApproval: {
-      patterns: createDefaultAllowedToolUsePatterns({
-        tmuxSessionId,
-      }),
-    },
-  };
+  let merged = {};
 
   for (const filePath of paths) {
     const config = await loadConfigFile(path.resolve(filePath));
@@ -205,190 +193,4 @@ async function isConfigHashTrusted(hash) {
 async function trustConfigHash(hash) {
   await fs.mkdir(TRUSTED_CONFIG_HASHES_DIR, { recursive: true });
   await fs.writeFile(path.join(TRUSTED_CONFIG_HASHES_DIR, hash), "");
-}
-
-/**
- * @typedef {object} CreateAllowedToolUsePatternsInput
- * @property {string} tmuxSessionId
- */
-
-/**
- * @param {CreateAllowedToolUsePatternsInput} input
- * @returns {ToolUsePattern[]}
- */
-export function createDefaultAllowedToolUsePatterns({ tmuxSessionId }) {
-  /** @type {ToolUsePattern[]} */
-  return [
-    // Exec command
-    {
-      toolName: "exec_command",
-      input: { command: /^(pwd|date|uname|ls|wc|cat|head|tail|jq|echo)$/ },
-      action: "allow",
-    },
-    {
-      toolName: "exec_command",
-      input: {
-        command: "fd",
-        /**
-         * @param {unknown=} args
-         */
-        args: (args) =>
-          Array.isArray(args) &&
-          args.every(
-            (arg) =>
-              typeof arg === "string" &&
-              !arg.match(
-                /^(--unrestricted|-u|--no-ignore|-I|--exec|-x|--exec-batch|-X)(=.+)?$/,
-              ),
-          ),
-      },
-      action: "allow",
-    },
-    {
-      toolName: "exec_command",
-      input: {
-        command: "rg",
-        /**
-         * @param {unknown=} args
-         */
-        args: (args) =>
-          Array.isArray(args) &&
-          args.every(
-            (arg) =>
-              typeof arg === "string" &&
-              !arg.match(/^(--unrestricted|-u|--no-ignore)(=.+)?$/),
-          ),
-      },
-      action: "allow",
-    },
-    {
-      toolName: "exec_command",
-      input: {
-        command: "sed",
-        args: ["-n", /^\d+(,\d+)?(p|l)$/],
-      },
-      action: "allow",
-    },
-    {
-      toolName: "exec_command",
-      input: {
-        command: "awk",
-        // Supported patterns:
-        // FNR==0, FNR=200 {print FNR, $0}
-        // FNR==0, FNR=200 {print $0}
-        // FNR==50 {print $0}
-        // NR==0, NR=200 {print NR, $0}
-        args: [/^F?NR==\d+(, *F?NR==-?\d+)? *\{print (F?NR[," ]*)?\$0\}$/],
-      },
-      action: "allow",
-    },
-    {
-      toolName: "exec_command",
-      input: {
-        command: "awk",
-        // Supported patterns:
-        // FNR>=76 && FNR<=85 {print $0}
-        args: [
-          /^F?NR[=<>]+\d+ *(&& *F?NR[=<>]+-?\d+)? *\{print (F?NR[," ]*)?\$0\}$/,
-        ],
-      },
-      action: "allow",
-    },
-    {
-      toolName: "exec_command",
-      input: {
-        command: "awk",
-        // Supported patterns:
-        // FNR>=76 && FNR<=85
-        args: [/^F?NR[=<>]+\d+ *(&& *F?NR[=<>]+-?\d+)?$/],
-      },
-      action: "allow",
-    },
-    {
-      toolName: "exec_command",
-      input: {
-        command: "git",
-        args: [/^(status|diff|log|show|ls-remote|rev-parse)$/],
-      },
-      action: "allow",
-    },
-    {
-      toolName: "exec_command",
-      input: { command: "git", args: ["branch", "--show-current"] },
-      action: "allow",
-    },
-    {
-      toolName: "exec_command",
-      input: { command: "docker", args: [/^(ps)$/] },
-      action: "allow",
-    },
-    {
-      toolName: "exec_command",
-      input: { command: "docker", args: ["compose", /^(ps|logs)$/] },
-      action: "allow",
-    },
-    {
-      toolName: "exec_command",
-      input: { command: "gh", args: ["--version"] },
-      action: "allow",
-    },
-    {
-      toolName: "exec_command",
-      input: { command: "gh", args: ["auth", "status"] },
-      action: "allow",
-    },
-    {
-      toolName: "exec_command",
-      input: { command: "gh", args: [/^(pr|issue)$/, /^(view|diff)$/] },
-      action: "allow",
-    },
-    {
-      toolName: "exec_command",
-      input: {
-        command: "gh",
-        args: ["api", /^repos\/[^/]+\/[^/]+\/pulls\/\d+\/comments$/],
-      },
-      action: "allow",
-    },
-    {
-      toolName: "exec_command",
-      input: {
-        command: "gh",
-        args: ["api", /^repos\/[^/]+\/[^/]+\/pulls\/comments\/\d+$/],
-      },
-      action: "allow",
-    },
-
-    // Tmux command
-    {
-      toolName: "tmux_command",
-      input: {
-        command: /^(list-sessions|list-windows)$/,
-      },
-      action: "allow",
-    },
-    {
-      toolName: "tmux_command",
-      input: {
-        command: "capture-pane",
-        args: [
-          "-p",
-          "-t",
-          /**
-           * @param {unknown} arg
-           */
-          (arg) => typeof arg === "string" && arg.startsWith(tmuxSessionId),
-        ],
-      },
-      action: "allow",
-    },
-    {
-      toolName: "tmux_command",
-      input: {
-        command: /^(new-session|new)$/,
-        args: ["-d", "-s", tmuxSessionId],
-      },
-      action: "allow",
-    },
-  ];
 }

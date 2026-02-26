@@ -266,26 +266,27 @@ The agent loads configuration files in the following order. Settings in later fi
     "defaultAction": "deny",
     // The maximum number of automatic approvals.
     "maxApprovals": 100,
+    // Patterns are evaluated in order. First match wins.
     "patterns": [
       {
         "toolName": "exec_command",
-        "input": { "command": { "regex": "^(find|grep)$" } },
+        "input": { "command": { "$regex": "^(find|grep)$" } },
         "action": "deny",
         "reason": "Use rg or fd instead"
       },
       // Prohibit direct access to external URLs
       {
-        "toolName": { "regex": "^(fetch_web_page|fetch_web_page_with_browser)$" },
+        "toolName": { "$regex": "^(fetch_web_page|fetch_web_page_with_browser)$" },
         "action": "deny",
         "reason": "Use ask_google instead"
       },
 
       {
-        "toolName": { "regex": "^(write_file|patch_file|exec_command|tmux_command)$" },
+        "toolName": { "$regex": "^(write_file|patch_file|exec_command|tmux_command)$" },
         "action": "allow"
       },
       {
-        "toolName": { "regex": "^(delegate_to_subagent|report_as_subagent)$" },
+        "toolName": { "$regex": "^(delegate_to_subagent|report_as_subagent)$" },
         "action": "allow"
       },
       {
@@ -295,7 +296,7 @@ The agent loads configuration files in the following order. Settings in later fi
 
       // ⚠️ Never do this. fetch_web_page and mcp run outside the sandbox, so they can send anything externally.
       // {
-      //   "toolName": { "regex": "." },
+      //   "toolName": { "$regex": "." },
       //   "action": "allow"
       // }
     ]
@@ -327,22 +328,23 @@ The agent loads configuration files in the following order. Settings in later fi
   "autoApproval": {
     // The maximum number of automatic approvals.
     "maxApprovals": 50,
+    // Patterns are evaluated in order. First match wins.
     "patterns": [
       {
         "toolName": "exec_command",
-        "input": { "command": { "regex": "^(find|grep)$" } },
+        "input": { "command": { "$regex": "^(find|grep)$" } },
         "action": "deny",
         "reason": "Use rg or fd instead"
       },
 
       {
-        "toolName": { "regex": "^(write_file|patch_file)$" },
-        "input": { "filePath": { "regex": "^\\.agent/memory/.+\\.md$" } },
+        "toolName": { "$regex": "^(write_file|patch_file)$" },
+        "input": { "filePath": { "$regex": "^\\.agent/memory/.+\\.md$" } },
         "action": "allow"
       },
       {
-        "toolName": { "regex": "^(write_file|patch_file)$" },
-        "input": { "filePath": { "regex": "^(\\./)?src/" } },
+        "toolName": { "$regex": "^(write_file|patch_file)$" },
+        "input": { "filePath": { "$regex": "^(\\./)?src/" } },
         "action": "allow"
       },
 
@@ -350,11 +352,11 @@ The agent loads configuration files in the following order. Settings in later fi
       // It must be run in a sandbox.
       {
         "toolName": "exec_command",
-        "input": { "command": "npm", "args": ["run", { "regex": "^(check|test|lint|fix)$" }] },
+        "input": { "command": "npm", "args": ["run", { "$regex": "^(check|test|lint|fix)$" }] },
         "action": "allow"
       },
       {
-        "toolName": { "regex": "^(delegate_to_subagent|report_as_subagent)$" },
+        "toolName": { "$regex": "^(delegate_to_subagent|report_as_subagent)$" },
         "action": "allow"
       },
       {
@@ -364,7 +366,7 @@ The agent loads configuration files in the following order. Settings in later fi
 
       // MCP Tool naming convention: mcp__<serverName>__<toolName>
       {
-        "toolName": { "regex": "slack_(read|search)_.+" },
+        "toolName": { "$regex": "slack_(read|search)_.+" },
         "action": "allow"
       }
     ]
@@ -382,7 +384,7 @@ The agent loads configuration files in the following order. Settings in later fi
       // Run specific commands outside the sandbox
       {
         "pattern": {
-          "command": { "regex": "^(gh|docker)$" }
+          "command": { "$regex": "^(gh|docker)$" }
         },
         "mode": "unsandboxed"
       },

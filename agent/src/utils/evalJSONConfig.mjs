@@ -10,10 +10,30 @@ export function evalJSONConfig(configItem) {
   if (typeof configItem === "object" && configItem !== null) {
     if (
       Object.keys(configItem).length === 1 &&
-      "regex" in configItem &&
-      typeof configItem.regex === "string"
+      "$regex" in configItem &&
+      typeof configItem.$regex === "string"
     ) {
-      return new RegExp(configItem.regex);
+      return new RegExp(configItem.$regex);
+    }
+
+    if (Object.keys(configItem).length === 1 && "$has" in configItem) {
+      const pattern = evalJSONConfig(configItem.$has);
+      /** @param {unknown} value */
+      return (value) => {
+        if (!Array.isArray(value)) return false;
+        return value.some((item) => {
+          if (typeof pattern === "string") {
+            return item === pattern;
+          }
+          if (pattern instanceof RegExp) {
+            return typeof item === "string" && pattern.test(item);
+          }
+          if (typeof pattern === "function") {
+            return pattern(item);
+          }
+          return false;
+        });
+      };
     }
 
     /** @type {Record<string,unknown>} */

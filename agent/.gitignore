@@ -9,6 +9,7 @@ tmp/
 !.config/agents.predefined/
 !.config/agents.library/
 !.config/agents/
+!.config/config.predefined.json
 
 .agent/*
 !.agent/config.json
