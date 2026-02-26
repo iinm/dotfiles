@@ -6,7 +6,12 @@
     "useIgnoreFile": false
   },
   "files": {
-    "includes": ["**", "!.config", "!.cache", "!.agent"],
+    "includes": [
+      "src/**",
+      "bin/**",
+      "*.json",
+      ".config/config.predefined.json"
+    ],
     "ignoreUnknown": false
   },
   "formatter": {
