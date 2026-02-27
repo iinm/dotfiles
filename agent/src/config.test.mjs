@@ -41,10 +41,50 @@ describe("predefined patterns from config.predefined.json", async () => {
       action: "allow",
     },
     {
+      desc: "fd with -H only should be allowed",
+      toolUse: {
+        toolName: "exec_command",
+        input: { command: "fd", args: ["-H", "pattern"] },
+      },
+      action: "allow",
+    },
+    {
       desc: "fd with unsafe args should be ask",
       toolUse: {
         toolName: "exec_command",
         input: { command: "fd", args: ["--unrestricted"] },
+      },
+      action: "ask",
+    },
+    {
+      desc: "fd with -I option should be ask",
+      toolUse: {
+        toolName: "exec_command",
+        input: { command: "fd", args: ["-I", "pattern"] },
+      },
+      action: "ask",
+    },
+    {
+      desc: "fd with -HI combined options should be ask",
+      toolUse: {
+        toolName: "exec_command",
+        input: { command: "fd", args: ["-HI", "pattern"] },
+      },
+      action: "ask",
+    },
+    {
+      desc: "fd with -IH combined options should be ask",
+      toolUse: {
+        toolName: "exec_command",
+        input: { command: "fd", args: ["-IH", "pattern"] },
+      },
+      action: "ask",
+    },
+    {
+      desc: "fd with -Hx=command combined options with value should be ask",
+      toolUse: {
+        toolName: "exec_command",
+        input: { command: "fd", args: ["-Hx=cat", "pattern"] },
       },
       action: "ask",
     },
@@ -57,10 +97,42 @@ describe("predefined patterns from config.predefined.json", async () => {
       action: "allow",
     },
     {
+      desc: "rg with -H only should be allowed",
+      toolUse: {
+        toolName: "exec_command",
+        input: { command: "rg", args: ["-H", "pattern"] },
+      },
+      action: "allow",
+    },
+    {
       desc: "rg with unsafe args should be ask",
       toolUse: {
         toolName: "exec_command",
         input: { command: "rg", args: ["--unrestricted"] },
+      },
+      action: "ask",
+    },
+    {
+      desc: "rg with -u option should be ask",
+      toolUse: {
+        toolName: "exec_command",
+        input: { command: "rg", args: ["-u", "pattern"] },
+      },
+      action: "ask",
+    },
+    {
+      desc: "rg with -Hu combined options should be ask",
+      toolUse: {
+        toolName: "exec_command",
+        input: { command: "rg", args: ["-Hu", "pattern"] },
+      },
+      action: "ask",
+    },
+    {
+      desc: "rg with -uH combined options should be ask",
+      toolUse: {
+        toolName: "exec_command",
+        input: { command: "rg", args: ["-uH", "pattern"] },
       },
       action: "ask",
     },

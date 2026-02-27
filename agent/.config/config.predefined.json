@@ -15,7 +15,7 @@
           "command": "fd",
           "args": {
             "$has": {
-              "$regex": "^(--unrestricted|-u|--no-ignore|-I|--exec|-x|--exec-batch|-X)(=.+)?$"
+              "$regex": "^(--unrestricted|--no-ignore|--exec|--exec-batch|--follow|-[^-]*[uIxXL])"
             }
           }
         },
@@ -26,7 +26,9 @@
         "input": {
           "command": "rg",
           "args": {
-            "$has": { "$regex": "^(--unrestricted|-u|--no-ignore)(=.+)?$" }
+            "$has": {
+              "$regex": "^(--unrestricted|--no-ignore|--follow|-[^-]*[uL])"
+            }
           }
         },
         "action": "ask"
