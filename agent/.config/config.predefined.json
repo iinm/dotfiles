@@ -57,38 +57,6 @@
       {
         "toolName": "exec_command",
         "input": {
-          "command": "awk",
-          "args": [
-            {
-              "$regex": "^F?NR==\\d+(, *F?NR==-?\\d+)? *\\{print (F?NR[,\" ]*)?\\$0\\}$"
-            }
-          ]
-        },
-        "action": "allow"
-      },
-      {
-        "toolName": "exec_command",
-        "input": {
-          "command": "awk",
-          "args": [
-            {
-              "$regex": "^F?NR[=<>]+\\d+ *(&& *F?NR[=<>]+-?\\d+)? *\\{print (F?NR[,\" ]*)?\\$0\\}$"
-            }
-          ]
-        },
-        "action": "allow"
-      },
-      {
-        "toolName": "exec_command",
-        "input": {
-          "command": "awk",
-          "args": [{ "$regex": "^F?NR[=<>]+\\d+ *(&& *F?NR[=<>]+-?\\d+)?$" }]
-        },
-        "action": "allow"
-      },
-      {
-        "toolName": "exec_command",
-        "input": {
           "command": "git",
           "args": [{ "$regex": "^(status|diff|log|show|ls-remote|rev-parse)$" }]
         },
