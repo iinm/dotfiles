@@ -11,20 +11,20 @@
   },
   "dependencies": {
     "@aws-crypto/sha256-js": "^5.2.0",
-    "@aws-sdk/credential-providers": "^3.992.0",
-    "@modelcontextprotocol/sdk": "^1.27.0",
+    "@aws-sdk/credential-providers": "^3.998.0",
+    "@modelcontextprotocol/sdk": "^1.27.1",
     "@mozilla/readability": "^0.6.0",
-    "@smithy/protocol-http": "^5.3.8",
-    "@smithy/signature-v4": "^5.3.8",
+    "@smithy/protocol-http": "^5.3.10",
+    "@smithy/signature-v4": "^5.3.10",
     "diff": "^8.0.3",
     "jsdom": "^27.4.0",
-    "puppeteer": "^24.37.4",
+    "puppeteer": "^24.37.5",
     "turndown": "^7.2.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.2",
+    "@biomejs/biome": "^2.4.4",
     "@types/jsdom": "^27.0.0",
-    "@types/node": "^22.19.11",
+    "@types/node": "^22.19.12",
     "@types/turndown": "^5.0.6",
     "typescript": "^5.9.3"
   }
