@@ -127,7 +127,29 @@ export function createAgentLoop({
         break;
       }
 
-      // Auto approve tool use
+      // Step 1: Validation (early return on invalid input)
+      const validation = toolExecutor.validateBatch(toolUseParts);
+      if (!validation.isValid) {
+        state.messages = [
+          ...state.messages,
+          {
+            role: "user",
+            content: /** @type {MessageContentToolResult[]} */ (
+              validation.toolResults
+            ),
+          },
+        ];
+        if (validation.errorMessage) {
+          console.error(styleText("yellow", validation.errorMessage));
+        }
+        agentEventEmitter.emit(
+          "message",
+          state.messages[state.messages.length - 1],
+        );
+        continue;
+      }
+
+      // Step 2: Approve tool use
       const decisions = toolUseParts.map(toolUseApprover.isAllowedToolUse);
 
       const hasDeniedToolUse = decisions.some((d) => d.action === "deny");

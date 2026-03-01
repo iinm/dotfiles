@@ -104,11 +104,19 @@ export function createInputHandler(context) {
       }
 
       // Execute tools
-      /** @type {MessageContentToolResult[]} */
-      const toolResults = [];
-      for (const toolUse of toolUseParts) {
-        toolResults.push(await toolExecutor.execute(toolUse));
+      const executionResult = await toolExecutor.executeBatch(toolUseParts);
+      if (!executionResult.success) {
+        state.messages = [
+          ...state.messages,
+          { role: "user", content: executionResult.errors },
+        ];
+        agentEventEmitter.emit(
+          "message",
+          state.messages[state.messages.length - 1],
+        );
+        return;
       }
+      const toolResults = executionResult.results;
 
       // Process tool results (handles subagent-specific logic)
       const result = subagentManager.processToolResults(

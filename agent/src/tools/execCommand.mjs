@@ -46,12 +46,22 @@ export function createExecCommandTool(config) {
       if (typeof input.command !== "string") {
         return new Error("command must be a string");
       }
+
+      // Example: fd<arg_key>args</arg_key><arg_value>[... (GLM-5)
+      if (input.command.match(/[<>]/)) {
+        return new Error(
+          `invalid tool use format: command=${JSON.stringify(input.command)}`,
+        );
+      }
+
       if (input.command.startsWith("-")) {
         return new Error("command must not start with '-'");
       }
+
       if (input.args && !Array.isArray(input.args)) {
         return new Error("args must be an array of strings");
       }
+
       return;
     },
 
