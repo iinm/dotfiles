@@ -26,7 +26,7 @@ export const MODEL_REGISTRY = {
     provider: "openai",
     caller: callOpenAIModel,
     params: {
-      model: "gpt-5.2",
+      model: "gpt-5.4",
       reasoning: { effort: "low", summary: "auto" },
     },
   },
@@ -34,7 +34,7 @@ export const MODEL_REGISTRY = {
     provider: "openai",
     caller: callOpenAIModel,
     params: {
-      model: "gpt-5.2",
+      model: "gpt-5.4",
       reasoning: { effort: "medium", summary: "auto" },
     },
   },
@@ -42,7 +42,7 @@ export const MODEL_REGISTRY = {
     provider: "openai",
     caller: callOpenAIModel,
     params: {
-      model: "gpt-5.2",
+      model: "gpt-5.4",
       reasoning: { effort: "high", summary: "auto" },
     },
   },
@@ -50,7 +50,7 @@ export const MODEL_REGISTRY = {
     provider: "openai",
     caller: callOpenAIModel,
     params: {
-      model: "gpt-5.2",
+      model: "gpt-5.4",
       reasoning: { effort: "xhigh", summary: "auto" },
     },
   },
