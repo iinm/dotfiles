@@ -41,7 +41,7 @@
         "toolName": "exec_command",
         "input": {
           "command": {
-            "$regex": "^(echo|ls|cat|head|tail|wc|date|pwd|uname|fd|rg|jq)$"
+            "$regex": "^(echo|ls|cat|head|tail|wc|nl|date|pwd|uname|fd|rg|jq)$"
           }
         },
         "action": "allow"

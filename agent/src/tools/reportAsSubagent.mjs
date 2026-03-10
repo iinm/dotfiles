@@ -1,10 +1,6 @@
 /**
  * @import { Tool } from '../tool'
- */
-
-/**
- * @typedef {Object} ReportAsSubagentInput
- * @property {string} memoryPath
+ * @import { ReportAsSubagentInput } from './reportAsSubagent'
  */
 
 /** @type {Tool} */

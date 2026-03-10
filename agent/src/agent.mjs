@@ -2,8 +2,8 @@
  * @import { Agent, AgentConfig, AgentEventEmitter, UserEventEmitter } from "./agent"
  * @import { Message } from "./model"
  * @import { Tool, ToolDefinition } from "./tool"
- * @import { DelegateToSubagentInput } from "./tools/delegateToSubagent.mjs";
- * @import { ReportAsSubagentInput } from "./tools/reportAsSubagent.mjs";
+ * @import { DelegateToSubagentInput } from "./tools/delegateToSubagent"
+ * @import { ReportAsSubagentInput } from "./tools/reportAsSubagent"
  */
 
 import { EventEmitter } from "node:events";

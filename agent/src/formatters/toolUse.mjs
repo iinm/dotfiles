@@ -8,6 +8,7 @@ import { createPatch } from "diff";
  * @import { WriteFileInput } from "../tools/writeFile"
  * @import { TmuxCommandInput } from "../tools/tmuxCommand"
  * @import { TavilySearchInput } from "../tools/tavilySearch"
+ * @import { DelegateToSubagentInput } from "../tools/delegateToSubagent"
  */
 
 /**
@@ -91,6 +92,16 @@ export function formatToolUse(toolUse) {
     return [`tool: ${toolName}`, `query: ${tavilySearchInput.query}`].join(
       "\n",
     );
+  }
+
+  if (toolName === "delegate_to_subagent") {
+    /** @type {Partial<DelegateToSubagentInput>} */
+    const delegateInput = input;
+    return [
+      `tool: ${toolName}`,
+      `name: ${delegateInput.name}`,
+      `goal: ${delegateInput.goal}`,
+    ].join("\n");
   }
 
   const { provider: _, ...filteredToolUse } = toolUse;

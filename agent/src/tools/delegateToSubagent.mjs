@@ -1,11 +1,6 @@
 /**
  * @import { Tool } from '../tool'
- */
-
-/**
- * @typedef {Object} DelegateToSubagentInput
- * @property {string} name
- * @property {string} goal
+ * @import { DelegateToSubagentInput } from './delegateToSubagent'
  */
 
 /** @type {Tool} */
