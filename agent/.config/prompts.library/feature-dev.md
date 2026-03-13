@@ -3,4 +3,4 @@ import: https://raw.githubusercontent.com/anthropics/claude-plugins-official/4ca
 ---
 
 - Use memory file instead of TodoWrite
-- Parallel execution is not supported. Execute all tasks sequentially.
+- Parallel execution of subagents is not supported. Delegate to subagents sequentially.
