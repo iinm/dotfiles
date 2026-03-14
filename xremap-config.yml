@@ -18,6 +18,9 @@ keymap:
       # Ctrl+h to Backspace
       LeftCtrl-h: Backspace
 
+      # Ctrl+j to Enter
+      LeftCtrl-j: Enter
+
       # Alt+hjkl to arrow keys
       LeftAlt-h: Left
       LeftAlt-j: Down
