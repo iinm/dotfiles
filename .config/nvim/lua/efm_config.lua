@@ -1,5 +1,3 @@
-local efm_root_markers = {}
-
 local tools = {
   linters = {
     shellcheck = {
