@@ -49,6 +49,7 @@ local setup_options = function()
   vim.opt.cmdheight = 2
   vim.opt.shortmess:append('s') -- don't show "search hit BOTTOM, ..."
 
+  vim.g.mapleader = ' '
   vim.g.markdown_fenced_languages = { 'sh', 'mermaid' }
   vim.g.netrw_banner = 0
   vim.g.newrw_hide = 0
@@ -126,7 +127,6 @@ end
 local setup_keymap = function()
   local window_utils = require('window_utils')
 
-  vim.g.mapleader = ' '
   -- utilities
   vim.keymap.set('n', '<leader>r', 'q:?')
   vim.keymap.set('n', '<leader>f', ':<C-u>Files<CR>')
@@ -472,16 +472,16 @@ local setup_auto_commands = function()
 end
 
 local setup_plugins = function()
-  -- https://github.com/folke/lazy.nvim
-  local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
+  -- https://lazy.folke.io/installation
+  local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
   if not (vim.uv or vim.loop).fs_stat(lazypath) then
-    local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
-    local out = vim.fn.system({ 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath })
+    local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+    local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
     if vim.v.shell_error ~= 0 then
       vim.api.nvim_echo({
-        { 'Failed to clone lazy.nvim:\n', 'ErrorMsg' },
-        { out,                            'WarningMsg' },
-        { '\nPress any key to exit...' },
+        { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+        { out,                            "WarningMsg" },
+        { "\nPress any key to exit..." },
       }, true, {})
       vim.fn.getchar()
       os.exit(1)
@@ -490,49 +490,51 @@ local setup_plugins = function()
   vim.opt.rtp:prepend(lazypath)
 
   require('lazy').setup({
-    -- dependencies
-    -- required by minuet-ai
-    'nvim-lua/plenary.nvim',
+    spec = {
+      -- dependencies
+      -- required by minuet-ai
+      { 'nvim-lua/plenary.nvim' },
 
-    -- syntax
-    'nvim-treesitter/nvim-treesitter',
+      -- syntax
+      { 'nvim-treesitter/nvim-treesitter' },
 
-    -- ui
-    'sainnhe/everforest',
-    'stevearc/dressing.nvim',
+      -- ui
+      { 'sainnhe/everforest' },
+      { 'stevearc/dressing.nvim' },
 
-    -- fuzzy finder
-    'junegunn/fzf',
-    'junegunn/fzf.vim',
+      -- fuzzy finder
+      { 'junegunn/fzf' },
+      { 'junegunn/fzf.vim' },
 
-    -- file explorer
-    'stevearc/oil.nvim',
+      -- file explorer
+      { 'stevearc/oil.nvim' },
 
-    -- terminal
-    'akinsho/toggleterm.nvim',
+      -- terminal
+      { 'akinsho/toggleterm.nvim' },
 
-    -- markdown preview
-    'previm/previm',
-    'tyru/open-browser.vim',
+      -- markdown preview
+      { 'previm/previm' },
+      { 'tyru/open-browser.vim' },
 
-    -- lsp
-    'neovim/nvim-lspconfig',
+      -- lsp
+      { 'neovim/nvim-lspconfig' },
 
-    -- completion
-    { 'saghen/blink.cmp', version = '1.*' },
-    'milanglacier/minuet-ai.nvim',
+      -- completion
+      { 'saghen/blink.cmp',               version = '1.*' },
+      { 'milanglacier/minuet-ai.nvim' },
 
-    -- snippets
-    'rafamadriz/friendly-snippets',
+      -- snippets
+      { 'rafamadriz/friendly-snippets' },
 
-    -- utilities
-    'tpope/vim-sleuth',
-    'tpope/vim-fugitive',
-    'easymotion/vim-easymotion',
-    'kylechui/nvim-surround',
-    'windwp/nvim-autopairs',
-    'bullets-vim/bullets.vim',
-    'Almo7aya/openingh.nvim',
+      -- utilities
+      { 'tpope/vim-sleuth' },
+      { 'tpope/vim-fugitive' },
+      { 'easymotion/vim-easymotion' },
+      { 'kylechui/nvim-surround' },
+      { 'windwp/nvim-autopairs',          opts = {} },
+      { 'bullets-vim/bullets.vim' },
+      { 'Almo7aya/openingh.nvim' },
+    }
   })
 end
 
@@ -813,8 +815,6 @@ end
 
 local setup_others = function()
   vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
-  require('nvim-autopairs').setup()
-  require("nvim-surround").setup()
 end
 
 setup_options()
