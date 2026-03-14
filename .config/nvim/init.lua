@@ -542,6 +542,7 @@ local setup_lsp = function()
     -- go install golang.org/x/tools/gopls@latest
     { name = 'gopls',       bin = 'gopls' },
     -- brew install hashicorp/tap/terraform-ls
+    -- https://releases.hashicorp.com/terraform-ls/
     { name = 'terraformls', bin = 'terraform-ls' },
     -- npm install -g @prisma/language-server
     { name = 'prismals',    bin = 'prisma-language-server' },
