@@ -66,6 +66,7 @@ if status is-interactive
   alias cp 'cp -i'
   alias mv 'mv -i'
 
+  alias t 'tmux'
   alias v 'nvim'
 
   alias gco 'git checkout'
@@ -74,6 +75,8 @@ if status is-interactive
   alias gcd 'cd (git rev-parse --show-toplevel)'
   alias gcb 'git rev-parse --abbrev-ref HEAD'
   alias gsm 'git submodule'
+
+  alias ghb 'gh browse'
 
   alias d 'docker'
   alias dc 'docker-compose'
