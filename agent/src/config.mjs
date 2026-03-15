@@ -77,6 +77,9 @@ export async function loadAppConfig() {
         },
       },
       autoApproval: {
+        defaultAction:
+          config.autoApproval?.defaultAction ??
+          merged.autoApproval?.defaultAction,
         patterns: [
           ...(config.autoApproval?.patterns ?? []),
           ...(merged.autoApproval?.patterns ?? []),
