@@ -69,7 +69,7 @@ Examples:
 - Read specific line ranges (max 200 lines): sed ["-n", "1,200p", "file.txt"]
 - Manage GitHub issues and PRs:
   Get PR details: gh ["pr", "view", "123", "--json", "title,body,url"]
-  Get PR comment: gh ["api", "repos/<owner>/<repo>/pulls/comments/<id>", "--jq", "{user: .user.login, path: .path, line: .line, body: .body}"]
+  Get PR comment: gh ["api", "--method", "GET", "repos/<owner>/<repo>/pulls/comments/<id>", "--jq", "{user: .user.login, path: .path, line: .line, body: .body}"]
 
 ## tmux_command
 
