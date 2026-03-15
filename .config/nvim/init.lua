@@ -473,7 +473,6 @@ local setup_plugins = function()
 
       -- ui
       { 'sainnhe/everforest' },
-      { 'stevearc/dressing.nvim' },
 
       -- fuzzy finder
       { 'junegunn/fzf' },
@@ -708,8 +707,7 @@ local setup_treesitter = function()
       'fish',
       'graphql',
       'prisma',
-      -- Disabled due to instability
-      -- 'terraform',
+      'terraform',
     },
     highlight = { enable = true },
   })
