@@ -212,7 +212,7 @@ describe("predefined patterns from config.predefined.json", async () => {
       desc: "gh --version should be allowed",
       toolUse: {
         toolName: "exec_command",
-        input: { command: "gh", args: ["--version"] },
+        input: { command: "gh", args: ["version"] },
       },
       action: "allow",
     },
@@ -238,7 +238,12 @@ describe("predefined patterns from config.predefined.json", async () => {
         toolName: "exec_command",
         input: {
           command: "gh",
-          args: ["api", "repos/owner/repo/pulls/123/comments"],
+          args: [
+            "api",
+            "--method",
+            "GET",
+            "repos/owner/repo/pulls/123/comments",
+          ],
         },
       },
       action: "allow",

@@ -17,13 +17,13 @@
     "@smithy/protocol-http": "^5.3.10",
     "@smithy/signature-v4": "^5.3.10",
     "diff": "^8.0.3",
-    "jsdom": "^27.4.0",
+    "jsdom": "^28.1.0",
     "puppeteer": "^24.37.5",
     "turndown": "^7.2.2"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.5",
-    "@types/jsdom": "^27.0.0",
+    "@types/jsdom": "^28.0.0",
     "@types/node": "^22.19.13",
     "@types/turndown": "^5.0.6",
     "typescript": "^5.9.3"
