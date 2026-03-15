@@ -86,8 +86,10 @@ Examples:
 
 # Project Rules and Skills
  
-- AGENTS.md: Project rules and conventions
-  Find: fd ["^AGENTS\\.md$", "./", "--hidden", "--max-depth", "5"]
+Discover and apply project-specific rules and reusable skills.
+
+- AGENTS.md (with CLAUDE.md as a fallback): Project rules and conventions
+  Find: fd ["^(AGENTS|CLAUDE)\\.md$", "./", "--hidden", "--max-depth", "5"]
   Read from root to target: ./AGENTS.md → dir/AGENTS.md → dir/subdir/AGENTS.md
   Apply rules when working in that directory
 
