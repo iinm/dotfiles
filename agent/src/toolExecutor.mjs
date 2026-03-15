@@ -138,7 +138,7 @@ export function createToolExecutor(toolByName, options = {}) {
           type: "tool_result",
           toolUseId: t.toolUseId,
           toolName: t.toolName,
-          content: [{ type: "text", text: "Tool call rejected" }],
+          content: [{ type: "text", text: exclusiveResult.errorMessage }],
           isError: true,
         })),
       };
