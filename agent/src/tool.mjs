@@ -49,6 +49,12 @@ export function createToolUseApprover({
 
       const action = pattern.action ?? defaultAction;
 
+      if (!["allow", "deny", "ask"].includes(action)) {
+        return {
+          action: "ask",
+        };
+      }
+
       if (action === "deny") {
         return {
           action: "deny",
