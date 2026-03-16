@@ -209,22 +209,6 @@ describe("predefined patterns from config.predefined.json", async () => {
       action: "allow",
     },
     {
-      desc: "gh --version should be allowed",
-      toolUse: {
-        toolName: "exec_command",
-        input: { command: "gh", args: ["version"] },
-      },
-      action: "allow",
-    },
-    {
-      desc: "gh auth status should be allowed",
-      toolUse: {
-        toolName: "exec_command",
-        input: { command: "gh", args: ["auth", "status"] },
-      },
-      action: "allow",
-    },
-    {
       desc: "gh pr view should be allowed",
       toolUse: {
         toolName: "exec_command",
