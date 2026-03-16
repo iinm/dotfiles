@@ -66,7 +66,7 @@ export function createToolUseApprover({
         }
       }
 
-      return { action: defaultAction };
+      return { action };
     }
 
     return { action: defaultAction };
