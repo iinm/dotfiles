@@ -408,8 +408,9 @@ local setup_auto_commands = function()
 
   -- folding method
   vim.api.nvim_create_autocmd({ 'FileType' }, {
-    callback = function()
-      if require('nvim-treesitter.parsers').has_parser() then
+    callback = function(args)
+      local ok, _ = pcall(vim.treesitter.get_parser, args.buf)
+      if ok then
         vim.wo.foldmethod = 'expr'
         vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
       else
@@ -467,67 +468,58 @@ local setup_auto_commands = function()
     end,
   })
 
+  vim.api.nvim_create_autocmd('PackChanged', {
+    callback = function(ev)
+      local name, kind = ev.data.spec.name, ev.data.kind
+      if name == 'nvim-treesitter' and kind == 'update' then
+        if not ev.data.active then vim.cmd.packadd('nvim-treesitter') end
+        vim.cmd('TSUpdate')
+      end
+    end
+  })
+
   local lsp_utils = require('lsp_utils')
   lsp_utils.lsp_call_hierarchy_recursive_setup_autocmd()
 end
 
 local setup_plugins = function()
-  -- https://lazy.folke.io/installation
-  local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-  if not (vim.uv or vim.loop).fs_stat(lazypath) then
-    local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-    local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
-    if vim.v.shell_error ~= 0 then
-      vim.api.nvim_echo({
-        { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-        { out,                            "WarningMsg" },
-        { "\nPress any key to exit..." },
-      }, true, {})
-      vim.fn.getchar()
-      os.exit(1)
-    end
-  end
-  vim.opt.rtp:prepend(lazypath)
+  vim.pack.add({
+    -- syntax
+    { src = 'https://github.com/nvim-treesitter/nvim-treesitter' },
 
-  require('lazy').setup({
-    spec = {
-      -- syntax
-      { 'nvim-treesitter/nvim-treesitter' },
+    -- ui
+    { src = 'https://github.com/sainnhe/everforest' },
 
-      -- ui
-      { 'sainnhe/everforest' },
+    -- fuzzy finder
+    { src = 'https://github.com/junegunn/fzf' },
+    { src = 'https://github.com/junegunn/fzf.vim' },
 
-      -- fuzzy finder
-      { 'junegunn/fzf' },
-      { 'junegunn/fzf.vim' },
+    -- file explorer
+    { src = 'https://github.com/stevearc/oil.nvim' },
 
-      -- file explorer
-      { 'stevearc/oil.nvim' },
+    -- terminal
+    { src = 'https://github.com/akinsho/toggleterm.nvim' },
 
-      -- terminal
-      { 'akinsho/toggleterm.nvim' },
+    -- markdown preview
+    { src = 'https://github.com/previm/previm' },
 
-      -- markdown preview
-      { 'previm/previm' },
+    -- lsp
+    { src = 'https://github.com/neovim/nvim-lspconfig' },
 
-      -- lsp
-      { 'neovim/nvim-lspconfig' },
+    -- completion
+    { src = 'https://github.com/saghen/blink.cmp',               version = vim.version.range('v1.x') },
+    { src = 'https://github.com/milanglacier/minuet-ai.nvim' },
+    { src = 'https://github.com/nvim-lua/plenary.nvim' }, -- required by minuet
 
-      -- completion
-      { 'saghen/blink.cmp',               version = '1.*' },
-      { 'milanglacier/minuet-ai.nvim' },
-      { 'nvim-lua/plenary.nvim' }, -- required by minuet
+    -- snippets
+    { src = 'https://github.com/rafamadriz/friendly-snippets' },
 
-      -- snippets
-      { 'rafamadriz/friendly-snippets' },
-
-      -- utilities
-      { 'tpope/vim-sleuth' },
-      { 'tpope/vim-fugitive' },
-      { 'easymotion/vim-easymotion' },
-      { 'kylechui/nvim-surround' },
-      { 'windwp/nvim-autopairs',          opts = {} },
-    }
+    -- utilities
+    { src = 'https://github.com/tpope/vim-sleuth' },
+    { src = 'https://github.com/tpope/vim-fugitive' },
+    { src = 'https://github.com/easymotion/vim-easymotion' },
+    { src = 'https://github.com/kylechui/nvim-surround' },
+    { src = 'https://github.com/windwp/nvim-autopairs' },
   })
 end
 
@@ -724,7 +716,7 @@ local setup_oil = function()
 end
 
 local setup_treesitter = function()
-  require('nvim-treesitter.configs').setup({
+  require('nvim-treesitter').setup({
     ensure_installed = {
       'vim', 'vimdoc',
       'javascript', 'jsdoc',
@@ -822,6 +814,8 @@ local setup_minuet = function()
 end
 
 local setup_others = function()
+  require('nvim-autopairs').setup()
+
   vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
 
   if vim.fn.has('mac') == 1 then
@@ -833,6 +827,7 @@ end
 
 setup_options()
 setup_utilities()
+setup_auto_commands()
 
 setup_plugins()
 setup_toggleterm()
@@ -846,4 +841,3 @@ setup_others()
 setup_appearance()
 setup_keymap()
 setup_commands()
-setup_auto_commands()
