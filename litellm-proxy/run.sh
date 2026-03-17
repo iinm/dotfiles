@@ -9,6 +9,4 @@ cd "$this_dir"
 
 uvx --with "litellm[google]" --with "botocore[crt]" "litellm[proxy]" \
     --host 127.0.0.1 --port "$PORT" \
-    --config config.yaml \
-    --detailed_debug
-
+    --config config.yaml

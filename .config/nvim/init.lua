@@ -797,7 +797,7 @@ local setup_minuet = function()
 
       -- LiteLLM Proxy
       openai_compatible = {
-        model = 'gemini-3-flash',
+        model = 'gemini-3-flash-preview',
         -- model = 'claude-haiku-4-5',
         end_point = 'http://localhost:4900/v1/chat/completions',
         stream = false,
