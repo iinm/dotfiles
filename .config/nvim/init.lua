@@ -211,6 +211,29 @@ local setup_keymap = function()
     [[:5TermExec open=0 cmd='with_notify git push origin <C-r>=FugitiveHead()<CR>'<Left>]])
   vim.keymap.set('n', '<leader>gb', ':<C-u>Git blame<CR>')
   vim.keymap.set('n', '<leader>gl', ':<C-u>Git log %<CR>')
+
+  -- minuet
+  vim.keymap.set({ "i", "s" }, "<C-l>", function()
+    if vim.fn.mode() == 'i' then
+      require('minuet.virtualtext').action.next()
+    end
+  end, { silent = true })
+
+  vim.keymap.set({ "i", "s" }, "<C-h>", function()
+    if require('minuet.virtualtext').action.is_visible() then
+      require('minuet.virtualtext').action.prev()
+    else
+      return vim.api.nvim_replace_termcodes("<C-h>", true, false, true)
+    end
+  end, { expr = true, silent = true })
+
+  vim.keymap.set({ "i", "s" }, "<Tab>", function()
+    if require('minuet.virtualtext').action.is_visible() then
+      require('minuet.virtualtext').action.accept()
+    else
+      return vim.api.nvim_replace_termcodes("<Tab>", true, false, true)
+    end
+  end, { expr = true, silent = true })
 end
 
 local setup_commands = function()
@@ -492,6 +515,8 @@ local setup_plugins = function()
 
       -- completion
       { 'saghen/blink.cmp',               version = '1.*' },
+      { 'milanglacier/minuet-ai.nvim' },
+      { 'nvim-lua/plenary.nvim' }, -- required by minuet
 
       -- snippets
       { 'rafamadriz/friendly-snippets' },
@@ -648,6 +673,7 @@ local setup_blink_cmp = function()
       ['<C-b>'] = { 'snippet_backward', 'scroll_documentation_up', 'fallback' },
       ['<C-f>'] = { 'snippet_forward', 'scroll_documentation_down', 'fallback' },
 
+      -- Avoid conflict with Minuet
       -- ['<Tab>'] = { 'snippet_forward', 'fallback' },
       -- ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
 
@@ -713,6 +739,73 @@ local setup_treesitter = function()
   })
 end
 
+local setup_minuet = function()
+  local local_secrets = require_safe('local_secrets')
+  require('minuet').setup({
+    cmp = {
+      enable_auto_complete = false,
+    },
+    blink = {
+      enable_auto_complete = false,
+    },
+
+    virtualtext = {
+      auto_trigger_ft = {},
+      keymap = {},
+      -- show_on_completion_menu = true,
+    },
+
+    provider = 'gemini',
+    request_timeout = 3,
+
+    provider_options = {
+      claude = {
+        model = 'claude-haiku-4-5',
+        end_point = (local_secrets.minuet_anthropic_end_point or 'https://api.anthropic.com') .. '/v1/messages',
+        api_key = function()
+          return local_secrets.minuet_anthropic_api_key
+        end
+      },
+
+      gemini = {
+        model = 'gemini-3-flash-preview',
+        optional = {
+          generationConfig = {
+            maxOutputTokens = 256,
+            thinkingConfig = {
+              thinkingLevel = 'minimal',
+            },
+          },
+          safetySettings = {
+            {
+              category = 'HARM_CATEGORY_DANGEROUS_CONTENT',
+              threshold = 'BLOCK_ONLY_HIGH',
+            },
+          },
+        },
+        end_point = (local_secrets.minuet_gemini_end_point or 'https://generativelanguage.googleapis.com') ..
+            '/v1beta/models',
+        api_key = function()
+          return local_secrets.minuet_gemini_api_key
+        end
+      },
+
+      openai = {
+        model = 'gpt-5-mini',
+        optional = {
+          max_completion_tokens = 512,
+          reasoning_effort = 'minimal',
+          verbosity = 'low',
+        },
+        end_point = (local_secrets.minuet_openai_end_point or 'https://api.openai.com') .. '/v1/chat/completions',
+        api_key = function()
+          return local_secrets.minuet_openai_api_key
+        end
+      },
+    },
+  })
+end
+
 local setup_others = function()
   vim.g.fzf_preview_window = { 'hidden,right,50%', 'ctrl-/' }
 
@@ -732,6 +825,7 @@ setup_lsp()
 setup_blink_cmp()
 setup_oil()
 setup_treesitter()
+setup_minuet()
 setup_others()
 
 setup_appearance()
