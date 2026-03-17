@@ -267,6 +267,15 @@ function local_config --description "Host specific configuration"
   function local_config_last
   end
 
+  function start_daemons
+    # tmux new-session -d -s daemon
+    # tmux new-window -t daemon ~/dotfiles/litellm-proxy/run.sh
+  end
+
+  function stop_daemons
+    # tmux kill-session -t daemon
+  end
+
   function project_config_on_pwd_change --on-variable PWD --description "Project specific configuration"
     # Set node version
     if string match -rq 'path/to/project1$' "$PWD"
@@ -277,15 +286,6 @@ function local_config --description "Host specific configuration"
     else
       use node
     end
-  end
-
-  function start_daemons
-    # tmux new-session -d -s daemon
-    # tmux new-window -t daemon ~/dotfiles/litellm-proxy/run.sh
-  end
-
-  function stop_daemons
-    # tmux kill-session -t daemon
   end
 
   cd $PWD
