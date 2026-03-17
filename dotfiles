@@ -285,6 +285,15 @@ function local_config --description "Host specific configuration"
     end
   end
 
+  function start_daemons
+    # tmux new-session -d -s daemon
+    # tmux new-window -t daemon ~/dotfiles/litellm-proxy/run.sh
+  end
+
+  function stop_daemons
+    # tmux kill-session -t daemon
+  end
+
   cd $PWD
 end
 EOF
