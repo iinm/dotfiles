@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 NVIM_VERSION=0.11.6
+# NVIM_VERSION=nightly
 EFM_LS_VERSION=0.0.54
 
 # Debian only
@@ -317,17 +318,18 @@ setup_nvim() {
     mkdir -p ~/tools
 
     local nvim_base_url=https://github.com/neovim/neovim/releases/download/v$NVIM_VERSION
-    if test "$(uname)" = "Linux"; then
-      curl --show-error --fail -L $nvim_base_url/nvim-linux-x86_64.tar.gz \
-        | tar -C ~/tools -xzf -
-      ln -s nvim-linux-x86_64 "$nvim_path"
+    if test "$NVIM_VERSION" = "nightly"; then
+      nvim_base_url=https://github.com/neovim/neovim/releases/download/nightly
     fi
 
-    if test "$(uname)" = "Darwin"; then
-      curl --show-error --fail -L $nvim_base_url/nvim-macos-arm64.tar.gz \
-        | tar -C ~/tools -xzf -
-      ln -s nvim-macos-arm64 "$nvim_path"
-    fi
+    local platform
+    local machine
+    platform="$(uname -s | sed 's/Linux/linux/; s/Darwin/macos/')"
+    machine="$(uname -m)"
+
+    curl --show-error --fail -L "${nvim_base_url}/nvim-${platform}-${machine}.tar.gz" \
+      | tar -C ~/tools -xzf -
+    ln -s "nvim-${platform}-${machine}" "$nvim_path"
   fi
 
   local nvim_local_config=~/.config/nvim/lua/local_config.lua
@@ -443,51 +445,53 @@ EOF
 install_golang() {
   local usage="install_golang VERSION"
   local golang_version="${1?"Usage: $usage"}"
-  local golang_dir
-  golang_dir="$HOME/tools/go${golang_version}"
-  if test -e "${golang_dir}/bin/go"; then
+
+  local golang_dir="$HOME/tools/go-${golang_version}"
+
+  if test -x "${golang_dir}/bin/go"; then
     echo "skip: Go $golang_version is installed in $golang_dir"
   else
     echo "run: install Go $golang_version to $golang_dir"
+
+    local kernel
+    local machine
+    kernel="$(uname -s | sed 's/Linux/linux/; s/Darwin/darwin/')"
+    machine="$(uname -m | sed 's/x86_64/amd64/')"
     
-    local platform="linux-amd64"
-    if test "$(uname)" = "Darwin"; then
-      platform="darwin-arm64"
-    fi
-    
-    local url="https://go.dev/dl/go${golang_version}.${platform}.tar.gz"
-    rm -rf /tmp/go-download
-    mkdir -p /tmp/go-download
-    curl --show-error --fail -L "$url" | tar -C /tmp/go-download -xzf -
-    mv /tmp/go-download/go "$golang_dir"
+    rm -rf "$golang_dir"
+    mkdir -p "$golang_dir"
+
+    local url="https://go.dev/dl/go${golang_version}.${kernel}-${machine}.tar.gz"
+    curl --show-error --fail -L "$url" | tar --strip-components=1 -C "$golang_dir" -xzf -
   fi
 }
 
 install_nodejs() {
   local usage="install_nodejs VERSION"
   local nodejs_version="${1?"Usage: $usage"}"
-  local kernel
-  kernel="$(uname -s | awk '{ print tolower($0) }')"
-  local machine=x64
-  if test "$(uname -m)" = "arm64"; then
-    machine=arm64
-  fi
-  local ext=tar.xz
-  local extract_option=J
-  if test "$kernel" = "darwin"; then
-    ext=tar.gz
-    extract_option=z
-  fi
 
-  local nodejs_dir
-  nodejs_dir="$HOME/tools/node-v${nodejs_version}-${kernel}-${machine}"
-  if "${nodejs_dir}/bin/node" -v 2> /dev/null | grep -q "$nodejs_version"; then
+  local nodejs_dir="$HOME/tools/node-${nodejs_version}"
+
+  if test -x "${nodejs_dir}/bin/node"; then
     echo "skip: Node.js $nodejs_version is installed in $nodejs_dir"
   else
     echo "run: install Node.js $nodejs_version to $nodejs_dir"
-    local url="https://nodejs.org/dist/v${nodejs_version}/node-v${nodejs_version}-${kernel}-${machine}.${ext}"
+
+    local kernel
+    local machine
+    kernel="$(uname -s | sed 's/Linux/linux/; s/Darwin/darwin/')"
+    machine="$(uname -m | sed 's/x86_64/x64/')"
+
+    local ext
+    local extract_option
+    ext="$(sed 's/linux/tar.xz/; s/darwin/tar.gz/' <<< "$kernel")"
+    extract_option="$(sed 's/linux/J/; s/darwin/z/' <<< "$kernel")"
+
     rm -rf "$nodejs_dir"
-    curl --show-error --fail -L "$url" | tar -C ~/tools -x${extract_option}f -
+    mkdir -p "$nodejs_dir"
+
+    local url="https://nodejs.org/dist/v${nodejs_version}/node-v${nodejs_version}-${kernel}-${machine}.${ext}"
+    curl --show-error --fail -L "$url" | tar --strip-components=1 -C "$nodejs_dir" "-x${extract_option}f" -
   fi
 }
 
@@ -496,6 +500,7 @@ install_python() {
   local python_version="${1?:"Usage: $usage"}"
 
   local python_dir="$HOME/tools/python-$python_version"
+
   if test -x "$python_dir/install/bin/python"; then
     echo "skip: Python $python_version is installed in $python_dir"
   else
@@ -509,15 +514,16 @@ install_python() {
     distibution_version=$(jq -r .tag <<< "$metadata")
     asset_url_prefix=$(jq -r .asset_url_prefix <<< "$metadata")
 
-    local target="x86_64-unknown-linux-gnu"
-    if test "$(uname)" = "Darwin"; then
-      target="aarch64-apple-darwin"
-    fi
+    local platform
+    local machine
+    platform="$(uname -s | sed 's/Linux/unknown-linux-gnu/; s/Darwin/apple-darwin/')"
+    machine="$(uname -m | sed 's/arm64/aarch64/')"
 
-    local url="${asset_url_prefix}/cpython-${python_version}+${distibution_version}-${target}-pgo+lto-full.tar.zst"
+    local url="${asset_url_prefix}/cpython-${python_version}+${distibution_version}-${machine}-${platform}-pgo+lto-full.tar.zst"
 
     rm -rf "$python_dir"
     mkdir -p "$python_dir"
+
     curl --show-error --fail -L "$url" | tar --strip-components=1 -C "$python_dir" --zstd -xf -
   fi
 }
