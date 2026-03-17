@@ -17,6 +17,7 @@ fish_add_path $HOME/tools/vim/bin
 fish_add_path $HOME/tools/nvim/bin
 fish_add_path $HOME/tools/node/bin
 fish_add_path $HOME/tools/go/bin
+fish_add_path $HOME/tools/python/install/bin
 fish_add_path $HOME/tools/lua-language-server/bin
 fish_add_path $HOME/tools/google-cloud-sdk/bin
 fish_add_path $HOME/tools/aws/dist

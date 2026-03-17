@@ -25,6 +25,7 @@ Commands:
 Optional commands:
   install_golang  Install Golang
   install_nodejs  Install Node.js
+  install_python  Install Python
   setup_chrome    Setup Chrome startup options. (Linux only)
 HELP
 }
@@ -478,6 +479,37 @@ install_nodejs() {
     local url="https://nodejs.org/dist/v${nodejs_version}/node-v${nodejs_version}-${kernel}-${machine}.${ext}"
     rm -rf "$nodejs_dir"
     curl --show-error --fail -L "$url" | tar -C ~/tools -x${extract_option}f -
+  fi
+}
+
+install_python() {
+  local usage="install_python VERSION"
+  local python_version="${1?:"Usage: $usage"}"
+
+  local python_dir="$HOME/tools/python-$python_version"
+  if test -x "$python_dir/install/bin/python"; then
+    echo "skip: Python $python_version is installed in $python_dir"
+  else
+    echo "run: install Python $python_version to $python_dir"
+
+    local metadata
+    metadata=$(curl --silent --show-error --fail -L https://raw.githubusercontent.com/astral-sh/python-build-standalone/latest-release/latest-release.json)
+
+    local distibution_version
+    local asset_url_prefix
+    distibution_version=$(jq -r .tag <<< "$metadata")
+    asset_url_prefix=$(jq -r .asset_url_prefix <<< "$metadata")
+
+    local target="x86_64-unknown-linux-gnu"
+    if test "$(uname)" = "Darwin"; then
+      target="aarch64-apple-darwin"
+    fi
+
+    local url="${asset_url_prefix}/cpython-${python_version}+${distibution_version}-${target}-pgo+lto-full.tar.zst"
+
+    rm -rf "$python_dir"
+    mkdir -p "$python_dir"
+    curl --show-error --fail -L "$url" | tar --strip-components=1 -C "$python_dir" --zstd -xf -
   fi
 }
 
