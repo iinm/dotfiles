@@ -42,7 +42,7 @@ local setup_options = function()
   vim.opt.shiftwidth = 2
   vim.opt.softtabstop = 2
   vim.opt.grepprg = 'grep -n -H -R --exclude-dir ".git" $* .'
-  if vim.fn.executable('rg') then
+  if vim.fn.executable('rg') == 1 then
     vim.opt.grepprg = 'rg --vimgrep --glob "!.git" --glob "!node_modules"'
   end
   vim.opt.maxmempattern = 10000
@@ -406,15 +406,16 @@ local setup_auto_commands = function()
     command = 'botright cwindow | setlocal nowrap'
   })
 
-  -- folding method
+  -- start treesitter
   vim.api.nvim_create_autocmd({ 'FileType' }, {
-    callback = function(args)
-      local ok, _ = pcall(vim.treesitter.get_parser, args.buf)
+    callback = function()
+      local ok, _ = pcall(vim.treesitter.start)
       if ok then
-        vim.wo.foldmethod = 'expr'
-        vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+        vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+        vim.wo[0][0].foldmethod = 'expr'
+        vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
       else
-        vim.wo.foldmethod = 'indent'
+        vim.wo[0][0].foldmethod = 'indent'
       end
     end
   })
@@ -595,7 +596,7 @@ local setup_lsp = function()
     -- Enable only specified servers in local config
     if local_config.lsp_servers and not vim.tbl_contains(local_config.lsp_servers, server.name) then
       -- Skip
-    elseif vim.fn.executable(server.bin) then
+    elseif vim.fn.executable(server.bin) == 1 then
       if server.config then
         vim.lsp.config(server.name, server.config)
       end
@@ -716,8 +717,8 @@ local setup_oil = function()
 end
 
 local setup_treesitter = function()
-  require('nvim-treesitter').setup({
-    ensure_installed = {
+  if vim.fn.executable('tree-sitter') == 1 then
+    require('nvim-treesitter').install({
       'vim', 'vimdoc',
       'javascript', 'jsdoc',
       'typescript', 'tsx',
@@ -726,9 +727,11 @@ local setup_treesitter = function()
       'graphql',
       'prisma',
       'terraform',
-    },
-    highlight = { enable = true },
-  })
+    })
+  else
+    vim.notify(
+      "tree-sitter executable not found. Install with: npm install -g tree-sitter-cli or cargo install tree-sitter-cli")
+  end
 end
 
 local setup_minuet = function()
