@@ -1,0 +1,5 @@
+#!/bin/sh
+
+export PORT=4900
+export VERTEXAI_PROJECT=FIXME
+export AWS_PROFILE=FIXME

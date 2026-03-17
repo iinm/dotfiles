@@ -1,0 +1,11 @@
+model_list:
+  - model_name: gemini-3-flash
+    litellm_params:
+      model: vertex_ai/gemini-3-flash-preview
+      vertex_project: os.environ/VERTEXAI_PROJECT
+      vertex_location: global
+
+  - model_name: claude-haiku-4-5
+    litellm_params:
+      model: bedrock/global.anthropic.claude-haiku-4-5-20251001-v1:0
+      aws_region_name: ap-northeast-1
