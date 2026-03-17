@@ -1,3 +1,11 @@
+function use --argument-names tool ver
+  fish_remove_path_pattern '.+/tools/'$tool'-[^/]+/.+'
+  if test -n "$ver"
+    set bin_path (fd '^bin$' --type d -1 ~/tools/$tool-$ver/)
+    fish_add_path --path -m "$bin_path"
+  end
+end
+
 # Host specific configuration
 if type --quiet local_config
   local_config
