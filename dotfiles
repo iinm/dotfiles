@@ -216,6 +216,7 @@ bootstrap_darwin() {
     lazydocker
     lua-language-server
     csvq
+    zstd
   )
   local missing_packages=()
   for package in "${packages[@]}"; do
