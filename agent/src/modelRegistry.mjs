@@ -22,7 +22,7 @@ import { callOpenAICompatibleModel } from "./providers/openaiCompatible.mjs";
  */
 export const MODEL_REGISTRY = {
   // OpenAI - GPT models
-  "gpt-thinking-low": {
+  "gpt-low": {
     provider: "openai",
     caller: callOpenAIModel,
     params: {
@@ -30,7 +30,7 @@ export const MODEL_REGISTRY = {
       reasoning: { effort: "low", summary: "auto" },
     },
   },
-  "gpt-thinking-medium": {
+  "gpt-medium": {
     provider: "openai",
     caller: callOpenAIModel,
     params: {
@@ -38,7 +38,7 @@ export const MODEL_REGISTRY = {
       reasoning: { effort: "medium", summary: "auto" },
     },
   },
-  "gpt-thinking-high": {
+  "gpt-high": {
     provider: "openai",
     caller: callOpenAIModel,
     params: {
@@ -46,7 +46,7 @@ export const MODEL_REGISTRY = {
       reasoning: { effort: "high", summary: "auto" },
     },
   },
-  "gpt-thinking-xhigh": {
+  "gpt-xhigh": {
     provider: "openai",
     caller: callOpenAIModel,
     params: {
@@ -86,28 +86,36 @@ export const MODEL_REGISTRY = {
       reasoning: { effort: "xhigh", summary: "auto" },
     },
   },
-  "gpt-codex-mini-low": {
+  "gpt-mini-low": {
     provider: "openai",
     caller: callOpenAIModel,
     params: {
-      model: "gpt-5.1-codex-mini",
+      model: "gpt-5.4-mini",
       reasoning: { effort: "low", summary: "auto" },
     },
   },
-  "gpt-codex-mini-medium": {
+  "gpt-mini-medium": {
     provider: "openai",
     caller: callOpenAIModel,
     params: {
-      model: "gpt-5.1-codex-mini",
+      model: "gpt-5.4-mini",
       reasoning: { effort: "medium", summary: "auto" },
     },
   },
-  "gpt-codex-mini-high": {
+  "gpt-mini-high": {
     provider: "openai",
     caller: callOpenAIModel,
     params: {
-      model: "gpt-5.1-codex-mini",
+      model: "gpt-5.4-mini",
       reasoning: { effort: "high", summary: "auto" },
+    },
+  },
+  "gpt-mini-xhigh": {
+    provider: "openai",
+    caller: callOpenAIModel,
+    params: {
+      model: "gpt-5.4-mini",
+      reasoning: { effort: "xhigh", summary: "auto" },
     },
   },
   "gpt-chat": {
