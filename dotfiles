@@ -307,8 +307,6 @@ setup_nvim() {
     echo "skip: $nvim_path $NVIM_VERSION exists."
   else
     echo "run: install nvim."
-    rm -rf ~/tools/nvim*
-    mkdir -p ~/tools
 
     local nvim_base_url=https://github.com/neovim/neovim/releases/download/v$NVIM_VERSION
     if test "$NVIM_VERSION" = "nightly"; then
@@ -320,9 +318,11 @@ setup_nvim() {
     platform="$(uname -s | sed 's/Linux/linux/; s/Darwin/macos/')"
     machine="$(uname -m)"
 
+    rm -rf "$nvim_path"
+    mkdir -p "$nvim_path"
+
     curl --show-error --fail -L "${nvim_base_url}/nvim-${platform}-${machine}.tar.gz" \
-      | tar -C ~/tools -xzf -
-    ln -s "nvim-${platform}-${machine}" "$nvim_path"
+      | tar --strip-components=1 -C "$nvim_path" -xzf -
   fi
 
   local nvim_local_config=~/.config/nvim/lua/local_config.lua
