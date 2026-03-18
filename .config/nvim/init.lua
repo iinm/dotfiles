@@ -469,6 +469,11 @@ local setup_auto_commands = function()
     end,
   })
 
+  local lsp_utils = require('lsp_utils')
+  lsp_utils.lsp_call_hierarchy_recursive_setup_autocmd()
+end
+
+local setup_plugins = function()
   vim.api.nvim_create_autocmd('PackChanged', {
     callback = function(ev)
       local name, kind = ev.data.spec.name, ev.data.kind
@@ -479,11 +484,6 @@ local setup_auto_commands = function()
     end
   })
 
-  local lsp_utils = require('lsp_utils')
-  lsp_utils.lsp_call_hierarchy_recursive_setup_autocmd()
-end
-
-local setup_plugins = function()
   vim.pack.add({
     -- syntax
     { src = 'https://github.com/nvim-treesitter/nvim-treesitter' },
