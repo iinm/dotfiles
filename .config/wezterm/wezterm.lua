@@ -39,6 +39,8 @@ config.window_padding = {
   top = "0cell",
   bottom = "0cell",
 }
+config.initial_cols = 96
+config.initial_rows = 48
 config.keys = {
   {
     key = 'n',
