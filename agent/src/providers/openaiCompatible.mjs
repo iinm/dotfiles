@@ -1,8 +1,7 @@
 /**
  * @import { ModelInput, Message, MessageContentText, AssistantMessage, ModelOutput, PartialMessageContent, MessageContentThinking, MessageContentToolUse } from "../model"
- * @import { OpenAIAssistantMessage, OpenAIMessage, OpenAIMessageToolCall, OpenAIModelConfig, OpenAIToolDefinition, OpenAIStreamData, OpenAIChatCompletion, OpenAIMessageContentImage, OpenAIChatCompletionRequest } from "./openaiCompatible"
+ * @import { OpenAIAssistantMessage, OpenAIMessage, OpenAIMessageToolCall, OpenAICompatibleModelConfig, OpenAIToolDefinition, OpenAIStreamData, OpenAIChatCompletion, OpenAIMessageContentImage, OpenAIChatCompletionRequest } from "./openaiCompatible"
  * @import { ToolDefinition } from "../tool"
- * @import { GenericModelProviderConfig } from "../config"
  */
 
 import { styleText } from "node:util";
@@ -16,20 +15,19 @@ import { readBedrockStreamEvents } from "./bedrock.mjs";
 import { getGoogleCloudAccessToken } from "./googleCloud.mjs";
 
 /**
- * @param {GenericModelProviderConfig} providerConfig
- * @param {OpenAIModelConfig} modelConfig
+ * @param {import("../modelDefinition").PlatformConfig} platformConfig
+ * @param {OpenAICompatibleModelConfig} modelConfig
  * @param {ModelInput} input
  * @param {number} retryCount
  * @returns {Promise<ModelOutput | Error>}
  */
 export async function callOpenAICompatibleModel(
-  providerConfig,
+  platformConfig,
   modelConfig,
   input,
   retryCount = 0,
 ) {
   const retryInterval = Math.min(2 * 2 ** retryCount, 16);
-  const baseURL = providerConfig.baseURL || "https://api.openai.com";
 
   return await noThrow(async () => {
     const messages = convertGenericMessageToOpenAIFormat(input.messages);
@@ -37,52 +35,59 @@ export async function callOpenAICompatibleModel(
       input.tools || [],
     );
 
-    const url =
-      providerConfig.platform === "bedrock"
-        ? `${baseURL}/model/${providerConfig.modelMap?.[modelConfig.model] ?? modelConfig.model}/invoke-with-response-stream`
-        : providerConfig.platform === "vertex-ai"
-          ? `${baseURL}/endpoints/openapi/chat/completions`
-          : `${baseURL}/v1/chat/completions`;
+    const url = (() => {
+      const baseURL = platformConfig.baseURL;
+
+      switch (platformConfig.name) {
+        case "openai":
+          return `${baseURL}/v1/chat/completions`;
+        case "bedrock":
+          return `${baseURL}/model/${modelConfig.model}/invoke-with-response-stream`;
+        case "vertex-ai":
+          return `${baseURL}/endpoints/openapi/chat/completions`;
+        default:
+          throw new Error(`Unsupported platform: ${platformConfig.name}`);
+      }
+    })();
 
     /** @type {Record<string,string>} */
-    const headers =
-      providerConfig.platform === "bedrock"
-        ? {
-            ...providerConfig.customHeaders,
-            ...(providerConfig.apiKey
-              ? {
-                  Authorization: `Bearer ${providerConfig.apiKey}`,
-                }
-              : {}),
-          }
-        : providerConfig.platform === "vertex-ai"
-          ? {
-              ...providerConfig.customHeaders,
-              Authorization: `Bearer ${await getGoogleCloudAccessToken()}`,
-            }
-          : {
-              ...providerConfig.customHeaders,
-              Authorization: `Bearer ${providerConfig.apiKey}`,
-            };
+    const headers = await (async () => {
+      switch (platformConfig.name) {
+        case "openai":
+          return {
+            ...platformConfig.customHeaders,
+            Authorization: `Bearer ${platformConfig.apiKey}`,
+          };
+        case "bedrock":
+          return platformConfig.customHeaders ?? {};
+        case "vertex-ai":
+          return {
+            ...platformConfig.customHeaders,
+            Authorization: `Bearer ${await getGoogleCloudAccessToken()}`,
+          };
+      }
+    })();
 
     const { model: _, ...modelConfigWithoutName } = modelConfig;
-    const platformRequest =
-      providerConfig.platform === "bedrock"
-        ? {
+    const platformRequest = (() => {
+      switch (platformConfig.name) {
+        case "openai":
+          return {
+            ...modelConfig,
+            stream: true,
+          };
+        case "bedrock":
+          return {
             ...modelConfigWithoutName,
-          }
-        : providerConfig.platform === "vertex-ai"
-          ? {
-              ...modelConfig,
-              model:
-                providerConfig.modelMap?.[modelConfig.model] ??
-                modelConfig.model,
-              stream: true,
-            }
-          : {
-              ...modelConfig,
-              stream: true,
-            };
+          };
+        case "vertex-ai":
+          return {
+            ...modelConfig,
+            model: modelConfig.model,
+            stream: true,
+          };
+      }
+    })();
 
     /** @type {OpenAIChatCompletionRequest} */
     const request = {
@@ -108,13 +113,14 @@ export async function callOpenAICompatibleModel(
     // bedrock + sso profile
     const runFetchForBedrock = async () => {
       const region =
-        baseURL.match(/bedrock-runtime\.([\w-]+)\.amazonaws\.com/)?.[1] ?? "";
+        url.match(/bedrock-runtime\.([\w-]+)\.amazonaws\.com/)?.[1] ?? "";
       const urlParsed = new URL(url);
       const { hostname, pathname } = urlParsed;
 
       const signer = new SignatureV4({
         credentials: fromIni({
-          profile: providerConfig.bedrock?.awsProfile ?? "",
+          profile:
+            platformConfig.name === "bedrock" ? platformConfig.awsProfile : "",
         }),
         region,
         service: "bedrock",
@@ -144,10 +150,7 @@ export async function callOpenAICompatibleModel(
     };
 
     const runFetch =
-      providerConfig.platform === "bedrock" &&
-      providerConfig.bedrock?.awsProfile
-        ? runFetchForBedrock
-        : runFetchDefault;
+      platformConfig.name === "bedrock" ? runFetchForBedrock : runFetchDefault;
 
     const response = await retryOnError(() => runFetch(), {
       shouldRetry: (err) => err instanceof Error && err.name === "TimeoutError",
@@ -175,7 +178,7 @@ export async function callOpenAICompatibleModel(
       );
       await new Promise((resolve) => setTimeout(resolve, retryInterval * 1000));
       return callOpenAICompatibleModel(
-        providerConfig,
+        platformConfig,
         modelConfig,
         input,
         retryCount + 1,
@@ -194,7 +197,7 @@ export async function callOpenAICompatibleModel(
 
     const reader = response.body.getReader();
     const eventStreamReader =
-      providerConfig.platform === "bedrock"
+      platformConfig.name === "bedrock"
         ? /** @type {typeof readOpenAIStreamData} */ (readBedrockStreamEvents)
         : readOpenAIStreamData;
 
@@ -231,7 +234,7 @@ export async function callOpenAICompatibleModel(
       );
       await new Promise((resolve) => setTimeout(resolve, retryInterval * 1000));
       return callOpenAICompatibleModel(
-        providerConfig,
+        platformConfig,
         modelConfig,
         input,
         retryCount + 1,

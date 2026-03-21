@@ -1,9 +1,11 @@
+import { ModelDefinition, PlatformConfig } from "./modelDefinition";
 import { ToolUsePattern } from "./tool";
 import { ExecCommandSanboxConfig } from "./tools/execCommand";
 
 export type AppConfig = {
   model?: string;
-  providers?: ModelProvidersConfig;
+  models?: ModelDefinition[];
+  platforms?: PlatformConfig[];
   autoApproval?: {
     patterns?: ToolUsePattern[];
     maxApprovals?: number;
@@ -28,37 +30,6 @@ export type AppConfig = {
   };
   mcpServers?: Record<string, MCPServerConfig>;
   notifyCmd?: string;
-};
-
-export type ModelProvidersConfig = {
-  anthropic?: GenericModelProviderConfig;
-  gemini?: GenericModelProviderConfig;
-  openai?: GenericModelProviderConfig;
-  moonshotai?: GenericModelProviderConfig;
-  deepseek?: GenericModelProviderConfig;
-  minimax?: GenericModelProviderConfig;
-  qwen?: GenericModelProviderConfig;
-  zai?: GenericModelProviderConfig;
-  xai?: GenericModelProviderConfig;
-  [key: string]: GenericModelProviderConfig | undefined;
-};
-
-export type GenericModelProviderConfig = {
-  platform?: "vertex-ai" | "bedrock" | "azure";
-  baseURL?: string;
-  apiKey?: string;
-  customHeaders?: Record<string, string>;
-  modelMap?: Record<string, string>;
-
-  azure?: {
-    azureConfigDir?: string;
-  };
-  bedrock?: {
-    awsProfile?: string;
-  };
-  vertexAI?: {
-    account?: string;
-  };
 };
 
 export type MCPServerConfig = {

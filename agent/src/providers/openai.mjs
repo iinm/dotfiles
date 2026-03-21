@@ -2,7 +2,6 @@
  * @import { ModelInput, Message, AssistantMessage, ModelOutput, PartialMessageContent } from "../model"
  * @import { OpenAIInputImage, OpenAIInputItem, OpenAIModelConfig, OpenAIOutputItem, OpenAIRequest, OpenAIStreamEvent, OpenAIToolFunction } from "./openai"
  * @import { ToolDefinition } from "../tool"
- * @import { GenericModelProviderConfig } from "../config"
  */
 
 import { styleText } from "node:util";
@@ -10,20 +9,18 @@ import { noThrow } from "../utils/noThrow.mjs";
 import { getAzureAccessToken } from "./azure.mjs";
 
 /**
- * @param {GenericModelProviderConfig} providerConfig
+ * @param {import("../modelDefinition").PlatformConfig} platformConfig
  * @param {OpenAIModelConfig} modelConfig
  * @param {ModelInput} input
  * @param {number} retryCount
  * @returns {Promise<ModelOutput | Error>}
  */
 export async function callOpenAIModel(
-  providerConfig,
+  platformConfig,
   modelConfig,
   input,
   retryCount = 0,
 ) {
-  const baseURL = providerConfig.baseURL || "https://api.openai.com";
-
   return await noThrow(async () => {
     const messages = convertGenericMessageToOpenAIFormat(input.messages);
     const tools = convertGenericeToolDefinitionToOpenAIFormat(
@@ -35,30 +32,33 @@ export async function callOpenAIModel(
     /** @type {OpenAIRequest} */
     const request = {
       ...baseModelConfig,
-      model:
-        providerConfig.platform === "azure"
-          ? (providerConfig.modelMap?.[model] ?? model)
-          : model,
+      model: model,
       input: messages,
       tools: tools.length ? tools : undefined,
       stream: true,
     };
 
-    const apiKey =
-      providerConfig.platform === "azure"
-        ? await getAzureAccessToken(
-            providerConfig.azure?.azureConfigDir
+    const apiKey = await (async () => {
+      switch (platformConfig.name) {
+        case "openai":
+          return platformConfig.apiKey;
+        case "azure":
+          return getAzureAccessToken(
+            platformConfig.azureConfigDir
               ? {
-                  azureConfigDir: providerConfig.azure.azureConfigDir,
+                  azureConfigDir: platformConfig.azureConfigDir,
                 }
               : undefined,
-          )
-        : providerConfig.apiKey;
+          );
+        default:
+          throw new Error(`Unsupported platform: ${platformConfig.name}`);
+      }
+    })();
 
-    const response = await fetch(`${baseURL}/v1/responses`, {
+    const response = await fetch(`${platformConfig.baseURL}/v1/responses`, {
       method: "POST",
       headers: {
-        ...providerConfig.customHeaders,
+        ...platformConfig.customHeaders,
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
@@ -76,7 +76,7 @@ export async function callOpenAIModel(
       );
       await new Promise((resolve) => setTimeout(resolve, retryInterval * 1000));
       return callOpenAIModel(
-        providerConfig,
+        platformConfig,
         modelConfig,
         input,
         retryCount + 1,
@@ -124,7 +124,7 @@ export async function callOpenAIModel(
       );
       await new Promise((resolve) => setTimeout(resolve, retryInterval * 1000));
       return callOpenAIModel(
-        providerConfig,
+        platformConfig,
         modelConfig,
         input,
         retryCount + 1,

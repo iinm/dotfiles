@@ -29,76 +29,66 @@ npm install
 // $AGENT_ROOT(where this README file exists)/.config/config.local.json
 {
   // Set default model used by ./bin/agent
-  // See src/model.mjs for available models
-  "model": "<model-name>",
+  // e.g., "gpt-5.4-mini:thinking-high"
+  // See .config/config.predefined.json for available models
+  "model": "<model>:<variant>",
 
-  "providers": {
-    "anthropic": {
+  "platforms": [
+    {
+      "name": "anthropic",
       "apiKey": "FIXME"
-
-      // Or use Bedrock + AWS SSO
-      // "platform": "bedrock",
-      // "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
-      // "bedrock": {
-      //   "awsProfile": "FIXME"
-      // },
-      // "modelMap": {
-      //   "claude-haiku-4-5": "<region>.anthropic.claude-haiku-4-5-20251001-v1:0",
-      //   "claude-sonnet-4-5": "<region>.anthropic.claude-sonnet-4-5-20250929-v1:0",
-      //   "claude-opus-4-6": "<region>.anthropic.claude-opus-4-6-v1"
-      // }
-
-      // Or use Vertex AI (Requires gcloud CLI to get authentication token)
-      // "platform": "vertex-ai",
-      // "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>",
-      // "modelMap": {
-      //   "claude-haiku-4-5": "claude-haiku-4-5@20251001",
-      //   "claude-sonnet-4-5": "claude-sonnet-4-5@20250929",
-      //   "claude-opus-4-6": "claude-opus-4-6"
-      // }
-
-      // (Optional) AI Gateway example:
-      // "baseURL": "https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/anthropic",
-      // "customHeaders": {
-      //   "cf-aig-metadata": "{\"client\":\"agent-by-iinm\"}"
-      // }
     },
-    "gemini": {
-      // Google AI Studio
+    {
+      "name": "gemini",
+      "variant": "default",
       "apiKey": "FIXME"
-
-      // Or use Vertex AI (Requires gcloud CLI to get authentication token)
-      // "platform": "vertex-ai",
-      // "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>"
-      // "vertexAI": {
-      //   "account": "FIXME"
-      // }
     },
-    "openai": {
+    {
+      "name": "openai",
+      "variant": "default",
       "apiKey": "FIXME"
-
-      // Or use Azure (Requires Azure CLI to get access token)
-      // "platform": "azure",
-      // "baseURL": "https://<resource>.openai.azure.com/openai",
-      // "modelMap": {
-      //   "gpt-5.2-chat-latest": "gpt-5.2-chat"
-      // },
-      // "azure": {
-      //   "azureConfigDir": "/home/xxx/.azure-for-agent"
-      // }
+    },
+    {
+      "name": "openai",
+      "variant": "xai",
+      "apiKey": "FIXME"
+    },
+    {
+      // Requires Azure CLI to get access token
+      "name": "azure",
+      "variant": "default",
+      "baseURL": "https://<resource>.openai.azure.com/openai",
+      // Optional
+      "azureConfigDir": "/home/xxx/.azure-for-agent"
+    },
+    {
+      "name": "bedrock",
+      "variant": "default",
+      "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
+      "awsProfile": "FIXME"
+    },
+    {
+      // Requires gcloud CLI to get authentication token
+      "name": "vertex-ai",
+      "variant": "default",
+      "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project>/locations/<location>",
+      // Optional
+      "account": "<service_account_email>"
     }
-  },
+  ],
+
   // Optional
   "tools": {
     "askGoogle": {
+      "model": "gemini-3-flash-preview"
+
       // Google AI Studio
       "apiKey": "FIXME"
 
       // Or use Vertex AI (Requires gcloud CLI to get authentication token)
       // "platform": "vertex-ai",
       // "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>",
-      // "account": "FIXME",
-      // "model": "gemini-3-flash-preview"
+      // "account": "FIXME"
     },
     "tavily": {
       "apiKey": "FIXME"
@@ -108,85 +98,6 @@ npm install
 ```
 </details>
 
-<details>
-<summary>Other Supported Providers</summary>
-
-```js
-{
-  "providers": {
-    "deepseek": {
-      "platform": "bedrock",
-      "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
-      "bedrock": {
-        "awsProfile": "FIXME"
-      },
-      "modelMap": {
-        "deepseek-v3.2": "deepseek.v3.2"
-      }
-
-      // Or use Vertex AI
-      // "platform": "vertex-ai",
-      // "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>",
-      // "modelMap": {
-      //   "deepseek-v3.2": "deepseek-ai/deepseek-v3.2-maas"
-      // }
-    },
-    "minimax": {
-      "platform": "bedrock",
-      "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
-      "bedrock": {
-        "awsProfile": "FIXME"
-      },
-      "modelMap": {
-        "MiniMax-M2.1": "minimax.minimax-m2.1"
-      }
-    },
-    "moonshotai": {
-      "platform": "bedrock",
-      "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
-      "bedrock": {
-        "awsProfile": "FIXME"
-      },
-      "modelMap": {
-        "kimi-k2.5": "moonshotai.kimi-k2.5"
-      }
-    },
-    "qwen": {
-      "platform": "bedrock",
-      "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
-      "bedrock": {
-        "awsProfile": "FIXME"
-      },
-      "modelMap": {
-        "qwen3-next-80b-a3b": "qwen.qwen3-next-80b-a3b"
-      }
-    },
-    "zai": {
-      "platform": "vertex-ai",
-      "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project_id>/locations/<location>",
-      "modelMap": {
-        "glm-5": "zai-org/glm-5-maas"
-      }
-
-      // Or use Bedrock
-      // "platform": "bedrock",
-      // "baseURL": "https://bedrock-runtime.<region>.amazonaws.com",
-      // "bedrock": {
-      //   "awsProfile": "FIXME"
-      // },
-      // "modelMap": {
-      //   "glm-4.7": "zai.glm-4.7"
-      // }
-    },
-    "xai": {
-      "apiKey": "FIXME"
-    }
-  }
-}
-```
-
-</details>
-
 Run the agent.
 
 ```sh
@@ -194,7 +105,7 @@ Run the agent.
 ./bin/agent
 
 # Or specify a specific model
-./bin/agent-<model>
+AGENT_MODEL=<model>:<variant> ./bin/agent
 ```
 
 Display the help message.
@@ -583,7 +494,7 @@ az role assignment create \
 export app_secret=$(echo "$service_principal" | jq -r .password)
 export tenant_id=$(echo "$service_principal" | jq -r .tenant)
 
-export AZURE_CONFIG_DIR=$HOME/.azure-agent # Change the location to store credentials
+export AZURE_CONFIG_DIR=$HOME/.azure-for-agent # Change the location to store credentials
 az login --service-principal -u "$app_id" -p "$app_secret" --tenant "$tenant_id"
 ```
 </details>

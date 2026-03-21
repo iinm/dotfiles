@@ -38,44 +38,8 @@ export async function loadAppConfig() {
     }
     merged = {
       model: config.model || merged.model,
-      providers: {
-        gemini: {
-          ...(merged.providers?.gemini ?? {}),
-          ...(config.providers?.gemini ?? {}),
-        },
-        openai: {
-          ...(merged.providers?.openai ?? {}),
-          ...(config.providers?.openai ?? {}),
-        },
-        anthropic: {
-          ...(merged.providers?.anthropic ?? {}),
-          ...(config.providers?.anthropic ?? {}),
-        },
-        moonshotai: {
-          ...(merged.providers?.moonshotai ?? {}),
-          ...(config.providers?.moonshotai ?? {}),
-        },
-        deepseek: {
-          ...(merged.providers?.deepseek ?? {}),
-          ...(config.providers?.deepseek ?? {}),
-        },
-        minimax: {
-          ...(merged.providers?.minimax ?? {}),
-          ...(config.providers?.minimax ?? {}),
-        },
-        qwen: {
-          ...(merged.providers?.qwen ?? {}),
-          ...(config.providers?.qwen ?? {}),
-        },
-        zai: {
-          ...(merged.providers?.zai ?? {}),
-          ...(config.providers?.zai ?? {}),
-        },
-        xai: {
-          ...(merged.providers?.xai ?? {}),
-          ...(config.providers?.xai ?? {}),
-        },
-      },
+      models: [...(config.models ?? []), ...(merged.models ?? [])],
+      platforms: [...(config.platforms ?? []), ...(merged.platforms ?? [])],
       autoApproval: {
         defaultAction:
           config.autoApproval?.defaultAction ??

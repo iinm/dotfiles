@@ -12,5 +12,5 @@
     process.env.AGENT_MODEL = model;
   }
 
-  import("../src/app.mjs");
+  import("../src/main.mjs");
 })();

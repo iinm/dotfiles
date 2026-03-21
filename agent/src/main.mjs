@@ -13,7 +13,7 @@ import {
   USER_NAME,
 } from "./env.mjs";
 import { setupMCPServer } from "./mcp.mjs";
-import { createModelCaller } from "./modelRegistry.mjs";
+import { createModelCaller } from "./model.mjs";
 import { createPrompt } from "./prompt.mjs";
 import { createToolUseApprover } from "./tool.mjs";
 import { createAskGoogleTool } from "./tools/askGoogle.mjs";
@@ -84,12 +84,12 @@ import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
     }
   }
 
-  const modelName = AGENT_MODEL || appConfig.model || "";
+  const modelNameWithVariant = AGENT_MODEL || appConfig.model || "";
   const agentRoles = await loadAgentRoles();
 
   const prompt = createPrompt({
     username: USER_NAME,
-    modelName,
+    modelName: modelNameWithVariant,
     sessionId,
     tmuxSessionId,
     workingDir: process.cwd(),
@@ -136,8 +136,35 @@ import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
     },
   });
 
+  const [modelName, modelVariant] = modelNameWithVariant.split(":");
+  const modelDef = (appConfig.models ?? []).find(
+    (entry) => entry.name === modelName && entry.variant === modelVariant,
+  );
+  if (!modelDef) {
+    throw new Error(
+      `Model "${modelNameWithVariant}" not found in configuration.`,
+    );
+  }
+
+  const platform = (appConfig.platforms ?? []).find(
+    (entry) =>
+      entry.name === modelDef.platform.name &&
+      entry.variant === modelDef.platform.variant,
+  );
+  if (!platform) {
+    throw new Error(
+      `Platform ${modelDef.platform.name} variant=${modelDef.platform.variant} not found in configuration.`,
+    );
+  }
+
   const { userEventEmitter, agentEventEmitter, agentCommands } = createAgent({
-    callModel: createModelCaller(modelName, appConfig.providers),
+    callModel: createModelCaller({
+      ...modelDef,
+      platform: {
+        ...modelDef.platform,
+        ...platform,
+      },
+    }),
     prompt,
     tools: [...builtinTools, ...mcpTools],
     toolUseApprover,
@@ -149,7 +176,7 @@ import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
     agentEventEmitter,
     agentCommands,
     sessionId,
-    modelName,
+    modelName: modelNameWithVariant,
     notifyCmd: appConfig.notifyCmd || AGENT_NOTIFY_CMD_DEFAULT,
     sandbox: Boolean(appConfig.sandbox),
     onStop: async () => {
