@@ -29,9 +29,9 @@ npm install
 // $AGENT_ROOT(where this README file exists)/.config/config.local.json
 {
   // Set default model used by ./bin/agent
-  // e.g., "gpt-5.4-mini:thinking-high"
+  // e.g., "gpt-5.4-mini+thinking-high"
   // See .config/config.predefined.json for available models
-  "model": "<model>:<variant>",
+  "model": "<model>+<variant>",
 
   "platforms": [
     {
@@ -329,7 +329,7 @@ The agent loads configuration files in the following order. Settings in later fi
 ```
 </details>
 
-## File-based Prompts
+## Prompts
 
 You can define reusable prompts in Markdown files. These are especially useful for common tasks like creating commit messages or conducting retrospectives.
 
@@ -348,9 +348,10 @@ You can also import remote prompts with the `import` field:
 
 ```md
 ---
-import: https://raw.githubusercontent.com/anthropics/claude-plugins-official/refs/heads/main/plugins/code-simplifier/agents/code-simplifier.md
+import: https://raw.githubusercontent.com/anthropics/claude-plugins-official/4ca561fb8532594e7a5faef945e85096fcec0616/plugins/feature-dev/commands/feature-dev.md
 ---
-Use AGENTS.md instead of CLAUDE.md in this project.
+- Use memory file instead of TodoWrite
+- Parallel execution of subagents is not supported. Delegate to subagents sequentially.
 ```
 
 Remote prompts are fetched and cached locally. The local content will be appended to the imported content.
@@ -359,14 +360,54 @@ Remote prompts are fetched and cached locally. The local content will be appende
 
 The agent searches for prompts in the following directories:
 
+- `$AGENT_ROOT/.config/prompts.predefined/` (Predefined prompts)
 - `$AGENT_ROOT/.config/prompts/` (Global/User-defined prompts)
 - `.agent/prompts/` (Project-specific prompts)
+- `.claude/commands/` (Claude-specific commands, prefixed with `claude/`)
+- `.claude/skills/` (Claude-specific skills, prefixed with `claude/skill/`)
 
 The prompt ID is the relative path of the file without the `.md` extension. For example, `.agent/prompts/retro.md` becomes `/prompts:retro`.
 
 ### Shortcuts
 
 Prompts located in a `shortcuts/` subdirectory (e.g., `.agent/prompts/shortcuts/review.md`) can be invoked directly as a top-level command (e.g., `/review`). This is useful for frequently used tasks. If a prompt is in a `shortcuts/` subdirectory, its ID is simplified by removing the `shortcuts/` prefix for use as a shortcut (e.g., `shortcuts/review` becomes `/review`).
+
+## Subagents
+
+Subagents are specialized agents that can be delegated specific tasks. They allow you to break down complex workflows into focused, manageable components.
+
+### Subagent File Format
+
+Subagent definitions are Markdown files with a YAML frontmatter:
+
+```md
+---
+description: Simplifies and refines code for clarity and maintainability
+---
+You are a code simplifier. Your role is to refactor code while preserving its functionality.
+```
+
+You can also import remote subagent definitions with the `import` field:
+
+```md
+---
+import: https://raw.githubusercontent.com/anthropics/claude-plugins-official/ceb9b72b4c4c20ad39efce780edd0aabe80ebce3/plugins/code-simplifier/agents/code-simplifier.md
+---
+Use AGENTS.md instead of CLAUDE.md in this project.
+```
+
+Remote subagents are fetched and cached locally. The local content will be appended to the imported content.
+
+### Locations
+
+The agent searches for subagent definitions in the following directories:
+
+- `$AGENT_ROOT/.config/agents.predefined/` (Predefined agents)
+- `$AGENT_ROOT/.config/agents/` (Global/User-defined agents)
+- `.agent/agents/` (Project-specific agents)
+- `.claude/agents/` (Claude-specific agents)
+
+The subagent ID is the relative path of the file without the `.md` extension. For example, `.agent/agents/worker.md` becomes `worker`.
 
 ## Development
 

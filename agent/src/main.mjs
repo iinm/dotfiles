@@ -136,7 +136,7 @@ import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
     },
   });
 
-  const [modelName, modelVariant] = modelNameWithVariant.split(":");
+  const [modelName, modelVariant] = modelNameWithVariant.split("+");
   const modelDef = (appConfig.models ?? []).find(
     (entry) => entry.name === modelName && entry.variant === modelVariant,
   );
