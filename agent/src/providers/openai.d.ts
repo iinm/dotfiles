@@ -84,7 +84,7 @@ export type OpenAIOutputContent = OpenAIOutputText | OpenAIOutputRefusal;
 export type OpenAIOutputText = {
   type: "output_text";
   text: string;
-  annotations: unknown;
+  annotations?: unknown;
 };
 
 export type OpenAIOutputRefusal = {
@@ -93,6 +93,7 @@ export type OpenAIOutputRefusal = {
 };
 
 export type OpenAIFunctionToolCall = {
+  id: string;
   type: "function_call";
   call_id: string;
   name: string;
@@ -103,7 +104,11 @@ export type OpenAIFunctionToolCall = {
 export type OpenAIReasoning = {
   id: string;
   type: "reasoning";
-  summary: { type: "summary_text"; text: string };
+  summary: {
+    type: "summary_text";
+    text: string;
+  }[];
+  encrypted_content: string;
 };
 
 export type OpenAIUsage = {

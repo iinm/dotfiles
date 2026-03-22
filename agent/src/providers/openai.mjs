@@ -1,6 +1,6 @@
 /**
  * @import { ModelInput, Message, AssistantMessage, ModelOutput, PartialMessageContent } from "../model"
- * @import { OpenAIInputImage, OpenAIInputItem, OpenAIModelConfig, OpenAIOutputItem, OpenAIRequest, OpenAIStreamEvent, OpenAIToolFunction } from "./openai"
+ * @import { OpenAIFunctionToolCall, OpenAIInputImage, OpenAIInputItem, OpenAIModelConfig, OpenAIOutputItem, OpenAIOutputMessage, OpenAIReasoning, OpenAIRequest, OpenAIStreamEvent, OpenAIToolFunction } from "./openai"
  * @import { ToolDefinition } from "../tool"
  */
 
@@ -236,15 +236,69 @@ function convertGenericMessageToOpenAIFormat(genericMessages) {
         break;
       }
       case "assistant": {
-        if (!genericMessage.provider?.source) {
-          throw new Error(
-            "Original message is required for assistant role but not provided.",
-          );
+        // if (!genericMessage.provider?.source) {
+        //   throw new Error(
+        //     "Original message is required for assistant role but not provided.",
+        //   );
+        // }
+        // const source = /** @type {OpenAIOutputItem[]} */ (
+        //   genericMessage.provider.source
+        // );
+        // openAIInputItems.push(...source);
+
+        for (const part of genericMessage.content) {
+          if (part.type === "thinking") {
+            openAIInputItems.push(
+              /** @type {OpenAIReasoning} */ ({
+                type: "reasoning",
+                ...part.provider?.fields,
+              }),
+            );
+          }
+          if (part.type === "tool_use") {
+            openAIInputItems.push(
+              /** @type {OpenAIFunctionToolCall} */ ({
+                type: "function_call",
+                name: part.toolName,
+                arguments: JSON.stringify(part.input),
+                call_id: part.toolUseId,
+                ...part.provider?.fields,
+              }),
+            );
+          }
+          if (part.type === "text") {
+            const itemId = /** @type {string | undefined} */ (
+              part.provider?.fields?.id
+            );
+            const item = /** @type {OpenAIOutputMessage | undefined} */ (
+              openAIInputItems.find(
+                (item) =>
+                  "id" in item && item.id === itemId && item.type === "message",
+              )
+            );
+
+            if (item) {
+              item.content.push({
+                type: "output_text",
+                text: part.text,
+              });
+            } else {
+              openAIInputItems.push(
+                /** @type {OpenAIOutputMessage} */ ({
+                  type: "message",
+                  role: "assistant",
+                  content: [
+                    {
+                      type: "output_text",
+                      text: part.text,
+                    },
+                  ],
+                  ...part.provider?.fields,
+                }),
+              );
+            }
+          }
         }
-        const source = /** @type {OpenAIOutputItem[]} */ (
-          genericMessage.provider.source
-        );
-        openAIInputItems.push(...source);
       }
     }
   }
@@ -282,7 +336,14 @@ function convertOpenAIAssistantMessageToGenericFormat(openAIOutputItems) {
     if (item.type === "reasoning") {
       content.push({
         type: "thinking",
-        thinking: item.summary.text,
+        thinking: item.summary.at(0)?.text ?? "",
+        provider: {
+          fields: {
+            id: item.id,
+            encrypted_content: item.encrypted_content,
+            summary: item.summary,
+          },
+        },
       });
     }
 
@@ -292,6 +353,11 @@ function convertOpenAIAssistantMessageToGenericFormat(openAIOutputItems) {
           content.push({
             type: "text",
             text: part.text,
+            provider: {
+              fields: {
+                id: item.id,
+              },
+            },
           });
         }
       }
@@ -303,6 +369,11 @@ function convertOpenAIAssistantMessageToGenericFormat(openAIOutputItems) {
         toolUseId: item.call_id,
         toolName: item.name,
         input: JSON.parse(item.arguments),
+        provider: {
+          fields: {
+            id: item.id,
+          },
+        },
       });
     }
   }
@@ -310,10 +381,10 @@ function convertOpenAIAssistantMessageToGenericFormat(openAIOutputItems) {
   return {
     role: "assistant",
     content,
-    provider: {
-      // Keep the original message because converting from generic to provider format is complex.
-      source: openAIOutputItems,
-    },
+
+    // provider: {
+    //   source: openAIOutputItems,
+    // },
   };
 }
 
