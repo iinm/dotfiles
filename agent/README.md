@@ -30,7 +30,7 @@ npm install
 {
   // Set default model used by ./bin/agent
   // e.g., "gpt-5.4-mini+thinking-high"
-  // See .config/config.predefined.json for available models
+  // List available models: jq -r '.models[] | "\(.name)+\(.variant)"' .config/config.predefined.json
   "model": "<model>+<variant>",
 
   "platforms": [
