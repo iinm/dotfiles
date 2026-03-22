@@ -729,6 +729,7 @@ local setup_treesitter = function()
   if vim.fn.executable('tree-sitter') == 1 then
     require('nvim-treesitter').install({
       'vim', 'vimdoc',
+      'lua',
       'javascript', 'jsdoc',
       'typescript', 'tsx',
       'mermaid',
