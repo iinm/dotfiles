@@ -49,16 +49,6 @@ npm install
       "apiKey": "FIXME"
     },
     {
-      "name": "openai",
-      "variant": "ollama",
-      "baseURL": "http://localhost:11434"
-    },
-    {
-      "name": "openai",
-      "variant": "xai",
-      "apiKey": "FIXME"
-    },
-    {
       // Requires Azure CLI to get access token
       "name": "azure",
       "variant": "default",
@@ -79,6 +69,23 @@ npm install
       "baseURL": "https://aiplatform.googleapis.com/v1beta1/projects/<project>/locations/<location>",
       // Optional
       "account": "<service_account_email>"
+    },
+    {
+      "name": "openai",
+      "variant": "ollama",
+      "baseURL": "https://ollama.com",
+      "apiKey": "FIXME"
+    },
+    {
+      "name": "openai",
+      "variant": "huggingface",
+      "baseURL": "https://router.huggingface.co",
+      "apiKey": "FIXME"
+    },
+    {
+      "name": "openai",
+      "variant": "xai",
+      "apiKey": "FIXME"
     }
   ],
 

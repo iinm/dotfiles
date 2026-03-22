@@ -705,6 +705,20 @@
         }
       }
     },
+    {
+      "name": "glm-5",
+      "variant": "huggingface",
+      "platform": {
+        "name": "openai",
+        "variant": "huggingface"
+      },
+      "model": {
+        "format": "openai-messages",
+        "config": {
+          "model": "zai-org/GLM-5:novita"
+        }
+      }
+    },
 
     {
       "name": "kimi-k2.5",
@@ -768,6 +782,7 @@
         }
       }
     },
+
     {
       "name": "qwen3-next",
       "variant": "vertex-ai",
