@@ -690,6 +690,21 @@
         }
       }
     },
+    {
+      "name": "glm-5",
+      "variant": "ollama",
+      "platform": {
+        "name": "openai",
+        "variant": "ollama"
+      },
+      "model": {
+        "format": "openai-responses",
+        "config": {
+          "model": "glm-5:cloud",
+          "reasoning": { "effort": "high", "summary": "detailed" }
+        }
+      }
+    },
 
     {
       "name": "kimi-k2.5",
@@ -738,7 +753,21 @@
         }
       }
     },
-
+    {
+      "name": "minimax-m2.7",
+      "variant": "ollama",
+      "platform": {
+        "name": "openai",
+        "variant": "ollama"
+      },
+      "model": {
+        "format": "openai-responses",
+        "config": {
+          "model": "minimax-m2.7:cloud",
+          "reasoning": { "effort": "high", "summary": "detailed" }
+        }
+      }
+    },
     {
       "name": "qwen3-next",
       "variant": "vertex-ai",

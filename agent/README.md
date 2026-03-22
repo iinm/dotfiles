@@ -50,6 +50,11 @@ npm install
     },
     {
       "name": "openai",
+      "variant": "ollama",
+      "baseURL": "http://localhost:11434"
+    },
+    {
+      "name": "openai",
       "variant": "xai",
       "apiKey": "FIXME"
     },

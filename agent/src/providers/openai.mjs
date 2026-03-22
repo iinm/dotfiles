@@ -99,7 +99,6 @@ export async function callOpenAIModel(
     const streamEvents = [];
     for await (const streamEvent of readOpenAIStreamData(reader)) {
       streamEvents.push(streamEvent);
-
       const partialContent =
         convertOpenAIStreamDataToAgentPartialContent(streamEvent);
       if (input.onPartialMessageContent && partialContent) {
@@ -387,8 +386,15 @@ function convertOpenAIStreamDataToAgentPartialContent(streamEvent) {
     }
   }
 
-  // tool
   if (streamEvent.type === "response.output_item.added") {
+    if (streamEvent.item.type === "reasoning") {
+      // ollama only
+      return {
+        type: "thinking",
+        position: "start",
+      };
+    }
+
     if (streamEvent.item.type === "function_call") {
       return {
         type: "tool_use",
