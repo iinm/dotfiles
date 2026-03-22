@@ -543,7 +543,9 @@
         "format": "openai-responses",
         "config": {
           "model": "gpt-5.4-mini",
-          "reasoning": { "effort": "medium", "summary": "auto" }
+          "reasoning": { "effort": "medium", "summary": "auto" },
+          "store": false,
+          "include": ["reasoning.encrypted_content"]
         }
       }
     },
@@ -559,7 +561,9 @@
         "format": "openai-responses",
         "config": {
           "model": "gpt-5.4-mini",
-          "reasoning": { "effort": "high", "summary": "auto" }
+          "reasoning": { "effort": "high", "summary": "auto" },
+          "store": false,
+          "include": ["reasoning.encrypted_content"]
         }
       }
     },
@@ -575,7 +579,9 @@
         "format": "openai-responses",
         "config": {
           "model": "gpt-5.4-mini",
-          "reasoning": { "effort": "xhigh", "summary": "auto" }
+          "reasoning": { "effort": "xhigh", "summary": "auto" },
+          "store": false,
+          "include": ["reasoning.encrypted_content"]
         }
       }
     },
@@ -591,7 +597,9 @@
         "format": "openai-responses",
         "config": {
           "model": "gpt-5.4",
-          "reasoning": { "effort": "medium", "summary": "auto" }
+          "reasoning": { "effort": "medium", "summary": "auto" },
+          "store": false,
+          "include": ["reasoning.encrypted_content"]
         }
       }
     },
@@ -607,7 +615,9 @@
         "format": "openai-responses",
         "config": {
           "model": "gpt-5.4",
-          "reasoning": { "effort": "high", "summary": "auto" }
+          "reasoning": { "effort": "high", "summary": "auto" },
+          "store": false,
+          "include": ["reasoning.encrypted_content"]
         }
       }
     },
@@ -623,7 +633,9 @@
         "format": "openai-responses",
         "config": {
           "model": "gpt-5.4",
-          "reasoning": { "effort": "xhigh", "summary": "auto" }
+          "reasoning": { "effort": "xhigh", "summary": "auto" },
+          "store": false,
+          "include": ["reasoning.encrypted_content"]
         }
       }
     },

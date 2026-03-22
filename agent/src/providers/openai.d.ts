@@ -5,6 +5,8 @@ export type OpenAIModelConfig = {
     effort: "minimal" | "low" | "medium" | "high" | "xhigh";
     summary: "auto" | "concise" | "detailed";
   };
+  store?: boolean;
+  include?: ["reasoning.encrypted_content"];
 };
 
 /**
