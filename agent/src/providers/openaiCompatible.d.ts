@@ -1,5 +1,5 @@
 /* Model */
-export type OpenAIModelConfig =
+export type OpenAICompatibleModelConfig =
   | {
       model: string;
       temperature?: number;

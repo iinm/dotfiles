@@ -123,5 +123,636 @@
         "action": "allow"
       }
     ]
-  }
+  },
+  "models": [
+    {
+      "name": "claude-haiku-4-5",
+      "variant": "thinking-16k",
+      "platform": {
+        "name": "anthropic",
+        "variant": "default",
+        "baseURL": "https://api.anthropic.com"
+      },
+      "model": {
+        "format": "anthropic",
+        "config": {
+          "model": "claude-haiku-4-5",
+          "max_tokens": 32768,
+          "thinking": { "type": "enabled", "budget_tokens": 16384 }
+        }
+      }
+    },
+    {
+      "name": "claude-haiku-4-5",
+      "variant": "thinking-32k",
+      "platform": {
+        "name": "anthropic",
+        "variant": "default",
+        "baseURL": "https://api.anthropic.com"
+      },
+      "model": {
+        "format": "anthropic",
+        "config": {
+          "model": "claude-haiku-4-5",
+          "max_tokens": 64000,
+          "thinking": { "type": "enabled", "budget_tokens": 32768 }
+        }
+      }
+    },
+    {
+      "name": "claude-sonnet-4-6",
+      "variant": "thinking-16k",
+      "platform": {
+        "name": "anthropic",
+        "variant": "default",
+        "baseURL": "https://api.anthropic.com"
+      },
+      "model": {
+        "format": "anthropic",
+        "config": {
+          "model": "claude-sonnet-4-6",
+          "max_tokens": 32768,
+          "thinking": { "type": "enabled", "budget_tokens": 16384 }
+        }
+      }
+    },
+    {
+      "name": "claude-sonnet-4-6",
+      "variant": "thinking-32k",
+      "platform": {
+        "name": "anthropic",
+        "variant": "default",
+        "baseURL": "https://api.anthropic.com"
+      },
+      "model": {
+        "format": "anthropic",
+        "config": {
+          "model": "claude-sonnet-4-6",
+          "max_tokens": 64000,
+          "thinking": { "type": "enabled", "budget_tokens": 32768 }
+        }
+      }
+    },
+    {
+      "name": "claude-opus-4-6",
+      "variant": "thinking-16k",
+      "platform": {
+        "name": "anthropic",
+        "variant": "default",
+        "baseURL": "https://api.anthropic.com"
+      },
+      "model": {
+        "format": "anthropic",
+        "config": {
+          "model": "claude-opus-4-6",
+          "max_tokens": 32768,
+          "thinking": { "type": "enabled", "budget_tokens": 16384 }
+        }
+      }
+    },
+    {
+      "name": "claude-opus-4-6",
+      "variant": "thinking-32k",
+      "platform": {
+        "name": "anthropic",
+        "variant": "default",
+        "baseURL": "https://api.anthropic.com"
+      },
+      "model": {
+        "format": "anthropic",
+        "config": {
+          "model": "claude-opus-4-6",
+          "max_tokens": 64000,
+          "thinking": { "type": "enabled", "budget_tokens": 32768 }
+        }
+      }
+    },
+
+    {
+      "name": "claude-haiku-4-5",
+      "variant": "thinking-16k-bedrock",
+      "platform": {
+        "name": "bedrock",
+        "variant": "default"
+      },
+      "model": {
+        "format": "anthropic",
+        "config": {
+          "model": "global.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "max_tokens": 32768,
+          "thinking": { "type": "enabled", "budget_tokens": 16384 }
+        }
+      }
+    },
+    {
+      "name": "claude-haiku-4-5",
+      "variant": "thinking-32k-bedrock",
+      "platform": {
+        "name": "bedrock",
+        "variant": "default"
+      },
+      "model": {
+        "format": "anthropic",
+        "config": {
+          "model": "global.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "max_tokens": 64000,
+          "thinking": { "type": "enabled", "budget_tokens": 32768 }
+        }
+      }
+    },
+    {
+      "name": "claude-sonnet-4-6",
+      "variant": "thinking-16k-bedrock",
+      "platform": {
+        "name": "bedrock",
+        "variant": "default"
+      },
+      "model": {
+        "format": "anthropic",
+        "config": {
+          "model": "global.anthropic.claude-sonnet-4-6",
+          "max_tokens": 32768,
+          "thinking": { "type": "enabled", "budget_tokens": 16384 }
+        }
+      }
+    },
+    {
+      "name": "claude-sonnet-4-6",
+      "variant": "thinking-32k-bedrock",
+      "platform": {
+        "name": "bedrock",
+        "variant": "default"
+      },
+      "model": {
+        "format": "anthropic",
+        "config": {
+          "model": "global.anthropic.claude-sonnet-4-6",
+          "max_tokens": 64000,
+          "thinking": { "type": "enabled", "budget_tokens": 32768 }
+        }
+      }
+    },
+    {
+      "name": "claude-opus-4-6",
+      "variant": "thinking-16k-bedrock",
+      "platform": {
+        "name": "bedrock",
+        "variant": "default"
+      },
+      "model": {
+        "format": "anthropic",
+        "config": {
+          "model": "global.anthropic.claude-opus-4-6-v1",
+          "max_tokens": 32768,
+          "thinking": { "type": "enabled", "budget_tokens": 16384 }
+        }
+      }
+    },
+    {
+      "name": "claude-opus-4-6",
+      "variant": "thinking-32k-bedrock",
+      "platform": {
+        "name": "bedrock",
+        "variant": "default"
+      },
+      "model": {
+        "format": "anthropic",
+        "config": {
+          "model": "global.anthropic.claude-opus-4-6-v1",
+          "max_tokens": 64000,
+          "thinking": { "type": "enabled", "budget_tokens": 32768 }
+        }
+      }
+    },
+
+    {
+      "name": "gemini-3-flash-preview",
+      "variant": "thinking-medium",
+      "platform": {
+        "name": "gemini",
+        "variant": "default",
+        "baseURL": "https://generativelanguage.googleapis.com/v1beta"
+      },
+      "model": {
+        "format": "gemini",
+        "config": {
+          "model": "gemini-3-flash-preview",
+          "config": {
+            "requestConfig": {
+              "generationConfig": {
+                "maxOutputTokens": 32768,
+                "thinkingConfig": {
+                  "includeThoughts": true,
+                  "thinkingLevel": "medium"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "gemini-3-flash-preview",
+      "variant": "thinking-high",
+      "platform": {
+        "name": "gemini",
+        "variant": "default",
+        "baseURL": "https://generativelanguage.googleapis.com/v1beta"
+      },
+      "model": {
+        "format": "gemini",
+        "config": {
+          "model": "gemini-3-flash-preview",
+          "config": {
+            "requestConfig": {
+              "generationConfig": {
+                "maxOutputTokens": 65536,
+                "thinkingConfig": {
+                  "includeThoughts": true,
+                  "thinkingLevel": "high"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "gemini-3.1-pro-preview",
+      "variant": "thinking-medium",
+      "platform": {
+        "name": "gemini",
+        "variant": "default",
+        "baseURL": "https://generativelanguage.googleapis.com/v1beta"
+      },
+      "model": {
+        "format": "gemini",
+        "config": {
+          "model": "gemini-3.1-pro-preview",
+          "config": {
+            "requestConfig": {
+              "generationConfig": {
+                "maxOutputTokens": 32768,
+                "thinkingConfig": {
+                  "includeThoughts": true,
+                  "thinkingLevel": "medium"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "gemini-3.1-pro-preview",
+      "variant": "thinking-high",
+      "platform": {
+        "name": "gemini",
+        "variant": "default",
+        "baseURL": "https://generativelanguage.googleapis.com/v1beta"
+      },
+      "model": {
+        "format": "gemini",
+        "config": {
+          "model": "gemini-3.1-pro-preview",
+          "config": {
+            "requestConfig": {
+              "generationConfig": {
+                "maxOutputTokens": 65536,
+                "thinkingConfig": {
+                  "includeThoughts": true,
+                  "thinkingLevel": "high"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    {
+      "name": "gemini-3-flash-preview",
+      "variant": "thinking-medium",
+      "platform": {
+        "name": "vertex-ai",
+        "variant": "default"
+      },
+      "model": {
+        "format": "gemini",
+        "config": {
+          "model": "gemini-3-flash-preview",
+          "config": {
+            "requestConfig": {
+              "generationConfig": {
+                "maxOutputTokens": 32768,
+                "thinkingConfig": {
+                  "includeThoughts": true,
+                  "thinkingLevel": "medium"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "gemini-3-flash-preview",
+      "variant": "thinking-high",
+      "platform": {
+        "name": "vertex-ai",
+        "variant": "default"
+      },
+      "model": {
+        "format": "gemini",
+        "config": {
+          "model": "gemini-3-flash-preview",
+          "config": {
+            "requestConfig": {
+              "generationConfig": {
+                "maxOutputTokens": 65536,
+                "thinkingConfig": {
+                  "includeThoughts": true,
+                  "thinkingLevel": "high"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "gemini-3.1-pro-preview",
+      "variant": "thinking-medium",
+      "platform": {
+        "name": "vertex-ai",
+        "variant": "default"
+      },
+      "model": {
+        "format": "gemini",
+        "config": {
+          "model": "gemini-3.1-pro-preview",
+          "config": {
+            "requestConfig": {
+              "generationConfig": {
+                "maxOutputTokens": 32768,
+                "thinkingConfig": {
+                  "includeThoughts": true,
+                  "thinkingLevel": "medium"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "gemini-3.1-pro-preview",
+      "variant": "thinking-high",
+      "platform": {
+        "name": "vertex-ai",
+        "variant": "default"
+      },
+      "model": {
+        "format": "gemini",
+        "config": {
+          "model": "gemini-3.1-pro-preview",
+          "config": {
+            "requestConfig": {
+              "generationConfig": {
+                "maxOutputTokens": 65536,
+                "thinkingConfig": {
+                  "includeThoughts": true,
+                  "thinkingLevel": "high"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    {
+      "name": "gpt-5.4-mini",
+      "variant": "thinking-medium",
+      "platform": {
+        "name": "openai",
+        "variant": "default",
+        "baseURL": "https://api.openai.com"
+      },
+      "model": {
+        "format": "openai-responses",
+        "config": {
+          "model": "gpt-5.4-mini",
+          "reasoning": { "effort": "medium", "summary": "auto" }
+        }
+      }
+    },
+    {
+      "name": "gpt-5.4-mini",
+      "variant": "thinking-high",
+      "platform": {
+        "name": "openai",
+        "variant": "default",
+        "baseURL": "https://api.openai.com"
+      },
+      "model": {
+        "format": "openai-responses",
+        "config": {
+          "model": "gpt-5.4-mini",
+          "reasoning": { "effort": "high", "summary": "auto" }
+        }
+      }
+    },
+    {
+      "name": "gpt-5.4-mini",
+      "variant": "thinking-xhigh",
+      "platform": {
+        "name": "openai",
+        "variant": "default",
+        "baseURL": "https://api.openai.com"
+      },
+      "model": {
+        "format": "openai-responses",
+        "config": {
+          "model": "gpt-5.4-mini",
+          "reasoning": { "effort": "xhigh", "summary": "auto" }
+        }
+      }
+    },
+    {
+      "name": "gpt-5.4",
+      "variant": "thinking-medium",
+      "platform": {
+        "name": "openai",
+        "variant": "default",
+        "baseURL": "https://api.openai.com"
+      },
+      "model": {
+        "format": "openai-responses",
+        "config": {
+          "model": "gpt-5.4",
+          "reasoning": { "effort": "medium", "summary": "auto" }
+        }
+      }
+    },
+    {
+      "name": "gpt-5.4",
+      "variant": "thinking-high",
+      "platform": {
+        "name": "openai",
+        "variant": "default",
+        "baseURL": "https://api.openai.com"
+      },
+      "model": {
+        "format": "openai-responses",
+        "config": {
+          "model": "gpt-5.4",
+          "reasoning": { "effort": "high", "summary": "auto" }
+        }
+      }
+    },
+    {
+      "name": "gpt-5.4",
+      "variant": "thinking-xhigh",
+      "platform": {
+        "name": "openai",
+        "variant": "default",
+        "baseURL": "https://api.openai.com"
+      },
+      "model": {
+        "format": "openai-responses",
+        "config": {
+          "model": "gpt-5.4",
+          "reasoning": { "effort": "xhigh", "summary": "auto" }
+        }
+      }
+    },
+
+    {
+      "name": "gpt-5.2-chat",
+      "variant": "thinking-medium-azure",
+      "platform": {
+        "name": "azure",
+        "variant": "default"
+      },
+      "model": {
+        "format": "openai-responses",
+        "config": {
+          "model": "gpt-5.2-latest",
+          "reasoning": { "effort": "medium", "summary": "auto" }
+        }
+      }
+    },
+
+    {
+      "name": "grok-4-1-fast-reasoning",
+      "variant": "default",
+      "platform": {
+        "name": "openai",
+        "variant": "xai",
+        "baseURL": "https://api.x.ai"
+      },
+      "model": {
+        "format": "openai-messages",
+        "config": {
+          "model": "grok-4-1-fast-reasoning"
+        }
+      }
+    },
+    {
+      "name": "grok-4.20-0309-reasoning",
+      "variant": "default",
+      "platform": {
+        "name": "openai",
+        "variant": "xai",
+        "baseURL": "https://api.x.ai"
+      },
+      "model": {
+        "format": "openai-messages",
+        "config": {
+          "model": "grok-4.20-0309-reasoning"
+        }
+      }
+    },
+
+    {
+      "name": "glm-5",
+      "variant": "vertex-ai",
+      "platform": {
+        "name": "vertex-ai",
+        "variant": "default"
+      },
+      "model": {
+        "format": "openai-messages",
+        "config": {
+          "model": "zai-org/glm-5-maas",
+          "thinking": { "type": "enabled" }
+        }
+      }
+    },
+
+    {
+      "name": "kimi-k2.5",
+      "variant": "bedrock",
+      "platform": {
+        "name": "bedrock",
+        "variant": "default"
+      },
+      "model": {
+        "format": "openai-messages",
+        "config": {
+          "model": "moonshotai.kimi-k2.5",
+          "thinking": { "type": "enabled" }
+        }
+      }
+    },
+
+    {
+      "name": "deepseek-v3.2",
+      "variant": "bedrock",
+      "platform": {
+        "name": "bedrock",
+        "variant": "default"
+      },
+      "model": {
+        "format": "openai-messages",
+        "config": {
+          "model": "deepseek.v3.2",
+          "thinking": { "type": "enabled" }
+        }
+      }
+    },
+
+    {
+      "name": "minimax-m2.1",
+      "variant": "bedrock",
+      "platform": {
+        "name": "bedrock",
+        "variant": "default"
+      },
+      "model": {
+        "format": "openai-messages",
+        "config": {
+          "model": "minimax.minimax-m2.1",
+          "thinking": { "type": "enabled" }
+        }
+      }
+    },
+
+    {
+      "name": "qwen3-next",
+      "variant": "vertex-ai",
+      "platform": {
+        "name": "vertex-ai",
+        "variant": "default"
+      },
+      "model": {
+        "format": "openai-messages",
+        "config": {
+          "model": "qwen/qwen3-next-80b-a3b-thinking-maas",
+          "thinking": { "type": "enabled" }
+        }
+      }
+    }
+  ]
 }

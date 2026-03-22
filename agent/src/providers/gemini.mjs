@@ -2,7 +2,6 @@
  * @import { ModelInput, Message, AssistantMessage, ModelOutput, PartialMessageContent, ProviderTokenUsage } from "../model";
  * @import { GeminiCachedContents, GeminiContent, GeminiContentPartFunctionCall, GeminiContentPartText, GeminiCreateCachedContentInput as GeminiCreateCachedContentInput, GeminiFunctionContent, GeminiGenerateContentInput, GeminiGeneratedContent, GeminiModelConfig, GeminiModelContent, GeminiSystemContent, GeminiToolConfig, GeminiToolDefinition, GeminiUserContent } from "./gemini";
  * @import { ToolDefinition } from "../tool";
- * @import { GenericModelProviderConfig } from "../config"
  */
 
 import { styleText } from "node:util";
@@ -21,16 +20,16 @@ import { getGoogleCloudAccessToken } from "./googleCloud.mjs";
  * References:
  * - https://ai.google.dev/gemini-api/docs/caching
  * - https://ai.google.dev/api/caching
- * @param {GenericModelProviderConfig} providerConfig
+ * @param {import("../modelDefinition").PlatformConfig} platformConfig
  * @param {Pick<GeminiModelConfig, "model">} modelConfig
  * @returns {GeminiModelCaller}
  */
 export function createCacheEnabledGeminiModelCaller(
-  providerConfig,
+  platformConfig,
   modelConfig,
 ) {
   const baseURL =
-    providerConfig.baseURL ||
+    platformConfig.baseURL ||
     "https://generativelanguage.googleapis.com/v1beta";
 
   const props = {
@@ -73,22 +72,32 @@ export function createCacheEnabledGeminiModelCaller(
         state.cache = undefined;
       }
 
-      const url =
-        providerConfig.platform === "vertex-ai"
-          ? `${baseURL}/publishers/google/models/${config.model}:streamGenerateContent?alt=sse`
-          : `${baseURL}/models/${config.model}:streamGenerateContent?alt=sse`;
+      const url = (() => {
+        switch (platformConfig.name) {
+          case "gemini":
+            return `${baseURL}/models/${config.model}:streamGenerateContent?alt=sse`;
+          case "vertex-ai":
+            return `${baseURL}/publishers/google/models/${config.model}:streamGenerateContent?alt=sse`;
+          default:
+            throw new Error(`Unsupported platform: ${platformConfig.name}`);
+        }
+      })();
 
       /** @type {Record<string,string>} */
-      const headers =
-        providerConfig.platform === "vertex-ai"
-          ? {
-              ...providerConfig.customHeaders,
-              Authorization: `Bearer ${await getGoogleCloudAccessToken(providerConfig.vertexAI?.account)}`,
-            }
-          : {
-              ...providerConfig.customHeaders,
-              "x-goog-api-key": providerConfig.apiKey ?? "",
+      const headers = await (async () => {
+        switch (platformConfig.name) {
+          case "gemini":
+            return {
+              ...platformConfig.customHeaders,
+              "x-goog-api-key": platformConfig.apiKey,
             };
+          case "vertex-ai":
+            return {
+              ...platformConfig.customHeaders,
+              Authorization: `Bearer ${await getGoogleCloudAccessToken(platformConfig.account)}`,
+            };
+        }
+      })();
 
       /** @type {Pick<GeminiGenerateContentInput, "generationConfig" | "safetySettings">} */
       const baseRequest = {
@@ -265,7 +274,7 @@ export function createCacheEnabledGeminiModelCaller(
     headers,
   }) {
     const modelPrefix =
-      providerConfig.platform === "vertex-ai"
+      platformConfig.name === "vertex-ai"
         ? `${baseURL.match(/projects\/[^/]+\/locations\/[^/]+/)?.[0] || ""}/publishers/google/models`
         : "models";
 

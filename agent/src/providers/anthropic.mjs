@@ -2,7 +2,6 @@
  * @import { ModelInput, Message, AssistantMessage, ModelOutput, PartialMessageContent } from "../model";
  * @import { AnthropicChatCompletion, AnthropicMessage, AnthropicToolDefinition, AnthropicModelConfig, AnthropicAssistantMessage, AnthropicStreamEvent, AnthropicAssistantMessageContent, AnthropicChatCompletionUsage, AnthropicRequestInput } from "./anthropic";
  * @import { ToolDefinition } from "../tool";
- * @import { GenericModelProviderConfig } from "../config"
  */
 
 import { styleText } from "node:util";
@@ -15,20 +14,18 @@ import { readBedrockStreamEvents } from "./bedrock.mjs";
 import { getGoogleCloudAccessToken } from "./googleCloud.mjs";
 
 /**
- * @param {GenericModelProviderConfig} providerConfig
+ * @param {import("../modelDefinition").PlatformConfig} platformConfig
  * @param {AnthropicModelConfig} modelConfig
  * @param {ModelInput} input
  * @param {number} [retryCount]
  * @returns {Promise<ModelOutput | Error>}
  */
 export async function callAnthropicModel(
-  providerConfig,
+  platformConfig,
   modelConfig,
   input,
   retryCount = 0,
 ) {
-  const baseURL = providerConfig.baseURL || "https://api.anthropic.com";
-
   return await noThrow(async () => {
     const messages = convertGenericMessageToAnthropicFormat(input.messages);
     const cacheEnabledMessages = enableContextCaching(messages);
@@ -36,52 +33,61 @@ export async function callAnthropicModel(
       input.tools || [],
     );
 
-    const url =
-      providerConfig.platform === "bedrock"
-        ? `${baseURL}/model/${providerConfig.modelMap?.[modelConfig.model] ?? modelConfig.model}/invoke-with-response-stream`
-        : providerConfig.platform === "vertex-ai"
-          ? `${baseURL}/publishers/anthropic/models/${providerConfig.modelMap?.[modelConfig.model]}:streamRawPredict`
-          : `${baseURL}/v1/messages`;
+    const url = (() => {
+      const baseURL = platformConfig.baseURL;
+
+      switch (platformConfig.name) {
+        case "anthropic":
+          return `${baseURL}/v1/messages`;
+        case "bedrock":
+          return `${baseURL}/model/${modelConfig.model}/invoke-with-response-stream`;
+        case "vertex-ai":
+          return `${baseURL}/publishers/anthropic/models/${modelConfig.model}:streamRawPredict`;
+        default:
+          throw new Error(`Unsupported platform: ${platformConfig.name}`);
+      }
+    })();
 
     /** @type {Record<string,string>} */
-    const headers =
-      providerConfig.platform === "bedrock"
-        ? {
-            ...providerConfig.customHeaders,
-            ...(providerConfig.apiKey
-              ? {
-                  Authorization: `Bearer ${providerConfig.apiKey}`,
-                }
-              : {}),
-          }
-        : providerConfig.platform === "vertex-ai"
-          ? {
-              ...providerConfig.customHeaders,
-              Authorization: `Bearer ${await getGoogleCloudAccessToken()}`,
-            }
-          : {
-              ...providerConfig.customHeaders,
-              "anthropic-version": "2023-06-01",
-              "x-api-key": `${providerConfig.apiKey}`,
-            };
+    const headers = await (async () => {
+      switch (platformConfig.name) {
+        case "anthropic":
+          return {
+            ...platformConfig.customHeaders,
+            "anthropic-version": "2023-06-01",
+            "x-api-key": `${platformConfig.apiKey}`,
+          };
+        case "bedrock":
+          return platformConfig.customHeaders ?? {};
+        case "vertex-ai":
+          return {
+            ...platformConfig.customHeaders,
+            Authorization: `Bearer ${await getGoogleCloudAccessToken()}`,
+          };
+      }
+    })();
 
     const { model: _, ...modelConfigWithoutName } = modelConfig;
-    const platformRequest =
-      providerConfig.platform === "bedrock"
-        ? {
+    const platformRequest = (() => {
+      switch (platformConfig.name) {
+        case "anthropic":
+          return {
+            ...modelConfig,
+            stream: true,
+          };
+        case "bedrock":
+          return {
             anthropic_version: "bedrock-2023-05-31",
             ...modelConfigWithoutName,
-          }
-        : providerConfig.platform === "vertex-ai"
-          ? {
-              anthropic_version: "vertex-2023-10-16",
-              stream: true,
-              ...modelConfigWithoutName,
-            }
-          : {
-              ...modelConfig,
-              stream: true,
-            };
+          };
+        case "vertex-ai":
+          return {
+            anthropic_version: "vertex-2023-10-16",
+            stream: true,
+            ...modelConfigWithoutName,
+          };
+      }
+    })();
 
     /** @type {AnthropicRequestInput} */
     const request = {
@@ -107,13 +113,14 @@ export async function callAnthropicModel(
     // bedrock + sso profile
     const runFetchForBedrock = async () => {
       const region =
-        baseURL.match(/bedrock-runtime\.([\w-]+)\.amazonaws\.com/)?.[1] ?? "";
+        url.match(/bedrock-runtime\.([\w-]+)\.amazonaws\.com/)?.[1] ?? "";
       const urlParsed = new URL(url);
       const { hostname, pathname } = urlParsed;
 
       const signer = new SignatureV4({
         credentials: fromIni({
-          profile: providerConfig.bedrock?.awsProfile ?? "",
+          profile:
+            platformConfig.name === "bedrock" ? platformConfig.awsProfile : "",
         }),
         region,
         service: "bedrock",
@@ -143,10 +150,7 @@ export async function callAnthropicModel(
     };
 
     const runFetch =
-      providerConfig.platform === "bedrock" &&
-      providerConfig.bedrock?.awsProfile
-        ? runFetchForBedrock
-        : runFetchDefault;
+      platformConfig.name === "bedrock" ? runFetchForBedrock : runFetchDefault;
 
     const response = await runFetch();
 
@@ -160,7 +164,7 @@ export async function callAnthropicModel(
       );
       await new Promise((resolve) => setTimeout(resolve, interval * 1000));
       return callAnthropicModel(
-        providerConfig,
+        platformConfig,
         modelConfig,
         input,
         retryCount + 1,
@@ -179,7 +183,7 @@ export async function callAnthropicModel(
 
     const reader = response.body.getReader();
     const eventStreamReader =
-      providerConfig.platform === "bedrock"
+      platformConfig.name === "bedrock"
         ? /** @type {typeof readAnthropicStreamEvents} */ (
             readBedrockStreamEvents
           )
