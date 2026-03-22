@@ -323,10 +323,20 @@ function convertOpenAIAssistantMessageToGenericFormat(openAIOutputItems) {
  */
 function convertOpenAIStreamDataToAgentPartialContent(streamEvent) {
   // thinking
+  if (streamEvent.type === "response.output_item.added") {
+    if (streamEvent.item.type === "reasoning") {
+      return {
+        type: "thinking",
+        position: "start",
+      };
+    }
+  }
+
   if (streamEvent.type === "response.reasoning_summary_part.added") {
     return {
       type: "thinking",
-      position: "start",
+      position: "delta",
+      content: streamEvent.part.text,
     };
   }
 
@@ -341,8 +351,18 @@ function convertOpenAIStreamDataToAgentPartialContent(streamEvent) {
   if (streamEvent.type === "response.reasoning_summary_text.done") {
     return {
       type: "thinking",
-      position: "stop",
+      position: "delta",
+      content: streamEvent.text,
     };
+  }
+
+  if (streamEvent.type === "response.output_item.done") {
+    if (streamEvent.item.type === "reasoning") {
+      return {
+        type: "thinking",
+        position: "stop",
+      };
+    }
   }
 
   // text
@@ -386,15 +406,8 @@ function convertOpenAIStreamDataToAgentPartialContent(streamEvent) {
     }
   }
 
+  // tool use
   if (streamEvent.type === "response.output_item.added") {
-    if (streamEvent.item.type === "reasoning") {
-      // ollama only
-      return {
-        type: "thinking",
-        position: "start",
-      };
-    }
-
     if (streamEvent.item.type === "function_call") {
       return {
         type: "tool_use",
