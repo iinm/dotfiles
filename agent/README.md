@@ -36,6 +36,7 @@ npm install
   "platforms": [
     {
       "name": "anthropic",
+      "variant": "default",
       "apiKey": "FIXME"
     },
     {
