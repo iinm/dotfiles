@@ -736,6 +736,21 @@
 
     {
       "name": "deepseek-v3.2",
+      "variant": "vertex-ai",
+      "platform": {
+        "name": "vertex-ai",
+        "variant": "default"
+      },
+      "model": {
+        "format": "openai-messages",
+        "config": {
+          "model": "deepseek-ai/deepseek-v3.2-maas",
+          "chat_template_kwargs": { "thinking": true }
+        }
+      }
+    },
+    {
+      "name": "deepseek-v3.2",
       "variant": "bedrock",
       "platform": {
         "name": "bedrock",
