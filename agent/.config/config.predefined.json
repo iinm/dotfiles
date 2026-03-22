@@ -685,8 +685,7 @@
       "model": {
         "format": "openai-messages",
         "config": {
-          "model": "zai-org/glm-5-maas",
-          "thinking": { "type": "enabled" }
+          "model": "zai-org/glm-5-maas"
         }
       }
     },
@@ -700,8 +699,7 @@
       "model": {
         "format": "openai-responses",
         "config": {
-          "model": "glm-5:cloud",
-          "reasoning": { "effort": "high", "summary": "detailed" }
+          "model": "glm-5:cloud"
         }
       }
     },
@@ -731,7 +729,7 @@
         "format": "openai-messages",
         "config": {
           "model": "moonshotai.kimi-k2.5",
-          "thinking": { "type": "enabled" }
+          "reasoning_effort": "high"
         }
       }
     },
@@ -747,7 +745,7 @@
         "format": "openai-messages",
         "config": {
           "model": "deepseek.v3.2",
-          "thinking": { "type": "enabled" }
+          "reasoning_effort": "high"
         }
       }
     },
@@ -763,7 +761,7 @@
         "format": "openai-messages",
         "config": {
           "model": "minimax.minimax-m2.1",
-          "thinking": { "type": "enabled" }
+          "reasoning_effort": "high"
         }
       }
     },
@@ -777,8 +775,7 @@
       "model": {
         "format": "openai-responses",
         "config": {
-          "model": "minimax-m2.7:cloud",
-          "reasoning": { "effort": "high", "summary": "detailed" }
+          "model": "minimax-m2.7:cloud"
         }
       }
     },
@@ -793,8 +790,7 @@
       "model": {
         "format": "openai-messages",
         "config": {
-          "model": "qwen/qwen3-next-80b-a3b-thinking-maas",
-          "thinking": { "type": "enabled" }
+          "model": "qwen/qwen3-next-80b-a3b-thinking-maas"
         }
       }
     }
