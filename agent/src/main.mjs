@@ -4,11 +4,11 @@
 
 import { styleText } from "node:util";
 import { createAgent } from "./agent.mjs";
-import { startInteractiveSession } from "./cli.mjs";
+import { parseCliArgs, printHelp } from "./cliArgs.mjs";
+import { startInteractiveSession } from "./cliInteractive.mjs";
 import { loadAppConfig } from "./config.mjs";
 import { loadAgentRoles } from "./context/loadAgentRoles.mjs";
 import {
-  AGENT_MODEL,
   AGENT_NOTIFY_CMD_DEFAULT,
   AGENT_PROJECT_METADATA_DIR,
   USER_NAME,
@@ -27,6 +27,11 @@ import { createTavilySearchTool } from "./tools/tavilySearch.mjs";
 import { createTmuxCommandTool } from "./tools/tmuxCommand.mjs";
 import { writeFileTool } from "./tools/writeFile.mjs";
 import { createToolUseApprover } from "./toolUseApprover.mjs";
+
+const cliArgs = parseCliArgs(process.argv);
+if (cliArgs.showHelp) {
+  printHelp();
+}
 
 (async () => {
   const startTime = new Date();
@@ -88,7 +93,7 @@ import { createToolUseApprover } from "./toolUseApprover.mjs";
     }
   }
 
-  const modelNameWithVariant = AGENT_MODEL || appConfig.model || "";
+  const modelNameWithVariant = cliArgs.model || appConfig.model || "";
   const agentRoles = await loadAgentRoles();
 
   const prompt = createPrompt({

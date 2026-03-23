@@ -18,8 +18,6 @@ export const MESSAGES_DUMP_FILE_PATH = path.join(
   "messages.json",
 );
 
-export const AGENT_MODEL = process.env.AGENT_MODEL || "";
-
 export const AGENT_NOTIFY_CMD_DEFAULT = path.join(
   AGENT_ROOT,
   "bin",

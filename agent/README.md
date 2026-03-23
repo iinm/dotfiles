@@ -118,7 +118,7 @@ Run the agent.
 ./bin/agent
 
 # Or specify a specific model
-AGENT_MODEL=<model>:<variant> ./bin/agent
+./bin/agent -m <model>+<variant>
 ```
 
 Display the help message.
