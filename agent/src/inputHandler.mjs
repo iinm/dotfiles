@@ -1,15 +1,14 @@
 /**
- * @import { Message, MessageContentText, MessageContentToolUse, MessageContentToolResult, UserMessage } from "./model"
- * @import { AgentEventEmitter } from "./agent"
+ * @import { MessageContentText, MessageContentToolUse, MessageContentToolResult, UserMessage } from "./model"
+ * @import { StateManager } from "./stateManager.mjs"
  */
 
 /**
  * @typedef {Object} InputHandlerContext
- * @property {{ messages: Message[] }} state
+ * @property {StateManager} stateManager
  * @property {import("./toolExecutor.mjs").ToolExecutor} toolExecutor
  * @property {import("./subagentManager.mjs").SubagentManager} subagentManager
  * @property {import("./tool.d.ts").ToolUseApprover} toolUseApprover
- * @property {AgentEventEmitter} agentEventEmitter
  */
 
 /**
@@ -22,13 +21,8 @@
  * @param {InputHandlerContext} context
  */
 export function createInputHandler(context) {
-  const {
-    state,
-    toolExecutor,
-    subagentManager,
-    toolUseApprover,
-    agentEventEmitter,
-  } = context;
+  const { stateManager, toolExecutor, subagentManager, toolUseApprover } =
+    context;
 
   /**
    * Determine input type based on current state and input.
@@ -36,7 +30,7 @@ export function createInputHandler(context) {
    * @returns {'toolApproval' | 'resume' | 'text'}
    */
   function determineInputType(input) {
-    const lastMessage = state.messages.at(-1);
+    const lastMessage = stateManager.getMessageAt(-1);
 
     // Check if there's a pending tool call
     if (lastMessage?.content.some((part) => part.type === "tool_use")) {
@@ -59,7 +53,7 @@ export function createInputHandler(context) {
    * @param {UserMessage["content"]} input
    */
   async function handleToolApproval(input) {
-    const lastMessage = state.messages.at(-1);
+    const lastMessage = stateManager.getMessageAt(-1);
     if (!lastMessage) return;
 
     /** @type {MessageContentToolUse[]} */
@@ -83,14 +77,9 @@ export function createInputHandler(context) {
 
       const executionResult = await toolExecutor.executeBatch(toolUseParts);
       if (!executionResult.success) {
-        state.messages = [
-          ...state.messages,
+        stateManager.appendMessages([
           { role: "user", content: executionResult.errors },
-        ];
-        agentEventEmitter.emit(
-          "message",
-          state.messages[state.messages.length - 1],
-        );
+        ]);
         return;
       }
 
@@ -98,23 +87,15 @@ export function createInputHandler(context) {
       const result = subagentManager.processToolResults(
         toolUseParts,
         toolResults,
-        state.messages,
+        stateManager.getMessages(),
       );
-      state.messages = result.messages;
+      stateManager.setMessages(result.messages);
 
       if (result.newMessage) {
-        state.messages = [...state.messages, result.newMessage];
+        stateManager.appendMessages([result.newMessage]);
       } else {
-        state.messages = [
-          ...state.messages,
-          { role: "user", content: toolResults },
-        ];
+        stateManager.appendMessages([{ role: "user", content: toolResults }]);
       }
-
-      agentEventEmitter.emit(
-        "message",
-        state.messages[state.messages.length - 1],
-      );
     } else {
       // Rejected
       /** @type {MessageContentToolResult[]} */
@@ -126,14 +107,13 @@ export function createInputHandler(context) {
         isError: true,
       }));
 
-      state.messages = [
-        ...state.messages,
+      stateManager.appendMessages([
         { role: "user", content: toolResults },
         {
           role: "user",
           content: input,
         },
-      ];
+      ]);
     }
   }
 
@@ -146,13 +126,12 @@ export function createInputHandler(context) {
    * @param {UserMessage["content"]} input
    */
   async function handleText(input) {
-    state.messages = [
-      ...state.messages,
+    stateManager.appendMessages([
       {
         role: "user",
         content: input,
       },
-    ];
+    ]);
   }
 
   return {

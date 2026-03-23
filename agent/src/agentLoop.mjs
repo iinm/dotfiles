@@ -1,8 +1,9 @@
 /**
  * @import { AgentEventEmitter } from "./agent"
- * @import { CallModel, Message, MessageContentText, MessageContentImage, MessageContentToolResult, MessageContentToolUse, PartialMessageContent } from "./model"
+ * @import { CallModel, MessageContentText, MessageContentImage, MessageContentToolResult, PartialMessageContent } from "./model"
  * @import { ToolDefinition, ToolUseApprover } from "./tool"
  * @import { SubagentManager } from "./subagentManager.mjs"
+ * @import { StateManager } from "./stateManager.mjs"
  */
 
 import { styleText } from "node:util";
@@ -12,7 +13,7 @@ import { createInputHandler } from "./inputHandler.mjs";
 /**
  * @typedef {Object} AgentLoopConfig
  * @property {CallModel} callModel - Function to call the language model
- * @property {{ messages: Message[] }} state - Agent state containing messages
+ * @property {StateManager} stateManager - State manager for message handling
  * @property {ToolDefinition[]} toolDefs - Tool definitions for the model
  * @property {import("./toolExecutor.mjs").ToolExecutor} toolExecutor - Tool executor instance
  * @property {AgentEventEmitter} agentEventEmitter - Event emitter for agent events
@@ -30,7 +31,7 @@ import { createInputHandler } from "./inputHandler.mjs";
  */
 export function createAgentLoop({
   callModel,
-  state,
+  stateManager,
   toolDefs,
   toolExecutor,
   agentEventEmitter,
@@ -38,11 +39,10 @@ export function createAgentLoop({
   subagentManager,
 }) {
   const inputHandler = createInputHandler({
-    state,
+    stateManager,
     toolExecutor,
     subagentManager,
     toolUseApprover,
-    agentEventEmitter,
   });
 
   /**
@@ -67,7 +67,7 @@ export function createAgentLoop({
 
     while (true) {
       const modelOutput = await callModel({
-        messages: state.messages,
+        messages: stateManager.getMessages(),
         tools: toolDefs,
         /**
          * @param {PartialMessageContent} partialContent
@@ -83,8 +83,7 @@ export function createAgentLoop({
       }
 
       const { message: assistantMessage, providerTokenUsage } = modelOutput;
-      state.messages = [...state.messages, assistantMessage];
-      agentEventEmitter.emit("message", assistantMessage);
+      stateManager.appendMessages([assistantMessage]);
       agentEventEmitter.emit("providerTokenUsage", providerTokenUsage);
 
       // Gemini may stop with "thinking" -> continue
@@ -95,13 +94,12 @@ export function createAgentLoop({
           break;
         }
 
-        state.messages = [
-          ...state.messages,
+        stateManager.appendMessages([
           {
             role: "user",
             content: [{ type: "text", text: "System: Continue" }],
           },
-        ];
+        ]);
         console.error(
           styleText(
             "yellow",
@@ -111,8 +109,8 @@ export function createAgentLoop({
         continue;
       }
 
-      const toolUseParts = /** @type {MessageContentToolUse[]} */ (
-        assistantMessage.content.filter((part) => part.type === "tool_use")
+      const toolUseParts = assistantMessage.content.filter(
+        (part) => part.type === "tool_use",
       );
 
       // No tool use -> turn end
@@ -122,26 +120,19 @@ export function createAgentLoop({
 
       const validation = toolExecutor.validateBatch(toolUseParts);
       if (!validation.isValid) {
-        state.messages = [
-          ...state.messages,
+        stateManager.appendMessages([
           {
             role: "user",
-            content: /** @type {MessageContentToolResult[]} */ (
-              validation.toolResults
-            ),
+            content: validation.toolResults,
           },
-        ];
+        ]);
         if (validation.errorMessage) {
           console.error(styleText("yellow", validation.errorMessage));
         }
-        agentEventEmitter.emit(
-          "message",
-          state.messages[state.messages.length - 1],
-        );
         continue;
       }
 
-      // Step 2: Approve tool use
+      // Approve tool use
       const decisions = toolUseParts.map(toolUseApprover.isAllowedToolUse);
 
       const hasDeniedToolUse = decisions.some((d) => d.action === "deny");
@@ -162,14 +153,7 @@ export function createAgentLoop({
             isError: true,
           };
         });
-        state.messages = [
-          ...state.messages,
-          { role: "user", content: toolResults },
-        ];
-        agentEventEmitter.emit(
-          "message",
-          state.messages[state.messages.length - 1],
-        );
+        stateManager.appendMessages([{ role: "user", content: toolResults }]);
         continue;
       }
 
@@ -182,8 +166,7 @@ export function createAgentLoop({
       const executionResult = await toolExecutor.executeBatch(toolUseParts);
 
       if (!executionResult.success) {
-        state.messages = [
-          ...state.messages,
+        stateManager.appendMessages([
           {
             role: "user",
             content: executionResult.errors,
@@ -197,7 +180,7 @@ export function createAgentLoop({
               },
             ],
           },
-        ];
+        ]);
         console.error(styleText("yellow", executionResult.errorMessage));
         continue;
       }
@@ -207,36 +190,23 @@ export function createAgentLoop({
       const result = subagentManager.processToolResults(
         toolUseParts,
         toolResults,
-        state.messages,
+        stateManager.getMessages(),
       );
-      state.messages = result.messages;
+      stateManager.setMessages(result.messages);
       if (result.newMessage) {
-        state.messages = [...state.messages, result.newMessage];
+        stateManager.appendMessages([result.newMessage]);
       } else {
-        state.messages = [
-          ...state.messages,
-          { role: "user", content: toolResults },
-        ];
+        stateManager.appendMessages([{ role: "user", content: toolResults }]);
       }
-
-      agentEventEmitter.emit(
-        "message",
-        state.messages[state.messages.length - 1],
-      );
 
       const interruptMessage = await consumeInterruptMessage();
       if (interruptMessage) {
-        state.messages = [
-          ...state.messages,
+        stateManager.appendMessages([
           {
             role: "user",
             content: [{ type: "text", text: interruptMessage }],
           },
-        ];
-        agentEventEmitter.emit(
-          "message",
-          state.messages[state.messages.length - 1],
-        );
+        ]);
       }
     }
   }

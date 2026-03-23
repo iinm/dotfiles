@@ -1,5 +1,4 @@
 /**
- * @import { AgentEventEmitter } from "./agent"
  * @import { Message, MessageContentToolResult, MessageContentToolUse } from "./model"
  * @import { ReportAsSubagentInput } from "./tools/reportAsSubagent"
  * @import { AgentRole } from "./context/loadAgentRoles.mjs"
@@ -13,11 +12,16 @@ import { reportAsSubagentTool } from "./tools/reportAsSubagent.mjs";
 /** @typedef {ReturnType<typeof createSubagentManager>} SubagentManager */
 
 /**
- * Creates a manager for subagent lifecycle and state.
- * @param {AgentEventEmitter} agentEventEmitter
- * @param {Map<string, AgentRole>} agentRoles
+ * @typedef {Object} SubagentStateEventHandlers
+ * @property {(subagent: {name:string} | null) => void} onSubagentSwitched
  */
-export function createSubagentManager(agentEventEmitter, agentRoles) {
+
+/**
+ * Creates a manager for subagent lifecycle and state.
+ * @param {Map<string, AgentRole>} agentRoles
+ * @param {SubagentStateEventHandlers} handlers
+ */
+export function createSubagentManager(agentRoles, handlers) {
   /** @type {{name: string; goal: string; delegationMessageIndex: number}[]} */
   const subagents = [];
 
@@ -77,8 +81,7 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
       goal,
       delegationMessageIndex,
     });
-
-    agentEventEmitter.emit("subagentStatus", { name: actualName });
+    handlers.onSubagentSwitched({ name: actualName });
 
     return {
       success: true,
@@ -200,13 +203,12 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
       return { messages, newMessage: null };
     }
 
-    agentEventEmitter.emit("subagentStatus", subagents.at(-1) ?? null);
+    handlers.onSubagentSwitched(subagents.at(-1) ?? null);
 
     // Truncate history back to the delegation point
     const truncatedMessages = messages.slice(
       0,
-      // include delegation message + delegation result
-      currentSubagent.delegationMessageIndex + 2,
+      currentSubagent.delegationMessageIndex,
     );
 
     // Convert the tool result into a standard user message
@@ -226,6 +228,7 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
           type: "text",
           text: [
             `The subagent "${currentSubagent.name}" has completed the task.`,
+            `Goal: ${currentSubagent.goal}`,
             `Memory file: ${reportInput.memoryPath}`,
             `Result:\n${resultText}`,
           ].join("\n\n"),

@@ -1,6 +1,5 @@
 /**
  * @import { Agent, AgentConfig, AgentEventEmitter, UserEventEmitter } from "./agent"
- * @import { Message } from "./model"
  * @import { Tool, ToolDefinition } from "./tool"
  * @import { DelegateToSubagentInput } from "./tools/delegateToSubagent"
  * @import { ReportAsSubagentInput } from "./tools/reportAsSubagent"
@@ -10,6 +9,7 @@ import { EventEmitter } from "node:events";
 import fs from "node:fs/promises";
 import { createAgentLoop } from "./agentLoop.mjs";
 import { MESSAGES_DUMP_FILE_PATH } from "./env.mjs";
+import { createStateManager } from "./stateManager.mjs";
 import { createSubagentManager } from "./subagentManager.mjs";
 import { createToolExecutor } from "./toolExecutor.mjs";
 import { createToolInjector } from "./toolInjector.mjs";
@@ -27,29 +27,41 @@ export function createAgent({
   toolUseApprover,
   agentRoles,
 }) {
-  /** @type {{ messages: Message[] }} */
-  const state = {
-    messages: [
+  const stateManager = createStateManager(
+    [
       {
         role: "system",
         content: [{ type: "text", text: prompt }],
       },
     ],
-  };
+    {
+      onMessagesAppended: (newMessages) => {
+        const lastMessage = newMessages.at(-1);
+        if (!lastMessage) {
+          return;
+        }
+        agentEventEmitter.emit("message", lastMessage);
+      },
+    },
+  );
 
   /** @type {UserEventEmitter} */
   const userEventEmitter = new EventEmitter();
   /** @type {AgentEventEmitter} */
   const agentEventEmitter = new EventEmitter();
 
-  const subagentManager = createSubagentManager(agentEventEmitter, agentRoles);
+  const subagentManager = createSubagentManager(agentRoles, {
+    onSubagentSwitched: (subagent) => {
+      agentEventEmitter.emit("subagentSwitched", subagent);
+    },
+  });
 
   const toolInjector = createToolInjector();
   toolInjector.register(
     delegateToSubagentTool.def.name,
     (
       tool,
-      /** @type {{ subagentManager: import("./subagentManager.mjs").SubagentManager, state: { messages: Message[] } }} */ context,
+      /** @type {{ subagentManager: import("./subagentManager.mjs").SubagentManager, stateManager: import("./stateManager.mjs").StateManager }} */ context,
     ) => ({
       ...tool,
       /**
@@ -59,7 +71,7 @@ export function createAgent({
         const result = context.subagentManager.delegateToSubagent(
           input.name,
           input.goal,
-          context.state.messages.length - 1,
+          context.stateManager.getMessages().length - 1,
         );
         if (!result.success) {
           return new Error(result.error);
@@ -93,7 +105,7 @@ export function createAgent({
 
   const injectedTools = toolInjector.inject(tools, {
     subagentManager,
-    state,
+    stateManager,
   });
 
   /** @type {Map<string, Tool>} */
@@ -115,7 +127,10 @@ export function createAgent({
   async function dumpMessages() {
     const filePath = MESSAGES_DUMP_FILE_PATH;
     try {
-      await fs.writeFile(filePath, JSON.stringify(state.messages, null, 2));
+      await fs.writeFile(
+        filePath,
+        JSON.stringify(stateManager.getMessages(), null, 2),
+      );
       console.log(`Messages dumped to ${filePath}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -130,7 +145,10 @@ export function createAgent({
       const loadedMessages = JSON.parse(data);
       if (Array.isArray(loadedMessages)) {
         // Keep the system message (index 0) and replace the rest
-        state.messages = [state.messages[0], ...loadedMessages.slice(1)];
+        stateManager.setMessages([
+          stateManager.getMessageAt(0),
+          ...loadedMessages.slice(1),
+        ]);
         console.log(`Messages loaded from ${filePath}`);
       } else {
         console.error("Error loading messages: Invalid format in file.");
@@ -144,7 +162,7 @@ export function createAgent({
 
   const agentLoop = createAgentLoop({
     callModel,
-    state,
+    stateManager,
     toolDefs,
     toolExecutor,
     agentEventEmitter,

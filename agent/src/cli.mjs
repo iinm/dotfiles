@@ -621,6 +621,10 @@ export function startInteractiveSession({
   });
 
   agentEventEmitter.on("message", (message) => {
+    // Skip user message
+    if (state.turn) {
+      return;
+    }
     printMessage(message);
   });
 
@@ -636,8 +640,8 @@ export function startInteractiveSession({
     );
   });
 
-  agentEventEmitter.on("subagentStatus", (status) => {
-    state.subagentName = status?.name || "";
+  agentEventEmitter.on("subagentSwitched", (subagent) => {
+    state.subagentName = subagent?.name ?? "";
     currentCliPrompt = getCliPrompt(state.subagentName);
     cli.setPrompt(currentCliPrompt);
   });
