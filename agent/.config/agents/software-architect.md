@@ -1,1 +1,0 @@
-../agents.library/software-architect.md
