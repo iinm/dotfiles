@@ -8,7 +8,7 @@ import type {
   ProviderTokenUsage,
 } from "./model";
 import type { Tool, ToolUseApprover } from "./tool";
-import type { AgentRole } from "./utils/loadAgentRoles.mjs";
+import type { AgentRole } from "./context/loadAgentRoles.mjs";
 
 export type Agent = {
   userEventEmitter: UserEventEmitter;

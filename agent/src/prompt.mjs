@@ -6,7 +6,7 @@
  * @property {string} tmuxSessionId
  * @property {string} workingDir - The current working directory.
  * @property {string} projectMetadataDir - The directory where memory files are stored.
- * @property {Map<string, import('./utils/loadAgentRoles.mjs').AgentRole>} agentRoles - Available agent roles.
+ * @property {Map<string, import('./context/loadAgentRoles.mjs').AgentRole>} agentRoles - Available agent roles.
  */
 
 /**

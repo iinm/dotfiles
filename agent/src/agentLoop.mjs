@@ -6,8 +6,8 @@
  */
 
 import { styleText } from "node:util";
+import { consumeInterruptMessage } from "./context/consumeInterruptMessage.mjs";
 import { createInputHandler } from "./inputHandler.mjs";
-import { consumeInterruptMessage } from "./utils/consumeInterruptMessage.mjs";
 
 /**
  * @typedef {Object} AgentLoopConfig

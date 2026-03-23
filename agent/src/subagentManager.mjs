@@ -2,7 +2,7 @@
  * @import { AgentEventEmitter } from "./agent"
  * @import { Message, MessageContentToolResult, MessageContentToolUse } from "./model"
  * @import { ReportAsSubagentInput } from "./tools/reportAsSubagent"
- * @import { AgentRole } from "./utils/loadAgentRoles.mjs"
+ * @import { AgentRole } from "./context/loadAgentRoles.mjs"
  */
 
 import fs from "node:fs/promises";

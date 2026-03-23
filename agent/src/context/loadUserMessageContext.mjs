@@ -5,9 +5,9 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { styleText } from "node:util";
-import { noThrow } from "./noThrow.mjs";
-import { parseFileRange } from "./parseFileRange.mjs";
-import { readFileRange } from "./readFileRange.mjs";
+import { noThrow } from "../utils/noThrow.mjs";
+import { parseFileRange } from "../utils/parseFileRange.mjs";
+import { readFileRange } from "../utils/readFileRange.mjs";
 
 /** @type {ReadonlyMap<string, string>} */
 const IMAGE_MIME_TYPES = new Map([

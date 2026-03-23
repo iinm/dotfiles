@@ -6,6 +6,7 @@ import { styleText } from "node:util";
 import { createAgent } from "./agent.mjs";
 import { startInteractiveSession } from "./cli.mjs";
 import { loadAppConfig } from "./config.mjs";
+import { loadAgentRoles } from "./context/loadAgentRoles.mjs";
 import {
   AGENT_MODEL,
   AGENT_NOTIFY_CMD_DEFAULT,
@@ -26,11 +27,14 @@ import { reportAsSubagentTool } from "./tools/reportAsSubagent.mjs";
 import { createTavilySearchTool } from "./tools/tavilySearch.mjs";
 import { createTmuxCommandTool } from "./tools/tmuxCommand.mjs";
 import { writeFileTool } from "./tools/writeFile.mjs";
-import { createSessionId } from "./utils/createSessionId.mjs";
-import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
 
 (async () => {
-  const sessionId = createSessionId();
+  const startTime = new Date();
+  const sessionId = [
+    startTime.toISOString().slice(0, 10),
+    `0${startTime.getHours()}`.slice(-2) +
+      `0${startTime.getMinutes()}`.slice(-2),
+  ].join("-");
   const tmuxSessionId = `agent-${sessionId}`;
   const { appConfig, loadedConfigPath } = await loadAppConfig();
 

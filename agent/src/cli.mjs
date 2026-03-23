@@ -6,13 +6,13 @@
 import { execFileSync } from "node:child_process";
 import readline from "node:readline";
 import { styleText } from "node:util";
+import { consumeInterruptMessage } from "./context/consumeInterruptMessage.mjs";
+import { loadAgentRoles } from "./context/loadAgentRoles.mjs";
+import { loadPrompts } from "./context/loadPrompts.mjs";
+import { loadUserMessageContext } from "./context/loadUserMessageContext.mjs";
 import { formatProviderTokenUsage } from "./formatters/tokenUsage.mjs";
 import { formatToolResult } from "./formatters/toolResult.mjs";
 import { formatToolUse } from "./formatters/toolUse.mjs";
-import { consumeInterruptMessage } from "./utils/consumeInterruptMessage.mjs";
-import { loadAgentRoles } from "./utils/loadAgentRoles.mjs";
-import { loadPrompts } from "./utils/loadPrompts.mjs";
-import { loadUserMessageContext } from "./utils/loadUserMessageContext.mjs";
 import { notify } from "./utils/notify.mjs";
 import { parseFileRange } from "./utils/parseFileRange.mjs";
 import { readFileRange } from "./utils/readFileRange.mjs";
