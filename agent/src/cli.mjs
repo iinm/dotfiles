@@ -30,7 +30,7 @@ const SLASH_COMMANDS = [
   {
     name: "/prompts:<id>",
     description:
-      "Invoke a prompt with the given ID (e.g., /prompts:code-simplifier)",
+      "Invoke a prompt with the given ID (e.g., /prompts:feature-dev)",
   },
   {
     name: "/<id>",
