@@ -265,14 +265,13 @@ export function startInteractiveSession({
   const getCliPrompt = (subagentName = "") =>
     [
       "",
-      styleText(["cyanBright", "bgGray"], "▌") +
-        (subagentName
-          ? styleText(["white", "bgGray"], `[${subagentName}] `)
-          : "") +
-        styleText(
-          ["white", "bgGray"],
-          `Session: ${sessionId}, Model: ${modelName}, Sandbox: ${sandbox ? "on" : "off"} `,
-        ),
+      styleText(
+        ["white", "bgGray"],
+        [
+          ...(subagentName ? [`[${subagentName}]`] : []),
+          `session: ${sessionId} | model: ${modelName} | sandbox: ${sandbox ? "on" : "off"}`,
+        ].join(" "),
+      ),
       "> ",
     ].join("\n");
 
