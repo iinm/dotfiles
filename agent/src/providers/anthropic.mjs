@@ -10,8 +10,8 @@ import { fromIni } from "@aws-sdk/credential-providers";
 import { HttpRequest } from "@smithy/protocol-http";
 import { SignatureV4 } from "@smithy/signature-v4";
 import { noThrow } from "../utils/noThrow.mjs";
-import { readBedrockStreamEvents } from "./bedrock.mjs";
-import { getGoogleCloudAccessToken } from "./googleCloud.mjs";
+import { readBedrockStreamEvents } from "./platform/bedrock.mjs";
+import { getGoogleCloudAccessToken } from "./platform/googleCloud.mjs";
 
 /**
  * @param {import("../modelDefinition").PlatformConfig} platformConfig

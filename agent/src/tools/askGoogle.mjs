@@ -3,7 +3,7 @@
  */
 
 import { styleText } from "node:util";
-import { getGoogleCloudAccessToken } from "../providers/googleCloud.mjs";
+import { getGoogleCloudAccessToken } from "../providers/platform/googleCloud.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
 
 /**

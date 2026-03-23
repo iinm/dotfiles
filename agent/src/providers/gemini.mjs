@@ -6,7 +6,7 @@
 
 import { styleText } from "node:util";
 import { noThrow } from "../utils/noThrow.mjs";
-import { getGoogleCloudAccessToken } from "./googleCloud.mjs";
+import { getGoogleCloudAccessToken } from "./platform/googleCloud.mjs";
 
 /**
  * @callback GeminiModelCaller

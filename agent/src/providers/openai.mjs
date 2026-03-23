@@ -6,7 +6,7 @@
 
 import { styleText } from "node:util";
 import { noThrow } from "../utils/noThrow.mjs";
-import { getAzureAccessToken } from "./azure.mjs";
+import { getAzureAccessToken } from "./platform/azure.mjs";
 
 /**
  * @param {import("../modelDefinition").PlatformConfig} platformConfig
