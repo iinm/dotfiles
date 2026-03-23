@@ -59,7 +59,7 @@ export function createAgent({
         const result = context.subagentManager.delegateToSubagent(
           input.name,
           input.goal,
-          context.state.messages,
+          context.state.messages.length - 1,
         );
         if (!result.success) {
           return new Error(result.error);
@@ -86,7 +86,7 @@ export function createAgent({
         if (!result.success) {
           return new Error(result.error);
         }
-        return result.value;
+        return result.memoryContent;
       },
     }),
   );

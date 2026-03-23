@@ -14,7 +14,7 @@ import {
   USER_NAME,
 } from "./env.mjs";
 import { setupMCPServer } from "./mcp.mjs";
-import { createModelCaller } from "./model.mjs";
+import { createModelCaller } from "./modelCaller.mjs";
 import { createPrompt } from "./prompt.mjs";
 import { createToolUseApprover } from "./tool.mjs";
 import { createAskGoogleTool } from "./tools/askGoogle.mjs";

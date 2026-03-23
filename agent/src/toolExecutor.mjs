@@ -4,33 +4,7 @@
  */
 
 /**
- * @typedef {Object} ValidationResult
- * @property {boolean} isValid - Whether validation passed
- * @property {string} [errorMessage] - Error message if validation failed
- * @property {MessageContentToolResult[]} [toolResults] - Tool results for errors
- */
-
-/**
- * @typedef {Object} ExecuteBatchSuccess
- * @property {true} success - Execution succeeded
- * @property {MessageContentToolResult[]} results - Tool results on success
- */
-
-/**
- * @typedef {Object} ExecuteBatchFailure
- * @property {false} success - Execution failed
- * @property {MessageContentToolResult[]} errors - Error tool results on validation failure
- * @property {string} errorMessage - Error message on validation failure
- */
-
-/**
- * @typedef {ExecuteBatchSuccess | ExecuteBatchFailure} ExecuteBatchResult
- */
-
-/**
- * @typedef {Object} ToolExecutor
- * @property {(toolUseParts: MessageContentToolUse[]) => ValidationResult} validateBatch - Validate all tool uses (tool existence, input validation, exclusive tool check)
- * @property {(toolUseParts: MessageContentToolUse[]) => Promise<ExecuteBatchResult>} executeBatch - Validate and execute multiple tools
+ * @typedef {ReturnType<typeof createToolExecutor>} ToolExecutor
  */
 
 /**
@@ -42,38 +16,25 @@
  * Create a tool executor that handles tool validation, execution, and error handling
  * @param {Map<string, Tool>} toolByName - Map of tool names to tool implementations
  * @param {ToolExecutorOptions} [options] - Configuration options
- * @returns {ToolExecutor}
  */
 export function createToolExecutor(toolByName, options = {}) {
   const { exclusiveToolNames = [] } = options;
 
   /**
-   * Validate exclusive tool constraints
-   * @param {MessageContentToolUse[]} toolUseParts
-   * @returns {{isValid: true} | {isValid: false, errorMessage: string}}
+   * @typedef {ValidationSuccess | ValidationFailure} ValidationResult
    */
-  function validateExclusiveTools(toolUseParts) {
-    const exclusiveTools = toolUseParts.filter((t) =>
-      exclusiveToolNames.includes(t.toolName),
-    );
 
-    if (exclusiveTools.length > 1) {
-      const toolNames = exclusiveTools.map((t) => t.toolName).join(", ");
-      return {
-        isValid: false,
-        errorMessage: `System: ${toolNames} cannot be called together. Only one of these tools can be called at a time.`,
-      };
-    }
+  /**
+   * @typedef {Object} ValidationSuccess
+   * @property {true} isValid
+   */
 
-    if (exclusiveTools.length === 1 && toolUseParts.length > 1) {
-      return {
-        isValid: false,
-        errorMessage: `System: ${exclusiveTools[0].toolName} cannot be called with other tools. It must be called alone.`,
-      };
-    }
-
-    return { isValid: true };
-  }
+  /**
+   * @typedef {Object} ValidationFailure
+   * @property {false} isValid
+   * @property {string} errorMessage
+   * @property {MessageContentToolResult[]} toolResults
+   */
 
   /**
    * Validate all tool uses (tool existence, input validation, exclusive tool check)
@@ -81,7 +42,7 @@ export function createToolExecutor(toolByName, options = {}) {
    * @returns {ValidationResult}
    */
   function validateBatch(toolUseParts) {
-    // Phase 1: Tool existence + Input validation
+    // Tool existence + Input validation
     /** @type {{index: number, message: string}[]} */
     const errors = [];
 
@@ -128,7 +89,7 @@ export function createToolExecutor(toolByName, options = {}) {
       };
     }
 
-    // Phase 2: Exclusive tool validation
+    // Exclusive tool validation
     const exclusiveResult = validateExclusiveTools(toolUseParts);
     if (!exclusiveResult.isValid) {
       return {
@@ -148,13 +109,86 @@ export function createToolExecutor(toolByName, options = {}) {
   }
 
   /**
+   * @typedef {ExecuteBatchSuccess | ExecuteBatchFailure} ExecuteBatchResult
+   */
+
+  /**
+   * @typedef {Object} ExecuteBatchSuccess
+   * @property {true} success - Execution succeeded
+   * @property {MessageContentToolResult[]} results - Tool results on success
+   */
+
+  /**
+   * @typedef {Object} ExecuteBatchFailure
+   * @property {false} success - Execution failed
+   * @property {MessageContentToolResult[]} errors - Error tool results on validation failure
+   * @property {string} errorMessage - Error message on validation failure
+   */
+
+  /**
+   * Validate and execute multiple tools
+   * @param {MessageContentToolUse[]} toolUseParts
+   * @returns {Promise<ExecuteBatchResult>}
+   */
+  async function executeBatch(toolUseParts) {
+    const validation = validateBatch(toolUseParts);
+
+    if (!validation.isValid) {
+      return {
+        success: false,
+        errors: /** @type {MessageContentToolResult[]} */ (
+          validation.toolResults
+        ),
+        errorMessage: /** @type {string} */ (validation.errorMessage),
+      };
+    }
+
+    const results = [];
+    for (const toolUse of toolUseParts) {
+      results.push(await execute(toolUse));
+    }
+
+    return {
+      success: true,
+      results,
+    };
+  }
+
+  /**
+   * Validate exclusive tool constraints
+   * @param {MessageContentToolUse[]} toolUseParts
+   * @returns {{isValid: true} | {isValid: false, errorMessage: string}}
+   */
+  function validateExclusiveTools(toolUseParts) {
+    const exclusiveTools = toolUseParts.filter((t) =>
+      exclusiveToolNames.includes(t.toolName),
+    );
+
+    if (exclusiveTools.length > 1) {
+      const toolNames = exclusiveTools.map((t) => t.toolName).join(", ");
+      return {
+        isValid: false,
+        errorMessage: `System: ${toolNames} cannot be called together. Only one of these tools can be called at a time.`,
+      };
+    }
+
+    if (exclusiveTools.length === 1 && toolUseParts.length > 1) {
+      return {
+        isValid: false,
+        errorMessage: `System: ${exclusiveTools[0].toolName} cannot be called with other tools. It must be called alone.`,
+      };
+    }
+
+    return { isValid: true };
+  }
+
+  /**
    * Execute a tool use and return the result
-   * @param {MessageContentToolUse} toolUse - The tool use to execute
+   * @param {MessageContentToolUse} toolUse
    * @returns {Promise<MessageContentToolResult>}
    */
   async function execute(toolUse) {
     const tool = toolByName.get(toolUse.toolName);
-    // Tool existence and validateInput are already checked in validateBatch()
     if (!tool) {
       return {
         type: "tool_result",
@@ -195,37 +229,8 @@ export function createToolExecutor(toolByName, options = {}) {
     };
   }
 
-  /**
-   * Validate and execute multiple tools
-   * @param {MessageContentToolUse[]} toolUseParts - Tool uses to validate and execute
-   * @returns {Promise<ExecuteBatchResult>}
-   */
-  async function executeBatch(toolUseParts) {
-    const validation = validateBatch(toolUseParts);
-
-    if (!validation.isValid) {
-      return {
-        success: false,
-        errors: /** @type {MessageContentToolResult[]} */ (
-          validation.toolResults
-        ),
-        errorMessage: /** @type {string} */ (validation.errorMessage),
-      };
-    }
-
-    const results = [];
-    for (const toolUse of toolUseParts) {
-      results.push(await execute(toolUse));
-    }
-
-    return {
-      success: true,
-      results,
-    };
-  }
-
   return {
-    validateBatch,
     executeBatch,
+    validateBatch,
   };
 }

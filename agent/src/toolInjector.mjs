@@ -1,34 +1,31 @@
 /**
- * Tool Injector Module
- *
- * Manages tool implementation injection.
- */
-
-/**
  * @typedef {import("./tool.d.ts").Tool} Tool
- */
-
-/**
- * Injector function that transforms a tool by injecting its implementation.
- *
- * @callback InjectorFunction
- * @param {Tool} tool - The tool to inject implementation into
- * @param {any} context - Context containing dependencies (subagentManager, state, etc.)
- * @returns {Tool} Tool with injected implementation
  */
 
 /**
  * Tool Injector interface
  *
+ * @template C
  * @typedef {Object} ToolInjector
- * @property {(toolName: string, injectorFn: InjectorFunction) => void} register - Register an injector for a specific tool
- * @property {(tools: Tool[], context: Object) => Tool[]} inject - Inject implementations into tools
+ * @property {(toolName: string, injectorFn: InjectorFunction<C>) => void} register - Register an injector for a specific tool
+ * @property {(tools: Tool[], context: C) => Tool[]} inject - Inject implementations into tools
+ */
+
+/**
+ * Injector function that transforms a tool by injecting its implementation.
+ *
+ * @template C
+ * @callback InjectorFunction
+ * @param {Tool} tool - The tool to inject implementation into
+ * @param {C} context - Context containing dependencies (subagentManager, state, etc.)
+ * @returns {Tool} Tool with injected implementation
  */
 
 /**
  * Create a tool injector.
  *
- * @returns {ToolInjector} Tool injector instance
+ * @template C
+ * @returns {ToolInjector<C>} Tool injector instance
  *
  * @example
  * const toolInjector = createToolInjector();
@@ -43,7 +40,7 @@
  * const injectedTools = toolInjector.inject(tools, { subagentManager, state });
  */
 export function createToolInjector() {
-  /** @type {Map<string, InjectorFunction>} */
+  /** @type {Map<string, InjectorFunction<C>>} */
   const injectors = new Map();
 
   return {
@@ -51,7 +48,7 @@ export function createToolInjector() {
      * Register an injector function for a specific tool.
      *
      * @param {string} toolName - Name of the tool to inject implementation for
-     * @param {InjectorFunction} injectorFn - Function that injects implementation
+     * @param {InjectorFunction<C>} injectorFn - Function that injects implementation
      */
     register(toolName, injectorFn) {
       injectors.set(toolName, injectorFn);

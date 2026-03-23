@@ -10,187 +10,41 @@ import path from "node:path";
 import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
 import { reportAsSubagentTool } from "./tools/reportAsSubagent.mjs";
 
-/**
- * @typedef {Object} SubagentState
- * @property {string} name
- * @property {string} goal
- * @property {number} delegateResultMessageIndex
- */
-
-/**
- * @typedef {Object} DelegateSuccess
- * @property {true} success
- * @property {string} value - 成功時のメッセージ
- */
-
-/**
- * @typedef {Object} DelegateFailure
- * @property {false} success
- * @property {string} error - エラーメッセージ
- */
-
-/**
- * @typedef {DelegateSuccess | DelegateFailure} DelegateResult
- */
-
-/**
- * @typedef {Object} ReportSuccess
- * @property {true} success
- * @property {string} value - メモリファイルの内容
- */
-
-/**
- * @typedef {Object} ReportFailure
- * @property {false} success
- * @property {string} error - エラーメッセージ
- */
-
-/**
- * @typedef {ReportSuccess | ReportFailure} ReportResult
- */
-
-/**
- * @typedef {Object} SubagentManagerState
- * @property {SubagentState | null} current - Current active subagent
- * @property {number} count - Number of active subagents
- * @property {boolean} isActive - Whether currently in subagent mode
- */
-
-/**
- * @typedef {Object} SubagentManager
- * @property {() => SubagentManagerState} getState
- * @property {(toolUseParts: MessageContentToolUse[], toolResults: MessageContentToolResult[], messages: Message[]) => { messages: Message[], newMessage: Message | null }} processToolResults
- * @property {(name: string, goal: string, messages: Message[]) => DelegateResult} delegateToSubagent
- * @property {(memoryPath: string) => Promise<ReportResult>} reportAsSubagent
- */
+/** @typedef {ReturnType<typeof createSubagentManager>} SubagentManager */
 
 /**
  * Creates a manager for subagent lifecycle and state.
  * @param {AgentEventEmitter} agentEventEmitter
  * @param {Map<string, AgentRole>} agentRoles
- * @returns {SubagentManager}
  */
 export function createSubagentManager(agentEventEmitter, agentRoles) {
-  /** @type {SubagentState[]} */
+  /** @type {{name: string; goal: string; delegationMessageIndex: number}[]} */
   const subagents = [];
 
   /**
-   * Get the combined state of the subagent manager.
-   * This method provides a unified interface to query subagent state.
-   *
-   * @returns {SubagentManagerState} Combined subagent state
+   * @typedef {DelegateSuccess | DelegateFailure} DelegateResult
    */
-  function getState() {
-    return {
-      current: subagents.at(-1) ?? null,
-      count: subagents.length,
-      isActive: subagents.length > 0,
-    };
-  }
 
   /**
-   * Handle the result of a subagent reporting back.
-   * On success, truncates conversation history back to the delegation point
-   * and converts the report into a standard user message.
-   * @param {MessageContentToolUse} reportToolUse
-   * @param {MessageContentToolResult} reportResult
-   * @param {Message[]} messages
-   * @returns {{ messages: Message[], newMessage: Message | null }}
-   *   - messages: The truncated message history (new array)
-   *   - newMessage: The user message to add, or null if not handled
+   * @typedef {Object} DelegateSuccess
+   * @property {true} success
+   * @property {string} value
    */
-  function handleSubagentReport(reportToolUse, reportResult, messages) {
-    if (reportResult?.isError) {
-      return { messages, newMessage: null };
-    }
-
-    const currentSubagent = subagents.pop();
-    if (!currentSubagent) {
-      // Fallback if state is out of sync
-      return { messages, newMessage: null };
-    }
-
-    // Truncate history back to before the delegation point
-    // The -1 ensures the delegation result message itself is not included,
-    // as it will be replaced by the subagent's report message
-    const truncatedMessages = messages.slice(
-      0,
-      currentSubagent.delegateResultMessageIndex - 1,
-    );
-
-    agentEventEmitter.emit(
-      "subagentStatus",
-      subagents.length > 0 ? (subagents.at(-1) ?? null) : null,
-    );
-
-    // Convert the tool result into a standard user message
-    const resultText = reportResult?.content
-      ?.map((c) => (c.type === "text" ? c.text : ""))
-      .join("\n");
-
-    // Get memory path from the report tool input
-    const reportInput = /** @type {ReportAsSubagentInput} */ (
-      reportToolUse.input
-    );
-    const memoryPathText = reportInput.memoryPath
-      ? `\n\nMemory file: ${reportInput.memoryPath}`
-      : "";
-
-    /** @type {import('./model').UserMessage} */
-    const newMessage = {
-      role: "user",
-      content: [
-        {
-          type: "text",
-          text: `The subagent "${currentSubagent.name}" has completed the task.\n\nOriginal goal: ${currentSubagent.goal}${memoryPathText}\n\nResult:\n${resultText}`,
-        },
-      ],
-    };
-
-    return { messages: truncatedMessages, newMessage };
-  }
 
   /**
-   * Process tool results and update state based on special tools.
-   * Returns the truncated message history and a new message to add.
-   * @param {MessageContentToolUse[]} toolUseParts
-   * @param {MessageContentToolResult[]} toolResults
-   * @param {Message[]} messages
-   * @returns {{ messages: Message[], newMessage: Message | null }}
-   *   - messages: The potentially truncated message history (new array)
-   *   - newMessage: The user message to add, or null if tool results should be added directly
+   * @typedef {Object} DelegateFailure
+   * @property {false} success
+   * @property {string} error
    */
-  function processToolResults(toolUseParts, toolResults, messages) {
-    const reportSubagentToolUse = toolUseParts.find(
-      (toolUse) => toolUse.toolName === reportAsSubagentTool.def.name,
-    );
-
-    if (reportSubagentToolUse) {
-      const reportResult = toolResults.find(
-        (res) => res.toolUseId === reportSubagentToolUse.toolUseId,
-      );
-      if (!reportResult) {
-        return { messages, newMessage: null };
-      }
-      const result = handleSubagentReport(
-        reportSubagentToolUse,
-        reportResult,
-        messages,
-      );
-      return result;
-    }
-
-    return { messages, newMessage: null };
-  }
 
   /**
    * Delegate a task to a subagent.
    * @param {string} name
    * @param {string} goal
-   * @param {Message[]} messages - Current message history (for tracking delegation point)
+   * @param {number} delegationMessageIndex
    * @returns {DelegateResult}
    */
-  function delegateToSubagent(name, goal, messages) {
+  function delegateToSubagent(name, goal, delegationMessageIndex) {
     if (subagents.length > 0) {
       return {
         success: false,
@@ -199,13 +53,11 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
       };
     }
 
-    // Check if it's a custom (ad-hoc) role
     const isCustomRole = name.startsWith("custom:");
     const actualName = isCustomRole ? name.substring(7) : name;
 
     let roleContent = "";
     if (!isCustomRole) {
-      // Look for agent role
       const role = agentRoles.get(name);
       if (!role) {
         const availableRoles = Array.from(agentRoles.keys())
@@ -223,26 +75,38 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
     subagents.push({
       name: actualName,
       goal,
-      delegateResultMessageIndex: messages.length,
+      delegationMessageIndex,
     });
 
     agentEventEmitter.emit("subagentStatus", { name: actualName });
 
-    const roleSection = roleContent
-      ? `\n\nRole: ${name}\n---\n${roleContent}\n---`
-      : "";
-
-    const value =
-      `✓ Delegation successful. You are now the subagent "${actualName}".\n\n` +
-      `Your goal: ${goal}${roleSection}\n\n` +
-      `Memory file path format: ${AGENT_PROJECT_METADATA_DIR}/memory/<session-id>--${actualName}--<kebab-case-title>.md (Replace <kebab-case-title> to match the parent task)\n\n` +
-      `Start working on this goal now. When finished, call "report_as_subagent" with the memory file path.`;
-
     return {
       success: true,
-      value,
+      value: [
+        `✓ Delegation successful. You are now the subagent "${actualName}".`,
+        `Your goal: ${goal}`,
+        `Role: ${actualName}\n---\n${roleContent}\n---`,
+        `Memory file path format: ${AGENT_PROJECT_METADATA_DIR}/memory/<session-id>--${actualName}--<kebab-case-title>.md (Replace <kebab-case-title> to match the parent task)`,
+        `Start working on this goal now. When finished, call "report_as_subagent" with the memory file path.`,
+      ].join("\n\n"),
     };
   }
+
+  /**
+   * @typedef {ReportSuccess | ReportFailure} ReportResult
+   */
+
+  /**
+   * @typedef {Object} ReportSuccess
+   * @property {true} success
+   * @property {string} memoryContent
+   */
+
+  /**
+   * @typedef {Object} ReportFailure
+   * @property {false} success
+   * @property {string} error
+   */
 
   /**
    * Report as a subagent and read the memory file.
@@ -273,7 +137,7 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
       });
       return {
         success: true,
-        value: memoryContent,
+        memoryContent: memoryContent,
       };
     } catch (error) {
       return {
@@ -283,10 +147,98 @@ export function createSubagentManager(agentEventEmitter, agentRoles) {
     }
   }
 
+  /**
+   * Process tool results and update state based on special tools.
+   * Returns the truncated message history and a new message to add.
+   * @param {MessageContentToolUse[]} toolUseParts
+   * @param {MessageContentToolResult[]} toolResults
+   * @param {Message[]} messages
+   * @returns {{ messages: Message[], newMessage: Message | null }}
+   *   - messages: The potentially truncated message history (new array)
+   *   - newMessage: The user message to add, or null if tool results should be added directly
+   */
+  function processToolResults(toolUseParts, toolResults, messages) {
+    const reportSubagentToolUse = toolUseParts.find(
+      (toolUse) => toolUse.toolName === reportAsSubagentTool.def.name,
+    );
+
+    if (reportSubagentToolUse) {
+      const reportResult = toolResults.find(
+        (res) => res.toolUseId === reportSubagentToolUse.toolUseId,
+      );
+      if (!reportResult) {
+        return { messages, newMessage: null };
+      }
+      return handleSubagentReport(
+        reportSubagentToolUse,
+        reportResult,
+        messages,
+      );
+    }
+
+    return { messages, newMessage: null };
+  }
+
+  /**
+   * Handle the result of a subagent reporting back.
+   * On success, truncates conversation history back to the delegation point
+   * and converts the report into a standard user message.
+   * @param {MessageContentToolUse} reportToolUse
+   * @param {MessageContentToolResult} reportResult
+   * @param {Message[]} messages
+   * @returns {{ messages: Message[], newMessage: Message | null }}
+   *   - messages: The truncated message history (new array)
+   *   - newMessage: The user message to add, or null if not handled
+   */
+  function handleSubagentReport(reportToolUse, reportResult, messages) {
+    if (reportResult.isError) {
+      return { messages, newMessage: null };
+    }
+
+    const currentSubagent = subagents.pop();
+    if (!currentSubagent) {
+      return { messages, newMessage: null };
+    }
+
+    agentEventEmitter.emit("subagentStatus", subagents.at(-1) ?? null);
+
+    // Truncate history back to the delegation point
+    const truncatedMessages = messages.slice(
+      0,
+      // include delegation message + delegation result
+      currentSubagent.delegationMessageIndex + 2,
+    );
+
+    // Convert the tool result into a standard user message
+    const resultText = reportResult.content
+      .map((c) => (c.type === "text" ? c.text : ""))
+      .join("\n\n");
+
+    const reportInput = /** @type {ReportAsSubagentInput} */ (
+      reportToolUse.input
+    );
+
+    /** @type {import('./model').UserMessage} */
+    const newMessage = {
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text: [
+            `The subagent "${currentSubagent.name}" has completed the task.`,
+            `Memory file: ${reportInput.memoryPath}`,
+            `Result:\n${resultText}`,
+          ].join("\n\n"),
+        },
+      ],
+    };
+
+    return { messages: truncatedMessages, newMessage };
+  }
+
   return {
-    getState,
-    processToolResults,
     delegateToSubagent,
     reportAsSubagent,
+    processToolResults,
   };
 }

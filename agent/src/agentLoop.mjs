@@ -21,14 +21,12 @@ import { createInputHandler } from "./inputHandler.mjs";
  */
 
 /**
- * @typedef {Object} AgentLoop
- * @property {(input: (MessageContentText | MessageContentImage)[]) => Promise<void>} handleUserInput - Process user input and run the agent turn loop
+ * @typedef {ReturnType<typeof createAgentLoop>} AgentLoop
  */
 
 /**
  * Create an agent loop handler
  * @param {AgentLoopConfig} config
- * @returns {AgentLoop}
  */
 export function createAgentLoop({
   callModel,
@@ -54,9 +52,7 @@ export function createAgentLoop({
    */
   async function handleUserInput(input) {
     toolUseApprover.resetApprovalCount();
-
     await inputHandler.handle(input);
-
     await runTurnLoop();
     agentEventEmitter.emit("turnEnd");
   }
@@ -116,10 +112,7 @@ export function createAgentLoop({
       }
 
       const toolUseParts = /** @type {MessageContentToolUse[]} */ (
-        assistantMessage.content.filter(
-          /** @param {any} part */
-          (part) => part.type === "tool_use",
-        )
+        assistantMessage.content.filter((part) => part.type === "tool_use")
       );
 
       // No tool use -> turn end
@@ -127,7 +120,6 @@ export function createAgentLoop({
         break;
       }
 
-      // Step 1: Validation (early return on invalid input)
       const validation = toolExecutor.validateBatch(toolUseParts);
       if (!validation.isValid) {
         state.messages = [
