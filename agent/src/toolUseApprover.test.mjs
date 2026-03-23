@@ -4,7 +4,7 @@
 
 import assert from "node:assert";
 import { describe, it } from "node:test";
-import { createToolUseApprover } from "./tool.mjs";
+import { createToolUseApprover } from "./toolUseApprover.mjs";
 
 describe("createToolUseApprover", () => {
   it("should approve allowed tool use up to maxAutoApprovals", () => {

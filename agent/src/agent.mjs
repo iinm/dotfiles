@@ -8,9 +8,9 @@
 import { EventEmitter } from "node:events";
 import fs from "node:fs/promises";
 import { createAgentLoop } from "./agentLoop.mjs";
+import { createStateManager } from "./agentState.mjs";
 import { MESSAGES_DUMP_FILE_PATH } from "./env.mjs";
-import { createStateManager } from "./stateManager.mjs";
-import { createSubagentManager } from "./subagentManager.mjs";
+import { createSubagentManager } from "./subagent.mjs";
 import { createToolExecutor } from "./toolExecutor.mjs";
 import { createToolInjector } from "./toolInjector.mjs";
 import { delegateToSubagentTool } from "./tools/delegateToSubagent.mjs";
@@ -61,7 +61,7 @@ export function createAgent({
     delegateToSubagentTool.def.name,
     (
       tool,
-      /** @type {{ subagentManager: import("./subagentManager.mjs").SubagentManager, stateManager: import("./stateManager.mjs").StateManager }} */ context,
+      /** @type {{ subagentManager: import("./subagent.mjs").SubagentManager, stateManager: import("./agentState.mjs").StateManager }} */ context,
     ) => ({
       ...tool,
       /**
@@ -85,7 +85,7 @@ export function createAgent({
     reportAsSubagentTool.def.name,
     (
       tool,
-      /** @type {{ subagentManager: import("./subagentManager.mjs").SubagentManager }} */ context,
+      /** @type {{ subagentManager: import("./subagent.mjs").SubagentManager }} */ context,
     ) => ({
       ...tool,
       /**

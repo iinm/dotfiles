@@ -16,7 +16,6 @@ import {
 import { setupMCPServer } from "./mcp.mjs";
 import { createModelCaller } from "./modelCaller.mjs";
 import { createPrompt } from "./prompt.mjs";
-import { createToolUseApprover } from "./tool.mjs";
 import { createAskGoogleTool } from "./tools/askGoogle.mjs";
 import { delegateToSubagentTool } from "./tools/delegateToSubagent.mjs";
 import { createExecCommandTool } from "./tools/execCommand.mjs";
@@ -27,6 +26,7 @@ import { reportAsSubagentTool } from "./tools/reportAsSubagent.mjs";
 import { createTavilySearchTool } from "./tools/tavilySearch.mjs";
 import { createTmuxCommandTool } from "./tools/tmuxCommand.mjs";
 import { writeFileTool } from "./tools/writeFile.mjs";
+import { createToolUseApprover } from "./toolUseApprover.mjs";
 
 (async () => {
   const startTime = new Date();
