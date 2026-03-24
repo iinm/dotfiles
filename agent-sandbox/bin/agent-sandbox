@@ -867,7 +867,8 @@ print_preset_dockerfile() {
   cat << 'EOF'
 FROM node:lts
 
-RUN apt update && apt install -y \
+RUN apt update \
+    && apt install -y \
       busybox \
       bash zsh \
       ripgrep fd-find \
@@ -889,7 +890,8 @@ RUN install -dm 755 /etc/apt/keyrings \
 # Create user
 RUN groupadd sandbox \
     && useradd -g sandbox -m sandbox \
-    && mkdir -p /sandbox && chown sandbox:sandbox /sandbox
+    && mkdir -p /sandbox \
+    && chmod 777 /sandbox
 
 # Create user entrypoint script for persistence configuration
 RUN mkdir -p /sandbox/bin
@@ -897,15 +899,15 @@ COPY <<'USER_ENTRYPOINT' /sandbox/bin/user-entrypoint.sh
 #!/bin/bash
 # Configure persistence for sandbox data (history, configs, etc.) by symlinking to /persistent/home/.
 
-test -L ~/.bash_history || (touch /persistent/home/.bash_history; ln -s /persistent/home/.bash_history ~/)
-test -L ~/.zsh_history || (touch /persistent/home/.zsh_history; ln -s /persistent/home/.zsh_history ~/)
-test -L ~/.config || (mkdir -p /persistent/home/.config; ln -s /persistent/home/.config ~/)
-test -L ~/.gitconfig || (touch /persistent/home/.gitconfig; ln -s /persistent/home/.gitconfig ~/)
-test -L ~/.local || (mkdir -p /persistent/home/.local/share; ln -s /persistent/home/.local ~/)
-test -L ~/.claude || (mkdir -p /persistent/home/.claude; ln -s /persistent/home/.claude ~/)
-test -L ~/.claude.json || (touch /persistent/home/.claude.json; ln -s /persistent/home/.claude.json ~/)
-test -L ~/.gemini || (mkdir -p /persistent/home/.gemini; ln -s /persistent/home/.gemini ~/)
-test -L ~/.codex || (mkdir -p /persistent/home/.codex; ln -s /persistent/home/.codex ~/)
+test -L ~/.bash_history || (touch /persistent/home/.bash_history; ln -s /persistent/home/.bash_history ~/ 2> /dev/null)
+test -L ~/.zsh_history || (touch /persistent/home/.zsh_history; ln -s /persistent/home/.zsh_history ~/ 2> /dev/null)
+test -L ~/.config || (mkdir -p /persistent/home/.config; ln -s /persistent/home/.config ~/ 2> /dev/null)
+test -L ~/.gitconfig || (touch /persistent/home/.gitconfig; ln -s /persistent/home/.gitconfig ~/ 2> /dev/null)
+test -L ~/.local || (mkdir -p /persistent/home/.local/share; ln -s /persistent/home/.local ~/ 2> /dev/null)
+test -L ~/.claude || (mkdir -p /persistent/home/.claude; ln -s /persistent/home/.claude ~/ 2> /dev/null)
+test -L ~/.claude.json || (touch /persistent/home/.claude.json; ln -s /persistent/home/.claude.json ~/ 2> /dev/null)
+test -L ~/.gemini || (mkdir -p /persistent/home/.gemini; ln -s /persistent/home/.gemini ~/ 2> /dev/null)
+test -L ~/.codex || (mkdir -p /persistent/home/.codex; ln -s /persistent/home/.codex ~/ 2> /dev/null)
 
 eval "$(mise activate bash)"
 exec "$@"
@@ -914,12 +916,13 @@ RUN chmod +x /sandbox/bin/user-entrypoint.sh
 
 USER sandbox
 ENV NPM_CONFIG_PREFIX=/sandbox/npm-global
-ENV PATH=/sandbox/npm-global/bin:$PATH
+ENV PATH=/home/sandbox/.local/bin:/sandbox/npm-global/bin:$PATH
 
 # Install coding agents
-RUN npm install -g @anthropic-ai/claude-code \
-    && npm install -g @google/gemini-cli \
+RUN umask 000 \
+    && curl -fsSL https://claude.ai/install.sh | bash \
     && npm install -g @openai/codex \
+    && npm install -g @google/gemini-cli \
     && rm -rf /home/sandbox/.npm
 
 # Configure shell
