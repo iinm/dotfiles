@@ -18,6 +18,7 @@ import {
  * @property {string} [import]
  * @property {boolean} [userInvocable]
  * @property {boolean} [isShortcut]
+ * @property {boolean} [isSkill]
  */
 
 /**
@@ -269,6 +270,7 @@ function parsePrompt(relativePath, fileContent, fullPath, idPrefix = "") {
     import: parseFrontmatterField(frontmatter, "import"),
     userInvocable: userInvocableRaw ? userInvocableRaw === "true" : undefined,
     isShortcut,
+    isSkill: relativePath.endsWith("SKILL.md"),
   };
 }
 
