@@ -5,6 +5,7 @@ import {
   AGENT_CACHE_DIR,
   AGENT_PROJECT_METADATA_DIR,
   AGENT_ROOT,
+  CLAUDE_CODE_PLUGIN_DIR,
 } from "../env.mjs";
 
 /**
@@ -18,20 +19,39 @@ import {
 
 /**
  * Load all agent roles from the predefined directories.
+ * @param {Array<{name: string, path: string}>} [claudeCodePlugins]
  * @returns {Promise<Map<string, AgentRole>>}
  */
-export async function loadAgentRoles() {
+export async function loadAgentRoles(claudeCodePlugins) {
   const agentDirs = [
-    path.resolve(AGENT_ROOT, ".config", "agents.predefined"),
-    path.resolve(AGENT_ROOT, ".config", "agents"),
-    path.resolve(AGENT_PROJECT_METADATA_DIR, "agents"),
-    path.resolve(process.cwd(), ".claude", "agents"),
+    {
+      dir: path.resolve(AGENT_ROOT, ".config", "agents.predefined"),
+      idPrefix: "",
+    },
+    { dir: path.resolve(AGENT_ROOT, ".config", "agents"), idPrefix: "" },
+    { dir: path.resolve(AGENT_PROJECT_METADATA_DIR, "agents"), idPrefix: "" },
+    {
+      dir: path.resolve(process.cwd(), ".claude", "agents"),
+      idPrefix: "claude:",
+    },
   ];
+
+  // Add plugin directories if provided
+  if (claudeCodePlugins) {
+    for (const plugin of claudeCodePlugins) {
+      const pluginBase = path.join(CLAUDE_CODE_PLUGIN_DIR, plugin.path);
+
+      agentDirs.push({
+        dir: path.join(pluginBase, "agents"),
+        idPrefix: `claude/${plugin.name}:`,
+      });
+    }
+  }
 
   /** @type {Map<string, AgentRole>} */
   const roles = new Map();
 
-  for (const dir of agentDirs) {
+  for (const { dir, idPrefix } of agentDirs) {
     const files = await getMarkdownFiles(dir).catch((err) => {
       if (err.code !== "ENOENT") {
         console.warn(`Failed to list agent roles in ${dir}:`, err);
@@ -48,7 +68,7 @@ export async function loadAgentRoles() {
 
       if (content === null) continue;
 
-      let role = parseAgentRole(file, content, fullPath);
+      let role = parseAgentRole(file, content, fullPath, idPrefix);
       if (role.import) {
         role = await mergeRemoteRole(role, file, fullPath);
       }
@@ -190,10 +210,12 @@ async function getMarkdownFiles(dir, baseDir = dir) {
  * @param {string} relativePath
  * @param {string} fileContent
  * @param {string} fullPath
+ * @param {string} [idPrefix=""]
  * @returns {AgentRole}
  */
-function parseAgentRole(relativePath, fileContent, fullPath) {
-  const id = relativePath.replace(/\.md$/, "");
+function parseAgentRole(relativePath, fileContent, fullPath, idPrefix = "") {
+  const rawId = relativePath.replace(/\.md$/, "");
+  const id = idPrefix + rawId;
 
   // Match YAML frontmatter
   const match = fileContent.match(

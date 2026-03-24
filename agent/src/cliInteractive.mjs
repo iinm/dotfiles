@@ -1,6 +1,7 @@
 /**
  * @import { Message } from "./model"
  * @import { UserEventEmitter, AgentEventEmitter, AgentCommands } from "./agent"
+ * @import { ClaudeCodePluginConfig } from "./config"
  */
 
 import { execFileSync } from "node:child_process";
@@ -194,6 +195,7 @@ const HELP_MESSAGE = [
  * @property {string} notifyCmd
  * @property {boolean} sandbox
  * @property {() => Promise<void>} onStop
+ * @property {ClaudeCodePluginConfig[]} [claudeCodePlugins]
  */
 
 /**
@@ -208,6 +210,7 @@ export function startInteractiveSession({
   notifyCmd,
   sandbox,
   onStop,
+  claudeCodePlugins,
 }) {
   /** @type {{ turn: boolean, multiLineBuffer: string[] | null, subagentName: string }} */
   const state = {
@@ -222,7 +225,7 @@ export function startInteractiveSession({
    * @returns {Promise<void>}
    */
   async function invokeAgent(id, goal) {
-    const agentRoles = await loadAgentRoles();
+    const agentRoles = await loadAgentRoles(claudeCodePlugins);
     const agent = agentRoles.get(id);
     const name = agent ? id : `custom:${id}`;
     const message = `Delegate to "${name}" agent with goal: ${goal}`;
@@ -242,7 +245,7 @@ export function startInteractiveSession({
    * @returns {Promise<void>}
    */
   async function invokePrompt(id, args, displayInvocation) {
-    const prompts = await loadPrompts();
+    const prompts = await loadPrompts(claudeCodePlugins);
     const prompt = prompts.get(id);
 
     if (!prompt) {
@@ -287,8 +290,8 @@ export function startInteractiveSession({
     completer: (line, callback) => {
       (async () => {
         try {
-          const prompts = await loadPrompts();
-          const agentRoles = await loadAgentRoles();
+          const prompts = await loadPrompts(claudeCodePlugins);
+          const agentRoles = await loadAgentRoles(claudeCodePlugins);
 
           if (line.startsWith("/agents:")) {
             const prefix = "/agents:";
@@ -436,7 +439,7 @@ export function startInteractiveSession({
     }
 
     if (inputTrimmed === "/agents") {
-      const agentRoles = await loadAgentRoles();
+      const agentRoles = await loadAgentRoles(claudeCodePlugins);
 
       console.log(styleText("bold", "\nAvailable Agent Roles:"));
       if (agentRoles.size === 0) {
@@ -455,7 +458,7 @@ export function startInteractiveSession({
     }
 
     if (inputTrimmed.startsWith("/prompts")) {
-      const prompts = await loadPrompts();
+      const prompts = await loadPrompts(claudeCodePlugins);
 
       if (inputTrimmed === "/prompts") {
         console.log(styleText("bold", "\nAvailable Prompts:"));
@@ -546,7 +549,7 @@ export function startInteractiveSession({
       const match = inputTrimmed.match(/^\/([^ ]+)(?:\s+(.*))?$/);
       if (match) {
         const id = match[1];
-        const prompts = await loadPrompts();
+        const prompts = await loadPrompts(claudeCodePlugins);
         const prompt = prompts.get(id);
 
         if (prompt?.isShortcut) {

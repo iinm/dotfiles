@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { AGENT_PROJECT_METADATA_DIR } from "../env.mjs";
+import { AGENT_PROJECT_METADATA_DIR, CLAUDE_CODE_PLUGIN_DIR } from "../env.mjs";
 import { noThrowSync } from "./noThrow.mjs";
 
 /**
@@ -146,7 +146,8 @@ function isAgentMetadataPath(absPath) {
   return (
     [agentMemoryDir, agentTempDir].includes(absPath) ||
     absPath.startsWith(`${agentMemoryDir}${path.sep}`) ||
-    absPath.startsWith(`${agentTempDir}${path.sep}`)
+    absPath.startsWith(`${agentTempDir}${path.sep}`) ||
+    absPath.startsWith(`${CLAUDE_CODE_PLUGIN_DIR}${path.sep}`)
   );
 }
 

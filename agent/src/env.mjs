@@ -29,4 +29,9 @@ export const AGENT_INTERRUPT_MESSAGE_FILE_PATH = path.join(
   "interrupt-message.txt",
 );
 
+export const CLAUDE_CODE_PLUGIN_DIR = path.join(
+  AGENT_PROJECT_METADATA_DIR,
+  "claudeCodePlugins",
+);
+
 export const USER_NAME = process.env.USER || "unknown";

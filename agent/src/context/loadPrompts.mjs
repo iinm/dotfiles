@@ -6,6 +6,7 @@ import {
   AGENT_CACHE_DIR,
   AGENT_PROJECT_METADATA_DIR,
   AGENT_ROOT,
+  CLAUDE_CODE_PLUGIN_DIR,
 } from "../env.mjs";
 
 /**
@@ -17,13 +18,15 @@ import {
  * @property {string} [import]
  * @property {boolean} [userInvocable]
  * @property {boolean} [isShortcut]
+ * @property {boolean} [isSkill]
  */
 
 /**
  * Load all prompts from the predefined directories.
+ * @param {Array<{name: string, path: string}>} [claudeCodePlugins]
  * @returns {Promise<Map<string, Prompt>>}
  */
-export async function loadPrompts() {
+export async function loadPrompts(claudeCodePlugins) {
   const promptDirs = [
     {
       dir: path.resolve(AGENT_ROOT, ".config", "prompts.predefined"),
@@ -33,13 +36,32 @@ export async function loadPrompts() {
     { dir: path.resolve(AGENT_PROJECT_METADATA_DIR, "prompts"), idPrefix: "" },
     {
       dir: path.resolve(process.cwd(), ".claude", "commands"),
-      idPrefix: "claude/",
+      idPrefix: "claude/commands:",
     },
     {
       dir: path.resolve(process.cwd(), ".claude", "skills"),
-      idPrefix: "claude/skill/",
+      idPrefix: "claude/skill:",
     },
   ];
+
+  // Add plugin directories if provided
+  if (claudeCodePlugins) {
+    for (const plugin of claudeCodePlugins) {
+      const pluginBase = path.join(CLAUDE_CODE_PLUGIN_DIR, plugin.path);
+
+      // Commands
+      promptDirs.push({
+        dir: path.join(pluginBase, "commands"),
+        idPrefix: `claude/${plugin.name}/commands:`,
+      });
+
+      // Skills
+      promptDirs.push({
+        dir: path.join(pluginBase, "skills"),
+        idPrefix: `claude/${plugin.name}/skills:`,
+      });
+    }
+  }
 
   /** @type {Map<string, Prompt>} */
   const prompts = new Map();
@@ -248,6 +270,7 @@ function parsePrompt(relativePath, fileContent, fullPath, idPrefix = "") {
     import: parseFrontmatterField(frontmatter, "import"),
     userInvocable: userInvocableRaw ? userInvocableRaw === "true" : undefined,
     isShortcut,
+    isSkill: relativePath.endsWith("SKILL.md"),
   };
 }
 

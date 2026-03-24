@@ -8,6 +8,7 @@ import { parseCliArgs, printHelp } from "./cliArgs.mjs";
 import { startInteractiveSession } from "./cliInteractive.mjs";
 import { loadAppConfig } from "./config.mjs";
 import { loadAgentRoles } from "./context/loadAgentRoles.mjs";
+import { loadPrompts } from "./context/loadPrompts.mjs";
 import {
   AGENT_NOTIFY_CMD_DEFAULT,
   AGENT_PROJECT_METADATA_DIR,
@@ -94,7 +95,8 @@ if (cliArgs.showHelp) {
   }
 
   const modelNameWithVariant = cliArgs.model || appConfig.model || "";
-  const agentRoles = await loadAgentRoles();
+  const agentRoles = await loadAgentRoles(appConfig.claudeCodePlugins);
+  const prompts = await loadPrompts(appConfig.claudeCodePlugins);
 
   const prompt = createPrompt({
     username: USER_NAME,
@@ -104,6 +106,7 @@ if (cliArgs.showHelp) {
     workingDir: process.cwd(),
     projectMetadataDir: AGENT_PROJECT_METADATA_DIR,
     agentRoles,
+    skills: Array.from(prompts.values()).filter((p) => p.isSkill),
   });
 
   const builtinTools = [
@@ -193,6 +196,7 @@ if (cliArgs.showHelp) {
         await cleanup();
       }
     },
+    claudeCodePlugins: appConfig.claudeCodePlugins,
   });
 })().catch((err) => {
   console.error(err);

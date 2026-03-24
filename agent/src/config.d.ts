@@ -2,6 +2,11 @@ import { ModelDefinition, PlatformConfig } from "./modelDefinition";
 import { ToolUsePattern } from "./tool";
 import { ExecCommandSanboxConfig } from "./tools/execCommand";
 
+export type ClaudeCodePluginConfig = {
+  name: string;
+  path: string;
+};
+
 export type AppConfig = {
   model?: string;
   models?: ModelDefinition[];
@@ -30,6 +35,7 @@ export type AppConfig = {
   };
   mcpServers?: Record<string, MCPServerConfig>;
   notifyCmd?: string;
+  claudeCodePlugins?: ClaudeCodePluginConfig[];
 };
 
 export type MCPServerConfig = {

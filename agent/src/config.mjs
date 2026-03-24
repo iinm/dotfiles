@@ -68,6 +68,10 @@ export async function loadAppConfig() {
         ...(config.mcpServers ?? {}),
       },
       notifyCmd: config.notifyCmd || merged.notifyCmd,
+      claudeCodePlugins: [
+        ...(merged.claudeCodePlugins ?? []),
+        ...(config.claudeCodePlugins ?? []),
+      ],
     };
   }
 

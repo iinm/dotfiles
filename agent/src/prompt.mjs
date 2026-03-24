@@ -7,6 +7,7 @@
  * @property {string} workingDir - The current working directory.
  * @property {string} projectMetadataDir - The directory where memory files are stored.
  * @property {Map<string, import('./context/loadAgentRoles.mjs').AgentRole>} agentRoles - Available agent roles.
+ * @property {{filePath: string, description: string}[]} skills
  */
 
 /**
@@ -21,14 +22,25 @@ export function createPrompt({
   workingDir,
   projectMetadataDir,
   agentRoles,
+  skills,
 }) {
   const agentRoleDescriptions = Array.from(agentRoles.entries())
     .map(([id, role]) => {
-      let desc = role.description || "";
-      if (desc.length > 100) {
-        desc = `${desc.substring(0, 100)}...`;
-      }
+      const desc =
+        role.description.length > 100
+          ? `${role.description.substring(0, 100)}...`
+          : role.description;
       return `- ${id}: ${desc}`;
+    })
+    .join("\n");
+
+  const skillDescriptions = skills
+    .map((skill) => {
+      const desc =
+        skill.description.length > 100
+          ? `${skill.description.substring(0, 100)}...`
+          : skill.description;
+      return `- ${skill.filePath}\n  ${desc}`;
     })
     .join("\n");
 
@@ -88,14 +100,17 @@ Examples:
  
 Discover and apply project-specific rules and reusable skills.
 
-- AGENTS.md (with CLAUDE.md as a fallback): Project rules and conventions
-  Find: fd ["^(AGENTS|CLAUDE)\\.md$", "./", "--hidden", "--max-depth", "5"]
-  Read from root to target: ./AGENTS.md → dir/AGENTS.md → dir/subdir/AGENTS.md
-  Apply rules when working in that directory
+## AGENTS.md (falling back to CLAUDE.md if not found): Project-specific rules, conventions, and commands.
 
-- SKILL.md: Reusable workflows with specialized knowledge
-  Find: rg ["--hidden", "--heading", "--line-number", "--pcre2", "--multiline", "--glob", "SKILL.md", "\\A---\\n[\\s\\S]*?\\n---", "./"]
-  If skill matches task: read full file and apply the workflow
+Find: fd ["^(AGENTS|CLAUDE)\\.md$", "./", "--hidden", "--max-depth", "5"]
+Read from root to target: ./AGENTS.md → dir/AGENTS.md → dir/subdir/AGENTS.md
+Apply rules when working in that directory
+
+## SKILL.md: Reusable workflows with specialized knowledge
+
+If skill matches task: read full file and apply the workflow
+
+${skillDescriptions}
 
 # Environment
 
