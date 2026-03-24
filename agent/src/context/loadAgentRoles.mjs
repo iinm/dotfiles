@@ -5,6 +5,7 @@ import {
   AGENT_CACHE_DIR,
   AGENT_PROJECT_METADATA_DIR,
   AGENT_ROOT,
+  CLAUDE_CODE_PLUGIN_DIR,
 } from "../env.mjs";
 
 /**
@@ -18,9 +19,10 @@ import {
 
 /**
  * Load all agent roles from the predefined directories.
+ * @param {Array<{name: string, path: string}>} [claudeCodePlugins]
  * @returns {Promise<Map<string, AgentRole>>}
  */
-export async function loadAgentRoles() {
+export async function loadAgentRoles(claudeCodePlugins) {
   const agentDirs = [
     {
       dir: path.resolve(AGENT_ROOT, ".config", "agents.predefined"),
@@ -30,9 +32,21 @@ export async function loadAgentRoles() {
     { dir: path.resolve(AGENT_PROJECT_METADATA_DIR, "agents"), idPrefix: "" },
     {
       dir: path.resolve(process.cwd(), ".claude", "agents"),
-      idPrefix: "claude/",
+      idPrefix: "claude:",
     },
   ];
+
+  // Add plugin directories if provided
+  if (claudeCodePlugins) {
+    for (const plugin of claudeCodePlugins) {
+      const pluginBase = path.join(CLAUDE_CODE_PLUGIN_DIR, plugin.path);
+
+      agentDirs.push({
+        dir: path.join(pluginBase, "agents"),
+        idPrefix: `claude/${plugin.name}:`,
+      });
+    }
+  }
 
   /** @type {Map<string, AgentRole>} */
   const roles = new Map();

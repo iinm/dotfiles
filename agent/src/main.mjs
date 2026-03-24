@@ -94,7 +94,7 @@ if (cliArgs.showHelp) {
   }
 
   const modelNameWithVariant = cliArgs.model || appConfig.model || "";
-  const agentRoles = await loadAgentRoles();
+  const agentRoles = await loadAgentRoles(appConfig.claudeCodePlugins);
 
   const prompt = createPrompt({
     username: USER_NAME,
@@ -193,6 +193,7 @@ if (cliArgs.showHelp) {
         await cleanup();
       }
     },
+    claudeCodePlugins: appConfig.claudeCodePlugins,
   });
 })().catch((err) => {
   console.error(err);
