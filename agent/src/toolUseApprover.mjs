@@ -3,7 +3,7 @@
  * @import { MessageContentToolUse } from './model'
  */
 
-import { isSafeToolInput } from "./isSafeToolInput.mjs";
+import { isSafeToolInput } from "./toolInputValidator.mjs";
 import { matchValue } from "./utils/matchValue.mjs";
 
 /**

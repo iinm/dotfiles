@@ -1,7 +1,11 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { AGENT_PROJECT_METADATA_DIR, CLAUDE_CODE_PLUGIN_DIR } from "./env.mjs";
+import {
+  AGENT_MEMORY_DIR,
+  AGENT_TMP_DIR,
+  CLAUDE_CODE_PLUGIN_DIR,
+} from "./env.mjs";
 import { noThrowSync } from "./utils/noThrow.mjs";
 
 /**
@@ -60,13 +64,13 @@ export function isSafeToolInputItem(arg) {
     return false;
   }
 
-  // Allow agent metadata even if git-ignored.
-  if (isAgentMetadataPath(absPath)) {
+  // Allow safe path even if git-ignored.
+  if (isSafePath(realPath)) {
     return true;
   }
 
   // Deny git ignored files (which may contain sensitive information or should not be accessed)
-  return !isGitIgnored(absPath);
+  return !isGitIgnored(realPath);
 }
 
 /**
@@ -132,23 +136,23 @@ function isInsideWorkingDirectory(targetPath, workingDir) {
 }
 
 /**
- * @param {string} absPath
+ * @param {string} targetPath
  * @returns {boolean}
  */
-function isAgentMetadataPath(absPath) {
-  const agentMemoryDir = path.resolve(
-    path.join(AGENT_PROJECT_METADATA_DIR, "memory"),
-  );
-  const agentTempDir = path.resolve(
-    path.join(AGENT_PROJECT_METADATA_DIR, "tmp"),
-  );
+function isSafePath(targetPath) {
+  const safePaths = [AGENT_MEMORY_DIR, AGENT_TMP_DIR, CLAUDE_CODE_PLUGIN_DIR];
 
-  return (
-    [agentMemoryDir, agentTempDir].includes(absPath) ||
-    absPath.startsWith(`${agentMemoryDir}${path.sep}`) ||
-    absPath.startsWith(`${agentTempDir}${path.sep}`) ||
-    absPath.startsWith(`${CLAUDE_CODE_PLUGIN_DIR}${path.sep}`)
-  );
+  for (const safePath of safePaths) {
+    const safeAbsPath = path.resolve(safePath);
+    if (
+      targetPath === safeAbsPath ||
+      targetPath.startsWith(`${safeAbsPath}${path.sep}`)
+    ) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 /**

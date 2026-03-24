@@ -3,7 +3,7 @@ import { mkdir, rm, symlink } from "node:fs/promises";
 import path from "node:path";
 import { after, before, describe, it } from "node:test";
 import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
-import { isSafeToolInput, isSafeToolInputItem } from "./isSafeToolInput.mjs";
+import { isSafeToolInput, isSafeToolInputItem } from "./toolInputValidator.mjs";
 
 const TEMP_DIR = path.resolve("tmp/is-safe-tool-input");
 
@@ -103,8 +103,6 @@ describe("isSafeToolInputItem", () => {
 
   after(async () => {
     await rm(TEMP_DIR, { force: true, recursive: true });
-    // Note: We don't remove AGENT_PROJECT_METADATA_DIR completely as it might be used by other things,
-    // but we clean up our specific symlinks.
     await rm(symlinkInAllowedDir, { force: true });
     await rm(brokenSymlinkInAllowedDir, { force: true });
     await rm(safeSymlinkInAllowedDir, { force: true });

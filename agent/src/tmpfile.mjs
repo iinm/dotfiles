@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
+import { AGENT_TMP_DIR } from "./env.mjs";
 
 /**
  * Write content to a temporary file and return the file path
@@ -17,12 +17,10 @@ export async function writeTmpFile(content, name, extension = "txt") {
     .replace(/:/g, "");
   const randomSuffix = Math.random().toString(36).substring(2, 8);
 
-  const tmpDir = path.join(AGENT_PROJECT_METADATA_DIR, "tmp");
   const fileName = `${timestamp}-${randomSuffix}--${name}.${extension}`;
-  const filePath = path.join(tmpDir, fileName);
+  const filePath = path.join(AGENT_TMP_DIR, fileName);
 
-  // Ensure tmp directory exists
-  await fs.mkdir(tmpDir, { recursive: true });
+  await fs.mkdir(AGENT_TMP_DIR, { recursive: true });
   await fs.writeFile(filePath, content, "utf8");
 
   return filePath;
