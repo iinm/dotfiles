@@ -422,6 +422,26 @@ The agent searches for subagent definitions in the following directories:
 
 The subagent ID is the relative path of the file without the `.md` extension. For example, `.agent/agents/worker.md` becomes `worker`.
 
+## Claude Code Plugin Support
+
+Example:
+
+```sh
+git clone --depth 1 https://github.com/anthropics/claude-code .agent/claudeCodePlugins/anthropics/claude-code
+git clone --depth 1 https://github.com/awslabs/agent-plugins .agent/claudeCodePlugins/awslabs/agent-plugins
+```
+
+```js
+// .agent/config.json
+{
+  "claudeCodePlugins": [
+    { "name": "pr-review-toolkit", "path": "anthropics/claude-code/plugins/pr-review-toolkit" },
+    { "name": "aws-serverless", "path": "awslabs/agent-plugins/plugins/aws-serverless" }
+  ]
+}
+
+```
+
 ## Development
 
 ```sh
