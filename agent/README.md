@@ -6,7 +6,7 @@ A lightweight CLI-based coding agent.
 
 This CLI tool automatically allows the execution of certain tools but requires explicit approval for security-sensitive operations, such as accessing parent directories.
 
-Note: The `write_file` and `patch_file` tools block direct access to git-ignored files. However, `exec_command` can access any files within the working directory. Use a sandbox for stronger isolation. The security rules are defined in `.config/config.predefined.json` and `src/utils/isSafeToolInput.mjs` within this repository.
+Note: The `write_file` and `patch_file` tools block direct access to git-ignored files. However, `exec_command` can access any files within the working directory. Use a sandbox for stronger isolation. The security rules are defined in `.config/config.predefined.json` and `src/isSafeToolInput.mjs` within this repository.
 
 ## Requirements
 

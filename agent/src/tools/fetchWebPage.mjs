@@ -2,8 +2,8 @@
  * @import { Tool } from '../tool'
  */
 
+import { writeTmpFile } from "../tmpfile.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
-import { writeTmpFile } from "../utils/tmpfile.mjs";
 
 const MAX_CONTENT_LENGTH = 1024 * 8;
 

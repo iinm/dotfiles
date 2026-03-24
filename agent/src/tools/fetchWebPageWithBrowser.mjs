@@ -4,8 +4,8 @@
 
 import path from "node:path";
 import { AGENT_CACHE_DIR } from "../env.mjs";
+import { writeTmpFile } from "../tmpfile.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
-import { writeTmpFile } from "../utils/tmpfile.mjs";
 
 export const FETCH_WEB_PAGE_WITH_BROWSER_TOOL_USER_DATA_DIR = path.join(
   AGENT_CACHE_DIR,

@@ -2,7 +2,7 @@ import assert from "node:assert";
 import { mkdir, rm, symlink } from "node:fs/promises";
 import path from "node:path";
 import { after, before, describe, it } from "node:test";
-import { AGENT_PROJECT_METADATA_DIR } from "../env.mjs";
+import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
 import { isSafeToolInput, isSafeToolInputItem } from "./isSafeToolInput.mjs";
 
 const TEMP_DIR = path.resolve("tmp/is-safe-tool-input");

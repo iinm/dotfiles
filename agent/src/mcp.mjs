@@ -8,8 +8,8 @@
 import { mkdir, open } from "node:fs/promises";
 import path from "node:path";
 import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
+import { writeTmpFile } from "./tmpfile.mjs";
 import { noThrow } from "./utils/noThrow.mjs";
-import { writeTmpFile } from "./utils/tmpfile.mjs";
 
 const OUTPUT_MAX_LENGTH = 1024 * 8;
 

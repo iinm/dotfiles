@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { AGENT_PROJECT_METADATA_DIR } from "../env.mjs";
+import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
 
 /**
  * Write content to a temporary file and return the file path

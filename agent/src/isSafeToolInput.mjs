@@ -1,8 +1,8 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { AGENT_PROJECT_METADATA_DIR, CLAUDE_CODE_PLUGIN_DIR } from "../env.mjs";
-import { noThrowSync } from "./noThrow.mjs";
+import { AGENT_PROJECT_METADATA_DIR, CLAUDE_CODE_PLUGIN_DIR } from "./env.mjs";
+import { noThrowSync } from "./utils/noThrow.mjs";
 
 /**
  * @param {unknown} input

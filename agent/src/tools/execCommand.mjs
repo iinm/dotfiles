@@ -4,9 +4,9 @@
  */
 
 import { execFile } from "node:child_process";
+import { writeTmpFile } from "../tmpfile.mjs";
 import { matchValue } from "../utils/matchValue.mjs";
 import { noThrow } from "../utils/noThrow.mjs";
-import { writeTmpFile } from "../utils/tmpfile.mjs";
 
 const OUTPUT_MAX_LENGTH = 1024 * 8;
 const OUTPUT_TRUNCATED_LENGTH = 1024 * 2;
