@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
+import yaml from "js-yaml";
 import {
   AGENT_CACHE_DIR,
   AGENT_PROJECT_METADATA_DIR,
@@ -231,15 +232,28 @@ function parseAgentRole(relativePath, fileContent, fullPath, idPrefix = "") {
     };
   }
 
-  const frontmatter = match[1];
+  /** @type {{description?:string; import?:string}} */
+  let frontmatter;
+  try {
+    frontmatter = /** @type {{description?:string; import?:string}} */ (
+      yaml.load(match[1])
+    );
+  } catch (_err) {
+    return {
+      id,
+      description: parseFrontmatterField(match[1], "description") ?? "",
+      content: fileContent.trim(),
+      filePath: fullPath,
+    };
+  }
   const content = match[2].trim();
 
   return {
     id,
-    description: parseFrontmatterField(frontmatter, "description") ?? "",
+    description: frontmatter.description ?? "",
     content,
     filePath: fullPath,
-    import: parseFrontmatterField(frontmatter, "import"),
+    import: frontmatter.import,
   };
 }
 
@@ -249,6 +263,7 @@ function parseAgentRole(relativePath, fileContent, fullPath, idPrefix = "") {
  * @param {string} field
  * @returns {string | undefined}
  */
+
 function parseFrontmatterField(frontmatter, field) {
   const regex = new RegExp(`^${field}:\\s*(.*)$`, "m");
   const match = frontmatter.match(regex);

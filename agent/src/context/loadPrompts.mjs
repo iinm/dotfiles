@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
+import yaml from "js-yaml";
 import {
   AGENT_CACHE_DIR,
   AGENT_PROJECT_METADATA_DIR,
@@ -254,21 +255,43 @@ function parsePrompt(relativePath, fileContent, fullPath, idPrefix = "") {
       description: "",
       content: fileContent.trim(),
       filePath: fullPath,
+      isShortcut,
+      isSkill: relativePath.endsWith("SKILL.md"),
     };
   }
 
-  const frontmatter = match[1];
   const content = match[2].trim();
 
-  const userInvocableRaw = parseFrontmatterField(frontmatter, "user-invocable");
+  /** @type {{description?:string; import?:string; "user-invocable"?:boolean}} */
+  let frontmatter;
+  try {
+    frontmatter =
+      /** @type {{description?:string; import?:string; "user-invocable"?:boolean}} */ (
+        yaml.load(match[1])
+      );
+  } catch (_err) {
+    return {
+      id,
+      description: parseFrontmatterField(match[1], "description") ?? "",
+      content,
+      filePath: fullPath,
+      import: parseFrontmatterField(match[1], "import"),
+      userInvocable:
+        parseFrontmatterField(match[1], "user-invocable") === "true" ||
+        undefined,
+      isShortcut,
+      isSkill: relativePath.endsWith("SKILL.md"),
+    };
+  }
+  const userInvocable = frontmatter["user-invocable"];
 
   return {
     id,
-    description: parseFrontmatterField(frontmatter, "description") ?? "",
+    description: frontmatter.description ?? "",
     content,
     filePath: fullPath,
-    import: parseFrontmatterField(frontmatter, "import"),
-    userInvocable: userInvocableRaw ? userInvocableRaw === "true" : undefined,
+    import: frontmatter.import,
+    userInvocable: userInvocable ?? undefined,
     isShortcut,
     isSkill: relativePath.endsWith("SKILL.md"),
   };
@@ -280,6 +303,7 @@ function parsePrompt(relativePath, fileContent, fullPath, idPrefix = "") {
  * @param {string} field
  * @returns {string | undefined}
  */
+
 function parseFrontmatterField(frontmatter, field) {
   const regex = new RegExp(`^${field}:\\s*(.*)$`, "m");
   const match = frontmatter.match(regex);
