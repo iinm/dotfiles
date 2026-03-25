@@ -1,5 +1,5 @@
 ---
-import: https://raw.githubusercontent.com/anthropics/claude-plugins-official/b36fd4b753018b0b340803579399992a32e43502/plugins/code-review/commands/code-review.md
+import: https://raw.githubusercontent.com/anthropics/claude-code/db8834ba1d72e9a26fba30ac85f3bc4316bb0689/plugins/code-review/commands/code-review.md
 ---
 
 - Parallel execution of subagents is not supported. Delegate to subagents sequentially.

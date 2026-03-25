@@ -360,7 +360,7 @@ You can also import remote prompts with the `import` field:
 
 ```md
 ---
-import: https://raw.githubusercontent.com/anthropics/claude-plugins-official/4ca561fb8532594e7a5faef945e85096fcec0616/plugins/feature-dev/commands/feature-dev.md
+import: https://raw.githubusercontent.com/anthropics/claude-code/5cff78741f54a0dcfaeb11d29b9ea9a83f3882ff/plugins/feature-dev/commands/feature-dev.md
 ---
 - Use memory file instead of TodoWrite
 - Parallel execution of subagents is not supported. Delegate to subagents sequentially.
@@ -403,7 +403,7 @@ You can also import remote subagent definitions with the `import` field:
 
 ```md
 ---
-import: https://raw.githubusercontent.com/anthropics/claude-plugins-official/ceb9b72b4c4c20ad39efce780edd0aabe80ebce3/plugins/code-simplifier/agents/code-simplifier.md
+import: https://raw.githubusercontent.com/anthropics/claude-code/f7ab5c799caf2ec8c7cd1b99d2bc2f158459ef5e/plugins/pr-review-toolkit/agents/code-simplifier.md
 ---
 Use AGENTS.md instead of CLAUDE.md in this project.
 ```
