@@ -426,8 +426,8 @@ The subagent ID is the relative path of the file without the `.md` extension. Fo
 Example:
 
 ```sh
-git clone --depth 1 https://github.com/anthropics/claude-code .agent/claudeCodePlugins/anthropics/claude-code
-git clone --depth 1 https://github.com/awslabs/agent-plugins .agent/claudeCodePlugins/awslabs/agent-plugins
+git clone --depth 1 https://github.com/anthropics/claude-code .agent/claude-code-plugins/anthropics/claude-code
+git clone --depth 1 https://github.com/awslabs/agent-plugins .agent/claude-code-plugins/awslabs/agent-plugins
 ```
 
 ```js

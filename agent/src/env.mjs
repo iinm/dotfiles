@@ -20,7 +20,7 @@ export const AGENT_TMP_DIR = path.join(AGENT_PROJECT_METADATA_DIR, "tmp");
 
 export const CLAUDE_CODE_PLUGIN_DIR = path.join(
   AGENT_PROJECT_METADATA_DIR,
-  "claudeCodePlugins",
+  "claude-code-plugins",
 );
 
 export const MESSAGES_DUMP_FILE_PATH = path.join(
