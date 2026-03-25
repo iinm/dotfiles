@@ -21,7 +21,6 @@ import { createAskGoogleTool } from "./tools/askGoogle.mjs";
 import { delegateToSubagentTool } from "./tools/delegateToSubagent.mjs";
 import { createExecCommandTool } from "./tools/execCommand.mjs";
 import { fetchWebPageTool } from "./tools/fetchWebPage.mjs";
-import { fetchWebPageWithBrowserTool } from "./tools/fetchWebPageWithBrowser.mjs";
 import { patchFileTool } from "./tools/patchFile.mjs";
 import { reportAsSubagentTool } from "./tools/reportAsSubagent.mjs";
 import { createTavilySearchTool } from "./tools/tavilySearch.mjs";
@@ -115,7 +114,6 @@ if (cliArgs.showHelp) {
     patchFileTool,
     createTmuxCommandTool({ sandbox: appConfig.sandbox }),
     fetchWebPageTool,
-    fetchWebPageWithBrowserTool,
     delegateToSubagentTool,
     reportAsSubagentTool,
   ];

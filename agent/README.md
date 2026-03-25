@@ -142,7 +142,6 @@ The agent can use the following tools to assist with tasks:
 - **patch_file**: Patch a file.
 - **tmux_command**: Run a tmux command.
 - **fetch_web_page**: Fetch and extract web page content from a given URL, returning it as Markdown.
-- **fetch_web_page_with_browser**: Fetch and extract web page content from a given URL using a browser, returning it as Markdown. Can handle JavaScript-rendered content.
 - **search_web**: Search the web for information (requires Tavily API key).
 - **ask_google**: Ask Google a question using natural language (requires Gemini API key).
 - **delegate_to_subagent**: Delegate a subtask to a subagent. The agent switches to a subagent role within the same conversation, focusing on the specified goal.
@@ -193,7 +192,7 @@ The agent loads configuration files in the following order. Settings in later fi
     "patterns": [
       // Prohibit direct access to external URLs
       {
-        "toolName": { "$regex": "^(fetch_web_page|fetch_web_page_with_browser)$" },
+        "toolName": "fetch_web_page",
         "action": "deny",
         "reason": "Use ask_google instead"
       },

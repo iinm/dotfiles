@@ -4,9 +4,7 @@
     "maxApprovals": 100,
     "patterns": [
       {
-        "toolName": {
-          "$regex": "^(fetch_web_page|fetch_web_page_with_browser)$"
-        },
+        "toolName": "fetch_web_page",
         "action": "deny",
         "reason": "Use ask_google instead"
       },
