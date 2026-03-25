@@ -1,10 +1,12 @@
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const filename = fileURLToPath(import.meta.url);
 export const AGENT_ROOT = path.dirname(path.dirname(filename));
 
-export const AGENT_CACHE_DIR = path.join(AGENT_ROOT, ".cache");
+export const AGENT_CACHE_DIR = path.join(os.homedir(), ".cache", "agent");
+
 export const TRUSTED_CONFIG_HASHES_DIR = path.join(
   AGENT_CACHE_DIR,
   "trusted-config-hashes",
