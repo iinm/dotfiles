@@ -18,11 +18,11 @@ import { setupMCPServer } from "./mcp.mjs";
 import { createModelCaller } from "./modelCaller.mjs";
 import { createPrompt } from "./prompt.mjs";
 import { createAskGoogleTool } from "./tools/askGoogle.mjs";
-import { delegateToSubagentTool } from "./tools/delegateToSubagent.mjs";
+import { createDelegateToSubagentTool } from "./tools/delegateToSubagent.mjs";
 import { createExecCommandTool } from "./tools/execCommand.mjs";
 import { fetchWebPageTool } from "./tools/fetchWebPage.mjs";
 import { patchFileTool } from "./tools/patchFile.mjs";
-import { reportAsSubagentTool } from "./tools/reportAsSubagent.mjs";
+import { createReportAsSubagentTool } from "./tools/reportAsSubagent.mjs";
 import { createTavilySearchTool } from "./tools/tavilySearch.mjs";
 import { createTmuxCommandTool } from "./tools/tmuxCommand.mjs";
 import { writeFileTool } from "./tools/writeFile.mjs";
@@ -114,8 +114,8 @@ if (cliArgs.showHelp) {
     patchFileTool,
     createTmuxCommandTool({ sandbox: appConfig.sandbox }),
     fetchWebPageTool,
-    delegateToSubagentTool,
-    reportAsSubagentTool,
+    createDelegateToSubagentTool(),
+    createReportAsSubagentTool(),
   ];
 
   if (appConfig.tools?.tavily?.apiKey) {

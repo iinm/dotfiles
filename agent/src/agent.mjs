@@ -12,9 +12,8 @@ import { createStateManager } from "./agentState.mjs";
 import { MESSAGES_DUMP_FILE_PATH } from "./env.mjs";
 import { createSubagentManager } from "./subagent.mjs";
 import { createToolExecutor } from "./toolExecutor.mjs";
-import { createToolInjector } from "./toolInjector.mjs";
-import { delegateToSubagentTool } from "./tools/delegateToSubagent.mjs";
-import { reportAsSubagentTool } from "./tools/reportAsSubagent.mjs";
+import { delegateToSubagentToolName } from "./tools/delegateToSubagent.mjs";
+import { reportAsSubagentToolName } from "./tools/reportAsSubagent.mjs";
 
 /**
  * @param {AgentConfig} config
@@ -27,6 +26,11 @@ export function createAgent({
   toolUseApprover,
   agentRoles,
 }) {
+  /** @type {UserEventEmitter} */
+  const userEventEmitter = new EventEmitter();
+  /** @type {AgentEventEmitter} */
+  const agentEventEmitter = new EventEmitter();
+
   const stateManager = createStateManager(
     [
       {
@@ -45,83 +49,55 @@ export function createAgent({
     },
   );
 
-  /** @type {UserEventEmitter} */
-  const userEventEmitter = new EventEmitter();
-  /** @type {AgentEventEmitter} */
-  const agentEventEmitter = new EventEmitter();
-
   const subagentManager = createSubagentManager(agentRoles, {
     onSubagentSwitched: (subagent) => {
       agentEventEmitter.emit("subagentSwitched", subagent);
     },
   });
 
-  const toolInjector = createToolInjector();
-  toolInjector.register(
-    delegateToSubagentTool.def.name,
-    (
-      tool,
-      /** @type {{ subagentManager: import("./subagent.mjs").SubagentManager, stateManager: import("./agentState.mjs").StateManager }} */ context,
-    ) => ({
-      ...tool,
-      /**
-       * @param {DelegateToSubagentInput} input
-       */
-      impl: async (input) => {
-        const result = context.subagentManager.delegateToSubagent(
-          input.name,
-          input.goal,
-          context.stateManager.getMessages().length - 1,
-        );
-        if (!result.success) {
-          return new Error(result.error);
-        }
-        return result.value;
-      },
-    }),
-  );
+  /**
+   * @param {DelegateToSubagentInput} input
+   */
+  const delegateToSubagentImpl = async (input) => {
+    const result = subagentManager.delegateToSubagent(
+      input.name,
+      input.goal,
+      stateManager.getMessages().length - 1,
+    );
+    if (!result.success) {
+      return new Error(result.error);
+    }
+    return result.value;
+  };
 
-  toolInjector.register(
-    reportAsSubagentTool.def.name,
-    (
-      tool,
-      /** @type {{ subagentManager: import("./subagent.mjs").SubagentManager }} */ context,
-    ) => ({
-      ...tool,
-      /**
-       * @param {ReportAsSubagentInput} input
-       */
-      impl: async (input) => {
-        const result = await context.subagentManager.reportAsSubagent(
-          input.memoryPath,
-        );
-        if (!result.success) {
-          return new Error(result.error);
-        }
-        return result.memoryContent;
-      },
-    }),
-  );
-
-  const injectedTools = toolInjector.inject(tools, {
-    subagentManager,
-    stateManager,
-  });
+  /**
+   * @param {ReportAsSubagentInput} input
+   */
+  const reportAsSubagentImpl = async (input) => {
+    const result = await subagentManager.reportAsSubagent(input.memoryPath);
+    if (!result.success) {
+      return new Error(result.error);
+    }
+    return result.memoryContent;
+  };
 
   /** @type {Map<string, Tool>} */
   const toolByName = new Map();
-  for (const tool of injectedTools) {
+  for (const tool of tools) {
+    if (tool.def.name === delegateToSubagentToolName && tool.injectImpl) {
+      tool.injectImpl(delegateToSubagentImpl);
+    }
+    if (tool.def.name === reportAsSubagentToolName && tool.injectImpl) {
+      tool.injectImpl(reportAsSubagentImpl);
+    }
     toolByName.set(tool.def.name, tool);
   }
 
   /** @type {ToolDefinition[]} */
-  const toolDefs = injectedTools.map(({ def }) => def);
+  const toolDefs = tools.map(({ def }) => def);
 
   const toolExecutor = createToolExecutor(toolByName, {
-    exclusiveToolNames: [
-      delegateToSubagentTool.def.name,
-      reportAsSubagentTool.def.name,
-    ],
+    exclusiveToolNames: [delegateToSubagentToolName, reportAsSubagentToolName],
   });
 
   async function dumpMessages() {

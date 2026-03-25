@@ -7,6 +7,7 @@ export type Tool = {
   maskApprovalInput?: (
     input: Record<string, unknown>,
   ) => Record<string, unknown>;
+  injectImpl?: (impl: ToolImplementation) => void;
 };
 
 export type ToolDefinition = {

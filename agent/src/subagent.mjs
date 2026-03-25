@@ -7,7 +7,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { AGENT_PROJECT_METADATA_DIR } from "./env.mjs";
-import { reportAsSubagentTool } from "./tools/reportAsSubagent.mjs";
+import { reportAsSubagentToolName } from "./tools/reportAsSubagent.mjs";
 
 /** @typedef {ReturnType<typeof createSubagentManager>} SubagentManager */
 
@@ -162,7 +162,7 @@ export function createSubagentManager(agentRoles, handlers) {
    */
   function processToolResults(toolUseParts, toolResults, messages) {
     const reportSubagentToolUse = toolUseParts.find(
-      (toolUse) => toolUse.toolName === reportAsSubagentTool.def.name,
+      (toolUse) => toolUse.toolName === reportAsSubagentToolName,
     );
 
     if (reportSubagentToolUse) {
