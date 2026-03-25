@@ -760,7 +760,7 @@ local setup_minuet = function()
       -- show_on_completion_menu = true,
     },
 
-    provider = 'openai_compatible',
+    provider = 'gemini',
     request_timeout = 5,
 
     provider_options = {
@@ -806,21 +806,6 @@ local setup_minuet = function()
         api_key = function()
           return local_secrets.minuet_openai_api_key
         end
-      },
-
-      -- LiteLLM Proxy
-      openai_compatible = {
-        model = 'gemini-3-flash-preview',
-        -- model = 'claude-haiku-4-5',
-        end_point = 'http://localhost:4900/v1/chat/completions',
-        stream = false,
-        api_key = function()
-          return 'any'
-        end,
-        optional = {
-          -- max_tokens = 256,
-          reasoning_effort = 'minimal',
-        }
       },
     },
   })
