@@ -733,6 +733,11 @@ setup_container_firewall() {
   iptables -t mangle -F
   iptables -t mangle -X
 
+  ip6tables -F
+  ip6tables -X
+  ip6tables -t mangle -F
+  ip6tables -t mangle -X
+
   ipset create allow_list hash:net,port -exist
   ipset flush allow_list
   
@@ -748,6 +753,10 @@ setup_container_firewall() {
   iptables -P INPUT DROP
   iptables -P FORWARD DROP
   iptables -P OUTPUT DROP
+
+  ip6tables -P INPUT DROP
+  ip6tables -P FORWARD DROP
+  ip6tables -P OUTPUT DROP
   
   # allow access from docker host
   iptables -A INPUT -s "$docker_host_address" -j ACCEPT
