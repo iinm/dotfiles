@@ -116,7 +116,7 @@ Examples:
     $SCRIPT_NAME --allow-net mise-versions.jdx.dev,github.com,dl.google.com mise install go
 
   Use volume:
-    $SCRIPT_NAME --volume agent-sandbox--global--home-npm:/home/node/.npm \\
+    $SCRIPT_NAME --volume $SCRIPT_NAME--global--home-npm:/home/node/.npm \\
       --volume node_modules \\
       --verbose npm install
 
@@ -132,7 +132,7 @@ Preset Configuration:
 
   When --dockerfile is not specified, a preset Node.js LTS image is used with:
   - System packages: busybox, bash, zsh (with grml config), ripgrep, fd, dig, curl, git
-  - mise-en-place package manager for additional runtime installations
+  - mise package manager for additional runtime installations
   - AI coding assistants: Claude Code, Gemini CLI, Codex CLI
   - Persistent storage for shell history, git config, and AI tool configurations
   - Default editor: busybox vi
@@ -880,7 +880,7 @@ RUN apt update \
     && locale-gen \
     && npm install -g npm@latest
 
-# mise-en-place: https://mise.jdx.dev/
+# mise: https://mise.jdx.dev/
 RUN install -dm 755 /etc/apt/keyrings \
     && curl -fsSL https://mise.jdx.dev/gpg-key.pub | gpg --dearmor | tee /etc/apt/keyrings/mise-archive-keyring.gpg 1> /dev/null \
     && echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg arch=$(dpkg --print-architecture)] https://mise.jdx.dev/deb stable main" | tee /etc/apt/sources.list.d/mise.list \
