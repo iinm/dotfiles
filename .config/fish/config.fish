@@ -33,8 +33,6 @@ fish_add_path $HOME/go/bin
 
 set -x DOTFILES_DIR (dirname (dirname (readlink -f $HOME/.config/fish)))
 fish_add_path $DOTFILES_DIR/bin
-fish_add_path $DOTFILES_DIR/agent/bin
-fish_add_path $DOTFILES_DIR/agent-sandbox/bin
 
 # Environment variables
 set -x SHELL (which fish)
