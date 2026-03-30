@@ -474,62 +474,53 @@ local setup_auto_commands = function()
 end
 
 local setup_plugins = function()
-  -- https://lazy.folke.io/installation
-  local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-  if not (vim.uv or vim.loop).fs_stat(lazypath) then
-    local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-    local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
-    if vim.v.shell_error ~= 0 then
-      vim.api.nvim_echo({
-        { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-        { out,                            "WarningMsg" },
-        { "\nPress any key to exit..." },
-      }, true, {})
-      vim.fn.getchar()
-      os.exit(1)
+  vim.api.nvim_create_autocmd('PackChanged', {
+    callback = function(ev)
+      local name, kind = ev.data.spec.name, ev.data.kind
+      if name == 'nvim-treesitter' and kind == 'update' then
+        if not ev.data.active then vim.cmd.packadd('nvim-treesitter') end
+        vim.cmd('TSUpdate')
+      end
     end
-  end
-  vim.opt.rtp:prepend(lazypath)
+  })
 
-  require('lazy').setup({
-    spec = {
-      -- syntax
-      { 'https://github.com/nvim-treesitter/nvim-treesitter' },
+  vim.pack.add({
+    -- syntax
+    { src = 'https://github.com/nvim-treesitter/nvim-treesitter' },
 
-      -- ui
-      { 'https://github.com/sainnhe/everforest' },
+    -- ui
+    { src = 'https://github.com/sainnhe/everforest' },
 
-      -- fuzzy finder
-      { 'https://github.com/junegunn/fzf' },
-      { 'https://github.com/junegunn/fzf.vim' },
+    -- fuzzy finder
+    { src = 'https://github.com/junegunn/fzf' },
+    { src = 'https://github.com/junegunn/fzf.vim' },
 
-      -- file explorer
-      { 'https://github.com/stevearc/oil.nvim' },
+    -- file explorer
+    { src = 'https://github.com/stevearc/oil.nvim' },
 
-      -- terminal
-      { 'https://github.com/akinsho/toggleterm.nvim' },
+    -- terminal
+    { src = 'https://github.com/akinsho/toggleterm.nvim' },
 
-      -- markdown preview
-      { 'https://github.com/previm/previm' },
+    -- markdown preview
+    { src = 'https://github.com/previm/previm' },
 
-      -- lsp
-      { 'https://github.com/neovim/nvim-lspconfig' },
+    -- lsp
+    { src = 'https://github.com/neovim/nvim-lspconfig' },
 
-      -- completion
-      { 'https://github.com/saghen/blink.cmp',               version = '1.*' },
-      { 'https://github.com/milanglacier/minuet-ai.nvim' },
-      { 'https://github.com/nvim-lua/plenary.nvim' }, -- required by minuet
+    -- completion
+    { src = 'https://github.com/saghen/blink.cmp',               version = vim.version.range('v1.x') },
+    { src = 'https://github.com/milanglacier/minuet-ai.nvim' },
+    { src = 'https://github.com/nvim-lua/plenary.nvim' }, -- required by minuet
 
-      -- snippets
-      { 'https://github.com/rafamadriz/friendly-snippets' },
+    -- snippets
+    { src = 'https://github.com/rafamadriz/friendly-snippets' },
 
-      -- utilities
-      { 'https://github.com/tpope/vim-sleuth' },
-      { 'https://github.com/tpope/vim-fugitive' },
-      { 'https://github.com/easymotion/vim-easymotion' },
-      { 'https://github.com/kylechui/nvim-surround' },
-      { 'https://github.com/windwp/nvim-autopairs' },
-    }
+    -- utilities
+    { src = 'https://github.com/tpope/vim-sleuth' },
+    { src = 'https://github.com/tpope/vim-fugitive' },
+    { src = 'https://github.com/easymotion/vim-easymotion' },
+    { src = 'https://github.com/kylechui/nvim-surround' },
+    { src = 'https://github.com/windwp/nvim-autopairs' },
   })
 end
 
