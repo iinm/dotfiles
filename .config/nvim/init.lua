@@ -406,7 +406,7 @@ local setup_auto_commands = function()
     command = 'botright cwindow | setlocal nowrap'
   })
 
-  -- start treesitter
+  -- start treesitter (Neovim 0.12+ native)
   vim.api.nvim_create_autocmd({ 'FileType' }, {
     callback = function()
       local ok, _ = pcall(vim.treesitter.start)
@@ -474,18 +474,8 @@ local setup_auto_commands = function()
 end
 
 local setup_plugins = function()
-  vim.api.nvim_create_autocmd('PackChanged', {
-    callback = function(ev)
-      local name, kind = ev.data.spec.name, ev.data.kind
-      if name == 'nvim-treesitter' and kind == 'update' then
-        if not ev.data.active then vim.cmd.packadd('nvim-treesitter') end
-        vim.cmd('TSUpdate')
-      end
-    end
-  })
-
   vim.pack.add({
-    -- syntax
+    -- syntax (for indentexpr and custom parsers)
     { src = 'https://github.com/nvim-treesitter/nvim-treesitter' },
 
     -- ui
@@ -717,10 +707,9 @@ local setup_oil = function()
 end
 
 local setup_treesitter = function()
+  -- Note: vim, vimdoc, lua, markdown, query, c are bundled with Neovim 0.12+
   if vim.fn.executable('tree-sitter') == 1 then
     require('nvim-treesitter').install({
-      'vim', 'vimdoc',
-      'lua',
       'javascript', 'jsdoc',
       'typescript', 'tsx',
       'mermaid',
