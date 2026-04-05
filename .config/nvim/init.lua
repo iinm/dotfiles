@@ -548,6 +548,8 @@ local setup_lsp = function()
     { name = 'ts_ls',       bin = 'tsserver' },
     -- go install golang.org/x/tools/gopls@latest
     { name = 'gopls',       bin = 'gopls' },
+    -- pip install python-lsp-server
+    { name = 'pylsp',       bin = 'pylsp' },
     -- brew install hashicorp/tap/terraform-ls
     -- https://releases.hashicorp.com/terraform-ls/
     { name = 'terraformls', bin = 'terraform-ls' },
