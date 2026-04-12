@@ -37,12 +37,14 @@ keymap:
       not: [wezterm]
     remap:
       # Mac-like key bindings
+      LeftMeta-a: C-a
       LeftMeta-c: C-c
       LeftMeta-v: C-v
       LeftMeta-t: C-t
       LeftMeta-w: C-w
       LeftMeta-f: C-f
       LeftMeta-l: C-l
+      LeftMeta-x: C-x
       LeftMeta-z: C-z
       LeftMeta-r: C-r
       # +Shift
