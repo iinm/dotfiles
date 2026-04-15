@@ -511,6 +511,7 @@ local setup_plugins = function()
     { src = 'https://github.com/easymotion/vim-easymotion' },
     { src = 'https://github.com/kylechui/nvim-surround' },
     { src = 'https://github.com/windwp/nvim-autopairs' },
+    { src = 'https://github.com/Almo7aya/openingh.nvim' },
   })
 end
 
