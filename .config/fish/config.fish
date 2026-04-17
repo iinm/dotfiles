@@ -75,6 +75,7 @@ if status is-interactive
 
   alias t 'tmux'
   alias v 'nvim'
+  alias a 'plain'
 
   alias gco 'git checkout'
   alias gst 'git status'
