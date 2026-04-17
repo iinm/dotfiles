@@ -140,6 +140,7 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>z', ':<C-u>setl foldlevel=')
   vim.keymap.set('n', '<leader>q', window_utils.toggle_quickfix)
   vim.keymap.set('n', '<leader>i', ':<C-u>e .plain-agent/instructions.md<CR>')
+  vim.keymap.set('n', '<leader>m', ':<C-u>e .plain-agent/memory<CR>')
   vim.keymap.set({ 'n', 'v' }, '<leader>c', ':CopyContext<CR>')
   vim.keymap.set('n', 's', '<Plug>(easymotion-overwin-f2)')
   vim.keymap.set('n', '-', '<Cmd>Oil<CR>')
@@ -440,6 +441,15 @@ local setup_auto_commands = function()
     pattern = { 'toggleterm', 'qf' },
     group = vim.api.nvim_create_augroup('UserDisableSpellCheck', {}),
     command = 'setlocal nospell'
+  })
+
+  -- markdown filetype keymaps
+  vim.api.nvim_create_autocmd({ 'FileType' }, {
+    pattern = 'markdown',
+    group = vim.api.nvim_create_augroup('UserMarkdownKeymapConfig', {}),
+    callback = function()
+      vim.keymap.set('n', '<leader>p', '<Cmd>PrevimOpen<CR>', { buffer = true })
+    end,
   })
 
   -- fix syntax highlighting
