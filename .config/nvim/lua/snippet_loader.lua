@@ -38,7 +38,7 @@ local function parse_snippet_file(filepath, base_dir)
         menu = '[Snip]',
         kind = 'Snippet',
         info = name .. '\n' .. body,
-        user_data = { snippet_body = body, snippet_prefix = p },
+        user_data = { snippet_body = body },
       })
     end
   end
@@ -134,52 +134,27 @@ local function setup_expand_autocmd()
   })
 end
 
---- Auto-trigger snippet completion on TextChangedI.
---- Deferred to give LSP completion priority.
-local function setup_auto_trigger()
-  local timer = nil
+--- Trigger snippet completion manually.
+function M.complete()
+  local ft = vim.bo.filetype
+  local items = get_snippets(ft)
+  if #items == 0 then return end
 
-  vim.api.nvim_create_autocmd('TextChangedI', {
-    group = vim.api.nvim_create_augroup('UserSnippetAutoTrigger', {}),
-    callback = function()
-      -- Cancel any pending trigger
-      if timer then
-        timer:stop()
-        timer = nil
-      end
+  local col = vim.fn.col('.')
+  local line = vim.fn.getline('.')
+  local prefix = line:sub(1, col - 1):match('[%w_-]*$') or ''
+  local start_col = col - #prefix
 
-      -- Defer to give LSP completion a chance to show first
-      timer = vim.defer_fn(function()
-        timer = nil
+  local filtered = {}
+  for _, item in ipairs(items) do
+    if prefix == '' or item.abbr:sub(1, #prefix) == prefix then
+      table.insert(filtered, item)
+    end
+  end
 
-        -- Don't interfere if popup menu is already visible (e.g. from LSP)
-        if vim.fn.pumvisible() == 1 then return end
-        -- Must be in insert mode
-        if vim.fn.mode() ~= 'i' then return end
-
-        local ft = vim.bo.filetype
-        local items = get_snippets(ft)
-        if #items == 0 then return end
-
-        local col = vim.fn.col('.')
-        local line = vim.fn.getline('.')
-        local prefix = line:sub(1, col - 1):match('[%w_-]+$')
-        if not prefix or #prefix < 1 then return end
-
-        local filtered = {}
-        for _, item in ipairs(items) do
-          if item.abbr:sub(1, #prefix) == prefix then
-            table.insert(filtered, item)
-          end
-        end
-
-        if #filtered > 0 then
-          local start_col = col - #prefix
-          vim.fn.complete(start_col, filtered)
-        end
-      end, 100) -- 100ms delay to let LSP respond first
-    end,
-  })
+  if #filtered > 0 then
+    vim.fn.complete(start_col, filtered)
+  end
 end
 
 --- Setup snippet jump keymaps (<C-f> next, <C-b> prev).
@@ -204,8 +179,12 @@ end
 --- Setup: register autocmds and keymaps.
 function M.setup()
   setup_expand_autocmd()
-  setup_auto_trigger()
   setup_jump_keymaps()
+
+  -- <C-s> to trigger snippet completion
+  vim.keymap.set('i', '<C-s>', function()
+    M.complete()
+  end, { silent = true, desc = 'Trigger snippet completion' })
 end
 
 return M
