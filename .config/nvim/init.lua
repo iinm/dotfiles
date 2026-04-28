@@ -28,7 +28,8 @@ local setup_options = function()
   vim.opt.wildignore = { '.git', 'node_modules' }
   vim.opt.wildmode = { 'longest', 'full' }
   vim.opt.wildoptions = { 'fuzzy', 'pum', 'tagfile' }
-  vim.opt.completeopt = { 'menu', 'menuone', 'noinsert', 'popup' }
+  vim.opt.completeopt = { 'menu', 'menuone', 'noselect', 'fuzzy', 'popup' }
+  vim.o.pumborder = 'rounded'
   vim.opt.clipboard = "unnamedplus"
   vim.opt.termguicolors = true
   vim.opt.cursorline = true
@@ -508,12 +509,8 @@ local setup_plugins = function()
     { src = 'https://github.com/neovim/nvim-lspconfig' },
 
     -- completion
-    { src = 'https://github.com/saghen/blink.cmp',               version = vim.version.range('v1.x') },
     { src = 'https://github.com/milanglacier/minuet-ai.nvim' },
     { src = 'https://github.com/nvim-lua/plenary.nvim' }, -- required by minuet
-
-    -- snippets
-    { src = 'https://github.com/rafamadriz/friendly-snippets' },
 
     -- utilities
     { src = 'https://github.com/tpope/vim-sleuth' },
@@ -541,9 +538,27 @@ end
 local setup_lsp = function()
   local local_config = require_safe('local_config')
 
-  vim.lsp.config('*', {
-    capabilities = require('blink.cmp').get_lsp_capabilities()
+  -- enable native LSP completion (Neovim 0.12+)
+  vim.api.nvim_create_autocmd('LspAttach', {
+    group = vim.api.nvim_create_augroup('UserLspCompletionConfig', {}),
+    callback = function(ev)
+      local client = vim.lsp.get_client_by_id(ev.data.client_id)
+      if client and client:supports_method('textDocument/completion') then
+        vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = true })
+      end
+    end,
   })
+
+  -- HACK: add border to documentation popup
+  -- https://github.com/neovim/neovim/issues/38248
+  local orig_complete_set = vim.api.nvim__complete_set
+  vim.api.nvim__complete_set = function(...)
+    local result = orig_complete_set(...)
+    if result and result.winid then
+      pcall(vim.api.nvim_win_set_config, result.winid, { border = 'rounded' })
+    end
+    return result
+  end
 
   local efm_default_settings = require('efm_config').default_settings
   local efm_settings = vim.tbl_deep_extend(
@@ -652,56 +667,6 @@ local setup_lsp = function()
   })
 end
 
-local setup_blink_cmp = function()
-  require('blink.cmp').setup({
-    keymap = {
-      preset = 'none',
-      ['<CR>'] = { 'accept', 'fallback' },
-
-      ['<C-e>'] = { 'hide' },
-      ['<C-y>'] = { 'select_and_accept' },
-
-      ['<Up>'] = { 'select_prev', 'fallback' },
-      ['<Down>'] = { 'select_next', 'fallback' },
-      ['<C-p>'] = { 'select_prev', 'fallback_to_mappings' },
-      ['<C-n>'] = { 'select_next', 'fallback_to_mappings' },
-
-      ['<C-b>'] = { 'snippet_backward', 'scroll_documentation_up', 'fallback' },
-      ['<C-f>'] = { 'snippet_forward', 'scroll_documentation_down', 'fallback' },
-
-      -- Avoid conflict with Minuet
-      -- ['<Tab>'] = { 'snippet_forward', 'fallback' },
-      -- ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
-
-      ['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
-    },
-    completion = {
-      list = {
-        selection = { preselect = false, auto_insert = true },
-      },
-      documentation = {
-        auto_show = true,
-        auto_show_delay_ms = 200,
-      },
-    },
-    cmdline = {
-      keymap = {
-        preset = 'none',
-        ['<Tab>'] = { 'show_and_insert', 'select_next' },
-        ['<C-n>'] = { 'select_next', 'fallback' },
-        ['<C-p>'] = { 'select_prev', 'fallback' },
-        ['<C-e>'] = { 'cancel' },
-      },
-      completion = {
-        menu = { auto_show = true },
-        list = {
-          selection = { preselect = false, auto_insert = true },
-        },
-      },
-    },
-  })
-end
-
 local setup_oil = function()
   require("oil").setup({
     view_options = {
@@ -743,10 +708,6 @@ local setup_minuet = function()
     cmp = {
       enable_auto_complete = false,
     },
-    blink = {
-      enable_auto_complete = false,
-    },
-
     virtualtext = {
       auto_trigger_ft = {},
       keymap = {},
@@ -823,7 +784,6 @@ setup_auto_commands()
 setup_plugins()
 setup_toggleterm()
 setup_lsp()
-setup_blink_cmp()
 setup_oil()
 setup_treesitter()
 setup_minuet()
