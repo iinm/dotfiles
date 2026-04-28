@@ -140,37 +140,62 @@ local function setup_expand_autocmd()
   })
 end
 
---- Trigger snippet completion.
-function M.complete()
-  local ft = vim.bo.filetype
-  local items = get_snippets(ft)
-  if #items == 0 then return end
+--- Auto-trigger snippet completion on TextChangedI.
+local function setup_auto_trigger()
+  vim.api.nvim_create_autocmd('TextChangedI', {
+    group = vim.api.nvim_create_augroup('UserSnippetAutoTrigger', {}),
+    callback = function()
+      -- Don't interfere if popup menu is already visible (e.g. from LSP)
+      if vim.fn.pumvisible() == 1 then return end
 
-  local col = vim.fn.col('.')
-  local line = vim.fn.getline('.')
-  local prefix = line:sub(1, col - 1):match('[%w_-]*$') or ''
-  local start_col = col - #prefix
+      local ft = vim.bo.filetype
+      local items = get_snippets(ft)
+      if #items == 0 then return end
 
-  local filtered = {}
-  for _, item in ipairs(items) do
-    if prefix == '' or item.word:sub(1, #prefix) == prefix then
-      table.insert(filtered, item)
-    end
-  end
+      local col = vim.fn.col('.')
+      local line = vim.fn.getline('.')
+      local prefix = line:sub(1, col - 1):match('[%w_-]+$')
+      if not prefix or #prefix < 1 then return end
 
-  if #filtered > 0 then
-    vim.fn.complete(start_col, filtered)
-  end
+      local filtered = {}
+      for _, item in ipairs(items) do
+        if item.word:sub(1, #prefix) == prefix then
+          table.insert(filtered, item)
+        end
+      end
+
+      if #filtered > 0 then
+        local start_col = col - #prefix
+        vim.fn.complete(start_col, filtered)
+      end
+    end,
+  })
 end
 
---- Setup: register autocmds for snippet expansion and keymap.
+--- Setup snippet jump keymaps (<C-f> next, <C-b> prev).
+local function setup_jump_keymaps()
+  vim.keymap.set({ 'i', 's' }, '<C-f>', function()
+    if vim.snippet.active({ direction = 1 }) then
+      vim.snippet.jump(1)
+    else
+      return vim.api.nvim_replace_termcodes('<C-f>', true, false, true)
+    end
+  end, { expr = true, silent = true, desc = 'Snippet: jump to next placeholder' })
+
+  vim.keymap.set({ 'i', 's' }, '<C-b>', function()
+    if vim.snippet.active({ direction = -1 }) then
+      vim.snippet.jump(-1)
+    else
+      return vim.api.nvim_replace_termcodes('<C-b>', true, false, true)
+    end
+  end, { expr = true, silent = true, desc = 'Snippet: jump to prev placeholder' })
+end
+
+--- Setup: register autocmds and keymaps.
 function M.setup()
   setup_expand_autocmd()
-
-  -- <C-s> to trigger snippet completion manually
-  vim.keymap.set('i', '<C-s>', function()
-    M.complete()
-  end, { silent = true, desc = 'Trigger snippet completion' })
+  setup_auto_trigger()
+  setup_jump_keymaps()
 end
 
 return M
