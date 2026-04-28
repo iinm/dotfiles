@@ -33,12 +33,12 @@ local function parse_snippet_file(filepath, base_dir)
     end
     for _, p in ipairs(prefixes) do
       table.insert(items, {
-        word = p,
+        word = '',
         abbr = p,
         menu = '[Snip]',
         kind = 'Snippet',
         info = name .. '\n' .. body,
-        user_data = { snippet_body = body },
+        user_data = { snippet_body = body, snippet_prefix = p },
       })
     end
   end
@@ -123,51 +123,61 @@ local function setup_expand_autocmd()
         if ok then user_data = parsed end
       end
 
-      if type(user_data) == 'table' and user_data.snippet_body then
-        -- Remove the inserted prefix text, then expand the snippet
-        local prefix = item.word or ''
-        if #prefix > 0 then
-          local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-          local line = vim.api.nvim_get_current_line()
-          local before = line:sub(1, col - #prefix)
-          local after = line:sub(col + 1)
-          vim.api.nvim_set_current_line(before .. after)
-          vim.api.nvim_win_set_cursor(0, { row, #before })
-        end
+      if type(user_data) ~= 'table' or not user_data.snippet_body then return end
+
+      -- word='' means completion already removed the typed prefix (from start_col to cursor).
+      -- Just expand the snippet at the current cursor position.
+      vim.schedule(function()
         vim.snippet.expand(user_data.snippet_body)
-      end
+      end)
     end,
   })
 end
 
 --- Auto-trigger snippet completion on TextChangedI.
+--- Deferred to give LSP completion priority.
 local function setup_auto_trigger()
+  local timer = nil
+
   vim.api.nvim_create_autocmd('TextChangedI', {
     group = vim.api.nvim_create_augroup('UserSnippetAutoTrigger', {}),
     callback = function()
-      -- Don't interfere if popup menu is already visible (e.g. from LSP)
-      if vim.fn.pumvisible() == 1 then return end
+      -- Cancel any pending trigger
+      if timer then
+        timer:stop()
+        timer = nil
+      end
 
-      local ft = vim.bo.filetype
-      local items = get_snippets(ft)
-      if #items == 0 then return end
+      -- Defer to give LSP completion a chance to show first
+      timer = vim.defer_fn(function()
+        timer = nil
 
-      local col = vim.fn.col('.')
-      local line = vim.fn.getline('.')
-      local prefix = line:sub(1, col - 1):match('[%w_-]+$')
-      if not prefix or #prefix < 1 then return end
+        -- Don't interfere if popup menu is already visible (e.g. from LSP)
+        if vim.fn.pumvisible() == 1 then return end
+        -- Must be in insert mode
+        if vim.fn.mode() ~= 'i' then return end
 
-      local filtered = {}
-      for _, item in ipairs(items) do
-        if item.word:sub(1, #prefix) == prefix then
-          table.insert(filtered, item)
+        local ft = vim.bo.filetype
+        local items = get_snippets(ft)
+        if #items == 0 then return end
+
+        local col = vim.fn.col('.')
+        local line = vim.fn.getline('.')
+        local prefix = line:sub(1, col - 1):match('[%w_-]+$')
+        if not prefix or #prefix < 1 then return end
+
+        local filtered = {}
+        for _, item in ipairs(items) do
+          if item.abbr:sub(1, #prefix) == prefix then
+            table.insert(filtered, item)
+          end
         end
-      end
 
-      if #filtered > 0 then
-        local start_col = col - #prefix
-        vim.fn.complete(start_col, filtered)
-      end
+        if #filtered > 0 then
+          local start_col = col - #prefix
+          vim.fn.complete(start_col, filtered)
+        end
+      end, 100) -- 100ms delay to let LSP respond first
     end,
   })
 end
