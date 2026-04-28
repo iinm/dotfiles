@@ -512,6 +512,9 @@ local setup_plugins = function()
     { src = 'https://github.com/milanglacier/minuet-ai.nvim' },
     { src = 'https://github.com/nvim-lua/plenary.nvim' }, -- required by minuet
 
+    -- snippets
+    { src = 'https://github.com/rafamadriz/friendly-snippets' },
+
     -- utilities
     { src = 'https://github.com/tpope/vim-sleuth' },
     { src = 'https://github.com/tpope/vim-fugitive' },
