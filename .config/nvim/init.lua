@@ -787,6 +787,7 @@ setup_lsp()
 setup_oil()
 setup_treesitter()
 setup_minuet()
+require('snippet_loader').setup()
 setup_others()
 
 setup_appearance()
