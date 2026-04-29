@@ -134,24 +134,31 @@ local function setup_expand_autocmd()
   })
 end
 
---- Trigger snippet completion manually.
-function M.complete()
+--- Get matching snippet items for the current cursor position.
+--- @return table[] filtered items, number start_col
+function M.get_matches()
   local ft = vim.bo.filetype
   local items = get_snippets(ft)
-  if #items == 0 then return end
+  if #items == 0 then return {}, 0 end
 
   local col = vim.fn.col('.')
   local line = vim.fn.getline('.')
-  local prefix = line:sub(1, col - 1):match('[%w_-]*$') or ''
-  local start_col = col - #prefix
+  local prefix = line:sub(1, col - 1):match('[%w_-]+$')
+  if not prefix or #prefix < 2 then return {}, 0 end
 
+  local start_col = col - #prefix
   local filtered = {}
   for _, item in ipairs(items) do
-    if prefix == '' or item.abbr:sub(1, #prefix) == prefix then
+    if item.abbr:sub(1, #prefix) == prefix then
       table.insert(filtered, item)
     end
   end
+  return filtered, start_col
+end
 
+--- Trigger snippet completion (show popup with matching snippets).
+function M.complete()
+  local filtered, start_col = M.get_matches()
   if #filtered > 0 then
     vim.fn.complete(start_col, filtered)
   end
@@ -180,11 +187,6 @@ end
 function M.setup()
   setup_expand_autocmd()
   setup_jump_keymaps()
-
-  -- <C-s> to trigger snippet completion
-  vim.keymap.set('i', '<C-s>', function()
-    M.complete()
-  end, { silent = true, desc = 'Trigger snippet completion' })
 end
 
 return M

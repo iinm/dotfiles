@@ -558,6 +558,7 @@ local setup_lsp = function()
         vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = true })
 
         -- auto-trigger on keyword typing (>= 2 chars)
+        -- snippets take priority when prefix matches, otherwise LSP
         vim.api.nvim_create_autocmd('TextChangedI', {
           group = vim.api.nvim_create_augroup('UserLspKeywordTrigger_' .. ev.buf, {}),
           buffer = ev.buf,
@@ -565,12 +566,18 @@ local setup_lsp = function()
             if vim.fn.pumvisible() == 1 then return end
             local col = vim.fn.col('.')
             local line = vim.fn.getline('.')
-            local prefix = line:sub(1, col - 1):match('[%w_]+$')
+            local prefix = line:sub(1, col - 1):match('[%w_-]+$')
             if not prefix or #prefix < 2 then return end
-            vim.api.nvim_feedkeys(
-              vim.api.nvim_replace_termcodes('<C-x><C-o>', true, false, true),
-              'n', false
-            )
+
+            local snippet_items, start_col = require('snippet_loader').get_matches()
+            if #snippet_items > 0 then
+              vim.fn.complete(start_col, snippet_items)
+            else
+              vim.api.nvim_feedkeys(
+                vim.api.nvim_replace_termcodes('<C-x><C-o>', true, false, true),
+                'n', false
+              )
+            end
           end,
         })
       end
