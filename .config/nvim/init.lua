@@ -204,6 +204,14 @@ local setup_keymap = function()
     end,
   })
 
+  -- completion
+  vim.keymap.set('i', '<CR>', function()
+    if vim.fn.pumvisible() == 1 then
+      return vim.api.nvim_replace_termcodes('<C-y>', true, false, true)
+    end
+    return vim.api.nvim_replace_termcodes('<CR>', true, false, true)
+  end, { expr = true, desc = 'Confirm completion or newline' })
+
   -- git
   vim.keymap.set('n', '<leader>gs', ':<C-u>Git<CR>')
   vim.keymap.set('n', '<leader>gf', ':<C-u>Git fetch --prune<CR>')
