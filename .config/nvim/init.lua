@@ -548,6 +548,23 @@ local setup_lsp = function()
       local client = vim.lsp.get_client_by_id(ev.data.client_id)
       if client and client:supports_method('textDocument/completion') then
         vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = true })
+
+        -- auto-trigger on keyword typing (>= 2 chars)
+        vim.api.nvim_create_autocmd('TextChangedI', {
+          group = vim.api.nvim_create_augroup('UserLspKeywordTrigger_' .. ev.buf, {}),
+          buffer = ev.buf,
+          callback = function()
+            if vim.fn.pumvisible() == 1 then return end
+            local col = vim.fn.col('.')
+            local line = vim.fn.getline('.')
+            local prefix = line:sub(1, col - 1):match('[%w_]+$')
+            if not prefix or #prefix < 2 then return end
+            vim.api.nvim_feedkeys(
+              vim.api.nvim_replace_termcodes('<C-x><C-o>', true, false, true),
+              'n', false
+            )
+          end,
+        })
       end
     end,
   })
