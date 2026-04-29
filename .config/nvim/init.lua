@@ -557,12 +557,25 @@ local setup_lsp = function()
       if client and client:supports_method('textDocument/completion') then
         vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = true })
 
+        -- suppress auto-trigger right after completing
+        vim.api.nvim_create_autocmd('CompleteDone', {
+          group = vim.api.nvim_create_augroup('UserLspCompleteDone_' .. ev.buf, {}),
+          buffer = ev.buf,
+          callback = function()
+            vim.b[ev.buf].suppress_auto_complete = true
+          end,
+        })
+
         -- auto-trigger on keyword typing (>= 2 chars)
         -- snippets take priority when prefix matches, otherwise LSP
         vim.api.nvim_create_autocmd('TextChangedI', {
           group = vim.api.nvim_create_augroup('UserLspKeywordTrigger_' .. ev.buf, {}),
           buffer = ev.buf,
           callback = function()
+            if vim.b[ev.buf].suppress_auto_complete then
+              vim.b[ev.buf].suppress_auto_complete = false
+              return
+            end
             if vim.fn.pumvisible() == 1 then return end
             local col = vim.fn.col('.')
             local line = vim.fn.getline('.')
