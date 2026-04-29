@@ -567,12 +567,13 @@ local setup_lsp = function()
             local col = vim.fn.col('.')
             local line = vim.fn.getline('.')
             local prefix = line:sub(1, col - 1):match('[%w_-]+$')
-            if not prefix or #prefix < 2 then return end
+            if not prefix then return end
 
+            -- snippets trigger from 1 char, LSP from 2 chars
             local snippet_items, start_col = require('snippet_loader').get_matches()
             if #snippet_items > 0 then
               vim.fn.complete(start_col, snippet_items)
-            else
+            elseif #prefix >= 2 then
               vim.api.nvim_feedkeys(
                 vim.api.nvim_replace_termcodes('<C-x><C-o>', true, false, true),
                 'n', false

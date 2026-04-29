@@ -144,7 +144,7 @@ function M.get_matches()
   local col = vim.fn.col('.')
   local line = vim.fn.getline('.')
   local prefix = line:sub(1, col - 1):match('[%w_-]+$')
-  if not prefix or #prefix < 2 then return {}, 0 end
+  if not prefix then return {}, 0 end
 
   local start_col = col - #prefix
   local filtered = {}
