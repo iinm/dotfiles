@@ -133,13 +133,13 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>o', ':<C-u>Oldfiles<CR>')
   vim.keymap.set('n', '<leader>b', ':<C-u>Buffers<CR>')
   vim.keymap.set('n', '<leader>w', ':<C-u>setl wrap!<CR>')
-  vim.keymap.set('n', '<leader>n', ':<C-u>setl number!<CR>')
+  vim.keymap.set('n', '<leader>l', ':<C-u>setl number!<CR>')
   vim.keymap.set('n', '<leader>N', ':<C-u>set number!<CR>')
   vim.keymap.set('n', '<leader>s', ':<C-u>gr!<Space>')
   vim.keymap.set('n', '<leader>x', [[:<C-u><C-r>=v:count1<CR>TermExec cmd=''<Left>]])
   vim.keymap.set('n', '<leader>z', ':<C-u>setl foldlevel=')
   vim.keymap.set('n', '<leader>q', window_utils.toggle_quickfix)
-  vim.keymap.set('n', '<leader>i', ':<C-u>e .plain-agent/instructions.md<CR>')
+  vim.keymap.set('n', '<leader>n', ':<C-u>e .plain-agent/notes.md<CR>')
   vim.keymap.set('n', '<leader>m', ':<C-u>e .plain-agent/memory<CR>')
   vim.keymap.set({ 'n', 'v' }, '<leader>c', ':CopyContext<CR>')
   vim.keymap.set('n', 's', '<Plug>(easymotion-overwin-f2)')
@@ -443,15 +443,6 @@ local setup_auto_commands = function()
     command = 'setlocal nospell'
   })
 
-  -- markdown filetype keymaps
-  vim.api.nvim_create_autocmd({ 'FileType' }, {
-    pattern = 'markdown',
-    group = vim.api.nvim_create_augroup('UserMarkdownKeymapConfig', {}),
-    callback = function()
-      vim.keymap.set('n', '<leader>p', '<Cmd>PrevimOpen<CR>', { buffer = true })
-    end,
-  })
-
   -- fix syntax highlighting
   -- https://vim.fandom.com/wiki/Fix_syntax_highlighting
   -- vim.api.nvim_create_autocmd({ 'BufEnter', 'InsertLeave' }, {
@@ -730,6 +721,7 @@ local setup_treesitter = function()
       'graphql',
       'prisma',
       'terraform',
+      'bicep',
     })
   else
     vim.notify(

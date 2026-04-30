@@ -5,6 +5,5 @@
 *.un~
 *.swp
 
-# Intellij
-*.iml
-*.idea
+# drawio
+*.bkp
