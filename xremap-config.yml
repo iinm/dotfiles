@@ -34,7 +34,7 @@ keymap:
 
   - name: Non-Terminal
     application:
-      not: [wezterm]
+      not: [ghostty, wezterm]
     remap:
       # Mac-like key bindings
       LeftMeta-a: C-a
@@ -53,7 +53,7 @@ keymap:
 
   - name: Terminal
     application:
-      only: [wezterm]
+      only: [ghostty, wezterm]
     remap:
       LeftMeta-c: C-Shift-c
       LeftMeta-v: C-Shift-v
