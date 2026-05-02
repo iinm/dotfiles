@@ -64,7 +64,7 @@ local setup_options = function()
   'backspace,cursor,complete,copy,ctrlg,error,esc,hangul,lang,mess,showmatch,operator,register,shell,spell,wildmode'
   vim.opt.errorbells = true
   vim.opt.visualbell = false
-  vim.opt.guicursor = "a:blinkon0"
+  vim.opt.guicursor = "n-v-c-sm:block,i-ci-ve:ver25,r-cr-o:hor20,t:block-TermCursor"
 end
 
 local setup_utilities = function()
