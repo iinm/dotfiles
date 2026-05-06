@@ -4,7 +4,13 @@ theme = Tomorrow Night Eighties
 
 cursor-style-blink = false
 
-font-family = "Operator Mono SSm Medium"
+font-family = "Operator Mono SSm"
+font-style = "Medium"
+font-style-bold = "Bold"
+font-style-italic = "Medium Italic"
+font-style-bold-italic = "Bold Italic"
+
 font-family = "Noto Sans CJK JP"
 font-family = "Hiragino Sans"
+
 font-size = 11
