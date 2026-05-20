@@ -501,7 +501,11 @@ local setup_plugins = function()
 
     -- completion
     { src = 'https://github.com/saghen/blink.cmp',               version = vim.version.range('v1.x') },
-    { src = 'https://github.com/milanglacier/minuet-ai.nvim' },
+    {
+      -- src = 'https://github.com/milanglacier/minuet-ai.nvim',
+      src = 'https://github.com/iinm/minuet-ai.nvim',
+      version = 'feat/awscurl',
+    },
 
     -- snippets
     { src = 'https://github.com/rafamadriz/friendly-snippets' },
@@ -730,26 +734,46 @@ local setup_treesitter = function()
 end
 
 local setup_minuet = function()
+  local local_config = require_safe('local_config')
   local local_secrets = require_safe('local_secrets')
+
+  local use_bedrock = local_config.minuet_use_bedrock or false
+
   require('minuet').setup({
-    cmp = {
-      enable_auto_complete = false,
-    },
-    blink = {
-      enable_auto_complete = false,
-    },
+    provider = 'claude',
+    request_timeout = use_bedrock and 0 or 5,
 
-    virtualtext = {
-      auto_trigger_ft = {},
-      keymap = {},
-      -- show_on_completion_menu = true,
-    },
-
-    provider = 'gemini',
-    request_timeout = 5,
+    curl_cmd = use_bedrock and 'timeout' or 'curl',
+    curl_extra_args = use_bedrock and {
+      '5',
+      'env',
+      'AWS_PROFILE=' .. local_secrets.minuet_aws_profile,
+      'awscurl',
+      '--service', 'bedrock',
+      '--region', 'ap-northeast-1',
+      '-X', 'POST',
+    } or nil,
 
     provider_options = {
-      claude = {
+      claude = use_bedrock and {
+        end_point = local_secrets.minuet_claude_bedrock_endpoint,
+        optional = {
+          anthropic_version = 'bedrock-2023-05-31',
+        },
+        api_key = function()
+          return 'none'
+        end,
+        stream = false,
+        transform = {
+          function(opts)
+            opts.headers['x-api-key'] = nil
+            opts.headers['anthropic-version'] = nil
+            opts.body['model'] = nil
+            opts.body['stream'] = nil
+            return opts
+          end
+        }
+      } or {
         model = 'claude-haiku-4-5',
         end_point = (local_secrets.minuet_anthropic_end_point or 'https://api.anthropic.com') .. '/v1/messages',
         api_key = function()
@@ -758,7 +782,7 @@ local setup_minuet = function()
       },
 
       gemini = {
-        model = 'gemini-3-flash-preview',
+        model = 'gemini-3.5-flash',
         optional = {
           generationConfig = {
             maxOutputTokens = 256,
@@ -792,6 +816,20 @@ local setup_minuet = function()
           return local_secrets.minuet_openai_api_key
         end
       },
+    },
+
+    cmp = {
+      enable_auto_complete = false,
+    },
+
+    blink = {
+      enable_auto_complete = false,
+    },
+
+    virtualtext = {
+      auto_trigger_ft = {},
+      keymap = {},
+      -- show_on_completion_menu = true,
     },
   })
 end
