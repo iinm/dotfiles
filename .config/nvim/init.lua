@@ -409,13 +409,17 @@ local setup_auto_commands = function()
   })
 
   -- start treesitter (Neovim 0.12+ native)
+  local exclude_treesitter_indent = { lua = true }
+
   vim.api.nvim_create_autocmd({ 'FileType' }, {
     callback = function()
       local ok, _ = pcall(vim.treesitter.start)
       if ok then
         vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
         vim.wo[0][0].foldmethod = 'expr'
-        vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        if not exclude_treesitter_indent[vim.bo.filetype] then
+          vim.bo.indentexpr = "v:lua.vim.treesitter.indentexpr()"
+        end
       else
         vim.wo[0][0].foldmethod = 'indent'
       end
