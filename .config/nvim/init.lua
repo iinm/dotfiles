@@ -785,6 +785,9 @@ local use_aws_credential = function(aws_profile)
   end
 
   local refresh_aws_credentials = function()
+    vim.schedule(function()
+      vim.notify("Refreshing AWS credentials for minuet", vim.log.levels.INFO)
+    end)
     vim.system({ 'aws', 'configure', 'export-credentials', '--profile', aws_profile }, { text = true }, function(obj)
       if obj.code ~= 0 then
         vim.schedule(function()
@@ -792,10 +795,10 @@ local use_aws_credential = function(aws_profile)
         end)
         return
       end
-      local result = update_aws_creds_from_json(obj.stdout)
-      if not result then
-        return
-      end
+      update_aws_creds_from_json(obj.stdout)
+      vim.schedule(function()
+        vim.notify("AWS credentials refreshed", vim.log.levels.INFO)
+      end)
     end)
   end
 
@@ -807,11 +810,7 @@ local use_aws_credential = function(aws_profile)
     return nil
   end
 
-  -- Refresh every 10 minutes
-  local refresh_timer = vim.uv.new_timer()
-  refresh_timer:start(0, 10 * 60 * 1000, vim.schedule_wrap(function()
-    refresh_aws_credentials()
-  end))
+  refresh_aws_credentials()
 
   return {
     get_aws_credentials = get_aws_credentials
@@ -825,6 +824,22 @@ local setup_minuet = function()
   local use_bedrock = local_config.minuet_use_bedrock or false
   local aws_creds = use_bedrock and local_secrets.minuet_aws_profile
       and use_aws_credential(local_secrets.minuet_aws_profile)
+  local curl_extra_args = use_bedrock
+      and function()
+        local creds = aws_creds and aws_creds.get_aws_credentials()
+        if not creds then
+          return {}
+        end
+
+        local user = creds.access_key .. ':' .. creds.secret_key
+        return {
+          '-H', 'X-Amz-Security-Token:' .. creds.session_token,
+          '--aws-sigv4', 'aws:amz:ap-northeast-1:bedrock',
+          '--user', user,
+          '-X', 'POST',
+        }
+      end
+      or nil
 
   local base_provider_options = {
     claude = use_bedrock and {
@@ -895,23 +910,7 @@ local setup_minuet = function()
     provider = local_config.minuet_provider or 'claude',
     request_timeout = 5,
 
-    curl_extra_args = use_bedrock
-        and function()
-          local creds = aws_creds and aws_creds.get_aws_credentials()
-          if not creds then
-            return {}
-          end
-
-          local user = creds.access_key .. ':' .. creds.secret_key
-          return {
-            '-H', 'X-Amz-Security-Token:' .. creds.session_token,
-            '--aws-sigv4', 'aws:amz:ap-northeast-1:bedrock',
-            '--user', user,
-            '-X', 'POST',
-          }
-        end
-        or nil,
-
+    curl_extra_args = curl_extra_args,
     provider_options = base_provider_options,
 
     duet = {
