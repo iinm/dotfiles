@@ -268,6 +268,9 @@ local setup_commands = function()
       -- normal mode -> copy path
       vim.fn.setreg('+', vim.fn.expand('%:.'))
     end, { range = true } },
+    { 'MinuetDuetPredict', 'Minuet duet predict', {} },
+    { 'MinuetDuetApply',   'Minuet duet apply',   {} },
+    { 'MinuetDuetDismiss', 'Minuet duet dismiss', {} },
   }
 
   for _, command in ipairs(commands) do
@@ -823,6 +826,71 @@ local setup_minuet = function()
   local aws_creds = use_bedrock and local_secrets.minuet_aws_profile
       and use_aws_credential(local_secrets.minuet_aws_profile)
 
+  local base_provider_options = {
+    claude = use_bedrock and {
+      end_point = local_secrets.minuet_claude_bedrock_endpoint,
+      optional = {
+        anthropic_version = 'bedrock-2023-05-31',
+      },
+      api_key = function()
+        return 'dummy'
+      end,
+      stream = false,
+      transform = {
+        function(opts)
+          opts.headers['x-api-key'] = nil
+          opts.headers['anthropic-version'] = nil
+          opts.body['model'] = nil
+          opts.body['stream'] = nil
+          -- print(vim.inspect(opts))
+          return opts
+        end
+      }
+    } or {
+      model = 'claude-haiku-4-5',
+      end_point = (local_secrets.minuet_anthropic_end_point or 'https://api.anthropic.com') .. '/v1/messages',
+      api_key = function()
+        return local_secrets.minuet_anthropic_api_key
+      end
+    },
+
+    gemini = {
+      model = 'gemini-3.5-flash',
+      optional = {
+        generationConfig = {
+          maxOutputTokens = 256,
+          thinkingConfig = {
+            thinkingLevel = 'minimal',
+          },
+        },
+        safetySettings = {
+          {
+            category = 'HARM_CATEGORY_DANGEROUS_CONTENT',
+            threshold = 'BLOCK_ONLY_HIGH',
+          },
+        },
+      },
+      end_point = (local_secrets.minuet_gemini_end_point or 'https://generativelanguage.googleapis.com') ..
+          '/v1beta/models',
+      api_key = function()
+        return local_secrets.minuet_gemini_api_key
+      end
+    },
+
+    openai = {
+      model = 'gpt-5.4-mini',
+      optional = {
+        max_completion_tokens = 512,
+        reasoning_effort = 'none',
+        verbosity = 'low',
+      },
+      end_point = (local_secrets.minuet_openai_end_point or 'https://api.openai.com') .. '/v1/chat/completions',
+      api_key = function()
+        return local_secrets.minuet_openai_api_key
+      end
+    },
+  }
+
   require('minuet').setup({
     provider = local_config.minuet_provider or 'claude',
     request_timeout = 5,
@@ -844,69 +912,24 @@ local setup_minuet = function()
         end
         or nil,
 
-    provider_options = {
-      claude = use_bedrock and {
-        end_point = local_secrets.minuet_claude_bedrock_endpoint,
-        optional = {
-          anthropic_version = 'bedrock-2023-05-31',
-        },
-        api_key = function()
-          return 'dummy'
-        end,
-        stream = false,
-        transform = {
-          function(opts)
-            opts.headers['x-api-key'] = nil
-            opts.headers['anthropic-version'] = nil
-            opts.body['model'] = nil
-            opts.body['stream'] = nil
-            -- print(vim.inspect(opts))
-            return opts
-          end
-        }
-      } or {
-        model = 'claude-haiku-4-5',
-        end_point = (local_secrets.minuet_anthropic_end_point or 'https://api.anthropic.com') .. '/v1/messages',
-        api_key = function()
-          return local_secrets.minuet_anthropic_api_key
-        end
-      },
+    provider_options = base_provider_options,
 
-      gemini = {
-        model = 'gemini-3.5-flash',
-        optional = {
-          generationConfig = {
-            maxOutputTokens = 256,
-            thinkingConfig = {
-              thinkingLevel = 'minimal',
-            },
-          },
-          safetySettings = {
-            {
-              category = 'HARM_CATEGORY_DANGEROUS_CONTENT',
-              threshold = 'BLOCK_ONLY_HIGH',
-            },
-          },
+    duet = {
+      provider = local_config.minuet_provider or 'claude',
+      provider_options = vim.tbl_deep_extend('force', base_provider_options, {
+        gemini = {
+          optional = {
+            generationConfig = {
+              maxOutputTokens = nil,
+            }
+          }
         },
-        end_point = (local_secrets.minuet_gemini_end_point or 'https://generativelanguage.googleapis.com') ..
-            '/v1beta/models',
-        api_key = function()
-          return local_secrets.minuet_gemini_api_key
-        end
-      },
-
-      openai = {
-        model = 'gpt-5-mini',
-        optional = {
-          max_completion_tokens = 512,
-          reasoning_effort = 'minimal',
-          verbosity = 'low',
+        openai = {
+          optional = {
+            max_completion_tokens = nil,
+          }
         },
-        end_point = (local_secrets.minuet_openai_end_point or 'https://api.openai.com') .. '/v1/chat/completions',
-        api_key = function()
-          return local_secrets.minuet_openai_api_key
-        end
-      },
+      }),
     },
 
     cmp = {
