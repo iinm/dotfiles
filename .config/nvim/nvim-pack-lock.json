@@ -22,7 +22,7 @@
       "src": "https://github.com/junegunn/fzf.vim"
     },
     "minuet-ai.nvim": {
-      "rev": "9337c3cf7f7160f8680c737f59581605d6c123f3",
+      "rev": "c520749dfbf94d7f070c9b57543f93aa01743fcb",
       "src": "https://github.com/iinm/minuet-ai.nvim",
       "version": "'feat/awscurl'"
     },
