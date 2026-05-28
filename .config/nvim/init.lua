@@ -508,11 +508,7 @@ local setup_plugins = function()
 
     -- completion
     { src = 'https://github.com/saghen/blink.cmp',               version = vim.version.range('v1.x') },
-    {
-      -- src = 'https://github.com/milanglacier/minuet-ai.nvim',
-      src = 'https://github.com/iinm/minuet-ai.nvim',
-      version = 'feat/awscurl',
-    },
+    { src = 'https://github.com/milanglacier/minuet-ai.nvim' },
 
     -- snippets
     { src = 'https://github.com/rafamadriz/friendly-snippets' },
