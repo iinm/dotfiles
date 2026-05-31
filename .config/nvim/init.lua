@@ -238,39 +238,43 @@ local setup_keymap = function()
   end, { expr = true, silent = true })
 end
 
+local copy_path_command = function(path_getter, oil_modifier)
+  return function(opts)
+    if vim.bo.filetype == 'oil' then
+      require('oil.actions').copy_entry_path.callback()
+      vim.fn.setreg('+', vim.fn.fnamemodify(vim.fn.getreg(vim.v.register), oil_modifier))
+      return
+    end
+
+    local path = path_getter()
+    if opts.range > 0 then
+      local range_start = opts.line1
+      local range_end = opts.line2
+      if range_start == range_end then
+        path = path .. ':' .. range_start
+      else
+        path = path .. ':' .. range_start .. '-' .. range_end
+      end
+    end
+
+    vim.fn.setreg('+', path)
+  end
+end
+
 local setup_commands = function()
   local window_utils = require('window_utils')
   local commands = {
-    { 'Buffers',        'call Buffers()',                                       {} },
-    { 'Oldfiles',       function() vim.fn['Oldfiles']({ only_cwd = true }) end, {} },
-    { 'OldfilesGlobal', function() vim.fn['Oldfiles']() end,                    {} },
-    { 'Outline',        'call Outline()',                                       {} },
-    { 'CloseTerms',     function() window_utils.close_terms() end,              {} },
-    { 'Diagnostics',    function() vim.diagnostic.setloclist() end,             {} },
-    { 'CopyContext', function(opts)
-      -- file explorer -> copy path
-      if vim.bo.filetype == 'oil' then
-        require('oil.actions').copy_entry_path.callback()
-        vim.fn.setreg('+', vim.fn.fnamemodify(vim.fn.getreg(vim.v.register), ":."))
-        return
-      end
-      -- visual mode or range -> copy path with range
-      if opts.range > 0 then
-        local range_start = opts.line1
-        local range_end = opts.line2
-        if range_start == range_end then
-          vim.fn.setreg('+', vim.fn.expand('%:.') .. ':' .. range_start)
-        else
-          vim.fn.setreg('+', vim.fn.expand('%:.') .. ':' .. range_start .. '-' .. range_end)
-        end
-        return
-      end
-      -- normal mode -> copy path
-      vim.fn.setreg('+', vim.fn.expand('%:.'))
-    end, { range = true } },
-    { 'MinuetDuetPredict', 'Minuet duet predict', {} },
-    { 'MinuetDuetApply',   'Minuet duet apply',   {} },
-    { 'MinuetDuetDismiss', 'Minuet duet dismiss', {} },
+    { 'Buffers',           'call Buffers()',                                                    {} },
+    { 'Oldfiles',          function() vim.fn['Oldfiles']({ only_cwd = true }) end,              {} },
+    { 'OldfilesGlobal',    function() vim.fn['Oldfiles']() end,                                 {} },
+    { 'Outline',           'call Outline()',                                                    {} },
+    { 'CloseTerms',        function() window_utils.close_terms() end,                           {} },
+    { 'Diagnostics',       function() vim.diagnostic.setloclist() end,                          {} },
+    { 'CopyContext',       copy_path_command(function() return vim.fn.expand('%:.') end, ':.'), { range = true } },
+    { 'CopyContextAbs',    copy_path_command(function() return vim.fn.expand('%:p') end, ':p'), { range = true } },
+    { 'MinuetDuetPredict', 'Minuet duet predict',                                               {} },
+    { 'MinuetDuetApply',   'Minuet duet apply',                                                 {} },
+    { 'MinuetDuetDismiss', 'Minuet duet dismiss',                                               {} },
   }
 
   for _, command in ipairs(commands) do
