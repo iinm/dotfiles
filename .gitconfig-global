@@ -5,6 +5,7 @@
 	trustctime = false
 	excludesfile = ~/.gitignore-global
 	ignorecase = false
+	quotepath = false
 
 [pull]
 	ff = only
