@@ -417,7 +417,10 @@ local setup_auto_commands = function()
   })
 
   -- start treesitter (Neovim 0.12+ native)
-  local exclude_treesitter_indent = { lua = true }
+  local exclude_treesitter_indent = {
+    lua = true,
+    javascript = true,
+  }
 
   vim.api.nvim_create_autocmd({ 'FileType' }, {
     callback = function()
