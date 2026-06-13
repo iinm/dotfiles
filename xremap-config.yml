@@ -47,6 +47,7 @@ keymap:
       LeftMeta-x: C-x
       LeftMeta-z: C-z
       LeftMeta-r: C-r
+      Leftmeta-Grave: LeftAlt-Grave
       # +Shift
       LeftMeta-Shift-t: C-Shift-t
       LeftMeta-Shift-z: C-Shift-z
