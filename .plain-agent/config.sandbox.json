@@ -1,0 +1,57 @@
+{
+  "autoApproval": {
+    "defaultAction": "ask",
+    "maxApprovals": 100,
+    "patterns": [
+      {
+        "toolName": "exec_command",
+        "input": { "command": { "$regex": "^(gh|docker)$" } },
+        "action": "ask"
+      },
+      {
+        "toolName": "exec_command",
+        "input": {
+          "command": "git",
+          "args": { "$has": { "$regex": "^(config|commit|fetch|pull|push)$" } }
+        },
+        "action": "ask"
+      },
+
+      {
+        "toolName": { "$regex": "^(write_file|patch_file)$" },
+        "action": "allow"
+      },
+      {
+        "toolName": { "$regex": "^(web_search|web_fetch)$" },
+        "action": "allow"
+      },
+      {
+        "toolName": "exec_command",
+        "action": "allow"
+      }
+    ]
+  },
+  "sandbox": {
+    "command": "plain-sandbox",
+    "args": [
+      "--allow-write",
+      "--mount-readonly", "~/.gitconfig:/home/sandbox/.gitconfig,.plain-agent/config.json",
+      "--skip-build",
+      "--keep-alive", "30"
+    ],
+    "separator": "--",
+    "rules": [
+      {
+        "pattern": { "command": { "$regex": "^(gh|docker)$" } },
+        "mode": "unsandboxed"
+      },
+      {
+        "pattern": {
+          "command": "git",
+          "args": [{ "$regex": "^(fetch|pull|push)$" }]
+        },
+        "mode": "unsandboxed"
+      }
+    ]
+  }
+}
