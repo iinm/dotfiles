@@ -48,7 +48,7 @@
       {
         "pattern": {
           "command": "git",
-          "args": [{ "$regex": "^(fetch|pull|push)$" }]
+          "args": [{ "$regex": "^(commit|fetch|pull|push)$" }]
         },
         "mode": "unsandboxed"
       }
