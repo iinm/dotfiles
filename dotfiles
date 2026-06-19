@@ -214,6 +214,8 @@ bootstrap_darwin() {
     docker-compose
     docker-buildx
     lazydocker
+    gpg
+    pinentry-mac
     lua-language-server
     csvq
     zstd
