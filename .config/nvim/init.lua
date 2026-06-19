@@ -509,9 +509,6 @@ local setup_plugins = function()
     -- terminal
     { src = 'https://github.com/akinsho/toggleterm.nvim' },
 
-    -- markdown preview
-    { src = 'https://github.com/previm/previm' },
-
     -- lsp
     { src = 'https://github.com/neovim/nvim-lspconfig' },
 

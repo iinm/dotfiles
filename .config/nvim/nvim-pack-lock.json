@@ -49,10 +49,6 @@
       "rev": "7cc8c897cb6b34d8ed28e99d95baccef609ed251",
       "src": "https://github.com/Almo7aya/openingh.nvim"
     },
-    "previm": {
-      "rev": "2bccb5e2a14e9f344f2656578b815b0da5c37fe3",
-      "src": "https://github.com/previm/previm"
-    },
     "toggleterm.nvim": {
       "rev": "9a88eae817ef395952e08650b3283726786fb5fb",
       "src": "https://github.com/akinsho/toggleterm.nvim"
