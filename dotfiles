@@ -3,7 +3,6 @@
 NVIM_VERSION=0.12.3
 # NVIM_VERSION=nightly
 EFM_LS_VERSION=0.0.56
-MO_VERSION=1.6.0
 
 # Debian only
 FZF_VERSION=0.56.3
@@ -23,7 +22,6 @@ Commands:
   setup_nvim     Setup neovim
   setup_git      Setup git
   setup_wezterm  Setup wezterm
-  setup_mo       Setup mo (https://github.com/k1LoW/mo)
 
 Optional commands:
   install_golang  Install Golang
@@ -40,7 +38,6 @@ setup() {
   setup_nvim
   setup_git
   setup_wezterm
-  setup_mo
 }
 
 bootstrap() {
@@ -399,27 +396,6 @@ EOF
         "${base_url}/v${EFM_LS_VERSION}/efm-langserver_v${EFM_LS_VERSION}_darwin_arm64.zip"
       unzip /tmp/efm-langserver_v${EFM_LS_VERSION}.zip -d /tmp
       mv /tmp/efm-langserver_v${EFM_LS_VERSION}_darwin_arm64/efm-langserver $efm_ls_path
-    fi
-  fi
-}
-
-setup_mo() {
-  local mo_path=~/tools/bin/mo
-  if $mo_path --version 2> /dev/null | grep -q "$MO_VERSION"; then
-    echo "skip: mo $MO_VERSION is installed."
-  else
-    echo "run: install mo $MO_VERSION"
-    mkdir -p "$(dirname "$mo_path")"
-    if test "$(uname)" = "Linux"; then
-      curl -L --show-error --fail \
-        "https://github.com/k1LoW/mo/releases/download/v${MO_VERSION}/mo_v${MO_VERSION}_linux_amd64.tar.gz" \
-        | tar -zxf - -C "$(dirname "$mo_path")" mo
-    fi
-    if test "$(uname)" = "Darwin"; then
-      curl -L --show-error --fail \
-        -o /tmp/mo_v${MO_VERSION}.zip \
-        "https://github.com/k1LoW/mo/releases/download/v${MO_VERSION}/mo_v${MO_VERSION}_darwin_arm64.zip"
-      unzip -o /tmp/mo_v${MO_VERSION}.zip mo -d "$(dirname "$mo_path")"
     fi
   fi
 }
