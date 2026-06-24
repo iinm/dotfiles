@@ -36,7 +36,6 @@
     "args": [
       "--allow-write",
       "--mount-readonly", "~/.gitconfig:/home/sandbox/.gitconfig,.plain-agent/config.json",
-      "--skip-build",
       "--keep-alive", "30"
     ],
     "separator": "--",
