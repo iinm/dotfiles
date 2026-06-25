@@ -5,18 +5,17 @@
     "patterns": [
       {
         "toolName": "exec_command",
-        "input": { "command": { "$regex": "^(gh|docker)$" } },
-        "action": "ask"
+        "input": {
+          "command": "git",
+          "args": [{ "$regex": "^(status|diff|log|show|ls-remote|rev-parse)$" }]
+        },
+        "action": "allow"
       },
       {
         "toolName": "exec_command",
-        "input": {
-          "command": "git",
-          "args": { "$has": { "$regex": "^(config|commit|fetch|pull|push)$" } }
-        },
+        "input": { "command": { "$regex": "^(git|gh|docker)$" } },
         "action": "ask"
       },
-
       {
         "toolName": { "$regex": "^(write_file|patch_file)$" },
         "action": "allow"
@@ -35,20 +34,13 @@
     "command": "plain-sandbox",
     "args": [
       "--allow-write",
-      "--mount-readonly", "~/.gitconfig:/home/sandbox/.gitconfig,.plain-agent/config.json",
+      "--mount-readonly", ".plain-agent/config.json,.plain-agent/config.sandbox.json",
       "--keep-alive", "30"
     ],
     "separator": "--",
     "rules": [
       {
-        "pattern": { "command": { "$regex": "^(gh|docker)$" } },
-        "mode": "unsandboxed"
-      },
-      {
-        "pattern": {
-          "command": "git",
-          "args": [{ "$regex": "^(commit|fetch|pull|push)$" }]
-        },
+        "pattern": { "command": { "$regex": "^(git|gh|docker)$" } },
         "mode": "unsandboxed"
       }
     ]
