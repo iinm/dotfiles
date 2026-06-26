@@ -82,8 +82,8 @@ if status is-interactive
   if test -e $agent_config_dir/config.sandbox-local.json
     set agent_config_file $agent_config_dir/config.sandbox-local.json
   end
-  abbr agent_sandbox "plain -c $agent_config_file"
-  abbr agent_sandbox_shell "plain sandbox -c $agent_config_file -- --tty --allow-net 0.0.0.0/0 --verbose zsh"
+  abbr asb "plain -c $agent_config_file"
+  abbr asbs "plain sandbox -c $agent_config_file -- --tty --allow-net 0.0.0.0/0 --verbose zsh"
 
   alias gco 'git checkout'
   alias gst 'git status'
