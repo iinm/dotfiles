@@ -68,14 +68,13 @@ if status is-interactive
   fish_config theme choose 'Base16 Eighties'
   fish_config prompt choose astronaut
 
-  # Aliases
-  alias rm 'rm -i'
-  alias cp 'cp -i'
-  alias mv 'mv -i'
+  abbr rm 'rm -i'
+  abbr cp 'cp -i'
+  abbr mv 'mv -i'
 
-  alias t 'tmux'
-  alias v 'nvim'
-  alias a 'plain'
+  abbr t 'tmux'
+  abbr v 'nvim'
+  abbr a 'plain'
 
   function resolve_agent_sandbox_config_path
     for f in \
@@ -93,17 +92,17 @@ if status is-interactive
   abbr asb "plain -c (resolve_agent_sandbox_config_path)"
   abbr asbs "plain sandbox -c (resolve_agent_sandbox_config_path) -- --tty --allow-net 0.0.0.0/0 --verbose zsh"
 
-  alias gco 'git checkout'
-  alias gst 'git status'
-  alias gl  'git pull'
-  alias gcd 'cd (git rev-parse --show-toplevel)'
-  alias gcb 'git rev-parse --abbrev-ref HEAD'
-  alias gsm 'git submodule'
+  abbr gco 'git checkout'
+  abbr gst 'git status'
+  abbr gl  'git pull'
+  abbr gcd 'cd (git rev-parse --show-toplevel)'
+  abbr gcb 'git rev-parse --abbrev-ref HEAD'
+  abbr gsm 'git submodule'
 
-  alias ghb 'gh browse'
+  abbr ghb 'gh browse'
 
-  alias d 'docker'
-  alias dc 'docker-compose'
+  abbr d 'docker'
+  abbr dc 'docker-compose'
 
   # Utilities
   if type --quiet dir_history
