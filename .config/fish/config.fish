@@ -77,13 +77,26 @@ if status is-interactive
   alias v 'nvim'
   alias a 'plain'
 
-  set -l agent_config_dir $HOME/.config/.plain-agent
-  set -l agent_config_file $agent_config_dir/config.sandbox.json
-  if test -e $agent_config_dir/config.sandbox-local.json
-    set agent_config_file $agent_config_dir/config.sandbox-local.json
+  function __agent_sandbox_config
+    for f in \
+      .plain-agent/config.sandbox-local.json \
+      .plain-agent/config.sandbox.json \
+      $HOME/.config/.plain-agent/config.sandbox-local.json \
+      $HOME/.config/.plain-agent/config.sandbox.json
+      if test -e $f
+        echo $f
+        return
+      end
+    end
   end
-  abbr asb "plain -c $agent_config_file"
-  abbr asbs "plain sandbox -c $agent_config_file -- --tty --allow-net 0.0.0.0/0 --verbose zsh"
+
+  function asb --description "Run plain agent in sandbox"
+    plain -c (__agent_sandbox_config)
+  end
+
+  function asbs --description "Launch zsh in plain agent sandbox"
+    plain sandbox -c (__agent_sandbox_config) -- --tty --allow-net 0.0.0.0/0 --verbose zsh
+  end
 
   alias gco 'git checkout'
   alias gst 'git status'
