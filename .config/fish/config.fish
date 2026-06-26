@@ -170,7 +170,6 @@ if status is-interactive
   function calculate --description "Calculate mathematical expressions from input"
     sed -E 's,^ +//,,g; s,[^0-9.*+/()-],,g' | tr -s ' ' | tee /dev/stderr | bc -l | sed 's/^/= /'
   end
-
 end
 
 # Host specific configuration
