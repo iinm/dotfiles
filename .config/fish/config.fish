@@ -81,8 +81,8 @@ if status is-interactive
     for f in \
       .plain-agent/config.sandbox-local.json \
       .plain-agent/config.sandbox.json \
-      $HOME/.config/.plain-agent/config.sandbox-local.json \
-      $HOME/.config/.plain-agent/config.sandbox.json
+      $HOME/.config/plain-agent/config.sandbox-local.json \
+      $HOME/.config/plain-agent/config.sandbox.json
       if test -e $f
         echo $f
         return
