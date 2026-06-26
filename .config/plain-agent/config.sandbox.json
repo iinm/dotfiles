@@ -19,6 +19,15 @@
         "action": "deny",
         "reason": "Use rg instead; rg respects .gitignore by default"
       },
+      {
+        "toolName": "exec_command",
+        "input": {
+          "command": "npm",
+          "args": { "$has": { "$regex": "^(i|ci|install)$" } }
+        },
+        "action": "deny",
+        "reason": "Network access is restricted; ask the user to run it"
+      },
 
       {
         "toolName": "exec_command",
