@@ -155,6 +155,15 @@ if status is-interactive
     sed -E 's,^ +//,,g; s,[^0-9.*+/()-],,g' | tr -s ' ' | tee /dev/stderr | bc -l | sed 's/^/= /'
   end
 
+  function agent_sandbox --description "Run plain agent in sandbox"
+    set -l config_dir $HOME/.config/.plain-agent
+    set -l config_file $config_dir/config.sandbox.json
+    if test -e $config_dir/config.sandbox-local.json
+      set config_file $config_dir/config.sandbox-local.json
+    end
+    plain -c $config_file
+  end
+
   function agent_sandbox_shell --description "Launch zsh in plain agent sandbox"
     set -l config_dir $HOME/.config/.plain-agent
     set -l config_file $config_dir/config.sandbox.json
