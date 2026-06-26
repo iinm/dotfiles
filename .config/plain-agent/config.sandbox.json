@@ -1,8 +1,25 @@
 {
+  "tools": {
+    "tmux": { "enabled": false }
+  },
   "autoApproval": {
     "defaultAction": "ask",
     "maxApprovals": 100,
+    "allowGitUnmanagedFiles": true,
     "patterns": [
+      {
+        "toolName": "exec_command",
+        "input": { "command": "find" },
+        "action": "deny",
+        "reason": "Use fd instead; fd respects .gitignore by default"
+      },
+      {
+        "toolName": "exec_command",
+        "input": { "command": "grep" },
+        "action": "deny",
+        "reason": "Use rg instead; rg respects .gitignore by default"
+      },
+
       {
         "toolName": "exec_command",
         "input": {
@@ -16,6 +33,7 @@
         "input": { "command": { "$regex": "^(git|gh|docker)$" } },
         "action": "ask"
       },
+
       {
         "toolName": { "$regex": "^(write_file|patch_file)$" },
         "action": "allow"
@@ -24,6 +42,7 @@
         "toolName": { "$regex": "^(web_search|web_fetch)$" },
         "action": "allow"
       },
+
       {
         "toolName": "exec_command",
         "action": "allow"
@@ -34,7 +53,6 @@
     "command": "plain-sandbox",
     "args": [
       "--allow-write",
-      "--mount-readonly", ".plain-agent/config.json,.plain-agent/config.sandbox.json",
       "--keep-alive", "30"
     ],
     "separator": "--",
