@@ -154,6 +154,15 @@ if status is-interactive
   function calculate --description "Calculate mathematical expressions from input"
     sed -E 's,^ +//,,g; s,[^0-9.*+/()-],,g' | tr -s ' ' | tee /dev/stderr | bc -l | sed 's/^/= /'
   end
+
+  function agent_sandbox_shell --description "Launch zsh in plain agent sandbox"
+    set -l config_dir $HOME/.config/.plain-agent
+    set -l config_file $config_dir/config.sandbox.json
+    if test -e $config_dir/config.sandbox-local.json
+      set config_file $config_dir/config.sandbox-local.json
+    end
+    plain sandbox -c $config_file -- --tty --allow-net 0.0.0.0/0 --verbose zsh
+  end
 end
 
 # Host specific configuration
