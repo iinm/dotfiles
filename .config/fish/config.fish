@@ -48,10 +48,11 @@ if test (uname) = 'Linux'
   else
     set -x CLIPBOARD_FILE $HOME/.clipboard
     function pbcopy
-      read input
+      set -l tmpfile (mktemp)
+      cat > $tmpfile
       # OSC52
-      printf "\e]52;c;%s\a" (echo -n "$input" | openssl base64 -A)
-      echo -n "$input" > $CLIPBOARD_FILE
+      printf "\e]52;c;%s\a" (openssl base64 -A < $tmpfile)
+      mv $tmpfile $CLIPBOARD_FILE
     end
     alias pbpaste "cat $CLIPBOARD_FILE"
   end
@@ -67,6 +68,8 @@ if status is-interactive
   set -U fish_greeting
   fish_config theme choose 'Base16 Eighties'
   fish_config prompt choose astronaut
+
+  set -x GPG_TTY (tty)
 
   abbr rm 'rm -i'
   abbr cp 'cp -i'
@@ -104,6 +107,8 @@ if status is-interactive
   abbr d 'docker'
   abbr dc 'docker-compose'
 
+  abbr gpg_unlock 'echo "test" | gpg --clear-sign > /dev/null'
+
   # Utilities
   if type --quiet dir_history
     dir_history
@@ -132,10 +137,12 @@ if status is-interactive
     # disk: 100GB
     function colima_start
       colima start --cpu (sysctl -n hw.ncpu) --memory (math (sysctl -n hw.memsize) / 1024^3 / 2) \
-        --arch aarch64 --disk 100 \
+        --arch aarch64 --disk 100 --root-disk 50 \
         --vm-type=vz --vz-rosetta --mount-type virtiofs \
         --dns 8.8.8.8 --dns 1.1.1.1
     end
+
+    abbr colima_shell 'colima ssh -- env TERM=xterm-256color fish'
   end
 
   if type --quiet gh

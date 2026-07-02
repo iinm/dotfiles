@@ -99,6 +99,7 @@ bootstrap_debian() {
     jq
     xsel
     shellcheck
+    unzip
   )
   local missing_packages=()
   for package in "${packages[@]}"; do
@@ -143,6 +144,7 @@ bootstrap_ubuntu() {
     jq
     xsel
     shellcheck
+    unzip
   )
   local missing_packages=()
   for package in "${packages[@]}"; do
@@ -259,6 +261,7 @@ setup_fish() {
     echo "skip: $fish_local_config exists."
   else
     echo "run: create $fish_local_config"
+    mkdir -p "$(dirname "$fish_local_config")"
     cat > "$fish_local_config" << 'EOF'
 function local_config --description "Host specific configuration"
   function local_config_first
@@ -309,7 +312,7 @@ setup_nvim() {
     local platform
     local machine
     platform="$(uname -s | sed 's/Linux/linux/; s/Darwin/macos/')"
-    machine="$(uname -m)"
+    machine="$(uname -m | sed 's/aarch64/arm64/;')"
 
     rm -rf "$nvim_path"
     mkdir -p "$nvim_path"
@@ -380,15 +383,20 @@ EOF
     echo "skip: efm-langserver $EFM_LS_VERSION exists."
   else
     echo "run: install efm-langserver."
+
     mkdir -p "$(dirname "$efm_ls_path")"
     rm -rf $efm_ls_path
     rm -rf /tmp/efm-langserver_v*
+
     local base_url="https://github.com/mattn/efm-langserver/releases/download"
+    local machine
+    machine="$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/;')"
+
     if test "$(uname)" = "Linux"; then
       curl -L --show-error --fail \
-        "${base_url}/v${EFM_LS_VERSION}/efm-langserver_v${EFM_LS_VERSION}_linux_amd64.tar.gz" \
+        "${base_url}/v${EFM_LS_VERSION}/efm-langserver_v${EFM_LS_VERSION}_linux_${machine}.tar.gz" \
         | tar -zxf - -C /tmp
-      mv /tmp/efm-langserver_v${EFM_LS_VERSION}_linux_amd64/efm-langserver $efm_ls_path
+      mv /tmp/efm-langserver_v${EFM_LS_VERSION}_linux_${machine}/efm-langserver $efm_ls_path
     fi
     if test "$(uname)" = "Darwin"; then
       curl -L --show-error --fail \
@@ -442,7 +450,7 @@ install_golang() {
     local kernel
     local machine
     kernel="$(uname -s | sed 's/Linux/linux/; s/Darwin/darwin/')"
-    machine="$(uname -m | sed 's/x86_64/amd64/')"
+    machine="$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/;')"
     
     rm -rf "$golang_dir"
     mkdir -p "$golang_dir"
@@ -466,7 +474,7 @@ install_nodejs() {
     local kernel
     local machine
     kernel="$(uname -s | sed 's/Linux/linux/; s/Darwin/darwin/')"
-    machine="$(uname -m | sed 's/x86_64/x64/')"
+    machine="$(uname -m | sed 's/x86_64/x64/; s/aarch64/arm64/;')"
 
     local ext
     local extract_option
