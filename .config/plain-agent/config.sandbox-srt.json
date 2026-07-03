@@ -1,0 +1,72 @@
+{
+  "tools": {
+    "tmux": { "enabled": false }
+  },
+  "autoApproval": {
+    "defaultAction": "ask",
+    "maxApprovals": 100,
+    "allowGitUnmanagedFiles": true,
+    "patterns": [
+      {
+        "toolName": "exec_command",
+        "input": { "command": "find" },
+        "action": "deny",
+        "reason": "Use fd instead; fd respects .gitignore by default"
+      },
+      {
+        "toolName": "exec_command",
+        "input": { "command": "grep" },
+        "action": "deny",
+        "reason": "Use rg instead; rg respects .gitignore by default"
+      },
+      {
+        "toolName": "exec_command",
+        "input": {
+          "command": "npm",
+          "args": { "$has": { "$regex": "^(i|ci|install)$" } }
+        },
+        "action": "deny",
+        "reason": "Network access is restricted; ask the user to run it"
+      },
+
+      {
+        "toolName": "exec_command",
+        "input": {
+          "command": "git",
+          "args": [{ "$regex": "^(status|diff|log|show|ls-remote|rev-parse)$" }]
+        },
+        "action": "allow"
+      },
+      {
+        "toolName": "exec_command",
+        "input": { "command": { "$regex": "^(git|gh|docker)$" } },
+        "action": "ask"
+      },
+
+      {
+        "toolName": { "$regex": "^(write_file|patch_file)$" },
+        "action": "allow"
+      },
+      {
+        "toolName": { "$regex": "^(web_search|web_fetch)$" },
+        "action": "allow"
+      },
+
+      {
+        "toolName": "exec_command",
+        "action": "allow"
+      }
+    ]
+  },
+  "sandbox": {
+    "command": "srt",
+    "args": ["--settings", { "$env": "PLAIN_AGENT_SRT_SETTINGS" }],
+    "separator": "--",
+    "rules": [
+      {
+        "pattern": { "command": { "$regex": "^(git|gh|docker)$" } },
+        "mode": "unsandboxed"
+      }
+    ]
+  }
+}

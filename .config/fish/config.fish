@@ -39,6 +39,8 @@ set -x SHELL (which fish)
 test -n "$LANG";   or set -x LANG en_US.UTF-8
 test -n "$EDITOR"; or type --quiet nvim; and set -x EDITOR nvim
 
+set -x PLAIN_AGENT_SRT_SETTINGS ~/.srt-settings.json
+
 # Aliases for compatibility
 if test (uname) = 'Linux'
   alias open 'xdg-open'
@@ -93,7 +95,6 @@ if status is-interactive
   end
 
   abbr asb "plain -c (resolve_agent_sandbox_config_path)"
-  abbr asbs "plain sandbox -c (resolve_agent_sandbox_config_path) -- --tty --allow-net 0.0.0.0/0 --verbose zsh"
 
   abbr gco 'git checkout'
   abbr gst 'git status'
@@ -106,8 +107,6 @@ if status is-interactive
 
   abbr d 'docker'
   abbr dc 'docker-compose'
-
-  abbr gpg_unlock 'echo "test" | gpg --clear-sign > /dev/null'
 
   # Utilities
   if type --quiet dir_history
@@ -137,12 +136,10 @@ if status is-interactive
     # disk: 100GB
     function colima_start
       colima start --cpu (sysctl -n hw.ncpu) --memory (math (sysctl -n hw.memsize) / 1024^3 / 2) \
-        --arch aarch64 --disk 100 --root-disk 50 \
+        --arch aarch64 --disk 100 \
         --vm-type=vz --vz-rosetta --mount-type virtiofs \
         --dns 8.8.8.8 --dns 1.1.1.1
     end
-
-    abbr colima_shell 'colima ssh -- env TERM=xterm-256color fish'
   end
 
   if type --quiet gh

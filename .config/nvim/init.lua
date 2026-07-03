@@ -49,7 +49,6 @@ local setup_options = function()
   vim.opt.cmdheight = 2
   vim.opt.shortmess:append('s') -- don't show "search hit BOTTOM, ..."
 
-  vim.g.clipboard = 'osc52'
   vim.g.mapleader = ' '
   vim.g.markdown_fenced_languages = { 'sh', 'mermaid' }
   vim.g.netrw_banner = 0
