@@ -6,7 +6,7 @@
     "allowLocalBinding": false
   },
   "filesystem": {
-    "denyRead": ["/home/*/.*", "/Users/*/.*"],
+    "denyRead": ["/Users/*/.*"],
     "allowRead": [],
     "allowWrite": ["."],
     "denyWrite": ["**/.plain-agent/*.json"]

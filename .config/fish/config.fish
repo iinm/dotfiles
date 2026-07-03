@@ -39,10 +39,8 @@ set -x SHELL (which fish)
 test -n "$LANG";   or set -x LANG en_US.UTF-8
 test -n "$EDITOR"; or type --quiet nvim; and set -x EDITOR nvim
 
-set -x PLAIN_AGENT_SRT_SETTINGS ~/.srt-settings.json
-
-# Aliases for compatibility
 if test (uname) = 'Linux'
+  # Aliases for compatibility
   alias open 'xdg-open'
   if xsel -o &> /dev/null
     alias pbcopy  'xsel -i -p && xsel -o -p | xsel -i -b'
@@ -61,6 +59,8 @@ if test (uname) = 'Linux'
 end
 
 if test (uname) = 'Darwin'; and not type --quiet tac
+  set -x PLAIN_AGENT_SRT_SETTINGS ~/.config/plain-agent/srt-settings.macos.json
+
   alias tac 'tail -r'
 end
 
@@ -70,8 +70,6 @@ if status is-interactive
   set -U fish_greeting
   fish_config theme choose 'Base16 Eighties'
   fish_config prompt choose astronaut
-
-  set -x GPG_TTY (tty)
 
   abbr rm 'rm -i'
   abbr cp 'cp -i'
