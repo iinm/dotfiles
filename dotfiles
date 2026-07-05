@@ -43,10 +43,8 @@ setup() {
 bootstrap() {
   if test -e /etc/pacman.conf; then
     bootstrap_archlinux
-  elif test "$(lsb_release -is 2> /dev/null)" = "Debian"; then
-    bootstrap_debian
-  elif test "$(lsb_release -is 2> /dev/null)" = "Ubuntu"; then
-    bootstrap_ubuntu
+  elif test "$(lsb_release -is 2> /dev/null)" = "Debian" || test "$(lsb_release -is 2> /dev/null)" = "Ubuntu"; then
+    bootstrap_debian_ubuntu
   elif test "$(uname)" = "Darwin"; then
     bootstrap_darwin
   else
@@ -85,7 +83,7 @@ bootstrap_archlinux() {
   fi
 }
 
-bootstrap_debian() {
+bootstrap_debian_ubuntu() {
   local packages=(
     fish
     tmux
@@ -95,41 +93,6 @@ bootstrap_debian() {
     build-essential
     ripgrep
     fd-find
-    curl
-    jq
-    xsel
-    shellcheck
-    unzip
-  )
-  local missing_packages=()
-  for package in "${packages[@]}"; do
-    dpkg --status "$package" &> /dev/null || missing_packages+=("$package")
-  done
-
-  if test "${#missing_packages[@]}" -eq 0; then
-    echo "skip: all required packages are installed."
-  else
-    echo "run: install ${missing_packages[*]}"
-    sudo apt update
-    sudo apt install -y "${missing_packages[@]}"
-  fi
-
-  setup_fzf_on_linux
-  setup_lua_language_server_on_linux
-  setup_fd_link_on_debian
-}
-
-bootstrap_ubuntu() {
-  local packages=(
-    fish
-    tmux
-    git
-    tig
-    make
-    build-essential
-    ripgrep
-    fd-find
-    fzf
     curl
     jq
     xsel
