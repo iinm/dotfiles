@@ -44,7 +44,7 @@ bootstrap() {
   if test -e /etc/pacman.conf; then
     bootstrap_archlinux
   elif test "$(lsb_release -is 2> /dev/null)" = "Debian" || test "$(lsb_release -is 2> /dev/null)" = "Ubuntu"; then
-    bootstrap_debian_ubuntu
+    bootstrap_debian
   elif test "$(uname)" = "Darwin"; then
     bootstrap_darwin
   else
@@ -83,7 +83,7 @@ bootstrap_archlinux() {
   fi
 }
 
-bootstrap_debian_ubuntu() {
+bootstrap_debian() {
   local packages=(
     fish
     tmux
