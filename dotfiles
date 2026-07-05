@@ -120,16 +120,6 @@ bootstrap_debian() {
 }
 
 bootstrap_ubuntu() {
-  if lsb_release -r | grep -qE "20.04"; then
-    if test -e /etc/apt/sources.list.d/fish-shell-ubuntu-release-3-*.list; then
-      echo "skip: fish PPA is enabled."
-    else
-      echo "run: enable fish PPA."
-      sudo apt-add-repository ppa:fish-shell/release-3 -y
-      sudo apt purge -y fish || true
-    fi
-  fi
-
   local packages=(
     fish
     tmux
@@ -169,9 +159,13 @@ setup_fzf_on_linux() {
     echo "skip: fzf $FZF_VERSION is installed."
   else
     echo "run: install fzf $FZF_VERSION"
+
+    local machine
+    machine="$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/;')"
+
     mkdir -p ~/tools/bin
     curl --show-error --fail -L \
-      "https://github.com/junegunn/fzf/releases/download/v${FZF_VERSION}/fzf-${FZF_VERSION}-linux_amd64.tar.gz" \
+      "https://github.com/junegunn/fzf/releases/download/v${FZF_VERSION}/fzf-${FZF_VERSION}-linux_${machine}.tar.gz" \
       | tar -C ~/tools/bin -xzf -
   fi
 }
@@ -182,10 +176,14 @@ setup_lua_language_server_on_linux() {
     echo "skip: lua-language-server $LUA_LANGUAGE_SERVER_VERSION is installed."
   else
     echo "run: install lua-language-server $LUA_LANGUAGE_SERVER_VERSION"
+
+    local machine
+    machine="$(uname -m | sed 's/x86_64/x64/; s/aarch64/arm64/;')"
+
     rm -rf "$lua_language_server_dir"
     mkdir -p "$lua_language_server_dir"
     curl --show-error --fail -L \
-      "https://github.com/LuaLS/lua-language-server/releases/download/${LUA_LANGUAGE_SERVER_VERSION}/lua-language-server-${LUA_LANGUAGE_SERVER_VERSION}-linux-x64.tar.gz" \
+      "https://github.com/LuaLS/lua-language-server/releases/download/${LUA_LANGUAGE_SERVER_VERSION}/lua-language-server-${LUA_LANGUAGE_SERVER_VERSION}-linux-${machine}.tar.gz" \
       | tar -C "$lua_language_server_dir" -xzf -
   fi
 }
