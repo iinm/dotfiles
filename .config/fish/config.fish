@@ -60,6 +60,7 @@ end
 
 if test (uname) = 'Darwin'; and not type --quiet tac
   set -x PLAIN_AGENT_SRT_SETTINGS ~/.config/plain-agent/srt-settings.macos.json
+  set -x PLAIN_AGENT_SEATBELT_PROFILE ~/.config/plain-agent/seatbelt.macos.sb
 
   alias tac 'tail -r'
 end
