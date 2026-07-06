@@ -39,6 +39,18 @@
       },
       {
         "toolName": "exec_command",
+        "input": {
+          "command": "git",
+          "args": [
+            "-C",
+            { "$regex": "." },
+            { "$regex": "^(status|diff|log|show|ls-remote|rev-parse)$" }
+          ]
+        },
+        "action": "allow"
+      },
+      {
+        "toolName": "exec_command",
         "input": { "command": { "$regex": "^(git|gh|docker)$" } },
         "action": "ask"
       },
