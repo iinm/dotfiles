@@ -3,7 +3,7 @@
     "allowedDomains": [],
     "deniedDomains": [],
     "allowUnixSockets": [],
-    "allowLocalBinding": false
+    "allowLocalBinding": true
   },
   "filesystem": {
     "denyRead": ["/Users/*/.*"],
