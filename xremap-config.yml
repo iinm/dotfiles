@@ -9,6 +9,8 @@ modmap:
       LeftAlt: LeftMeta
       LeftMeta: LeftAlt
 
+      RightAlt: Enter
+
 keymap:
   - name: Global
     remap:
