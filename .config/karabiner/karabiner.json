@@ -269,7 +269,7 @@
                         },
                         {
                             "from": { "key_code": "japanese_kana" },
-                            "to": [{ "key_code": "right_command" }]
+                            "to": [{ "key_code": "return_or_enter" }]
                         },
                         {
                             "from": { "key_code": "left_command" },
