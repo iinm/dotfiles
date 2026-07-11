@@ -58,10 +58,12 @@ if test (uname) = 'Linux'
   end
 end
 
-if test (uname) = 'Darwin'; and not type --quiet tac
+if test (uname) = 'Darwin'
   set -x PLAIN_AGENT_SRT_SETTINGS ~/.config/plain-agent/srt-settings.macos.json
 
-  alias tac 'tail -r'
+  if not type --quiet tac
+    alias tac 'tail -r'
+  end
 end
 
 # Interactive shell configuration
