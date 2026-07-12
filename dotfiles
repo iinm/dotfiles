@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-NVIM_VERSION=0.12.3
-# NVIM_VERSION=nightly
+NVIM_VERSION=0.12.4
 EFM_LS_VERSION=0.0.56
 
 # Debian only
@@ -357,7 +356,7 @@ EOF
       curl -L --show-error --fail \
         "${base_url}/v${EFM_LS_VERSION}/efm-langserver_v${EFM_LS_VERSION}_linux_${machine}.tar.gz" \
         | tar -zxf - -C /tmp
-      mv /tmp/efm-langserver_v${EFM_LS_VERSION}_linux_${machine}/efm-langserver $efm_ls_path
+      mv "/tmp/efm-langserver_v${EFM_LS_VERSION}_linux_${machine}/efm-langserver" $efm_ls_path
     fi
     if test "$(uname)" = "Darwin"; then
       curl -L --show-error --fail \
