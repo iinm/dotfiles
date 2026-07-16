@@ -19,6 +19,7 @@
         "action": "deny",
         "reason": "Use rg instead; rg respects .gitignore by default"
       },
+
       {
         "toolName": "exec_command",
         "input": {
@@ -27,6 +28,12 @@
         },
         "action": "deny",
         "reason": "Network access is restricted; ask the user to run it"
+      },
+      {
+        "toolName": "exec_command",
+        "input": { "command": "npm", "args": [{ "$not": "--prefix" }] },
+        "action": "deny",
+        "reason": "Use npm --prefix to specify the directory"
       },
 
       {
@@ -72,10 +79,7 @@
   },
   "sandbox": {
     "command": "plain-sandbox",
-    "args": [
-      "--allow-write",
-      "--keep-alive", "30"
-    ],
+    "args": ["--allow-write", "--keep-alive", "30"],
     "separator": "--",
     "rules": [
       {

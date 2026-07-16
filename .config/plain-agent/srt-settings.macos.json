@@ -2,7 +2,7 @@
   "network": {
     "allowedDomains": [],
     "deniedDomains": [],
-    "allowUnixSockets": [],
+    "allowUnixSockets": ["/tmp/claude"],
     "allowLocalBinding": true
   },
   "filesystem": {
