@@ -27,6 +27,7 @@ Optional commands:
   install_nodejs  Install Node.js
   install_python  Install Python
   setup_chrome    Setup Chrome startup options. (Linux only)
+  setup_xremap    Deploy and start xremap. (Linux only)
 HELP
 }
 
@@ -393,6 +394,27 @@ end
 
 return module
 EOF
+  fi
+}
+
+setup_xremap() {
+  local service_source="$SOURCE_DIR/xremap.service"
+  local service_destination="$HOME/.config/systemd/user/xremap.service"
+  local current_service="$service_destination"
+
+  if test ! -e "$current_service"; then
+    current_service=/dev/null
+  fi
+
+  if ! diff -u "$current_service" <(sed "s|@HOME@|$HOME|g" "$service_source"); then
+    echo "run: deploy $service_destination"
+    mkdir -p "$(dirname "$service_destination")"
+    sed "s|@HOME@|$HOME|g" "$service_source" > "$service_destination"
+    systemctl --user daemon-reload
+    systemctl --user enable xremap
+    systemctl --user restart xremap
+  else
+    echo "skip: $service_destination is up to date."
   fi
 }
 

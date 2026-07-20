@@ -1,15 +1,12 @@
 # https://github.com/xremap/xremap
 #
-# mkdir -p ~/.config/systemd/user
-# cp xremap.service ~/.config/systemd/user/xremap.service
-# systemctl --user daemon-reload
-# systemctl --user enable xremap
+# This template is rendered by `./dotfiles setup_xremap`.
 [Unit]
 Description=xremap
 
 [Service]
 Restart=always
-ExecStart=/home/shumpei/tools/bin/xremap /home/shumpei/dotfiles/xremap-config.yml
+ExecStart=@HOME@/tools/bin/xremap --watch=device @HOME@/dotfiles/xremap-config.yml
 
 [Install]
 WantedBy=default.target
