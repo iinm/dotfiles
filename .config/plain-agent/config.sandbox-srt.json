@@ -70,6 +70,10 @@
         "toolName": { "$regex": "^(web_search|web_fetch)$" },
         "action": "allow"
       },
+      {
+        "toolName": "compact_context",
+        "action": "allow"
+      },
 
       {
         "toolName": "exec_command",
