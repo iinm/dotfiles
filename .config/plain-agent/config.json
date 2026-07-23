@@ -24,6 +24,12 @@
       ]
     },
     {
+      "source": "https://github.com/anthropics/skills",
+      "plugins": [
+        { "name": "skill-creator", "path": "", "only": "skill-creator" }
+      ]
+    },
+    {
       "source": "https://github.com/anthropics/claude-code-security-review",
       "plugins": [
         { "name": "security-review", "path": ".claude" }
