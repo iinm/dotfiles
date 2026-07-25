@@ -37,14 +37,20 @@ local function set_terminal_height(height)
   vim.t.managed_terminal_height = height
 end
 
-local function is_valid_win(win)
-  return win and vim.api.nvim_win_is_valid(win)
+local function is_managed_terminal_win(win)
+  if not win or not vim.api.nvim_win_is_valid(win) then
+    return false
+  end
+
+  local bufnr = vim.api.nvim_win_get_buf(win)
+  return vim.b[bufnr].managed_terminal == true
 end
 
 local function hide_current()
-  if is_valid_win(get_current_win()) then
-    set_terminal_height(vim.api.nvim_win_get_height(get_current_win()))
-    vim.api.nvim_win_close(get_current_win(), true)
+  local win = get_current_win()
+  if is_managed_terminal_win(win) then
+    set_terminal_height(vim.api.nvim_win_get_height(win))
+    vim.api.nvim_win_close(win, true)
   end
   set_current_win(nil)
 end
@@ -80,7 +86,7 @@ end
 function M.open(label)
   local bufnr = ensure_terminal(label)
 
-  if is_valid_win(get_current_win()) then
+  if is_managed_terminal_win(get_current_win()) then
     if vim.api.nvim_win_get_buf(get_current_win()) == bufnr then
       set_last_opened_label(label)
       vim.cmd("startinsert")
@@ -101,7 +107,7 @@ function M.open(label)
 end
 
 function M.toggle(default_label)
-  if is_valid_win(get_current_win()) then
+  if is_managed_terminal_win(get_current_win()) then
     hide_current()
     return
   end
