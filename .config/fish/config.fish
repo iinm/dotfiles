@@ -98,7 +98,7 @@ if status is-interactive
 
   abbr gco 'git checkout'
   abbr gst 'git status'
-  abbr gl  'git pull'
+  abbr gl  'git pull origin (git rev-parse --abbrev-ref HEAD)'
   abbr gcd 'cd (git rev-parse --show-toplevel)'
   abbr gcb 'git rev-parse --abbrev-ref HEAD'
   abbr gsm 'git submodule'
