@@ -262,7 +262,6 @@ local copy_path_command = function(path_getter, oil_modifier)
 end
 
 local setup_commands = function()
-  local window_utils = require('window_utils')
   local term = require_safe('term')
   local github = require('github')
 
@@ -271,7 +270,6 @@ local setup_commands = function()
     { 'Oldfiles',       function() vim.fn['Oldfiles']({ only_cwd = true }) end,                            {} },
     { 'OldfilesGlobal', function() vim.fn['Oldfiles']() end,                                               {} },
     { 'Outline',        'call Outline()',                                                                  {} },
-    { 'CloseTerms',     function() window_utils.close_terms() end,                                         {} },
     { 'Diagnostics',    function() vim.diagnostic.setloclist() end,                                        {} },
     { 'CopyContext',    copy_path_command(function() return vim.fn.expand('%:.') end, ':.'),               { range = true } },
     { 'CopyContextAbs', copy_path_command(function() return vim.fn.expand('%:p') end, ':p'),               { range = true } },
@@ -283,7 +281,7 @@ local setup_commands = function()
 
   vim.api.nvim_create_user_command("Term", function(opts)
     local label = opts.args ~= "" and opts.args or "1"
-    term.toggle(label)
+    term.open(label)
   end, { nargs = "?" })
 
   vim.api.nvim_create_user_command("TermExec", function(opts)
