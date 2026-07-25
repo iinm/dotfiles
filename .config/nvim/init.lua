@@ -264,19 +264,17 @@ end
 
 local setup_commands = function()
   local window_utils = require('window_utils')
+  local github = require('github')
   local commands = {
-    { 'Buffers',           'call Buffers()',                                                    {} },
-    { 'Oldfiles',          function() vim.fn['Oldfiles']({ only_cwd = true }) end,              {} },
-    { 'OldfilesGlobal',    function() vim.fn['Oldfiles']() end,                                 {} },
-    { 'Outline',           'call Outline()',                                                    {} },
-    { 'CloseTerms',        function() window_utils.close_terms() end,                           {} },
-    { 'Diagnostics',       function() vim.diagnostic.setloclist() end,                          {} },
-    { 'CopyContext',       copy_path_command(function() return vim.fn.expand('%:.') end, ':.'), { range = true } },
-    { 'CopyContextAbs',    copy_path_command(function() return vim.fn.expand('%:p') end, ':p'), { range = true } },
-    { 'MinuetDuetPredict', 'Minuet duet predict',                                               {} },
-    { 'MinuetDuetApply',   'Minuet duet apply',                                                 {} },
-    { 'MinuetDuetDismiss', 'Minuet duet dismiss',                                               {} },
-  }
+    { 'Buffers',        'call Buffers()',                                                                  {} },
+    { 'Oldfiles',       function() vim.fn['Oldfiles']({ only_cwd = true }) end,                            {} },
+    { 'OldfilesGlobal', function() vim.fn['Oldfiles']() end,                                               {} },
+    { 'Outline',        'call Outline()',                                                                  {} },
+    { 'CloseTerms',     function() window_utils.close_terms() end,                                         {} },
+    { 'Diagnostics',    function() vim.diagnostic.setloclist() end,                                        {} },
+    { 'CopyContext',    copy_path_command(function() return vim.fn.expand('%:.') end, ':.'),               { range = true } },
+    { 'CopyContextAbs', copy_path_command(function() return vim.fn.expand('%:p') end, ':p'),               { range = true } },
+    { 'OpenInGitHub',   github.open_in_github_command(function() return vim.api.nvim_buf_get_name(0) end), { range = true } }, }
 
   for _, command in ipairs(commands) do
     vim.api.nvim_create_user_command(table.unpack(command))
@@ -528,7 +526,6 @@ local setup_plugins = function()
     { src = 'https://github.com/easymotion/vim-easymotion' },
     { src = 'https://github.com/kylechui/nvim-surround' },
     { src = 'https://github.com/windwp/nvim-autopairs' },
-    { src = 'https://github.com/Almo7aya/openingh.nvim' },
   })
 end
 

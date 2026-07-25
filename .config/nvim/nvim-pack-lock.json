@@ -45,10 +45,6 @@
       "rev": "0fcc83805ad11cf714a949c98c605ed717e0b83e",
       "src": "https://github.com/stevearc/oil.nvim"
     },
-    "openingh.nvim": {
-      "rev": "7cc8c897cb6b34d8ed28e99d95baccef609ed251",
-      "src": "https://github.com/Almo7aya/openingh.nvim"
-    },
     "previm": {
       "rev": "2bccb5e2a14e9f344f2656578b815b0da5c37fe3",
       "src": "https://github.com/previm/previm"
