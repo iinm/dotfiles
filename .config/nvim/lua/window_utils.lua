@@ -1,40 +1,9 @@
-local close_terms = function()
-  -- close all term windows in all tabs
-  for i = 1, vim.fn.tabpagenr('$'), 1 do
-    local current_tab = vim.fn.tabpagenr()
-    vim.cmd(i .. 'tabnext')
-    for j = vim.fn.winnr('$'), 1, -1 do
-      local buf_name = vim.fn.bufname(vim.fn.winbufnr(j))
-      if vim.startswith(buf_name, 'term://') then
-        vim.cmd(j .. 'wincmd c')
-      end
-    end
-    -- back to current tab
-    vim.cmd(current_tab .. 'tabnext')
-  end
-end
-
-local close_terms_in_other_tab = function()
-  local current_tab = vim.fn.tabpagenr()
-  for i = 1, vim.fn.tabpagenr('$'), 1 do
-    if i ~= current_tab then
-      vim.cmd(i .. 'tabnext')
-      for j = vim.fn.winnr('$'), 1, -1 do
-        local buf_name = vim.fn.bufname(vim.fn.winbufnr(j))
-        if vim.startswith(buf_name, 'term://') then
-          vim.cmd(j .. 'wincmd c')
-        end
-      end
-    end
-  end
-  -- back to current tab
-  vim.cmd(current_tab .. 'tabnext')
-end
+local M = {}
 
 -- Maximize (Open in new tab)
-local toggle_maximize = function()
+function M.toggle_maximize()
   local is_term = function()
-    return vim.startswith(vim.fn.bufname(), 'term://')
+    return vim.startswith(vim.fn.bufname(), 'term:')
   end
   if vim.fn.winnr('$') == 1 then
     if vim.fn.tabpagenr() > 1 then
@@ -58,7 +27,7 @@ local toggle_maximize = function()
   end
 end
 
-local toggle_quickfix = function()
+function M.toggle_quickfix()
   for _, win in pairs(vim.fn.getwininfo()) do
     if win.quickfix == 1 then
       vim.cmd('cclose')
@@ -68,9 +37,4 @@ local toggle_quickfix = function()
   vim.cmd('botright cwindow | setlocal nowrap')
 end
 
-return {
-  close_terms = close_terms,
-  close_terms_in_other_tab = close_terms_in_other_tab,
-  toggle_maximize = toggle_maximize,
-  toggle_quickfix = toggle_quickfix,
-}
+return M

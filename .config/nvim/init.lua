@@ -56,7 +56,7 @@ local setup_options = function()
   vim.g.netrw_liststyle = 3
 
   -- spell
-  vim.o.spell = true
+  -- vim.o.spell = true
   vim.o.spelllang = 'en,cjk'
   vim.o.spelloptions = 'camel'
   -- disable mouse
@@ -104,7 +104,7 @@ local setup_appearance = function()
     -- align right
     '%=',
     -- terminal number
-    '%#Purple#%{&ft == "toggleterm" ? "#" . b:toggle_number : ""}%*',
+    [[%#Purple#%{get(b:, 'managed_terminal', 0) ? '#' . get(b:, 'terminal_label', '') : ''}%*]],
     '  ',
     '%l,%c%V %P',
     -- '%)',
@@ -128,6 +128,7 @@ end
 
 local setup_keymap = function()
   local window_utils = require('window_utils')
+  local term = require_safe("term")
 
   -- utilities
   vim.keymap.set('n', '<leader>r', 'q:?')
@@ -152,13 +153,10 @@ local setup_keymap = function()
 
   -- window
   vim.keymap.set('n', '<C-w>z', window_utils.toggle_maximize)
-  vim.keymap.set('n', '<C-w>t', function()
-    window_utils.close_terms_in_other_tab()
-    vim.cmd(vim.v.count .. 'ToggleTerm')
-  end)
-  for i = 1, 5, 1 do
-    vim.keymap.set('n', '<C-w>' .. i, string.format('<Cmd>CloseTerms<CR><Cmd>%dToggleTerm<CR>', i))
-    vim.keymap.set('n', '<F' .. i .. '>', string.format('<Cmd>CloseTerms<CR><Cmd>%dToggleTerm<CR>', i))
+  vim.keymap.set('n', '<C-w>t', function() term.toggle("1") end, {})
+  for i = 1, 5 do
+    vim.keymap.set('n', '<C-w>' .. i, function() term.open(tostring(i)) end, {})
+    vim.keymap.set('n', '<F' .. i .. '>', function() term.open(tostring(i)) end, {})
   end
 
   -- terminal
@@ -174,14 +172,15 @@ local setup_keymap = function()
       vim.keymap.set('t', '<C-w>k', '<Cmd>wincmd k<CR>', opts)
       vim.keymap.set('t', '<C-w>l', '<Cmd>wincmd l<CR>', opts)
       vim.keymap.set('t', '<C-w>c', '<Cmd>wincmd c<CR>', opts)
+      vim.keymap.set('t', '<C-w>=', '<Cmd>wincmd =<CR>', opts)
       vim.keymap.set('t', '<C-w><C-w>', '<Cmd>wincmd w<CR>', opts)
       vim.keymap.set('t', '<C-w>gt', '<Cmd>tabnext<CR>', opts)
       vim.keymap.set('t', '<C-w>gT', '<Cmd>tabprevious<CR>', opts)
-      vim.keymap.set('t', '<C-w>t', '<Cmd>ToggleTerm<CR>', {})
       vim.keymap.set('t', '<C-w>z', window_utils.toggle_maximize)
-      for i = 1, 5, 1 do
-        vim.keymap.set('t', '<C-w>' .. i, string.format('<Cmd>CloseTerms<CR><Cmd>%dToggleTerm<CR>', i))
-        vim.keymap.set('t', '<F' .. i .. '>', string.format('<Cmd>CloseTerms<CR><Cmd>%dToggleTerm<CR>', i))
+      vim.keymap.set('t', '<C-w>t', function() term.toggle("1") end, {})
+      for i = 1, 5 do
+        vim.keymap.set('t', '<C-w>' .. i, function() term.open(tostring(i)) end, {})
+        vim.keymap.set('t', '<F' .. i .. '>', function() term.open(tostring(i)) end, {})
       end
     end,
   })
@@ -211,7 +210,7 @@ local setup_keymap = function()
   vim.keymap.set('n', '<leader>gc', ':<C-u>Git checkout<Space>')
   vim.keymap.set('n', '<leader>gp', ':<C-u>Git pull origin <C-r>=FugitiveHead()<CR><CR>')
   vim.keymap.set('n', '<leader>gP',
-    [[:5TermExec open=0 cmd='with_notify git push origin <C-r>=FugitiveHead()<CR>'<Left>]])
+    [[:TermExec 5 with_notify git push origin <C-r>=FugitiveHead()<CR>]])
   vim.keymap.set('n', '<leader>gb', ':<C-u>Git blame<CR>')
   vim.keymap.set('n', '<leader>gl', ':<C-u>Git log %<CR>')
 
@@ -264,7 +263,9 @@ end
 
 local setup_commands = function()
   local window_utils = require('window_utils')
+  local term = require_safe('term')
   local github = require('github')
+
   local commands = {
     { 'Buffers',        'call Buffers()',                                                                  {} },
     { 'Oldfiles',       function() vim.fn['Oldfiles']({ only_cwd = true }) end,                            {} },
@@ -279,6 +280,22 @@ local setup_commands = function()
   for _, command in ipairs(commands) do
     vim.api.nvim_create_user_command(table.unpack(command))
   end
+
+  vim.api.nvim_create_user_command("Term", function(opts)
+    local label = opts.args ~= "" and opts.args or "1"
+    term.toggle(label)
+  end, { nargs = "?" })
+
+  vim.api.nvim_create_user_command("TermExec", function(opts)
+    local label, command = opts.args:match("^(%S+)%s+(.+)$")
+    if not label then
+      vim.notify("Usage: :TermExec <label> <command>", vim.log.levels.ERROR)
+      return
+    end
+    term.exec(label, command, { enter = false })
+  end, {
+    nargs = "+",
+  })
 
   vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('UserLspCommandConfig', {}),
@@ -453,7 +470,7 @@ local setup_auto_commands = function()
 
   -- disable spell check
   vim.api.nvim_create_autocmd({ 'FileType' }, {
-    pattern = { 'toggleterm', 'qf' },
+    pattern = { 'qf' },
     group = vim.api.nvim_create_augroup('UserDisableSpellCheck', {}),
     command = 'setlocal nospell'
   })
@@ -504,9 +521,6 @@ local setup_plugins = function()
     -- file explorer
     { src = 'https://github.com/stevearc/oil.nvim' },
 
-    -- terminal
-    { src = 'https://github.com/akinsho/toggleterm.nvim' },
-
     -- markdown preview
     { src = 'https://github.com/previm/previm' },
 
@@ -526,19 +540,6 @@ local setup_plugins = function()
     { src = 'https://github.com/easymotion/vim-easymotion' },
     { src = 'https://github.com/kylechui/nvim-surround' },
     { src = 'https://github.com/windwp/nvim-autopairs' },
-  })
-end
-
-local setup_toggleterm = function()
-  require("toggleterm").setup({
-    auto_scroll = false,
-    size = function(term)
-      if term.direction == "horizontal" then
-        return vim.o.lines * 0.4
-      elseif term.direction == "vertical" then
-        return vim.o.columns * 0.4
-      end
-    end,
   })
 end
 
@@ -966,7 +967,6 @@ setup_utilities()
 setup_auto_commands()
 
 setup_plugins()
-setup_toggleterm()
 setup_lsp()
 setup_blink_cmp()
 setup_oil()
