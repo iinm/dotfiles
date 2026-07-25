@@ -370,8 +370,8 @@ local setup_commands = function()
     end
   end, { range = true })
 
-  -- Ask (LLM) command
-  vim.api.nvim_create_user_command('Ask', function(opts)
+  -- Web search
+  vim.api.nvim_create_user_command('WebSearch', function(opts)
     local cursor_word = ''
     local question = table.concat(opts.fargs, " ")
 
@@ -381,7 +381,7 @@ local setup_commands = function()
     end
 
     local query = cursor_word .. "\n" .. question
-    local url = 'https://www.perplexity.ai/?q=' .. query
+    local url = 'https://www.google.com/search?q=' .. query
     local open_cmd = vim.fn.has('linux') == 1 and 'xdg-open' or 'open'
     vim.fn.system({ open_cmd, url })
   end, { range = true, nargs = '*' })
