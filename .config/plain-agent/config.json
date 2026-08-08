@@ -1,4 +1,14 @@
 {
+  "systemPrompt": {
+    "userPreferences": [
+      "- 応答・メモ・レポート・コードコメントなどすべての出力において、平易な言葉で要点を絞り簡潔に書く",
+      "- コードコメントは以下の用途に限定",
+      "  1. パブリックAPI/関数の仕様",
+      "  2. コードからは読み取れない設計判断",
+      "  3. 未完了作業 TODO/FIXME"
+    ]
+  },
+
   "autoApproval": {
     "defaultAction": "ask",
     "maxApprovals": 100,
