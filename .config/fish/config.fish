@@ -104,6 +104,7 @@ if status is-interactive
   abbr gsm 'git submodule'
 
   abbr ghb 'gh browse'
+  abbr gpgunlock  'echo test | gpg --clearsign >/dev/null; and echo "gpg unlocked"'
 
   abbr d 'docker'
   abbr dc 'docker-compose'
