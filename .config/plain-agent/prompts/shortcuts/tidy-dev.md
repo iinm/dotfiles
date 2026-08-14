@@ -16,7 +16,7 @@
   - 外から見たシステムの振る舞い
   - アーキテクチャ、責任分界（外界とのContractやデータモデルはコードへのリファレンスとして示す）
   - 非自明な設計判断
-  - 運用方法（デプロイ、設定変更など）
+  - 運用方法（デプロイ、設定など）
   - 制約
 
 ## Workflow
@@ -44,6 +44,7 @@ Output:
 - .work/<feat-name>-research.md (既存のソリューションや、利用可能な技術を調査)
 - README.md#Architecture
 - README.md#Decisions
+- README.md#Operations (デプロイ、設定)
 - 外界とのContract (Code)
 - データモデル (Code)
 
@@ -58,13 +59,12 @@ Output:
 
 Output:
 - Code & Tests
-- README.md#Operations
 
 ### Tidy Up
 
 恒久的に残すものを整理する
 
 Output:
-- 整理された README.md（Codeで説明可能な詳細を削除、実装との整合性を合わせる）
+- 整理された README.md（重複削除、Codeで説明可能な詳細を削除、実装との整合性を合わせる）
 - 整理された Code & Tests（自明・冗長なコメントの削除、テストケースの同値クラスの重複削除）
 - .work/ 配下の一時ファイル削除（全タスク完了後）
