@@ -13,7 +13,7 @@
   - 詳細レベルの振る舞い: Tests
 - ドキュメントにはコードでは表現できない将来も必要な知識を書く。
   - 存在意義
-  - 振る舞い
+  - 外から見たシステムの振る舞い
   - アーキテクチャ、責任分界（外界とのContractやデータモデルはコードへのリファレンスとして示す）
   - 非自明な設計判断
   - 運用方法（デプロイ、設定変更など）
@@ -31,21 +31,25 @@ Output:
 
 ### Define Spec
 
-システムとしてどう振る舞うべきかを整理する
+外から見たシステムの振る舞いを整理する
 
 Output:
-- 概要レベル README.md#Behavior
-- 詳細レベル テストコード（まだ実装がないので、コメントとして）
+- README.md#Behavior
 
 ### Design
 
+システムを実現するためのアーキテクチャを設計する
+
 Output:
+- .work/<feat-name>-research.md (既存のソリューションや、利用可能な技術を調査)
 - README.md#Architecture
+- README.md#Decisions
 - 外界とのContract (Code)
 - データモデル (Code)
-- README.md#Decisions
 
 ### Plan
+
+具体的なタスクに分解
 
 Output:
 - .work/<feat-name>-tasks.md
@@ -54,3 +58,13 @@ Output:
 
 Output:
 - Code & Tests
+- README.md#Operations
+
+### Tidy Up
+
+恒久的に残すものを整理する
+
+Output:
+- 整理された README.md（Codeで説明可能な詳細を削除、実装との整合性を合わせる）
+- 整理された Code & Tests（自明・冗長なコメントの削除、テストケースの同値クラスの重複削除）
+- .work/ 配下の一時ファイル削除（全タスク完了後）
