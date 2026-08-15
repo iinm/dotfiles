@@ -19,16 +19,6 @@
         "action": "deny",
         "reason": "Use rg instead; rg respects .gitignore by default"
       },
-
-      {
-        "toolName": "exec_command",
-        "input": {
-          "command": "npm",
-          "args": { "$has": { "$regex": "^(i|ci|install)$" } }
-        },
-        "action": "deny",
-        "reason": "Network access is restricted; ask the user to run it"
-      },
       {
         "toolName": "exec_command",
         "input": { "command": "npm", "args": [{ "$not": "--prefix" }] },
@@ -56,9 +46,18 @@
         },
         "action": "allow"
       },
+
       {
         "toolName": "exec_command",
         "input": { "command": { "$regex": "^(git|gh|docker)$" } },
+        "action": "ask"
+      },
+      {
+        "toolName": "exec_command",
+        "input": {
+          "command": "npm",
+          "args": { "$has": { "$regex": "^(i|ci|install)$" } }
+        },
         "action": "ask"
       },
 
@@ -74,7 +73,6 @@
         "toolName": "compact_context",
         "action": "allow"
       },
-
       {
         "toolName": "exec_command",
         "action": "allow"
@@ -89,6 +87,18 @@
       {
         "pattern": { "command": { "$regex": "^(git|gh|docker)$" } },
         "mode": "unsandboxed"
+      },
+      {
+        "pattern": {
+          "command": "npm",
+          "args": [
+            "--prefix",
+            { "$regex": "." },
+            { "$regex": "^(i|ci|install)$" }
+          ]
+        },
+        "mode": "sandbox",
+        "additionalArgs": ["--allow-net", "0.0.0.0/0"]
       }
     ]
   }

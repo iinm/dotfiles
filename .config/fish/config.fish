@@ -59,8 +59,6 @@ if test (uname) = 'Linux'
 end
 
 if test (uname) = 'Darwin'
-  set -x PLAIN_AGENT_SRT_SETTINGS ~/.config/plain-agent/srt-settings.macos.json
-
   if not type --quiet tac
     alias tac 'tail -r'
   end
