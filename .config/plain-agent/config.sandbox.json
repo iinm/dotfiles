@@ -21,9 +21,12 @@
       },
       {
         "toolName": "exec_command",
-        "input": { "command": "npm", "args": [{ "$not": "--prefix" }] },
+        "input": {
+          "command": { "$regex": "^(npm|npx)$" },
+          "args": [{ "$not": "--prefix" }]
+        },
         "action": "deny",
-        "reason": "Use npm --prefix to specify the directory"
+        "reason": "Use npm/npx --prefix to specify the directory"
       },
 
       {
