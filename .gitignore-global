@@ -5,5 +5,8 @@
 *.un~
 *.swp
 
+# mise
+mise.local.toml
+
 # drawio
 *.bkp
