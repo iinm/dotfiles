@@ -43,8 +43,9 @@ Review:
 Output:
 - .work/<feat-name>-research.md (既存のソリューションや、利用可能な技術を調査)
 - README.md#Architecture（主要な構成要素、責任境界、ワークフロー、状態遷移）
-- README.md#Decisions（非自明な設計判断）
 - README.md#Operations（デプロイ、設定などの運用方法）
+- README.md#Decisions（非自明な設計判断）
+- README.md#Limitations（既知の制約）
 - 外界とのContract (Code)
 - データモデル (Code)
 

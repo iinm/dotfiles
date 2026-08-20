@@ -93,6 +93,8 @@ if status is-interactive
   end
 
   abbr asb "plain -c (resolve_agent_sandbox_config_path)"
+  abbr asbs "plain sandbox -c (resolve_agent_sandbox_config_path) -- --verbose --tty --allow-net 0.0.0.0/0 zsh"
+  abbr asbr "plain resume -c (resolve_agent_sandbox_config_path)"
 
   abbr gco 'git checkout'
   abbr gst 'git status'
