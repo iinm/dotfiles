@@ -42,19 +42,19 @@ Review:
 
 Output:
 - .work/<feat-name>-research.md (既存のソリューションや、利用可能な技術を調査)
-- README.md#Architecture（主要な構成要素、責任境界、ワークフロー、状態遷移）
+- README.md#Architecture（主要な構成要素、責任境界、ワークフロー、ER Overview、状態遷移）
 - README.md#Operations（デプロイ、設定などの運用方法）
 - README.md#Decisions（非自明な設計判断）
 - README.md#Limitations（既知の制約）
-- 外部から見たインターフェース (Code)
-- データモデル (Code)
+- Code/外部から見たインターフェース + READMEからの参照
+- Code/データモデル + READMEからの参照
 
 Review:
 - ユースケースをサポートしているか
-- 構成要素や機能名称の役割が明確な名前になっているか
 - 正常系、異常系の考慮漏れはないか
-- 過剰な抽象化がないか
+- 構成要素や機能名称の役割が明確な名前になっているか
 - 全体整合性が取れているか
+- 過剰な抽象化がないか
 
 ### Plan
 
