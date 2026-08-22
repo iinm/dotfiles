@@ -9,6 +9,10 @@
     ]
   },
 
+  "tools": {
+    "tmux": { "enabled": true }
+  },
+
   "autoApproval": {
     "defaultAction": "ask",
     "maxApprovals": 100,
