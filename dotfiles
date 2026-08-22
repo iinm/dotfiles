@@ -26,7 +26,6 @@ Optional commands:
   install_golang  Install Golang
   install_nodejs  Install Node.js
   install_python  Install Python
-  setup_chrome    Setup Chrome startup options. (Linux only)
   setup_xremap    Deploy and start xremap. (Linux only)
 HELP
 }
@@ -435,10 +434,8 @@ install_golang() {
     kernel="$(uname -s | sed 's/Linux/linux/; s/Darwin/darwin/')"
     machine="$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/;')"
     
-    rm -rf "$golang_dir"
-    mkdir -p "$golang_dir"
-
     local url="https://go.dev/dl/go${golang_version}.${kernel}-${machine}.tar.gz"
+    mkdir -p "$golang_dir"
     curl --show-error --fail -L "$url" | tar --strip-components=1 -C "$golang_dir" -xzf -
   fi
 }
@@ -464,10 +461,8 @@ install_nodejs() {
     ext="$(sed 's/linux/tar.xz/; s/darwin/tar.gz/' <<< "$kernel")"
     extract_option="$(sed 's/linux/J/; s/darwin/z/' <<< "$kernel")"
 
-    rm -rf "$nodejs_dir"
-    mkdir -p "$nodejs_dir"
-
     local url="https://nodejs.org/dist/v${nodejs_version}/node-v${nodejs_version}-${kernel}-${machine}.${ext}"
+    mkdir -p "$nodejs_dir"
     curl --show-error --fail -L "$url" | tar --strip-components=1 -C "$nodejs_dir" "-x${extract_option}f" -
   fi
 }
@@ -497,27 +492,9 @@ install_python() {
     machine="$(uname -m | sed 's/arm64/aarch64/')"
 
     local url="${asset_url_prefix}/cpython-${python_version}+${distibution_version}-${machine}-${platform}-pgo+lto-full.tar.zst"
-
-    rm -rf "$python_dir"
     mkdir -p "$python_dir"
-
     curl --show-error --fail -L "$url" | tar --strip-components=1 -C "$python_dir" --zstd -xf -
   fi
-}
-
-setup_chrome() {
-  local original_desktop_entry=/usr/share/applications/google-chrome.desktop
-  local desktop_entry=~/.local/share/applications/google-chrome.desktop
-
-  echo "run: create chrome desktop entry. $desktop_entry"
-  local options=(
-    --force-device-scale-factor=1.15
-    # --enable-features=UseOzonePlatform
-    # --ozone-platform=wayland
-  )
-  sed -E "s,^(Exec=[^ ]+)(.*),\\1 ${options[*]}\\2,g" \
-    < "$original_desktop_entry" \
-    > "$desktop_entry"
 }
 
 if test "${BASH_SOURCE[0]}" = "$0"; then
