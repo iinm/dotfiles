@@ -19,6 +19,7 @@
         "action": "deny",
         "reason": "Use rg instead; rg respects .gitignore by default"
       },
+
       {
         "toolName": "exec_command",
         "input": {
@@ -26,7 +27,16 @@
           "args": [{ "$not": "--prefix" }]
         },
         "action": "deny",
-        "reason": "Use npm/npx --prefix to specify the directory"
+        "reason": "Use npm/npx --prefix DIR to specify the directory"
+      },
+      {
+        "toolName": "exec_command",
+        "input": {
+          "command": { "$regex": "^terraform$" },
+          "args": [{ "$not": { "$regex": "^-chdir=" } }]
+        },
+        "action": "deny",
+        "reason": "Use terraform -chdir=DIR to specify the directory"
       },
 
       {
@@ -57,10 +67,12 @@
       },
       {
         "toolName": "exec_command",
-        "input": {
-          "command": "npm",
-          "args": { "$has": { "$regex": "^(i|ci|install)$" } }
-        },
+        "input": { "command": "npm", "args": { "$has": { "$regex": "^(i|ci|install)$" } } },
+        "action": "ask"
+      },
+      {
+        "toolName": "exec_command",
+        "input": { "command": "terraform", "args": { "$has": "init" } },
         "action": "ask"
       },
 
@@ -80,11 +92,29 @@
         "toolName": "exec_command",
         "action": "allow"
       }
+    ],
+
+    "tests": [
+      {
+        "desc": "git push should require approval",
+        "toolUse": { "toolName": "exec_command", "input": { "command": "git", "args": ["push"] } },
+        "expectedAction": "ask"
+      },
+      {
+        "desc": "npm install should require approval",
+        "toolUse": { "toolName": "exec_command", "input": { "command": "npm", "args": ["--prefix", ".", "install"] } },
+        "expectedAction": "ask"
+      },
+      {
+        "desc": "terraform init should require approval",
+        "toolUse": { "toolName": "exec_command", "input": { "command": "terraform", "args": ["-chdir=.", "init"] } },
+        "expectedAction": "ask"
+      }
     ]
   },
   "sandbox": {
     "command": "plain-sandbox",
-    "args": ["--allow-write", "--keep-alive", "30"],
+    "args": ["--allow-write", "--volume-each", "node_modules", "--keep-alive", "30"],
     "separator": "--",
     "rules": [
       {
@@ -99,6 +129,14 @@
             { "$regex": "." },
             { "$regex": "^(i|ci|install)$" }
           ]
+        },
+        "mode": "sandbox",
+        "additionalArgs": ["--allow-net", "0.0.0.0/0"]
+      },
+      {
+        "pattern": {
+          "command": "terraform",
+          "args": [{ "$regex": "^-chdir=" }, "init"]
         },
         "mode": "sandbox",
         "additionalArgs": ["--allow-net", "0.0.0.0/0"]
