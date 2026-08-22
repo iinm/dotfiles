@@ -20,17 +20,20 @@ fish_add_path /opt/homebrew/sbin
 fish_add_path /opt/homebrew/bin
 
 fish_add_path $HOME/.local/bin
+fish_add_path $HOME/go/bin
 fish_add_path $HOME/tools/bin
-fish_add_path $HOME/tools/vim/bin
 fish_add_path $HOME/tools/nvim/bin
 fish_add_path $HOME/tools/node/bin
 fish_add_path $HOME/tools/go/bin
 fish_add_path $HOME/tools/python/install/bin
-fish_add_path $HOME/tools/tfenv/bin
 fish_add_path $HOME/tools/lua-language-server/bin
+
+# git clone --depth=1 https://github.com/tfutils/tfenv $HOME/tools/tfenv
+fish_add_path $HOME/tools/tfenv/bin
+# https://docs.cloud.google.com/sdk/docs/install-sdk
 fish_add_path $HOME/tools/google-cloud-sdk/bin
+# https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
 fish_add_path $HOME/tools/aws/dist
-fish_add_path $HOME/go/bin
 
 set -x DOTFILES_DIR (dirname (dirname (readlink -f $HOME/.config/fish)))
 fish_add_path $DOTFILES_DIR/bin
