@@ -143,7 +143,8 @@ if status is-interactive
       colima start --cpu (sysctl -n hw.ncpu) --memory (math (sysctl -n hw.memsize) / 1024^3 / 2) \
         --arch aarch64 --disk 100 \
         --vm-type=vz --vz-rosetta --mount-type virtiofs \
-        --dns 8.8.8.8 --dns 1.1.1.1
+        --mount ~/projects:w \
+        --mount ~/.cache/plain-sandbox:r
     end
   end
 
