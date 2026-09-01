@@ -6,7 +6,7 @@
       "version": "1.0.0 - 2.0.0"
     },
     "everforest": {
-      "rev": "aeef62ee97872d2557d25904d160ec93a4a355f8",
+      "rev": "85a86eb62409e3ec88713bff3d1b9d7374e112e4",
       "src": "https://github.com/sainnhe/everforest"
     },
     "friendly-snippets": {
@@ -14,39 +14,39 @@
       "src": "https://github.com/rafamadriz/friendly-snippets"
     },
     "fzf": {
-      "rev": "263eb4732fc6268f9fb35cffb634903ea8e2a26b",
+      "rev": "52f4319a72c17e123396cc3a2e6abf2e96e9d753",
       "src": "https://github.com/junegunn/fzf"
     },
     "fzf.vim": {
-      "rev": "b9624aa012ddcbae9e79964bfd30cc1fbe3cf263",
+      "rev": "d2a59a992a2455f609c0fde2ebd84427ea8f919a",
       "src": "https://github.com/junegunn/fzf.vim"
     },
     "minuet-ai.nvim": {
-      "rev": "d29dec4c36be2b41aa10e70938b7b09a03f0bdba",
+      "rev": "3b0a4c5f97b7124d94302c608fbe01c0270d4fbe",
       "src": "https://github.com/milanglacier/minuet-ai.nvim"
     },
     "nvim-autopairs": {
-      "rev": "7b9923abad60b903ece7c52940e1321d39eccc79",
+      "rev": "430522f95fe4fb7c511ec64f8c1a90cc6a66c05c",
       "src": "https://github.com/windwp/nvim-autopairs"
     },
     "nvim-lspconfig": {
-      "rev": "451d4ef9abd4f0f08e379ef0d55d1c391b6125a7",
+      "rev": "16286347bdba1333c7d124d9de9fe6630731b2b2",
       "src": "https://github.com/neovim/nvim-lspconfig"
     },
     "nvim-surround": {
-      "rev": "2e93e154de9ff326def6480a4358bfc149d5da2c",
+      "rev": "8b47db616ef658b8fc27e61db2896aa2f40134de",
       "src": "https://github.com/kylechui/nvim-surround"
     },
     "nvim-treesitter": {
-      "rev": "4916d6592ede8c07973490d9322f187e07dfefac",
+      "rev": "427e9222363d07c32d6db6169e4049c28d58d141",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter"
     },
     "oil.nvim": {
-      "rev": "0fcc83805ad11cf714a949c98c605ed717e0b83e",
+      "rev": "b73018b75affd13fa38e2fc94ef753b465f770d7",
       "src": "https://github.com/stevearc/oil.nvim"
     },
     "previm": {
-      "rev": "2bccb5e2a14e9f344f2656578b815b0da5c37fe3",
+      "rev": "29524dba1dfad1e77a8670b8c133af96f31582a7",
       "src": "https://github.com/previm/previm"
     },
     "vim-easymotion": {
