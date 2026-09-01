@@ -553,8 +553,8 @@ local setup_lsp = function()
   -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md
   local servers = {
     { name = 'lua_ls',      bin = 'lua-language-server' },
-    -- npm install -g typescript typescript-language-server
-    { name = 'ts_ls',       bin = 'tsserver' },
+    -- npm install -g typescript
+    { name = 'tsc',         bin = 'tsc' },
     -- go install golang.org/x/tools/gopls@latest
     { name = 'gopls',       bin = 'gopls' },
     -- pip install python-lsp-server
