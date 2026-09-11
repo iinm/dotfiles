@@ -23,6 +23,25 @@
       {
         "toolName": "exec_command",
         "input": {
+          "command": "bash",
+          "args": ["-c", { "$not": { "$regex": "[|><&;$`]" } }]
+        },
+        "action": "deny",
+        "reason": "Use bash -c only when shell features (|, >, <, &, ;, $, `) are required"
+      },
+      {
+        "toolName": "exec_command",
+        "input": {
+          "command": "bash",
+          "args": { "$has": { "$regex": "^(--login|-[^-]*l)" } }
+        },
+        "action": "deny",
+        "reason": "Login shell options (-l, --login) are not necessary"
+      },
+
+      {
+        "toolName": "exec_command",
+        "input": {
           "command": { "$regex": "^(npm|npx)$" },
           "args": [{ "$not": "--prefix" }]
         },
@@ -67,7 +86,10 @@
       },
       {
         "toolName": "exec_command",
-        "input": { "command": "npm", "args": { "$has": { "$regex": "^(i|ci|install)$" } } },
+        "input": {
+          "command": "npm",
+          "args": { "$has": { "$regex": "^(i|ci|install)$" } }
+        },
         "action": "ask"
       },
       {
@@ -97,24 +119,39 @@
     "tests": [
       {
         "desc": "git push should require approval",
-        "toolUse": { "toolName": "exec_command", "input": { "command": "git", "args": ["push"] } },
+        "toolUse": {
+          "toolName": "exec_command",
+          "input": { "command": "git", "args": ["push"] }
+        },
         "expectedAction": "ask"
       },
       {
         "desc": "npm install should require approval",
-        "toolUse": { "toolName": "exec_command", "input": { "command": "npm", "args": ["--prefix", ".", "install"] } },
+        "toolUse": {
+          "toolName": "exec_command",
+          "input": { "command": "npm", "args": ["--prefix", ".", "install"] }
+        },
         "expectedAction": "ask"
       },
       {
         "desc": "terraform init should require approval",
-        "toolUse": { "toolName": "exec_command", "input": { "command": "terraform", "args": ["-chdir=.", "init"] } },
+        "toolUse": {
+          "toolName": "exec_command",
+          "input": { "command": "terraform", "args": ["-chdir=.", "init"] }
+        },
         "expectedAction": "ask"
       }
     ]
   },
   "sandbox": {
     "command": "plain-sandbox",
-    "args": ["--allow-write", "--volume-each", "node_modules", "--keep-alive", "30"],
+    "args": [
+      "--allow-write",
+      "--volume-each",
+      "node_modules",
+      "--keep-alive",
+      "30"
+    ],
     "separator": "--",
     "rules": [
       {
