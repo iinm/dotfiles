@@ -15,7 +15,25 @@
   },
 
   "tools": {
-    "tmux": { "enabled": true }
+    "tmux": { "enabled": true },
+
+    "webFetch": {
+      "provider": "command",
+      "command": "w3m",
+      "args": ["-dump", "-o", "display_link_number=1"],
+      "allowedDomains": [
+        "github.com",
+        "docs.github.com",
+        "nodejs.org",
+        "developers.openai.com",
+        "platform.claude.com",
+        "ai.google.dev",
+        "docs.aws.amazon.com",
+        "docs.cloud.google.com",
+        "developer.mozilla.org",
+        "stackoverflow.com"
+      ]
+    }
   },
 
   "autoApproval": {
