@@ -1,4 +1,15 @@
 {
+  "systemPrompt": {
+    "userPreferences": [
+      "現在の環境:",
+      "- exec_command は docker ベースのサンドボックス環境で実行される",
+      "  ネットワークアクセスは不可",
+      "  例外的に、以下のコマンドをbashなどでwrapせずに直接実行する場合のみネットワークアクセスが許可される",
+      "  - npm --prefix DIR install (or ci)",
+      "  - terraform -chdir=DIR init"
+    ]
+  },
+
   "tools": {
     "tmux": { "enabled": false }
   },
