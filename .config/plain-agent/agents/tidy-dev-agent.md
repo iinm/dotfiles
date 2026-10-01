@@ -1,1 +1,0 @@
-../prompts/shortcuts/tidy-dev.md
