@@ -2,17 +2,18 @@
   "systemPrompt": {
     "userPreferences": [
       "現在の環境:",
-      "- exec_command は docker ベースのサンドボックス環境で実行される",
-      "  ネットワークアクセスは不可",
-      "  例外的に、以下のコマンドをbashなどでwrapせずに直接実行する場合のみネットワークアクセスが許可される",
-      "  - npm --prefix DIR install (or ci)",
-      "  - terraform -chdir=DIR init"
+      "exec_command は docker ベースのサンドボックス環境で実行される",
+      "ネットワークアクセスは無効",
+      "例外的に、以下のコマンド実行時のみネットワークアクセスが有効化される（shellでwrapしないこと）",
+      "- npm --prefix DIR install (or ci)",
+      "- terraform -chdir=DIR init"
     ]
   },
 
   "tools": {
     "tmux": { "enabled": false }
   },
+
   "autoApproval": {
     "defaultAction": "ask",
     "maxApprovals": 100,
@@ -87,6 +88,16 @@
             { "$regex": "^(status|diff|log|show|ls-remote|rev-parse)$" }
           ]
         },
+        "action": "allow"
+      },
+      {
+        "toolName": "exec_command",
+        "input": { "command": "git", "args": ["branch", "--show-current"] },
+        "action": "allow"
+      },
+      {
+        "toolName": "exec_command",
+        "input": { "command": "git", "args": ["grep"] },
         "action": "allow"
       },
 
@@ -165,6 +176,10 @@
     ],
     "separator": "--",
     "rules": [
+      {
+        "pattern": { "command": "git", "args": ["grep"] },
+        "mode": "sandbox"
+      },
       {
         "pattern": { "command": { "$regex": "^(git|gh|docker)$" } },
         "mode": "unsandboxed"
