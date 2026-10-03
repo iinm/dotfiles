@@ -43,6 +43,12 @@ set -x SHELL (which fish)
 test -n "$LANG";   or set -x LANG en_US.UTF-8
 test -n "$EDITOR"; or type --quiet nvim; and set -x EDITOR nvim
 
+set -x GIT_CONFIG_COUNT 2
+set -x GIT_CONFIG_KEY_0   core.fsmonitor
+set -x GIT_CONFIG_VALUE_0 false
+set -x GIT_CONFIG_KEY_1   core.hooksPath
+set -x GIT_CONFIG_VALUE_1 /dev/null
+
 if test (uname) = 'Linux'
   # Aliases for compatibility
   alias open 'xdg-open'

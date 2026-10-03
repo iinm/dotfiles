@@ -169,6 +169,8 @@
     "command": "plain-sandbox",
     "args": [
       "--allow-write",
+      "--mount-readonly",
+      "~/.config/plain-agent/gitconfig:/home/sandbox/.gitconfig",
       "--volume-each",
       "node_modules",
       "--keep-alive",
@@ -177,11 +179,7 @@
     "separator": "--",
     "rules": [
       {
-        "pattern": { "command": "git", "args": ["grep"] },
-        "mode": "sandbox"
-      },
-      {
-        "pattern": { "command": { "$regex": "^(git|gh|docker)$" } },
+        "pattern": { "command": { "$regex": "^(gh|docker)$" } },
         "mode": "unsandboxed"
       },
       {
