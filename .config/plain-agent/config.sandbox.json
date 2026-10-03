@@ -4,9 +4,13 @@
       "現在の環境:",
       "exec_command は docker ベースのサンドボックス環境で実行される",
       "ネットワークアクセスは無効",
-      "例外的に、以下のコマンド実行時のみネットワークアクセスが有効化される（shellでwrapしないこと）",
+      "(例外) 以下のコマンド実行時のみネットワークアクセスが有効化される（shellでwrapしないこと）",
       "- npm --prefix DIR install (or ci)",
-      "- terraform -chdir=DIR init"
+      "- terraform -chdir=DIR init",
+      "(例外) 以下のコマンドはホスト環境で実行される（shellでwrapしないこと）",
+      "- git",
+      "- gh",
+      "- docker"
     ]
   },
 
@@ -72,11 +76,18 @@
 
       {
         "toolName": "exec_command",
+        "input": { "command": { "$regex": "^(gh|docker)$" } },
+        "action": "ask"
+      },
+      {
+        "toolName": "exec_command",
         "input": {
           "command": "git",
-          "args": [{ "$regex": "^(status|diff|log|show|ls-remote|rev-parse)$" }]
+          "args": [
+            { "$regex": "^(fetch|pull|clone|checkout|switch|add|commit|push|reset|rebase|merge|cherry-pick|stash|rm|mv|clean|restore|ls-remote)$" }
+          ]
         },
-        "action": "allow"
+        "action": "ask"
       },
       {
         "toolName": "exec_command",
@@ -85,25 +96,9 @@
           "args": [
             "-C",
             { "$regex": "." },
-            { "$regex": "^(status|diff|log|show|ls-remote|rev-parse)$" }
+            { "$regex": "^(fetch|pull|clone|checkout|switch|add|commit|push|reset|rebase|merge|cherry-pick|stash|rm|mv|clean|restore|ls-remote)$" }
           ]
         },
-        "action": "allow"
-      },
-      {
-        "toolName": "exec_command",
-        "input": { "command": "git", "args": ["branch", "--show-current"] },
-        "action": "allow"
-      },
-      {
-        "toolName": "exec_command",
-        "input": { "command": "git", "args": ["grep"] },
-        "action": "allow"
-      },
-
-      {
-        "toolName": "exec_command",
-        "input": { "command": { "$regex": "^(git|gh|docker)$" } },
         "action": "ask"
       },
       {
@@ -140,6 +135,14 @@
 
     "tests": [
       {
+        "desc": "gh should require approval",
+        "toolUse": {
+          "toolName": "exec_command",
+          "input": { "command": "gh" }
+        },
+        "expectedAction": "ask"
+      },
+      {
         "desc": "git push should require approval",
         "toolUse": {
           "toolName": "exec_command",
@@ -162,6 +165,30 @@
           "input": { "command": "terraform", "args": ["-chdir=.", "init"] }
         },
         "expectedAction": "ask"
+      },
+      {
+        "desc": "git fetch should require approval",
+        "toolUse": {
+          "toolName": "exec_command",
+          "input": { "command": "git", "args": ["fetch"] }
+        },
+        "expectedAction": "ask"
+      },
+      {
+        "desc": "git -C DIR clean should require approval",
+        "toolUse": {
+          "toolName": "exec_command",
+          "input": { "command": "git", "args": ["-C", ".", "clean"] }
+        },
+        "expectedAction": "ask"
+      },
+      {
+        "desc": "git status should be allowed",
+        "toolUse": {
+          "toolName": "exec_command",
+          "input": { "command": "git", "args": ["status"] }
+        },
+        "expectedAction": "allow"
       }
     ]
   },
@@ -182,6 +209,26 @@
     "rules": [
       {
         "pattern": { "command": { "$regex": "^(gh|docker)$" } },
+        "mode": "unsandboxed"
+      },
+      {
+        "pattern": {
+          "command": "git",
+          "args": [
+            { "$regex": "^(fetch|pull|clone|checkout|switch|add|commit|push|reset|rebase|merge|cherry-pick|stash|rm|mv|clean|restore|ls-remote)$" }
+          ]
+        },
+        "mode": "unsandboxed"
+      },
+      {
+        "pattern": {
+          "command": "git",
+          "args": [
+            "-C",
+            { "$regex": "." },
+            { "$regex": "^(fetch|pull|clone|checkout|switch|add|commit|push|reset|rebase|merge|cherry-pick|stash|rm|mv|clean|restore|ls-remote)$" }
+          ]
+        },
         "mode": "unsandboxed"
       },
       {
