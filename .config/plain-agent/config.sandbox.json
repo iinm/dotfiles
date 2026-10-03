@@ -170,7 +170,9 @@
     "args": [
       "--allow-write",
       "--mount-readonly",
-      "~/.config/plain-agent/gitconfig:/home/sandbox/.gitconfig",
+      "~/.gitconfig:/home/sandbox/.gitconfig",
+      "--mount-readonly",
+      ".git",
       "--volume-each",
       "node_modules",
       "--keep-alive",
