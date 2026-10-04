@@ -83,21 +83,11 @@
         "toolName": "exec_command",
         "input": {
           "command": "git",
-          "args": [
-            { "$regex": "^(fetch|pull|clone|checkout|switch|add|commit|push|reset|rebase|merge|cherry-pick|stash|rm|mv|clean|restore|ls-remote)$" }
-          ]
-        },
-        "action": "ask"
-      },
-      {
-        "toolName": "exec_command",
-        "input": {
-          "command": "git",
-          "args": [
-            "-C",
-            { "$regex": "." },
-            { "$regex": "^(fetch|pull|clone|checkout|switch|add|commit|push|reset|rebase|merge|cherry-pick|stash|rm|mv|clean|restore|ls-remote)$" }
-          ]
+          "args": {
+            "$has": {
+              "$regex": "^(add|checkout|cherry-pick|clean|clone|commit|fetch|ls-remote|merge|mv|pull|push|rebase|reset|restore|rm|stash|switch)$"
+            }
+          }
         },
         "action": "ask"
       },
@@ -215,7 +205,7 @@
         "pattern": {
           "command": "git",
           "args": [
-            { "$regex": "^(fetch|pull|clone|checkout|switch|add|commit|push|reset|rebase|merge|cherry-pick|stash|rm|mv|clean|restore|ls-remote)$" }
+            { "$regex": "^(add|checkout|cherry-pick|clean|clone|commit|fetch|ls-remote|merge|mv|pull|push|rebase|reset|restore|rm|stash|switch)$" }
           ]
         },
         "mode": "unsandboxed"
@@ -226,7 +216,7 @@
           "args": [
             "-C",
             { "$regex": "." },
-            { "$regex": "^(fetch|pull|clone|checkout|switch|add|commit|push|reset|rebase|merge|cherry-pick|stash|rm|mv|clean|restore|ls-remote)$" }
+            { "$regex": "^(add|checkout|cherry-pick|clean|clone|commit|fetch|ls-remote|merge|mv|pull|push|rebase|reset|restore|rm|stash|switch)$" }
           ]
         },
         "mode": "unsandboxed"
