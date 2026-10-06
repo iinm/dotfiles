@@ -5,7 +5,7 @@
       "exec_command は docker ベースのサンドボックス環境で実行される",
       "ネットワークアクセスは無効",
       "(例外) 以下のコマンド実行時のみネットワークアクセスが有効化される（shellでwrapしないこと）",
-      "- npm --prefix DIR install (or ci)",
+      "- npm --prefix DIR install|ci|audit",
       "- terraform -chdir=DIR init",
       "(例外) 以下のコマンドはホスト環境で実行される（shellでwrapしないこと）",
       "- git",
@@ -95,7 +95,7 @@
         "toolName": "exec_command",
         "input": {
           "command": "npm",
-          "args": { "$has": { "$regex": "^(i|ci|install)$" } }
+          "args": { "$has": { "$regex": "^(i|ci|install|audit)$" } }
         },
         "action": "ask"
       },
@@ -229,7 +229,7 @@
           "args": [
             "--prefix",
             { "$regex": "." },
-            { "$regex": "^(i|ci|install)$" }
+            { "$regex": "^(i|ci|install|audit)$" }
           ]
         },
         "mode": "sandbox",
