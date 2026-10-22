@@ -27,6 +27,8 @@
         "nodejs.org",
         "developers.openai.com",
         "platform.claude.com",
+        "code.claude.com",
+        "docs.anthropic.com",
         "ai.google.dev",
         "docs.aws.amazon.com",
         "docs.cloud.google.com",
