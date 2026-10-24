@@ -8,7 +8,7 @@
       "- npm --prefix DIR install|ci|audit",
       "- terraform -chdir=DIR init",
       "(例外) 以下のコマンドはホスト環境で実行される（shellでwrapしないこと）",
-      "- git (add|checkout|cherry-pick|clean|clone|commit|fetch|ls-remote|merge|pull|push|rebase|reset|restore|stash|switch) ※ これ以外はsandbox内",
+      "- git (add|am|apply|checkout|cherry-pick|clean|clone|commit|fetch|ls-remote|merge|pull|push|rebase|reset|restore|stash|switch) ※ これ以外はsandbox内",
       "- gh",
       "- docker",
       "",
@@ -88,7 +88,7 @@
           "command": "git",
           "args": {
             "$has": {
-              "$regex": "^(add|checkout|cherry-pick|clean|clone|commit|fetch|ls-remote|merge|pull|push|rebase|reset|restore|stash|switch)$"
+              "$regex": "^(add|am|apply|checkout|cherry-pick|clean|clone|commit|fetch|ls-remote|merge|pull|push|rebase|reset|restore|stash|switch)$"
             }
           }
         },
@@ -209,7 +209,7 @@
           "command": "git",
           "args": [
             {
-              "$regex": "^(add|checkout|cherry-pick|clean|clone|commit|fetch|ls-remote|merge|pull|push|rebase|reset|restore|stash|switch)$"
+              "$regex": "^(add|am|apply|checkout|cherry-pick|clean|clone|commit|fetch|ls-remote|merge|pull|push|rebase|reset|restore|stash|switch)$"
             }
           ]
         },
@@ -222,7 +222,7 @@
             "-C",
             { "$regex": "." },
             {
-              "$regex": "^(add|checkout|cherry-pick|clean|clone|commit|fetch|ls-remote|merge|pull|push|rebase|reset|restore|stash|switch)$"
+              "$regex": "^(add|am|apply|checkout|cherry-pick|clean|clone|commit|fetch|ls-remote|merge|pull|push|rebase|reset|restore|stash|switch)$"
             }
           ]
         },
