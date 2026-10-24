@@ -49,7 +49,9 @@ set -x GIT_CONFIG_VALUE_0 false
 set -x GIT_CONFIG_KEY_1   core.hooksPath
 set -x GIT_CONFIG_VALUE_1 /dev/null
 
-set -x PLAIN_AGENT_SKILLS_DIR ~/.config/plain-agent/prompts/skills
+set -x PLAIN_AGENT_SKILLS_DIR $HOME/.config/plain-agent/prompts/skills
+set -x PLAIN_AGENT_SKILLS_REAL_DIR $DOTFILES_DIR/.config/plain-agent/prompts/skills
+set -x PLAIN_AGENT_SKILLS_DIR_SANDBOX_MOUNT $PLAIN_AGENT_SKILLS_REAL_DIR:$PLAIN_AGENT_SKILLS_DIR
 
 if test (uname) = 'Linux'
   # Aliases for compatibility
@@ -152,7 +154,8 @@ if status is-interactive
         --arch aarch64 --disk 100 \
         --vm-type=vz --vz-rosetta --mount-type virtiofs \
         --mount ~/projects:w \
-        --mount ~/.cache/plain-sandbox:r
+        --mount ~/.cache/plain-sandbox:r \
+        --mount ~/dotfiles/.config/plain-agent/prompts/skills:r
     end
   end
 

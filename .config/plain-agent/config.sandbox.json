@@ -192,7 +192,7 @@
       "--mount-readonly",
       ".git",
       "--mount-readonly",
-      { "$env": "PLAIN_AGENT_SKILLS_DIR" },
+      { "$env": "PLAIN_AGENT_SKILLS_DIR_SANDBOX_MOUNT" },
       "--volume-each",
       "node_modules",
       "--keep-alive",

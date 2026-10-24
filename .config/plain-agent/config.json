@@ -61,7 +61,10 @@
   "autoApproval": {
     "defaultAction": "ask",
     "maxApprovals": 100,
-    "allowedPaths": [{ "$env": "PLAIN_AGENT_SKILLS_DIR" }],
+    "allowedPaths": [
+      { "$env": "PLAIN_AGENT_SKILLS_DIR" },
+      { "$env": "PLAIN_AGENT_SKILLS_REAL_DIR" }
+    ],
 
     "patterns": [
       {
