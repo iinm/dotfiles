@@ -1,23 +1,27 @@
-# Tidy Dev
+---
+description: Software development workflow
+---
 
-## Purpose
-
-人間がシステムを理解するコストを抑えたい。
-そのために、ソフトウェア開発の過程で作るドキュメント・コードのうち、恒久的に維持するものと一時的に作るものを分け、恒久的に残すものを小さく整理された状態を保つ。
+# Software Dev
 
 ## Principals
 
-- コードで表現できるものは、コードをSingle Source of Truthとする。同じ情報をドキュメントに書かない。
-- ドキュメントには、コードでは表現しきれない、将来の開発者に必要な仕様・設計・意思決定などの知識を残す。
+人間がソフトウェアを開発・メンテナンスする際の認知コストを抑える：
+- 抽象度で整理する：実装の話はコードコメント、仕様・設計はドキュメント。抽象度レベルを混在させない。
+- 情報量を抑える：読み手が判断・行動をするのに必要な情報だけを書く。
+- 重複を避ける：コードで表現できるものは、コードをSingle Source of Truthとする。同じ情報をドキュメントに書かない。
 
 ## Workflow
+
+※ 以降の `docs#X` は、特定のファイルではなくプロジェクトのドキュメント内の該当セクションを指す。
+ドキュメントの格納先はユーザーと相談して決定する。
 
 ### Understand
 
 解決すべき問題、制約を理解するために、ユーザーとの議論やコードベースの調査を行う
 
 Output:
-- README.md#Purpose（存在意義）
+- docs#Purpose（存在意義）
 - .work/<feat-name>-research.md
 
 Review:
@@ -29,7 +33,7 @@ Review:
 外から見たシステムの振る舞いを定義する
 
 Output:
-- README.md#Behavior（ユースケース、外から見た振る舞い）
+- docs#Behavior（ユースケース、外から見た振る舞い）
 
 Review:
 - 問題を解決するためのユースケースの漏れや無駄はないか
@@ -42,19 +46,21 @@ Review:
 
 Output:
 - .work/<feat-name>-research.md (既存のソリューションや、利用可能な技術を調査)
-- README.md#Architecture（主要な構成要素、責任境界、ワークフロー、ER Overview、状態遷移）
-- README.md#Operations（デプロイ、設定などの運用方法）
-- README.md#Decisions（非自明な設計判断）
-- README.md#Limitations（既知の制約）
+- docs#Architecture（主要な構成要素、責任境界、ワークフロー、ER Overview、状態遷移）
+- docs#Operations（デプロイ、設定などの運用方法）
+- docs#Decisions（非自明な設計判断）
+- docs#Limitations（既知の制約）
 - Code/外部から見たインターフェース + READMEからの参照
 - Code/データモデル + READMEからの参照
 
 Review:
 - ユースケースをサポートしているか
 - 正常系、異常系の考慮漏れはないか
+- パッチワーク的な作りになってないか（異常系の存在を消す根本的改善はできないか）
 - 構成要素や機能名称の役割が明確な名前になっているか
 - 全体整合性が取れているか
 - 過剰な抽象化がないか
+- 技術文書で使用される自然な言葉・表現か
 
 ### Plan
 
@@ -82,6 +88,7 @@ Review:
 - コメント:
   - 公開API・関数のコメントは、コードを読まずに正しく呼び出すための情報を過不足なく書いているか
   - コードから自明なコメントがないか
+  - 技術文書で使用される自然な言葉・表現か
 - テスト:
   - 実装の詳細ではなく、振る舞いを検証しているか
   - 境界値をテストしているか
@@ -131,6 +138,17 @@ Output:
 - .work/ 配下の一時ファイル削除（全タスク完了後）
 
 ## Appendix
+
+### ドキュメント構成
+
+プロジェクトルール、ユーザーからの指示がない場合の構成
+
+- README.md: Purpose, 各ドキュメントへのリンク
+- docs/
+  - behavior.md (Behavior, Limitations)
+  - architecture.md
+  - operations.md
+  - decisions.md
 
 ### 非機能系のデフォルト
 

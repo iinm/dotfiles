@@ -49,6 +49,8 @@ set -x GIT_CONFIG_VALUE_0 false
 set -x GIT_CONFIG_KEY_1   core.hooksPath
 set -x GIT_CONFIG_VALUE_1 /dev/null
 
+set -x PLAIN_AGENT_SKILLS_DIR ~/.config/plain-agent/prompts/skills
+
 if test (uname) = 'Linux'
   # Aliases for compatibility
   alias open 'xdg-open'

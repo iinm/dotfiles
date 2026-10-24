@@ -4,7 +4,7 @@
       "Output Style:",
       "要点を絞る、具体例で説明",
       "",
-      "技術文書で使用される一般的な言葉を使う",
+      "技術文書で使用される自然な言葉・表現を使う",
       "良くある不自然表現と直し方",
       "- 確かめる → 検証、検査など",
       "- 断る → 拒否、却下など",
@@ -60,6 +60,8 @@
   "autoApproval": {
     "defaultAction": "ask",
     "maxApprovals": 100,
+    "allowedPaths": [{ "$env": "PLAIN_AGENT_SKILLS_DIR" }],
+
     "patterns": [
       {
         "toolName": { "$regex": "^(write_file|patch_file)$" },
