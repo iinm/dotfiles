@@ -79,6 +79,76 @@
 
       {
         "toolName": "exec_command",
+        "input": {
+          "command": "gh",
+          "args": { "$has": { "$regex": "^--hostname($|=)" } }
+        },
+        "action": "deny",
+        "reason": "--hostname is not allowed; gh must target the default host (github.com)"
+      },
+      {
+        "toolName": "exec_command",
+        "input": {
+          "command": "gh",
+          "args": ["pr", { "$regex": "^(list|view|diff)$" }]
+        },
+        "action": "allow"
+      },
+      {
+        "toolName": "exec_command",
+        "input": {
+          "command": "gh",
+          "args": ["issue", { "$regex": "^(list|view)$" }]
+        },
+        "action": "allow"
+      },
+      {
+        "toolName": "exec_command",
+        "input": {
+          "command": "gh",
+          "args": ["search"]
+        },
+        "action": "allow"
+      },
+      {
+        "toolName": "exec_command",
+        "input": {
+          "command": "gh",
+          "args": {
+            "$count": {
+              "of": { "$regex": "(--method|^-[a-zA-Z]*X)" },
+              "max": 1
+            }
+          }
+        },
+        "action": "deny",
+        "reason": "--method/-X must appear at most once"
+      },
+      {
+        "toolName": "exec_command",
+        "input": {
+          "command": "gh",
+          "args": ["api", { "$not": { "$regex": "^--(method|help)" } }]
+        },
+        "action": "deny",
+        "reason": "--method must be specified right after 'api'"
+      },
+      {
+        "toolName": "exec_command",
+        "input": {
+          "command": "gh",
+          "args": [
+            "api",
+            "--method",
+            "GET",
+            { "$regex": "^repos/[^/]+/[^/]+/(pulls|issues|contents)/" }
+          ]
+        },
+        "action": "allow"
+      },
+
+      {
+        "toolName": "exec_command",
         "input": { "command": { "$regex": "^(gh|docker)$" } },
         "action": "ask"
       },
