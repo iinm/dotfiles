@@ -7,7 +7,7 @@
       "(例外) 以下のコマンド実行時のみネットワークアクセスが有効化される（shellでwrapしないこと）",
       "- npm --prefix DIR install|ci|audit",
       "- terraform -chdir=DIR init",
-      "- mise",
+      "- mise (ネットワークが不要な場合は env MISE_OFFLINE=true mise 形式で実行すること)",
       "(例外) 以下のコマンドはホスト環境で実行される（shellでwrapしないこと）",
       "- git (add|am|apply|checkout|cherry-pick|clean|clone|commit|fetch|ls-remote|merge|pull|push|rebase|reset|restore|stash|switch) ※ これ以外はsandbox内",
       "- gh",
@@ -216,6 +216,14 @@
         "toolUse": {
           "toolName": "exec_command",
           "input": { "command": "git", "args": ["push"] }
+        },
+        "expectedAction": "ask"
+      },
+      {
+        "desc": "mise should require approval",
+        "toolUse": {
+          "toolName": "exec_command",
+          "input": { "command": "mise" }
         },
         "expectedAction": "ask"
       },
