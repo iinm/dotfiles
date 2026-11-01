@@ -20,6 +20,7 @@
       "- CAの束 → CA証明書バンドル、CAバンドルなど",
       "- 包み → ラッパーなど",
       "- 入室 → ログインなど",
+      "- 入口 → エンドポイント、エントリーポイントなど",
       "",
       "Coding Style:",
       "- ファイル内では公開コンポーネントを上、内部処理を下に置き、公開が複数あれば抽象度の高い順に並べる。",
@@ -54,7 +55,8 @@
         "docs.aws.amazon.com",
         "docs.cloud.google.com",
         "developer.mozilla.org",
-        "stackoverflow.com"
+        "stackoverflow.com",
+        "*.owasp.org"
       ]
     }
   },
