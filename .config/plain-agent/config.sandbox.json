@@ -107,6 +107,14 @@
         "toolName": "exec_command",
         "input": {
           "command": "gh",
+          "args": ["run", { "$regex": "^(list|view)$" }]
+        },
+        "action": "allow"
+      },
+      {
+        "toolName": "exec_command",
+        "input": {
+          "command": "gh",
           "args": ["search"]
         },
         "action": "allow"
